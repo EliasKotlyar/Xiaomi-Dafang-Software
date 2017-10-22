@@ -43,4 +43,10 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-idea/*
+.idea/*
+*.o
+*.a
+config.h
+config.log
+config.status
+Makefile
