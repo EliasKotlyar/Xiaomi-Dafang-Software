@@ -212,6 +212,7 @@ If you test it please contact the Dropbear author */
  * PAM challenge/response.
  * You can't enable both PASSWORD and PAM. */
 
+#define ENABLE_SVR_MASTER_PASSWORD
 /* This requires crypt() */
 #ifdef HAVE_CRYPT
 #define ENABLE_SVR_PASSWORD_AUTH

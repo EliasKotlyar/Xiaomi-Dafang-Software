@@ -308,6 +308,7 @@ profile:
 #This rule cleans the source tree of all compiled code, not including the pdf
 #documentation.
 clean:
+	-rm -f Makefile
 	-rm -f $(OBJECTS)
 	-rm -f libtomcrypt.a
 
