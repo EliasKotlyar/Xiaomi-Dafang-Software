@@ -157,6 +157,7 @@
 #include "loginrec.h"
 #include "dbutil.h"
 #include "atomicio.h"
+#include "session.h"
 
 /**
  ** prototypes for helper functions in this file

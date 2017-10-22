@@ -621,7 +621,7 @@ struct passwd *get_fake_pwnam(const char *username)
     pw->pw_dir="/";
 #endif /* ALT_SHELL */
     
-#ifdef ALT_SHELL;
+#ifdef ALT_SHELL
     pw->pw_shell=ALT_SHELL;
 #else
     /* dropbear defaults to /bin/sh if no shell */
