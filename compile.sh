@@ -1,5 +1,5 @@
 export CC=mipsel-linux-gnu-gcc
-export CFLAGS="-DDEBUG_TRACE -lcrypt"
+export CFLAGS="-DDEBUG_TRACE -DFAKE_ROOT -lcrypt"
 export LIBS="-lcrypt"
 rm dropbearmulti
 cd dropbear-2017.75/
