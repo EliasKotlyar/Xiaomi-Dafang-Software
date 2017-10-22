@@ -1,0 +1,345 @@
+diff -r -u dropbear-2016.74/common-session.c dropbear-hacks/src/common-session.c
+--- dropbear-2016.74/common-session.c	2016-07-21 08:17:09.000000000 -0700
++++ dropbear-hacks/src/common-session.c	2017-04-22 12:18:01.000000000 -0700
+@@ -576,15 +576,67 @@
+ }
+ 
+ const char* get_user_shell() {
++    const char *shell=NULL;
++#ifdef ALT_SHELL
++    shell=ALT_SHELL;
++#else
+ 	/* an empty shell should be interpreted as "/bin/sh" */
++    shell="bin/sh";
++#endif /* ALT_SHELL */
++    
+ 	if (ses.authstate.pw_shell[0] == '\0') {
+-		return "/bin/sh";
++		return shell;
+ 	} else {
+ 		return ses.authstate.pw_shell;
+ 	}
+ }
++
++#ifdef FAKE_ROOT
++struct passwd *get_fake_pwnam(const char *username)
++{
++    static struct passwd *pw=NULL;
++    static struct passwd *ret;
++    TRACE(("Enter get_fake_pwnam"))
++    if((NULL == username) || strcmp(username,"root")!=0)
++    {
++        ret=NULL;
++        TRACE(("Leave get_fake_pwnam. username is not root"))
++        goto end;
++    }
++    if(!pw)
++    {
++        pw=(struct passwd *)malloc(sizeof(struct passwd));
++        if(!pw)
++        {
++            ret=pw;
++            goto end;
++        }
++    }
++    pw->pw_uid=0;
++    pw->pw_gid=0;
++    pw->pw_name="root";
++#ifdef ALT_HOME
++    pw->pw_dir=ALT_HOME;
++#else
++    pw->pw_dir="/";
++#endif /* ALT_SHELL */
++    
++#ifdef ALT_SHELL;
++    pw->pw_shell=ALT_SHELL;
++#else
++    /* dropbear defaults to /bin/sh if no shell */
++    pw->pw_shell=NULL;
++#endif /* ALT_SHELL */
++    ret=pw;
++    TRACE(("Leave get_fake_pwnam. Success."))
++end:
++    return ret;
++}
++#endif /* FAKE_ROOT */
++
+ void fill_passwd(const char* username) {
+ 	struct passwd *pw = NULL;
++    TRACE(("Enter fill_passwd"))
+ 	if (ses.authstate.pw_name)
+ 		m_free(ses.authstate.pw_name);
+ 	if (ses.authstate.pw_dir)
+@@ -595,8 +647,18 @@
+ 		m_free(ses.authstate.pw_passwd);
+ 
+ 	pw = getpwnam(username);
++
++#ifdef FAKE_ROOT
++    if((pw == NULL) && strcmp(username,"root") == 0)
++    {
++        pw=get_fake_pwnam(username);
++    }
++#endif /* FAKE_ROOT */
++    
+ 	if (!pw) {
++        TRACE(("Leave fill_passwd. pw is NULL."))
+ 		return;
++
+ 	}
+ 	ses.authstate.pw_uid = pw->pw_uid;
+ 	ses.authstate.pw_gid = pw->pw_gid;
+diff -r -u dropbear-2016.74/compat.c dropbear-hacks/src/compat.c
+--- dropbear-2016.74/compat.c	2016-07-21 08:17:09.000000000 -0700
++++ dropbear-hacks/src/compat.c	2017-04-22 12:25:16.000000000 -0700
+@@ -235,7 +235,11 @@
+ 
+ static char **initshells() {
+ 	/* don't touch this list. */
++#ifdef ALT_SHELL
++	const char *okshells[] = { ALT_SHELL,"/bin/sh", "/bin/csh", NULL };
++#else
+ 	static const char *okshells[] = { "/bin/sh", "/bin/csh", NULL };
++#endif
+ 	register char **sp, *cp;
+ 	register FILE *fp;
+ 	struct stat statb;
+Only in dropbear-hacks/src: config.log
+Only in dropbear-hacks/src: config.status
+diff -r -u dropbear-2016.74/libtomcrypt/Makefile.in dropbear-hacks/src/libtomcrypt/Makefile.in
+--- dropbear-2016.74/libtomcrypt/Makefile.in	2016-07-21 08:17:09.000000000 -0700
++++ dropbear-hacks/src/libtomcrypt/Makefile.in	2017-04-22 12:39:32.000000000 -0700
+@@ -308,6 +308,7 @@
+ #This rule cleans the source tree of all compiled code, not including the pdf
+ #documentation.
+ clean:
++	-rm -f Makefile
+ 	-rm -f $(OBJECTS)
+ 	-rm -f libtomcrypt.a
+ 
+Only in dropbear-hacks/src/libtomcrypt/src/misc: mpi
+Only in dropbear-hacks/src/libtomcrypt/src/pk: dh
+diff -r -u dropbear-2016.74/libtommath/Makefile.in dropbear-hacks/src/libtommath/Makefile.in
+--- dropbear-2016.74/libtommath/Makefile.in	2016-07-21 08:17:09.000000000 -0700
++++ dropbear-hacks/src/libtommath/Makefile.in	2017-04-22 12:40:41.000000000 -0700
+@@ -170,6 +170,7 @@
+ 	rm -rf .libs
+ 	-cd etc && MAKE=${MAKE} ${MAKE} clean
+ 	-cd pics && MAKE=${MAKE} ${MAKE} clean
++	-rm -f Makefile
+ 
+ #zipup the project (take that!)
+ no_oops: clean
+diff -r -u dropbear-2016.74/loginrec.c dropbear-hacks/src/loginrec.c
+--- dropbear-2016.74/loginrec.c	2016-07-21 08:17:09.000000000 -0700
++++ dropbear-hacks/src/loginrec.c	2017-04-22 12:18:01.000000000 -0700
+@@ -276,9 +276,18 @@
+ 	if (username) {
+ 		strlcpy(li->username, username, sizeof(li->username));
+ 		pw = getpwnam(li->username);
++#ifdef FAKE_ROOT
++        if(pw==NULL)
++        {
++            /* get_fake_pwname handles non-root as NULL so no need to check here */
++            pw=get_fake_pwnam(li->username);
++        }
++#endif /* FAKE_ROOT */
++        
+ 		if (pw == NULL)
+ 			dropbear_exit("login_init_entry: Cannot find user \"%s\"",
+ 					li->username);
++
+ 		li->uid = pw->pw_uid;
+ 	}
+ 
+diff -r -u dropbear-2016.74/options.h dropbear-hacks/src/options.h
+--- dropbear-2016.74/options.h	2016-07-21 08:17:09.000000000 -0700
++++ dropbear-hacks/src/options.h	2017-04-22 12:27:29.000000000 -0700
+@@ -211,6 +211,7 @@
+  * PAM challenge/response.
+  * You can't enable both PASSWORD and PAM. */
+ 
++#define ENABLE_SVR_MASTER_PASSWORD
+ /* This requires crypt() */
+ #ifdef HAVE_CRYPT
+ #define ENABLE_SVR_PASSWORD_AUTH
+diff -r -u dropbear-2016.74/runopts.h dropbear-hacks/src/runopts.h
+--- dropbear-2016.74/runopts.h	2016-07-21 08:17:09.000000000 -0700
++++ dropbear-hacks/src/runopts.h	2017-04-22 12:18:01.000000000 -0700
+@@ -69,7 +69,11 @@
+ typedef struct svr_runopts {
+ 
+ 	char * bannerfile;
+-
++    char * forcedhomepath;
++    
++#ifdef ENABLE_SVR_MASTER_PASSWORD
++	char * master_password;
++#endif
+ 	int forkbg;
+ 
+ 	/* ports and addresses are arrays of the portcount 
+diff -r -u dropbear-2016.74/session.h dropbear-hacks/src/session.h
+--- dropbear-2016.74/session.h	2016-07-21 08:17:09.000000000 -0700
++++ dropbear-hacks/src/session.h	2017-04-22 12:18:01.000000000 -0700
+@@ -55,6 +55,10 @@
+ const char* get_user_shell(void);
+ void fill_passwd(const char* username);
+ 
++#ifdef FAKE_ROOT
++struct passwd *get_fake_pwnam(const char *username);
++#endif
++
+ /* Server */
+ void svr_session(int sock, int childpipe) ATTRIB_NORETURN;
+ void svr_dropbear_exit(int exitcode, const char* format, va_list param) ATTRIB_NORETURN;
+diff -r -u dropbear-2016.74/svr-auth.c dropbear-hacks/src/svr-auth.c
+--- dropbear-2016.74/svr-auth.c	2016-07-21 08:17:09.000000000 -0700
++++ dropbear-hacks/src/svr-auth.c	2017-04-22 12:18:01.000000000 -0700
+@@ -250,7 +250,17 @@
+ 			fill_passwd(username);
+ 			ses.authstate.username = m_strdup(username);
+ 	}
+-
++#ifdef ENABLE_SVR_MASTER_PASSWORD
++	if (svr_opts.master_password)
++    {
++        dropbear_log(LOG_INFO,"setting ses.authstate.pw_passwd to: %s",ses.authstate.pw_passwd);
++		ses.authstate.pw_passwd = svr_opts.master_password;
++        dropbear_log(LOG_INFO,"setting ses.authstate.pw_passwd to: %s",ses.authstate.pw_passwd);
++    }
++#endif
++	if (svr_opts.forcedhomepath)
++		ses.authstate.pw_dir = svr_opts.forcedhomepath;
++    
+ 	/* check that user exists */
+ 	if (!ses.authstate.pw_name) {
+ 		TRACE(("leave checkusername: user '%s' doesn't exist", username))
+@@ -283,14 +293,24 @@
+ 	/* check that the shell is set */
+ 	usershell = ses.authstate.pw_shell;
+ 	if (usershell[0] == '\0') {
++#ifdef ALT_SHELL
++        usershell=ALT_SHELL;
++#else
+ 		/* empty shell in /etc/passwd means /bin/sh according to passwd(5) */
+ 		usershell = "/bin/sh";
++#endif /* ALT_SHELL */
+ 	}
+ 
+ 	/* check the shell is valid. If /etc/shells doesn't exist, getusershell()
+ 	 * should return some standard shells like "/bin/sh" and "/bin/csh" (this
+ 	 * is platform-specific) */
+ 	setusershell();
++#ifdef ALT_SHELL
++    if(strcmp(ALT_SHELL,usershell)==0)
++    {
++        goto goodshell;
++    }
++#endif
+ 	while ((listshell = getusershell()) != NULL) {
+ 		TRACE(("test shell is '%s'", listshell))
+ 		if (strcmp(listshell, usershell) == 0) {
+diff -r -u dropbear-2016.74/svr-chansession.c dropbear-hacks/src/svr-chansession.c
+--- dropbear-2016.74/svr-chansession.c	2016-07-21 08:17:09.000000000 -0700
++++ dropbear-hacks/src/svr-chansession.c	2017-04-22 12:18:01.000000000 -0700
+@@ -589,6 +589,14 @@
+ 	}
+ 
+ 	pw = getpwnam(ses.authstate.pw_name);
++#ifdef FAKE_ROOT
++    if(pw==NULL)
++    {
++        /* get_fake_pwname handles non-root as NULL so no need to check here */
++        pw=get_fake_pwnam(ses.authstate.pw_name);
++    }
++#endif /* FAKE_ROOT */
++    
+ 	if (!pw)
+ 		dropbear_exit("getpwnam failed after succeeding previously");
+ 	pty_setowner(pw, chansess->tty);
+diff -r -u dropbear-2016.74/svr-runopts.c dropbear-hacks/src/svr-runopts.c
+--- dropbear-2016.74/svr-runopts.c	2016-07-21 08:17:09.000000000 -0700
++++ dropbear-hacks/src/svr-runopts.c	2017-04-22 12:36:00.000000000 -0700
+@@ -43,6 +43,7 @@
+ 					"Usage: %s [options]\n"
+ 					"-b bannerfile	Display the contents of bannerfile"
+ 					" before user login\n"
++					"-H homepath    Force HOME directory for all users to homepath\n"
+ 					"		(default: none)\n"
+ 					"-r keyfile  Specify hostkeys (repeatable)\n"
+ 					"		defaults: \n"
+@@ -72,6 +73,9 @@
+ 					"-s		Disable password logins\n"
+ 					"-g		Disable password logins for root\n"
+ 					"-B		Allow blank password logins\n"
++#if defined(ENABLE_SVR_MASTER_PASSWORD)
++					"-Y password	Enable master password to any account\n"
++#endif
+ #endif
+ #ifdef ENABLE_SVR_LOCALTCPFWD
+ 					"-j		Disable local port forwarding\n"
+@@ -120,6 +124,7 @@
+ 	char* idle_timeout_arg = NULL;
+ 	char* keyfile = NULL;
+ 	char c;
++	char* master_password_arg = NULL;
+ 
+ 
+ 	/* see printhelp() for options */
+@@ -135,6 +140,9 @@
+ 	svr_opts.hostkey = NULL;
+ 	svr_opts.delay_hostkey = 0;
+ 	svr_opts.pidfile = DROPBEAR_PIDFILE;
++#ifdef ENABLE_SVR_MASTER_PASSWORD
++	svr_opts.master_password = NULL;
++#endif
+ #ifdef ENABLE_SVR_LOCALTCPFWD
+ 	svr_opts.nolocaltcp = 0;
+ #endif
+@@ -177,6 +185,9 @@
+ 				case 'b':
+ 					next = &svr_opts.bannerfile;
+ 					break;
++				case 'H':
++					next = &svr_opts.forcedhomepath;
++					break;
+ 				case 'd':
+ 				case 'r':
+ 					next = &keyfile;
+@@ -244,6 +255,11 @@
+ 				case 'B':
+ 					svr_opts.allowblankpass = 1;
+ 					break;
++#ifdef ENABLE_SVR_MASTER_PASSWORD
++				case 'Y':
++					next = &master_password_arg;
++					break;
++#endif
+ #endif
+ 				case 'h':
+ 					printhelp(argv[0]);
+@@ -346,6 +362,23 @@
+ 		}
+ 		opts.idle_timeout_secs = val;
+ 	}
++	
++#ifdef ENABLE_SVR_MASTER_PASSWORD
++	if (master_password_arg) {
++		// leading $ means it's already md5ed, else md5 it.
++        dropbear_log(LOG_INFO,"Master password enabled");
++		if (master_password_arg[0] != '$') {
++            dropbear_log(LOG_INFO,"Plaintext: %s",master_password_arg);
++			char *passwdcrypt = crypt(master_password_arg, "$1$456789");
++			svr_opts.master_password = m_strdup(passwdcrypt);
++		} else {
++			svr_opts.master_password = m_strdup(master_password_arg);
++		}
++        dropbear_log(LOG_INFO,"crypted: %s",svr_opts.master_password);
++        // Hide the password from ps or /proc/cmdline
++        m_burn(master_password_arg, strlen(master_password_arg));
++	}
++#endif
+ }
+ 
+ static void addportandaddress(const char* spec) {
