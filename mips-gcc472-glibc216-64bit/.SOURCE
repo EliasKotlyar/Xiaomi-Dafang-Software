@@ -1,0 +1,18 @@
+Jz-special/: a0fc546291999ba52919a41c474b9ccc0e987738 release 2.3.2
+locals/: 73cd5300ebac3e7e51f6a629f146549f47b6b5ef Removed DO_XSI_MATH, added EXTRA_WARNINGS for uClibc. Modified version information.
+binutils-2012.09/: 861065b4558552f69ef42186c1b280529b701bbd release 2.3.2
+cloog-0.15/: a36206b1b4fba0d64f0a11f5efd86e6ef43afe96 release 2.3
+expat-2012.09/: 3918335fcf1a49dd5b300395b4785fb60c963118 release 2.3
+gcc-4.7-2012.09/: 70ad62119a88d5ce2db2fd8009ff8773c36a2dbd release 2.3.2
+glibc-2.16-2012.09/: 00d8a6dd7550582fd0eba2440c5c2c74c22c6d9b release 2.3
+glibc-ports-2.16-2012.09/: ff465f2c2fbd352fe1226f147935765a80089ffe release 2.3
+glibc_localedef-2.16-2012.09/: 45cfe703e93b0dc588fff1c99a85fc47d3b12755 release 2.3
+gmp-2012.09/: f8f882ac18ecb524be4b7f9ec43c418ce1237224 release 2.3
+libelf-2012.09/: 315db062faf67588f787ed77f1b081959dff3d09 release 2.3
+linux-2012.09/: 9a8621f7f3e0588ee1d7d6a4192a4ddd7d0457a1 release 2.3
+make-3.81/: 693ac281cac869d0da09e5cc3f7fb3c67b4c4ca6 release 2.3
+mpc-2012.09/: 9806b105beec73a46d80dd611444a8ea898c1103 release 2.3
+mpfr-2012.09/: 49696c1fdf80f5178398372d58d64f6c0be7342a release 2.3
+ppl-sgxx-0.11-2012.09/: 2f3de8a17f8101745af43d3faea20ec8c07b7ac0 release 2.3
+prelink-2015.05/: 7467ad9c9c071a5c8c932e9f7e498472112e28b7 Initialize for sourcery mentor 2015.05
+uclibc-2012.09/: 9417cf9db93f0075cfccb127b05849483ab10919 release 2.3.2
