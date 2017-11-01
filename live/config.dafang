@@ -1,5 +1,5 @@
 CROSS_COMPILE=        /var/www/Dropbear-Dafang/mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-
-COMPILE_OPTS =        $(INCLUDES) -I. -O2 -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64
+COMPILE_OPTS =        $(INCLUDES) -I. -O2 -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -DXLOCALE_NOT_USED=1
 C =            c
 C_COMPILER =        $(CROSS_COMPILE)gcc
 CFLAGS +=        $(COMPILE_OPTS)
@@ -12,7 +12,7 @@ OBJ =            o
 LINK =            $(CROSS_COMPILE)g++ -o
 LINK_OPTS =        -L. $(LDFLAGS)
 CONSOLE_LINK_OPTS =    $(LINK_OPTS)
-LIBRARY_LINK =        "$(CROSS_COMPILE)ar" cr
+LIBRARY_LINK =        "$(CROSS_COMPILE)ar" "cr"
 LIBRARY_LINK_OPTS =
 LIB_SUFFIX =            a
 LIBS_FOR_CONSOLE_APPLICATION = $(CXXLIBS)
