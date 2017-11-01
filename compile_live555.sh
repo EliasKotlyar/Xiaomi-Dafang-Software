@@ -9,5 +9,6 @@ export LDFLAGS="-muclibc -O2"
 
 
 cd live/
+./genMakefiles dafang
 make clean
-./configure --host=mips-linux
+make
