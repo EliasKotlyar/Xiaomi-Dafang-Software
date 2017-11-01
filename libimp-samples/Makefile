@@ -1,6 +1,6 @@
-CONFIG_UCLIBC_BUILD=n
+CONFIG_UCLIBC_BUILD=y
 
-CROSS_COMPILE ?= mips-linux-gnu-
+CROSS_COMPILE=        ../mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-
 
 CC = $(CROSS_COMPILE)gcc
 CPLUSPLUS = $(CROSS_COMPILE)g++
@@ -16,12 +16,12 @@ LDFLAG += -muclibc
 endif
 
 ifeq ($(CONFIG_UCLIBC_BUILD), y)
-SDK_LIB_DIR = ../../lib/uclibc
+SDK_LIB_DIR = uclibc
 else
 SDK_LIB_DIR = ../../lib/glibc
 endif
 
-SDK_INC_DIR = ../../include
+SDK_INC_DIR = include
 
 INCLUDES = -I$(SDK_INC_DIR)
 
