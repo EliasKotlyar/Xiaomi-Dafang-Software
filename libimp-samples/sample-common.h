@@ -110,7 +110,7 @@ extern "C"
 #elif defined SENSOR_JXF22
 #define SENSOR_NAME				"jxf22"
 #define SENSOR_CUBS_TYPE        TX_SENSOR_CONTROL_INTERFACE_I2C
-#define SENSOR_I2C_ADDR			0x30
+#define SENSOR_I2C_ADDR			0x40
 #define SENSOR_WIDTH			1920
 #define SENSOR_HEIGHT			1080
 #define CHN0_EN                 1
