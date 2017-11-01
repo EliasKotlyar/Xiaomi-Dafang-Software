@@ -49,4 +49,3 @@ fabric.properties
 config.h
 config.log
 config.status
-Makefile
