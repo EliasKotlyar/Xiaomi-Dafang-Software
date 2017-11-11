@@ -12,8 +12,8 @@
 # Perl c_rehash script, scan all files in a directory
 # and add symbolic links to their hash values.
 
-my $dir = "/var/www/Dafang-OpenSSL/openssl/_install";
-my $prefix = "/var/www/Dafang-OpenSSL/openssl/_install";
+my $dir = "/var/www/Dropbear-Dafang/openssl/_install";
+my $prefix = "/var/www/Dropbear-Dafang/openssl/_install";
 
 my $errorcount = 0;
 my $openssl = $ENV{OPENSSL} || "openssl";

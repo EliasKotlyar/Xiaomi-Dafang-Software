@@ -1,4 +1,4 @@
-prefix=/var/www/Dafang-OpenSSL/openssl/_install
+prefix=/var/www/Dropbear-Dafang/openssl/_install
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
