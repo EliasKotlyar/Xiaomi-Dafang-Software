@@ -16,19 +16,19 @@
 # To install in $HOME instead of /usr/local, use:
 #    make install prefix=$HOME
 
-CC=/var/www/Dafang-OpenSSL/mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-gcc
+CC=/var/www/Dropbear-Dafang/mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-gcc
 
-CFLAGS=-O3 -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
+CFLAGS=-muclibc -O2 -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 #CFLAGS=-O -DMAX_WBITS=14 -DMAX_MEM_LEVEL=7
 #CFLAGS=-g -DZLIB_DEBUG
 #CFLAGS=-O3 -Wall -Wwrite-strings -Wpointer-arith -Wconversion \
 #           -Wstrict-prototypes -Wmissing-prototypes
 
-SFLAGS=-O3 -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
-LDFLAGS=
+SFLAGS=-muclibc -O2 -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
+LDFLAGS=-muclibc -O2
 TEST_LDFLAGS=-L. libz.a
-LDSHARED=/var/www/Dafang-OpenSSL/mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-gcc -shared -Wl,-soname,libz.so.1,--version-script,zlib.map
-CPP=/var/www/Dafang-OpenSSL/mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-gcc -E
+LDSHARED=/var/www/Dropbear-Dafang/mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-gcc -shared -Wl,-soname,libz.so.1,--version-script,zlib.map
+CPP=/var/www/Dropbear-Dafang/mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-gcc -E
 
 STATICLIB=libz.a
 SHAREDLIB=libz.so
@@ -45,7 +45,7 @@ TAR=tar
 SHELL=/bin/sh
 EXE=
 
-prefix =/var/www/Dafang-OpenSSL/zlib/_install
+prefix =/var/www/Dropbear-Dafang/zlib/_install
 exec_prefix =${prefix}
 libdir =${exec_prefix}/lib
 sharedlibdir =${libdir}

@@ -1,4 +1,4 @@
-prefix=/var/www/Dafang-OpenSSL/zlib/_install
+prefix=/var/www/Dropbear-Dafang/zlib/_install
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 sharedlibdir=${libdir}
