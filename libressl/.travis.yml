@@ -1,0 +1,32 @@
+language: c
+matrix:
+  include:
+    - compiler: clang
+      os: osx
+      env: ARCH=native
+    - compiler: gcc
+      os: osx
+      env: ARCH=native
+    - compiler: clang
+      os: linux
+      env: ARCH=native
+      dist: trusty
+      sudo: required
+    - compiler: gcc
+      os: linux
+      env: ARCH=native
+      dist: trusty
+      sudo: required
+    - compiler: gcc
+      os: linux
+      env: ARCH=mingw32
+      dist: trusty
+      sudo: required
+    - compiler: gcc
+      os: linux
+      env: ARCH=mingw64
+      dist: trusty
+      sudo: required
+
+script:
+  "./scripts/travis"
