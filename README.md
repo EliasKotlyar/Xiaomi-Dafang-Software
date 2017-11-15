@@ -7,7 +7,11 @@ Run compile_dropbear.sh
 
 ## Compiling SFTP-Server
 
-sudo apt-get install autoconf shtool
+Install tools for buildung:
+```
+sudo apt-get install autoconf shtool libtool
+```
+
 
 
 2. Run compile.sh, then transfer the binary "dropbearmulti" to a microsd
