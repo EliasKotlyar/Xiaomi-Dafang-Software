@@ -1,6 +1,13 @@
 ## Compiling for Xiaomi Dafang
 
 
+## Compiling of Dropbear
+
+Run compile_dropbear.sh
+
+## Compiling SFTP-Server
+
+sudo apt-get install autoconf shtool
 
 
 2. Run compile.sh, then transfer the binary "dropbearmulti" to a microsd
