@@ -41,7 +41,7 @@ typedef struct {
 	int             roiRectCnt;                        /*< 需要检测的roi区域数量，范围为0-4，若为0：则不检测，1：检测roiRect 0
 														 区域，2、检测roiRect 0,1区域，3、检测roiRect 0,1,2区域，依次类推 */
 } IMP_IVS_MoveParam;
-// I suppose it has something to do with this sequence of stuff which is located in appfs/etc/sensor/:
+// I suppose it has something to do with this sequence of bytes which is located in appfs/etc/sensor/jxf22move.txt:
 	// 50 50 14 26 05 2b 3c 96 28 73 14 32 0f 28
 
 /*
