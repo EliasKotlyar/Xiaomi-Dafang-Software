@@ -11,3 +11,4 @@ cd libressl/
 ./autogen.sh
 ./configure --prefix=${PWD}/_install --host=mips-linux-gnu --with-pic
 make -j4
+make install
