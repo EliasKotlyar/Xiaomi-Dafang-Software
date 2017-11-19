@@ -396,7 +396,7 @@ int sample_encoder_exit(void)
 		return -1;
 	}
 
-	ret = IMP_Encoder_DestroyGroup(0);
+	ret = IMP_Encoder_DestroyGroup(1);
 	if (ret < 0) {
 		IMP_LOG_ERR(TAG, "IMP_Encoder_DestroyGroup(0) error: %d\n", ret);
 		return -1;
