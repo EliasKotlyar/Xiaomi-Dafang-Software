@@ -42,6 +42,7 @@ typedef enum sensor_type {
 	SENSOR_JXH42,
 	SENSOR_SC1035,
 	SENSOR_SC1045,
+	SENSOR_JXF22,
 	SENSOR_TYPEEND,
 } sensor_type_t;
 

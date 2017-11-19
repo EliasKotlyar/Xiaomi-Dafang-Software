@@ -61,6 +61,8 @@ int sample_res_get_sensor_type(const char *sensor_type_string, sensor_type_t *se
 		*sensor_type = SENSOR_SC1035;
 	} else if (!strncmp(sensor_type_string, "sc1045", sizeof("sc1045"))) {
 		*sensor_type = SENSOR_SC1045;
+    } else if (!strncmp(sensor_type_string, "jxf22", sizeof("jxf22"))) {
+        *sensor_type = SENSOR_JXF22;
 	} else {
 		IMP_LOG_ERR(TAG, "Unsupported sensor type %s\n", sensor_type_string);
 		return -1;
@@ -121,11 +123,11 @@ int sample_res_get_sensor_info(sensor_type_t sensor_type, IMPSensorInfo *sensor_
 			memcpy(sensor_info->i2c.type, "sc1045", sizeof("sc1045"));
 			sensor_info->i2c.addr = 0x30;
 			break;
-		case SENSOR_SC1045:
-			memcpy(sensor_info->name, "sc1045", sizeof("sc1045"));
+		case SENSOR_JXF22:
+			memcpy(sensor_info->name, "jxf22", sizeof("jxf22"));
 			sensor_info->cbus_type = TX_SENSOR_CONTROL_INTERFACE_I2C;
-			memcpy(sensor_info->i2c.type, "sc1045", sizeof("sc1045"));
-			sensor_info->i2c.addr = 0x30;
+			memcpy(sensor_info->i2c.type, "jxf22", sizeof("jxf22"));
+			sensor_info->i2c.addr = 0x40;
 			break;
 		default:
 			IMP_LOG_ERR(TAG, "unsupport sensor type:%d\n", sensor_type);
