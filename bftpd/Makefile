@@ -3,7 +3,7 @@ VERSION=4.7
 CC?=/var/www/Dropbear-Dafang/mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-gcc
 INSTALL=/usr/bin/install -c
 prefix=/usr
-CFLAGS=-muclibc -O2 -DDEBUG_TRACE -DFAKE_ROOT  -DHAVE_CONFIG_H -Wall -I. -DVERSION=\"$(VERSION)\" -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DPREFIX=\"$(prefix)\" 
+CFLAGS= -DHAVE_CONFIG_H -Wall -I. -DVERSION=\"$(VERSION)\" -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DPREFIX=\"$(prefix)\" -DDEBUG=1
 LIBS= -lcrypt
 mandir=${prefix}/man
 sbindir=${exec_prefix}/sbin
@@ -16,13 +16,13 @@ OBJS=bftpdutmp.o commands.o commands_admin.o cwd.o dirlist.o list.o login.o logg
 SRCS=bftpdutmp.c commands.c commands_admin.c cwd.c dirlist.c list.c login.c logging.c main.c mystring.c options.c md5.c
 
 OBJS2LINK=$(OBJS) $(PAX)
-LDFLAGS=
+LDFLAGS=-muclibc -O2
 
 all: bftpd
 
 bftpd: $(OBJS)
 	./mksources $(DIRPAX)
-	$(CC) $(OBJS2LINK) $(LDFLAGS) $(LIBS) -o bftpd
+	$(CC) $(OBJS2LINK) $(LIBS) -o bftpd $(LDFLAGS)
 
 $(OBJS): $(HEADERS) Makefile
 
