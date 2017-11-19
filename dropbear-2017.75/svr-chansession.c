@@ -666,7 +666,9 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 			}
 		}
 		if (issubsys) {
+		dropbear_log(LOG_INFO, "SUBSYSTEM CALL");
 #ifdef SFTPSERVER_PATH
+dropbear_log(LOG_INFO, "Starting SFTP");
 			if ((cmdlen == 4) && strncmp(chansess->cmd, "sftp", 4) == 0) {
 				m_free(chansess->cmd);
 				chansess->cmd = m_strdup(SFTPSERVER_PATH);

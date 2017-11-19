@@ -1,0 +1,4 @@
+Allow any system user to login anonymously and then have the system change
+the UID to match the logged in user. We can probably do this with a combination
+of the existing anonymous user and a CHANGE_UID option in the config file.
+

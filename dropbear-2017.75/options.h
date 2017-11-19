@@ -302,7 +302,7 @@ Homedir is prepended unless path begins with / */
  * OpenSSH), set the path below. If the path isn't defined, sftp will not
  * be enabled */
 #ifndef SFTPSERVER_PATH
-#define SFTPSERVER_PATH "/usr/libexec/sftp-server"
+#define SFTPSERVER_PATH "/system/sdcard/sftp-server -l INFO"
 #endif
 
 /* This is used by the scp binary when used as a client binary. If you're
@@ -312,7 +312,8 @@ Homedir is prepended unless path begins with / */
 /* Whether to log commands executed by a client. This only logs the 
  * (single) command sent to the server, not what a user did in a 
  * shell/sftp session etc. */
-/* #define LOG_COMMANDS */
+/* #define LOG_COMMANDS */t
+#define LOG_COMMANDS
 
 /* Window size limits. These tend to be a trade-off between memory
    usage and network performance: */

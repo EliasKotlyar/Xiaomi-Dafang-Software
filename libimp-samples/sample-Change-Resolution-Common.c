@@ -121,6 +121,12 @@ int sample_res_get_sensor_info(sensor_type_t sensor_type, IMPSensorInfo *sensor_
 			memcpy(sensor_info->i2c.type, "sc1045", sizeof("sc1045"));
 			sensor_info->i2c.addr = 0x30;
 			break;
+		case SENSOR_SC1045:
+			memcpy(sensor_info->name, "sc1045", sizeof("sc1045"));
+			sensor_info->cbus_type = TX_SENSOR_CONTROL_INTERFACE_I2C;
+			memcpy(sensor_info->i2c.type, "sc1045", sizeof("sc1045"));
+			sensor_info->i2c.addr = 0x30;
+			break;
 		default:
 			IMP_LOG_ERR(TAG, "unsupport sensor type:%d\n", sensor_type);
 			return -1;
