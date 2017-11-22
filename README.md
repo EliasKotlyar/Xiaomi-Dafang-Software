@@ -50,12 +50,6 @@ Run compile_libimpsamples.sh
 1. Transfer the encoder to Camera
 2. Run the following Commands for initialisation:
 ```
-
-
-echo 100 > /proc/sys/vm/swappiness
-echo 16777216 > /sys/block/zram0/disksize
-mkswap /dev/zram0
-swapon /dev/zram0
 insmod /driver/sensor_jxf22.ko data_interface=2 pwdn_gpio=-1 reset_gpio=18 sensor_gpio_func=0
 
 ```
@@ -80,3 +74,13 @@ sample_system_exit start
 
 ```
 
+Trick to increase RAM:
+```
+
+
+echo 100 > /proc/sys/vm/swappiness
+echo 16777216 > /sys/block/zram0/disksize
+mkswap /dev/zram0
+swapon /dev/zram0
+
+```

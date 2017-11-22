@@ -103,6 +103,7 @@ int sample_system_init()
 		return -1;
 	}
 
+
 	ret = IMP_ISP_AddSensor(&sensor_info);
 	if(ret < 0){
 		IMP_LOG_ERR(TAG, "failed to AddSensor\n");
@@ -122,11 +123,23 @@ int sample_system_init()
 	}
 
 	/* enable turning, to debug graphics */
+
 	ret = IMP_ISP_EnableTuning();
 	if(ret < 0){
 		IMP_LOG_ERR(TAG, "IMP_ISP_EnableTuning failed\n");
 		return -1;
 	}
+
+
+
+
+    ret = IMP_ISP_Tuning_SetWDRAttr(IMPISP_TUNING_OPS_MODE_DISABLE);
+    if(ret < 0){
+        IMP_LOG_ERR(TAG, "failed to set WDR\n");
+        return -1;
+    }
+
+
 
 	IMP_LOG_DBG(TAG, "ImpSystemInit success\n");
 
@@ -396,7 +409,7 @@ int sample_encoder_exit(void)
 		return -1;
 	}
 
-	ret = IMP_Encoder_DestroyGroup(1);
+	ret = IMP_Encoder_DestroyGroup(0);
 	if (ret < 0) {
 		IMP_LOG_ERR(TAG, "IMP_Encoder_DestroyGroup(0) error: %d\n", ret);
 		return -1;

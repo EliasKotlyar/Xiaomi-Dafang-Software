@@ -111,11 +111,11 @@ extern "C"
 #define SENSOR_NAME				"jxf22"
 #define SENSOR_CUBS_TYPE        TX_SENSOR_CONTROL_INTERFACE_I2C
 #define SENSOR_I2C_ADDR			0x40
-#define SENSOR_WIDTH			1920
-#define SENSOR_HEIGHT			1080
-#define CHN0_EN                 0
+#define SENSOR_WIDTH			1280
+#define SENSOR_HEIGHT			720
+#define CHN0_EN                 1
 #define CHN1_EN                 1
-#define CROP_EN					0
+#define CROP_EN					1
 #endif
 
 
@@ -139,7 +139,7 @@ extern "C"
 
 #define SLEEP_TIME			1
 
-#define FS_CHN_NUM			2  //MIN 1,MAX 2
+#define FS_CHN_NUM			1  //MIN 1,MAX 2
 #define IVS_CHN_ID          1
 
 #define CH0_INDEX  0

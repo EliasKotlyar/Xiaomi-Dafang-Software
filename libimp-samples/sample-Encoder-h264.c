@@ -52,6 +52,9 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+
+
+
 	/* Step.4 Bind */
 	for (i = 0; i < FS_CHN_NUM; i++) {
 		if (chn[i].enable) {
@@ -69,6 +72,8 @@ int main(int argc, char *argv[])
 		IMP_LOG_ERR(TAG, "ImpStreamOn failed\n");
 		return -1;
 	}
+
+
 
 	/* Step.6 Get stream */
 	ret = sample_get_h264_stream();
