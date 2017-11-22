@@ -1,0 +1,2 @@
+cd live/elphel/
+make
