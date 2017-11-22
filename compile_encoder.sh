@@ -7,3 +7,4 @@ CROSS_COMPILE=$TOOLCHAIN/mips-linux-gnu-
 cd libimp-samples/
 make clean
 make sample-Encoder-h264
+make sample-Encoder-jpeg
