@@ -12,7 +12,8 @@ OBJ =            o
 LINK =            $(CROSS_COMPILE)g++ -o
 LINK_OPTS =        -L. $(LDFLAGS)
 CONSOLE_LINK_OPTS =    $(LINK_OPTS)
-LIBRARY_LINK =        "$(CROSS_COMPILE)ar" "cr"
+LIBRARY_LINK =        "$(CROSS_COMPILE)ar" "cr" ""
+
 LIBRARY_LINK_OPTS =
 LIB_SUFFIX =            a
 LIBS_FOR_CONSOLE_APPLICATION = $(CXXLIBS)
