@@ -20,6 +20,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 #include "ElphelJPEGDeviceSource.hh"
 #include <sys/ioctl.h>
+#include <sys/time.h>
 
 ElphelJPEGDeviceSource*
 ElphelJPEGDeviceSource::createNew(UsageEnvironment& env,
@@ -39,33 +40,18 @@ ElphelJPEGDeviceSource
     fFid(fid), fTimePerFrame(timePerFrame), fNeedAFrame(False) {
 
   // Ask to be notified when data becomes available on the camera's socket:
-  int fd = fFid->_fileno;
-  envir().taskScheduler().
-    turnOnBackgroundReadHandling(fd,
-	 (TaskScheduler::BackgroundHandlerProc*)&newFrameHandler, this);
+
 
   // Start getting frames:
   startCapture();
 }
 
 ElphelJPEGDeviceSource::~ElphelJPEGDeviceSource() {
-  fclose(fFid);
 }
 
-static int Idunno;
-
 void ElphelJPEGDeviceSource::doGetNextFrame() {
-  if (feof(fFid) || ferror(fFid)) {
-    handleClosure(this);
-    return;
-  }
-
-  fNeedAFrame = True;
-  int fd = fFid->_fileno;
 
 
-  // If a new frame is already available for us, use it:
-  if (lseek(fd, 0, SEEK_END) > 0) deliverFrameToClient();
 }
 
 void ElphelJPEGDeviceSource
@@ -85,11 +71,6 @@ void ElphelJPEGDeviceSource::deliverFrameToClient() {
 
   // Start capturing the next frame:
   startCapture();
-
-  // Now, read the previously captured frame:
-  // Start with the JPEG header:
-  int fd = fFid->_fileno;
-  lseek(fd, 0, SEEK_SET);
   fread(fJPEGHeader, 1, JPEG_HEADER_SIZE, fFid);
   setParamsFromHeader();
 
@@ -108,6 +89,7 @@ void ElphelJPEGDeviceSource::deliverFrameToClient() {
 
 u_int8_t ElphelJPEGDeviceSource::type() {
   return 1;
+  }
 u_int8_t ElphelJPEGDeviceSource::qFactor() {
   return fLastQFactor;
 }
@@ -119,10 +101,9 @@ u_int8_t ElphelJPEGDeviceSource::height() {
 }
 
 void ElphelJPEGDeviceSource::startCapture() {
-  // Arrange to get a new frame now:
-  int fd = fFid->_fileno;
+
   // Consider the capture as having occurred now:
-  gettimeofday(&fLastCaptureTime, &Idunno);
+  gettimeofday(&fLastCaptureTime, (struct timezone *)0);
 }
 
 void ElphelJPEGDeviceSource::setParamsFromHeader() {

@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   TaskScheduler* scheduler = BasicTaskScheduler::createNew();
   env = BasicUsageEnvironment::createNew(*scheduler);
 
-  OutPacketBuffer::numPacketsLimit = 100;
+  //OutPacketBuffer::numPacketsLimit = 100;
   // Allow for up to 100 RTP packets per JPEG frame
 
   progName = argv[0];
