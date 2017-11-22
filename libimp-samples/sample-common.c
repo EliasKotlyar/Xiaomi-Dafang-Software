@@ -310,11 +310,13 @@ int sample_encoder_init()
 			enc_attr = &channel_attr.encAttr;
 			enc_attr->enType = PT_H264;
 			enc_attr->bufSize = 0;
-			enc_attr->profile = 1;
+			enc_attr->profile = 0;
 			enc_attr->picWidth = imp_chn_attr_tmp->picWidth;
 			enc_attr->picHeight = imp_chn_attr_tmp->picHeight;
 			rc_attr = &channel_attr.rcAttr;
-#if 1
+
+
+/*
 			rc_attr->rcMode = ENC_RC_MODE_H264CBR;
 			rc_attr->attrH264Cbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
 			rc_attr->attrH264Cbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
@@ -329,19 +331,22 @@ int sample_encoder_init()
 			rc_attr->attrH264Cbr.GOPQPStep = 15;
 			rc_attr->attrH264Cbr.AdaptiveMode = false;
 			rc_attr->attrH264Cbr.GOPRelation = false;
-#else
+			*/
+
 			rc_attr->rcMode = ENC_RC_MODE_H264VBR;
 			rc_attr->attrH264Vbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
 			rc_attr->attrH264Vbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
-			rc_attr->attrH264Vbr.maxGop = 2 * rc_attr->attrH264Vbr.outFrmRate.frmRateNum / rc_attr->attrH264Vbr.outFrmRate.frmRateDen;
+			rc_attr->attrH264Vbr.maxGop = 1 * rc_attr->attrH264Vbr.outFrmRate.frmRateNum / rc_attr->attrH264Vbr.outFrmRate.frmRateDen;
 			rc_attr->attrH264Vbr.maxQp = 38;
 			rc_attr->attrH264Vbr.minQp = 15;
 			rc_attr->attrH264Vbr.staticTime = 1;
-			rc_attr->attrH264Vbr.maxBitRate = 2000 * (imp_chn_attr_tmp->picWidth * imp_chn_attr_tmp->picHeight) / (1280 * 720);
-			rc_attr->attrH264Vbr.changePos = 100;
+			rc_attr->attrH264Vbr.maxBitRate = 100 * (imp_chn_attr_tmp->picWidth * imp_chn_attr_tmp->picHeight) / (1920 * 1080);
+			rc_attr->attrH264Vbr.changePos = 50;
 			rc_attr->attrH264Vbr.FrmQPStep = 3;
 			rc_attr->attrH264Vbr.GOPQPStep = 15;
-#endif
+			rc_attr->attrH264FrmUsed.enable = 1;
+
+
 
 			ret = IMP_Encoder_CreateChn(chn[i].index, &channel_attr);
 			if (ret < 0) {
