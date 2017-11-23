@@ -42,7 +42,7 @@ extra:	testGSMStreamer$(EXE)
 	$(CPLUSPLUS_COMPILER) -c $(CPLUSPLUS_FLAGS) $<
 
 
-H264_VIDEO_STREAMER_OBJS = testH264VideoStreamer.$(OBJ) ImpJpegVideoDeviceSource.$(OBJ)  sample-encoder-jpeg.$(OBJ)
+H264_VIDEO_STREAMER_OBJS = testH264VideoStreamer.$(OBJ) ImpJpegVideoDeviceSource.$(OBJ)  sample-encoder-jpeg.$(OBJ) sample-common.$(OBJ)
 
 USAGE_ENVIRONMENT_DIR = $(LIVEMEDIAPATH)/UsageEnvironment
 USAGE_ENVIRONMENT_LIB = $(USAGE_ENVIRONMENT_DIR)/libUsageEnvironment.$(libUsageEnvironment_LIB_SUFFIX)
@@ -54,7 +54,7 @@ GROUPSOCK_DIR = $(LIVEMEDIAPATH)/groupsock
 GROUPSOCK_LIB = $(GROUPSOCK_DIR)/libgroupsock.$(libgroupsock_LIB_SUFFIX)
 LOCAL_LIBS =	$(LIVEMEDIA_LIB) $(GROUPSOCK_LIB) \
 		$(BASIC_USAGE_ENVIRONMENT_LIB) $(USAGE_ENVIRONMENT_LIB)
-LIBS =			$(LOCAL_LIBS) $(LIBS_FOR_CONSOLE_APPLICATION) $(SDK_LIB_DIR)/libimp.so $(SDK_LIB_DIR)/libalog.so
+LIBS =			$(LOCAL_LIBS) $(LIBS_FOR_CONSOLE_APPLICATION) $(SDK_LIB_DIR)/libimp.so $(SDK_LIB_DIR)/libalog.so -lpthread -lm -lrt
 
 
 testH264VideoStreamer$(EXE):	$(H264_VIDEO_STREAMER_OBJS) $(LOCAL_LIBS)
