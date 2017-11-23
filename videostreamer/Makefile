@@ -1,5 +1,5 @@
 LIVEMEDIAPATH = ../live
-
+SDK_LIB_DIR = uclibc
 INCLUDES = -I$(LIVEMEDIAPATH)/UsageEnvironment/include -I$(LIVEMEDIAPATH)/groupsock/include -I$(LIVEMEDIAPATH)/liveMedia/include -I$(LIVEMEDIAPATH)/BasicUsageEnvironment/include -Iinclude/
 # Default library filename suffixes for each library that we link with.  The "config.*" file might redefine these later.
 libliveMedia_LIB_SUFFIX = $(LIB_SUFFIX)
@@ -54,7 +54,7 @@ GROUPSOCK_DIR = $(LIVEMEDIAPATH)/groupsock
 GROUPSOCK_LIB = $(GROUPSOCK_DIR)/libgroupsock.$(libgroupsock_LIB_SUFFIX)
 LOCAL_LIBS =	$(LIVEMEDIA_LIB) $(GROUPSOCK_LIB) \
 		$(BASIC_USAGE_ENVIRONMENT_LIB) $(USAGE_ENVIRONMENT_LIB)
-LIBS =			$(LOCAL_LIBS) $(LIBS_FOR_CONSOLE_APPLICATION)
+LIBS =			$(LOCAL_LIBS) $(LIBS_FOR_CONSOLE_APPLICATION) $(SDK_LIB_DIR)/libimp.so $(SDK_LIB_DIR)/libalog.so
 
 
 testH264VideoStreamer$(EXE):	$(H264_VIDEO_STREAMER_OBJS) $(LOCAL_LIBS)
