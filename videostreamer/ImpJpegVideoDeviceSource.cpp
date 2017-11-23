@@ -18,6 +18,7 @@
 // Implementation
 
 #include "ImpJpegVideoDeviceSource.h"
+#include "sample-encoder-jpeg.h"
 #include <fcntl.h>              /* low-level i/o */
 #include <unistd.h>
 #include <errno.h>
@@ -27,27 +28,11 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #ifndef JPEG_TEST
-#include <linux/videodev2.h>
 #endif
 
 #include "JpegFrameParser.hh"
 #include <algorithm> 
 #include <iostream>
-
-#ifndef JPEG_TEST
-static int xioctl(int fh, int request, void *arg);
-
-static int xioctl(int fh, int request, void *arg)
-{
-    int r;
-    
-    do {
-        r = ioctl(fh, request, arg);
-    } while (-1 == r && EINTR == errno);
-    
-    return r;
-}
-#endif
 
 ImpJpegVideoDeviceSource*
 ImpJpegVideoDeviceSource::createNew(UsageEnvironment& env,
@@ -70,182 +55,7 @@ ImpJpegVideoDeviceSource::createNew(UsageEnvironment& env,
 #ifndef JPEG_TEST
 int ImpJpegVideoDeviceSource::initDevice(UsageEnvironment& env, int fd)
 {
-    struct v4l2_capability cap;
-    struct v4l2_cropcap cropcap;
-    struct v4l2_crop crop;
-    struct v4l2_format fmt;
-    if(-1 == xioctl(fd, VIDIOC_QUERYCAP, &cap)) {
-        env.setResultErrMsg("QueryCap failed");
-        return -1;
-    }
-    if(!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
-        env.setResultErrMsg("No video capture device");
-        return -1;
-    }
-    if(!(cap.capabilities & V4L2_CAP_STREAMING)) {
-        env.setResultErrMsg("Streaming not supported");
-        return -1;
-    }
-    memset(&cropcap, 0, sizeof(cropcap));
-    cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if(0==xioctl(fd, VIDIOC_CROPCAP, &cropcap)) {
-        crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        crop.c = cropcap.defrect;
-        if(-1==xioctl(fd, VIDIOC_S_CROP, &crop)) {
-            switch(errno) {
-                case EINVAL:
-                    env.setResultErrMsg("Crop not supported");
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-    
-    struct v4l2_fmtdesc fmtdesc;
-    memset(&fmtdesc, 0, sizeof(fmtdesc));
-    fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    for(fmtdesc.index=0; ; fmtdesc.index++) {
-        if(-1==xioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc)) {
-            if(errno == EINVAL) {
-                break;
-            }
-            continue;
-        }
-        if(fmtdesc.pixelformat == V4L2_PIX_FMT_MJPEG) {
-            break;
-        }
-    }
-    if(fmtdesc.pixelformat != V4L2_PIX_FMT_MJPEG) {
-        env.setResultErrMsg("This webcam does not support MJPEG!");
-        return -1;
-    }
-    struct v4l2_frmsizeenum frmsize;
-    memset(&frmsize, 0, sizeof(frmsize));
-    frmsize.pixel_format = V4L2_PIX_FMT_MJPEG;
-    __u32 best_width=0, best_height=0, best_diff=0xffffffff;
-    __u32 diff;
-    for(frmsize.index = 0; xioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frmsize) >= 0; frmsize.index++) {
-        if(frmsize.type == V4L2_FRMSIZE_TYPE_DISCRETE) {
-            diff = abs(frmsize.discrete.width-640) + abs(frmsize.discrete.height-480);
-            if(diff<best_diff) {
-                best_diff = diff;
-                best_width = frmsize.discrete.width;
-                best_height = frmsize.discrete.height;
-            }
-        } else {
-            if(frmsize.stepwise.min_width >= 640) {
-                best_width = frmsize.stepwise.min_width;
-            } else if(frmsize.stepwise.max_width <= 640) {
-                best_width = frmsize.stepwise.max_width;
-            } else {
-                best_width = (640-frmsize.stepwise.min_width)/frmsize.stepwise.step_width*frmsize.stepwise.step_width + frmsize.stepwise.min_width;
-            }
-            if(frmsize.stepwise.min_height >= 480) {
-                best_height = frmsize.stepwise.min_height;
-            } else if(frmsize.stepwise.max_height <= 480) {
-                best_height = frmsize.stepwise.max_height;
-            } else {
-                best_height = (480-frmsize.stepwise.min_height)/frmsize.stepwise.step_height*frmsize.stepwise.step_height + frmsize.stepwise.min_height;
-            }
-            best_diff = 0;
-            break;
-        }
-    }
-    if(best_diff == 0xffffffff) {
-        env.setResultErrMsg("Failed to find an appropriate frame size!");
-        return -1;
-    }
-    
-    struct v4l2_frmivalenum frmival;
-    memset(&frmival, 0, sizeof(frmival));
-    frmival.index = 0;
-    frmival.pixel_format = V4L2_PIX_FMT_MJPEG;
-    frmival.width = best_width;
-    frmival.height = best_height;
-    __u32 best_ival_num=0, best_ival_den=0;
-    float best_ival_diff = 1e6, ival_diff;
-    for(frmival.index = 0; xioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival)>=0; frmival.index++) {
-        if(frmival.type == V4L2_FRMIVAL_TYPE_DISCRETE) {
-            ival_diff = abs((float)frmival.discrete.numerator/frmival.discrete.denominator - 0.1);
-            if(ival_diff<best_ival_diff) {
-                best_ival_diff = ival_diff;
-                best_ival_num = frmival.discrete.numerator;
-                best_ival_den = frmival.discrete.denominator;
-            }
-        } else {
-            break;
-        }
-    }
-    if(best_ival_diff > 1e5) {
-        env.setResultErrMsg("Failed to find an appropriate frame rate!");
-        return -1;
-    }
-    
-    memset(&fmt, 0, sizeof(fmt));
-    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    fmt.fmt.pix.width = best_width;
-    fmt.fmt.pix.height = best_height;
-    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-    fmt.fmt.pix.field = V4L2_FIELD_NONE;
-    if (-1==xioctl(fd, VIDIOC_S_FMT, &fmt)) {
-        env.setResultErrMsg("Set format MJPEG failed");
-        return -1;
-    }
-    
-    struct v4l2_requestbuffers req;
-    memset(&req, 0, sizeof(req));
-    req.count = 4;
-    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    req.memory = V4L2_MEMORY_MMAP;
-    if(-1==xioctl(fd, VIDIOC_REQBUFS, &req)) {
-        env.setResultErrMsg("ReqBuf failed");
-        return -1;
-    }
-    if(req.count < 2) {
-        env.setResultErrMsg("buffer count <2");
-        return -1;
-    }
-    fBuffers = (struct buffer *)calloc(req.count, sizeof(*fBuffers));
-    if(!fBuffers) {
-        env.setResultErrMsg("Out of memory");
-        return -1;
-    }
-    for(fNbuffers = 0; fNbuffers < req.count; fNbuffers++) {
-        struct v4l2_buffer buf;
-        memset(&buf, 0, sizeof(buf));
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;
-        buf.index = fNbuffers;
-        if(-1==xioctl(fd, VIDIOC_QUERYBUF, &buf)) {
-            env.setResultErrMsg("QueryBuf failed");
-            return -1;
-        }
-        fBuffers[fNbuffers].length = buf.length;
-        fBuffers[fNbuffers].start = mmap(NULL, buf.length, PROT_READ|PROT_WRITE, MAP_SHARED, fd, buf.m.offset);
-        if(MAP_FAILED == fBuffers[fNbuffers].start) {
-            env.setResultErrMsg("mmap failed");
-            return -1;
-        }
-    }
-    
-    for(int i=0;i<fNbuffers;i++) {
-        struct v4l2_buffer buf;
-        memset(&buf, 0, sizeof(buf));
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;
-        buf.index = i;
-        if(-1==xioctl(fd,VIDIOC_QBUF, &buf))
-        {
-            env.setResultErrMsg("QBuf failed");
-            return -1;
-        }
-    }
-    enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if(-1==xioctl(fd,VIDIOC_STREAMON, &type)) {
-        env.setResultErrMsg("StreamOn failed");
-        return -1;
-    }
+    imp_init(1);
     return 0;
 }
 #endif // JPEG_TEST
@@ -275,16 +85,7 @@ ImpJpegVideoDeviceSource::~ImpJpegVideoDeviceSource()
 #ifdef JPEG_TEST
     delete [] jpeg_dat;
 #else
-    enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if(-1==xioctl(fFd, VIDIOC_STREAMOFF, &type)) {
-        
-    }
-    for(int i=0; i< fNbuffers; i++) {
-        if(-1==munmap(fBuffers[i].start, fBuffers[i].length)) {
-            
-        }
-    }
-    ::close(fFd);
+    imp_shutdown();
 #endif
 }
 
@@ -328,29 +129,10 @@ void ImpJpegVideoDeviceSource::doGetNextFrame()
     fPresentationTime = fLastCaptureTime;
     fDurationInMicroseconds = fTimePerFrame;
 #else
-    struct v4l2_buffer buf;
-    memset(&buf, 0, sizeof(buf));
-    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    buf.memory = V4L2_MEMORY_MMAP;
-    if(-1==xioctl(fFd, VIDIOC_DQBUF, &buf)) { // this will block if no frames are available
-        
-    }
-    gettimeofday(&fLastCaptureTime, &Idunno);
-    if(framecount==0)
-        starttime = fLastCaptureTime;
-    framecount++;
-    fPresentationTime = fLastCaptureTime;
-    /*
-    if(framecount % 30 == 0)
-        printf("frame rate=%f\n", (float)framecount/timeval_diff(&fLastCaptureTime, &starttime));
-     */
-    if(buf.bytesused > fMaxSize) {
-        fprintf(stderr, "ImpJpegVideoDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n", fMaxSize);
-    }
-    fFrameSize = jpeg_to_rtp(fTo, fBuffers[buf.index].start, std::min(buf.bytesused, fMaxSize));
-    if(-1==xioctl(fFd, VIDIOC_QBUF, &buf)) {
-        
-    }
+
+
+    //fFrameSize = jpeg_to_rtp(fTo, fBuffers[buf.index].start, std::min(buf.bytesused, fMaxSize));
+
 #endif // JPEG_TEST
     // Switch to another task, and inform the reader that he has data:
     nextTask() = envir().taskScheduler().scheduleDelayedTask(0,
