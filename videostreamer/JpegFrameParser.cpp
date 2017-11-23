@@ -19,7 +19,7 @@
 
 #include "JpegFrameParser.hh"
 
-#ifndef NDEBUG
+#ifdef DEBUG
 #include <stdio.h>
 #define LOGGY(format, ...) fprintf (stderr, format, ##__VA_ARGS__)
 #else
