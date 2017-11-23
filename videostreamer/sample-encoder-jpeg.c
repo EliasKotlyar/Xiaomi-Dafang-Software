@@ -196,3 +196,53 @@ int save_stream(void* buffer, IMPEncoderStream *stream)
 
 	return 0;
 }
+
+
+int imp_get_h264_frame(void* buffer)
+{
+    int nr_frames = 1;
+	int ret;
+
+	/* H264 Channel start receive picture */
+	ret = IMP_Encoder_StartRecvPic(ENC_H264_CHANNEL);
+	if (ret < 0) {
+		IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", ENC_H264_CHANNEL);
+		return -1;
+	}
+
+
+	int i;
+	for (i = 0; i < nr_frames; i++) {
+		/* Polling H264 Stream, set timeout as 1000msec */
+		ret = IMP_Encoder_PollingStream(ENC_H264_CHANNEL, 1000);
+		if (ret < 0) {
+			IMP_LOG_ERR(TAG, "Polling stream timeout\n");
+			continue;
+		}
+
+		IMPEncoderStream stream;
+		/* Get H264 Stream */
+		ret = IMP_Encoder_GetStream(ENC_H264_CHANNEL, &stream, 1);
+		if (ret < 0) {
+			IMP_LOG_ERR(TAG, "IMP_Encoder_GetStream() failed\n");
+			return -1;
+		}
+
+		ret = save_stream(buffer, &stream);
+		if (ret < 0) {
+			return ret;
+		}
+
+		IMP_Encoder_ReleaseStream(ENC_H264_CHANNEL, &stream);
+	}
+
+
+
+	ret = IMP_Encoder_StopRecvPic(ENC_H264_CHANNEL);
+	if (ret < 0) {
+		IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
+		return -1;
+	}
+
+	return 0;
+}

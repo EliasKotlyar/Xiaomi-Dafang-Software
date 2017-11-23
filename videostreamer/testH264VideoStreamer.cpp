@@ -29,18 +29,14 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include <GroupsockHelper.hh>
 #include "ImpJpegVideoDeviceSource.h"
 
-
-
 UsageEnvironment* env;
-char const* inputFileName = "test.jpeg";
+char const* inputFileName = "test.264";
 H264VideoStreamFramer* videoSource;
 RTPSink* videoSink;
 
 void play(); // forward
 
 int main(int argc, char** argv) {
-
-
   // Begin by setting up our usage environment:
   TaskScheduler* scheduler = BasicTaskScheduler::createNew();
   env = BasicUsageEnvironment::createNew(*scheduler);
@@ -66,10 +62,10 @@ int main(int argc, char** argv) {
 
   // Create a 'H264 Video RTP' sink from the RTP 'groupsock':
   OutPacketBuffer::maxSize = 100000;
-  videoSink = JPEGVideoRTPSink::createNew(*env, &rtpGroupsock);
+  videoSink = H264VideoRTPSink::createNew(*env, &rtpGroupsock, 96);
 
   // Create (and start) a 'RTCP instance' for this RTP sink:
-  const unsigned estimatedSessionBandwidth = 5000; // in kbps; for RTCP b/w share
+  const unsigned estimatedSessionBandwidth = 500; // in kbps; for RTCP b/w share
   const unsigned maxCNAMElen = 100;
   unsigned char CNAME[maxCNAMElen+1];
   gethostname((char*)CNAME, maxCNAMElen);
@@ -99,22 +95,31 @@ int main(int argc, char** argv) {
 
   // Start the streaming:
   *env << "Beginning streaming...\n";
+  play();
 
-
-  // Create the MJPEG video source:
-    ImpJpegVideoDeviceSource* fileSource = ImpJpegVideoDeviceSource::createNew(*env,100);
-
-
-
-    // Finally, start playing:
-    *env << "Beginning to read from file...\n";
-    videoSink->startPlaying(*fileSource, NULL, NULL);
-
-    env->taskScheduler().doEventLoop();
-
-
-
+  env->taskScheduler().doEventLoop(); // does not return
 
   return 0; // only to prevent compiler warning
 }
 
+void afterPlaying(void* /*clientData*/) {
+  *env << "...done reading from file\n";
+  videoSink->stopPlaying();
+  Medium::close(videoSource);
+  // Note that this also closes the input file that this source read from.
+
+  // Start playing once again:
+  play();
+}
+
+void play() {
+  ImpJpegVideoDeviceSource* fileSource = ImpJpegVideoDeviceSource::createNew(*env,100);
+  FramedSource* videoES = fileSource;
+
+  // Create a framer for the Video Elementary Stream:
+  videoSource = H264VideoStreamFramer::createNew(*env, videoES);
+
+  // Finally, start playing:
+  *env << "Beginning to read from file...\n";
+  videoSink->startPlaying(*videoSource, afterPlaying, videoSink);
+}

@@ -9,7 +9,7 @@ extern "C"
 int imp_init();
 int imp_get_jpeg(void* buffer);
 int imp_shutdown();
-
+int imp_get_h264_frame(void* buffer);
 
 #if __cplusplus
 }
