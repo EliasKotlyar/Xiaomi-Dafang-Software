@@ -20,8 +20,6 @@
 #ifndef _WEBCAM_JPEG_DEVICE_SOURCE_HH
 #define _WEBCAM_JPEG_DEVICE_SOURCE_HH
 
-#define JPEG_TEST
-
 #include "JPEGVideoSource.hh"
 #include "JpegFrameParser.hh"
 

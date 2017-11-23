@@ -152,6 +152,7 @@ int imp_get_jpeg(void* buffer)
 {
 	int i, ret;
 	char snap_path[64];
+	 int bytesRead = 0;
 
 	for (i = 0; i < FS_CHN_NUM; i++) {
 		if (chn[i].enable) {
@@ -177,6 +178,7 @@ int imp_get_jpeg(void* buffer)
 			}
 
 			ret = save_stream(buffer, &stream);
+			bytesRead = ret;
 			//extractHeader(buffer,ret);
 			//IMP_LOG_ERR(TAG, "JPEG saved!\n");
 			if (ret < 0) {
@@ -195,7 +197,7 @@ int imp_get_jpeg(void* buffer)
 			}
 		}
 	}
-	return 0;
+	return bytesRead;
 }
 
 

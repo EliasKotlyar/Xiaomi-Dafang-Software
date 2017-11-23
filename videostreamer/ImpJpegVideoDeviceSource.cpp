@@ -39,11 +39,7 @@ ImpJpegVideoDeviceSource::createNew(UsageEnvironment& env,
 				  unsigned timePerFrame) {
     int fd = -1;
 #ifndef JPEG_TEST
-    fd = open("/dev/video0", O_RDWR, 0); // TODO: use argv instead of hardcoded dev
-    if (fd == -1) {
-        env.setResultErrMsg("Failed to open input device file");
-        return NULL;
-    }
+
 #endif
     try {
         return new ImpJpegVideoDeviceSource(env, fd, timePerFrame);
@@ -129,9 +125,21 @@ void ImpJpegVideoDeviceSource::doGetNextFrame()
     fPresentationTime = fLastCaptureTime;
     fDurationInMicroseconds = fTimePerFrame;
 #else
+    gettimeofday(&fLastCaptureTime, &Idunno);
+    if(framecount==0)
+        starttime = fLastCaptureTime;
+    framecount++;
+    fPresentationTime = fLastCaptureTime;
+    void* buffer = malloc(fMaxSize);
+    int bytesRead = imp_get_jpeg(buffer);
+
+    if(bytesRead > fMaxSize) {
+        fprintf(stderr, "WebcamJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n", fMaxSize);
+    }
 
 
-    //fFrameSize = jpeg_to_rtp(fTo, fBuffers[buf.index].start, std::min(buf.bytesused, fMaxSize));
+
+    fFrameSize = jpeg_to_rtp(fTo, buffer, bytesRead);
 
 #endif // JPEG_TEST
     // Switch to another task, and inform the reader that he has data:
