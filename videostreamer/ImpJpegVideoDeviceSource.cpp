@@ -3,6 +3,7 @@
 #include <GroupsockHelper.hh>
 #include "ImpJpegVideoDeviceSource.h"
 #include "sample-encoder-jpeg.h"
+#include "sample-common.h"
 ImpJpegVideoDeviceSource* ImpJpegVideoDeviceSource::createNew(UsageEnvironment& env,unsigned timePerFrame)
 {
     return new ImpJpegVideoDeviceSource(env,timePerFrame);
@@ -37,8 +38,8 @@ u_int8_t ImpJpegVideoDeviceSource::qFactor(){
     return 100;
 }
 u_int8_t ImpJpegVideoDeviceSource::width(){
- return 1280;
+ return SENSOR_WIDTH;
 }
 u_int8_t ImpJpegVideoDeviceSource::height(){
-return 720;
+return SENSOR_HEIGHT;
 }
