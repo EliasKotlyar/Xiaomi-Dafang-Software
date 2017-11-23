@@ -141,7 +141,7 @@ void imp_shutdown(){
 
 }
 
-void* imp_get_jpeg(*)
+int imp_get_jpeg(void* buffer)
 {
 	int i, ret;
 	char snap_path[64];
@@ -170,7 +170,7 @@ void* imp_get_jpeg(*)
 				return retPtr;
 			}
 
-			ret = save_stream(snap_fd, &stream);
+			ret = save_stream(buffer, &stream);
 			if (ret < 0) {
 
 				return retPtr;
@@ -190,7 +190,7 @@ void* imp_get_jpeg(*)
 	return retPtr;
 }
 
-int save_stream(int fd, IMPEncoderStream *stream)
+int save_stream(void* buffer, IMPEncoderStream *stream)
 {
 	int ret, i, nr_pack = stream->packCount;
 

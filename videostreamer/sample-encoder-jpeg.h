@@ -7,7 +7,7 @@ extern "C"
 #endif
 
 void imp_init();
-void sample_get_jpeg_snap();
+int imp_get_jpeg(void* buffer);
 void imp_shutdown();
 
 
