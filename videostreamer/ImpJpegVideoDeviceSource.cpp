@@ -2,7 +2,7 @@
 #include <BasicUsageEnvironment.hh>
 #include <GroupsockHelper.hh>
 #include "ImpJpegVideoDeviceSource.h"
-
+#include "sample-encoder-jpeg.h"
 ImpJpegVideoDeviceSource* ImpJpegVideoDeviceSource::createNew(UsageEnvironment& env,unsigned timePerFrame)
 {
     return new ImpJpegVideoDeviceSource(env,timePerFrame);
@@ -11,7 +11,7 @@ ImpJpegVideoDeviceSource* ImpJpegVideoDeviceSource::createNew(UsageEnvironment& 
 
 ImpJpegVideoDeviceSource::ImpJpegVideoDeviceSource(UsageEnvironment& env,unsigned timePerFrame) : JPEGVideoSource(env)
 {
-
+    imp_init();
 };
 
 void ImpJpegVideoDeviceSource::doGetNextFrame(){

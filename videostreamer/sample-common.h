@@ -178,7 +178,7 @@ int sample_osd_exit(IMPRgnHandle *prHandle,int grpNum);
 int sample_do_get_h264_stream(int nr_frames);
 int sample_get_h264_stream();
 int sample_do_get_jpeg_snap(void);
-int sample_get_jpeg_snap();
+
 
 
 #ifdef __cplusplus
