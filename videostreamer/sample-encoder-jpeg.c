@@ -30,7 +30,7 @@
 
 extern struct chn_conf chn[];
 
-void imp_init()
+int imp_init()
 {
 	int i, ret;
 
@@ -85,20 +85,14 @@ void imp_init()
 	/* drop several pictures of invalid data */
 	sleep(SLEEP_TIME);
 
-	/* Step.6 Get Snap */
-	ret = sample_get_jpeg_snap();
-	if (ret < 0) {
-		IMP_LOG_ERR(TAG, "Get H264 stream failed\n");
-		return -1;
-	}
 
 
 	return 0;
 }
 
 
-void imp_shutdown(){
-
+int imp_shutdown(){
+    int i, ret;
 	/* Exit sequence as follow... */
 	/* Step.a Stream Off */
 	ret = sample_framesource_streamoff();
@@ -145,14 +139,13 @@ int imp_get_jpeg(void* buffer)
 {
 	int i, ret;
 	char snap_path[64];
-	void* retPtr = 0;
 
 	for (i = 0; i < FS_CHN_NUM; i++) {
 		if (chn[i].enable) {
 			ret = IMP_Encoder_StartRecvPic(2 + chn[i].index);
 			if (ret < 0) {
 				IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", 2 + chn[i].index);
-				return retPtr;
+				return -1;
 			}
 
 			/* Polling JPEG Snap, set timeout as 1000msec */
@@ -167,13 +160,13 @@ int imp_get_jpeg(void* buffer)
 			ret = IMP_Encoder_GetStream(chn[i].index + 2, &stream, 1);
 			if (ret < 0) {
 				IMP_LOG_ERR(TAG, "IMP_Encoder_GetStream() failed\n");
-				return retPtr;
+				return -1;
 			}
 
 			ret = save_stream(buffer, &stream);
 			if (ret < 0) {
 
-				return retPtr;
+				return -1;
 			}
 
 			IMP_Encoder_ReleaseStream(2 + chn[i].index, &stream);
@@ -183,20 +176,21 @@ int imp_get_jpeg(void* buffer)
 			ret = IMP_Encoder_StopRecvPic(2 + chn[i].index);
 			if (ret < 0) {
 				IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
-				return retPtr;
+				return -1;
 			}
 		}
 	}
-	return retPtr;
+	return 0;
 }
 
 int save_stream(void* buffer, IMPEncoderStream *stream)
 {
 	int ret, i, nr_pack = stream->packCount;
 
+    void* memoryAddress = buffer;
 	for (i = 0; i < nr_pack; i++) {
-		ret = write(fd, (void *)stream->pack[i].virAddr,
-					stream->pack[i].length);
+	    memcpy(memoryAddress,(void *)stream->pack[i].virAddr,stream->pack[i].length);
+		memoryAddress = memoryAddress + stream->pack[i].length;
 		if (ret != stream->pack[i].length) {
 			IMP_LOG_ERR(TAG, "stream write error:%s\n", strerror(errno));
 			return -1;

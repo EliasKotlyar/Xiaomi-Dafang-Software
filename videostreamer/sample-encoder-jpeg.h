@@ -6,9 +6,9 @@ extern "C"
 {
 #endif
 
-void imp_init();
+int imp_init();
 int imp_get_jpeg(void* buffer);
-void imp_shutdown();
+int imp_shutdown();
 
 
 #if __cplusplus
