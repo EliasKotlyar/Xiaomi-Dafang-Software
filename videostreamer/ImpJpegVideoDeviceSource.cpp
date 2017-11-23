@@ -16,6 +16,9 @@ ImpJpegVideoDeviceSource::ImpJpegVideoDeviceSource(UsageEnvironment& env,unsigne
 
 void ImpJpegVideoDeviceSource::doGetNextFrame(){
 
+  // Switch to another task, and inform the reader that he has data:
+  nextTask() = envir().taskScheduler().scheduleDelayedTask(0,
+			   (TaskFunc*)FramedSource::afterGetting, this);
 }
 u_int8_t ImpJpegVideoDeviceSource::type(){
     return 1;
@@ -25,8 +28,8 @@ u_int8_t ImpJpegVideoDeviceSource::qFactor(){
     return 100;
 }
 u_int8_t ImpJpegVideoDeviceSource::width(){
- return 1980;
+ return 1920;
 }
 u_int8_t ImpJpegVideoDeviceSource::height(){
-return 1280;
+return 1080;
 }

@@ -20,7 +20,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 #include "ElphelJPEGDeviceSource.hh"
 #include <sys/ioctl.h>
-#include "asm/c313a.h"
+#include <sys/time.h>
 
 ElphelJPEGDeviceSource*
 ElphelJPEGDeviceSource::createNew(UsageEnvironment& env,
@@ -40,33 +40,18 @@ ElphelJPEGDeviceSource
     fFid(fid), fTimePerFrame(timePerFrame), fNeedAFrame(False) {
 
   // Ask to be notified when data becomes available on the camera's socket:
-  int fd = fFid->_fileno;
-  envir().taskScheduler().
-    turnOnBackgroundReadHandling(fd,
-	 (TaskScheduler::BackgroundHandlerProc*)&newFrameHandler, this);
+
 
   // Start getting frames:
   startCapture();
 }
 
 ElphelJPEGDeviceSource::~ElphelJPEGDeviceSource() {
-  fclose(fFid);
 }
 
-static int Idunno;
-
 void ElphelJPEGDeviceSource::doGetNextFrame() {
-  if (feof(fFid) || ferror(fFid)) {
-    handleClosure(this);
-    return;
-  }
 
-  fNeedAFrame = True;
-  int fd = fFid->_fileno;
-  ioctl (fd, _IO(CMOSCAM_IOCTYPE, IO_CCAM_JPEG), JPEG_CMD_CATCHUP);
 
-  // If a new frame is already available for us, use it:
-  if (lseek(fd, 0, SEEK_END) > 0) deliverFrameToClient();
 }
 
 void ElphelJPEGDeviceSource
@@ -86,11 +71,6 @@ void ElphelJPEGDeviceSource::deliverFrameToClient() {
 
   // Start capturing the next frame:
   startCapture();
-
-  // Now, read the previously captured frame:
-  // Start with the JPEG header:
-  int fd = fFid->_fileno;
-  lseek(fd, 0, SEEK_SET);
   fread(fJPEGHeader, 1, JPEG_HEADER_SIZE, fFid);
   setParamsFromHeader();
 
@@ -100,7 +80,6 @@ void ElphelJPEGDeviceSource::deliverFrameToClient() {
     fprintf(stderr, "ElphelJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n", fMaxSize);
   }
 
-  ioctl (fd, _IO(CMOSCAM_IOCTYPE, IO_CCAM_JPEG), JPEG_CMD_FORGET);
   clearerr(fFid); // clears EOF flag (for next time)
 
   // Switch to another task, and inform the reader that he has data:
@@ -110,7 +89,7 @@ void ElphelJPEGDeviceSource::deliverFrameToClient() {
 
 u_int8_t ElphelJPEGDeviceSource::type() {
   return 1;
-}
+  }
 u_int8_t ElphelJPEGDeviceSource::qFactor() {
   return fLastQFactor;
 }
@@ -122,11 +101,9 @@ u_int8_t ElphelJPEGDeviceSource::height() {
 }
 
 void ElphelJPEGDeviceSource::startCapture() {
-  // Arrange to get a new frame now:
-  int fd = fFid->_fileno;
-  ioctl (fd, _IO(CMOSCAM_IOCTYPE, IO_CCAM_JPEG), JPEG_CMD_ACQUIRE);
+
   // Consider the capture as having occurred now:
-  gettimeofday(&fLastCaptureTime, &Idunno);
+  gettimeofday(&fLastCaptureTime, (struct timezone *)0);
 }
 
 void ElphelJPEGDeviceSource::setParamsFromHeader() {
@@ -143,7 +120,5 @@ void ElphelJPEGDeviceSource::setParamsFromHeader() {
   }
   if (!foundIt) fprintf(stderr, "ElphelJPEGDeviceSource: Failed to find SOF0 marker in header!\n");
 
-  // The 'Q' factor is not in the header; do an ioctl() to get it:
-  int fd = fFid->_fileno;
-  fLastQFactor = ioctl(fd, _CCCMD(CCAM_RPARS, P_QUALITY), 0);
+
 }
