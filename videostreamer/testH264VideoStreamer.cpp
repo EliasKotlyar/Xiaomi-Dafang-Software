@@ -27,7 +27,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include <liveMedia.hh>
 #include <BasicUsageEnvironment.hh>
 #include <GroupsockHelper.hh>
-//#include "ImpJpegVideoDeviceSource.h"
+#include "ImpJpegVideoDeviceSource.h"
 
 UsageEnvironment* env;
 char const* inputFileName = "test.264";
