@@ -179,6 +179,7 @@ int imp_get_jpeg(void* buffer)
 
 			ret = save_stream(buffer, &stream);
 			bytesRead = ret;
+			//IMP_LOG_ERR(TAG, "Read %d bytes \n", ret);
 			//extractHeader(buffer,ret);
 			//IMP_LOG_ERR(TAG, "JPEG saved!\n");
 			if (ret < 0) {
@@ -204,13 +205,16 @@ int imp_get_jpeg(void* buffer)
 int save_stream(void* buffer, IMPEncoderStream *stream)
 {
 	int ret, i, nr_pack = stream->packCount;
+	//IMP_LOG_ERR(TAG, "Pack count: %d\n", nr_pack);
 
     void* memoryAddress = buffer;
     int bytesRead = 0;
-	for (i = 1; i < nr_pack; i++) {
+	for (i = 0; i < nr_pack; i++) {
+        int packLen  = stream->pack[i].length;
 	    memcpy(memoryAddress,(void *)stream->pack[i].virAddr,stream->pack[i].length);
 		memoryAddress = memoryAddress + stream->pack[i].length;
 		bytesRead = bytesRead + stream->pack[i].length;
+		//IMP_LOG_ERR(TAG, "Pack Len: %d\n", packLen);
 	}
 
 	return bytesRead;

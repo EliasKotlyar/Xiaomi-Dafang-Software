@@ -107,7 +107,7 @@ void play() {
         = JPEGVideoRTPSink::createNew(*env, sessionState.rtpGroupsock);
   
     // Create (and start) a 'RTCP instance' for this RTP sink:
-    unsigned const averageFrameSizeInBytes = 35000; // estimate
+    unsigned const averageFrameSizeInBytes = 120000; // estimate
     const unsigned totalSessionBandwidth
         = (8*1000*averageFrameSizeInBytes)/timePerFrame;
         // in kbps; for RTCP b/w share
