@@ -1,6 +1,6 @@
 LIVEMEDIAPATH = ../live
 
-INCLUDES = -I$(LIVEMEDIAPATH)/UsageEnvironment/include -I$(LIVEMEDIAPATH)/groupsock/include -I$(LIVEMEDIAPATH)/liveMedia/include -I$(LIVEMEDIAPATH)/BasicUsageEnvironment/include
+INCLUDES = -I$(LIVEMEDIAPATH)/UsageEnvironment/include -I$(LIVEMEDIAPATH)/groupsock/include -I$(LIVEMEDIAPATH)/liveMedia/include -I$(LIVEMEDIAPATH)/BasicUsageEnvironment/include -Iinclude/
 # Default library filename suffixes for each library that we link with.  The "config.*" file might redefine these later.
 libliveMedia_LIB_SUFFIX = $(LIB_SUFFIX)
 libBasicUsageEnvironment_LIB_SUFFIX = $(LIB_SUFFIX)
@@ -42,7 +42,7 @@ extra:	testGSMStreamer$(EXE)
 	$(CPLUSPLUS_COMPILER) -c $(CPLUSPLUS_FLAGS) $<
 
 
-H264_VIDEO_STREAMER_OBJS = testH264VideoStreamer.$(OBJ) ImpJpegVideoDeviceSource.$(OBJ)
+H264_VIDEO_STREAMER_OBJS = testH264VideoStreamer.$(OBJ) ImpJpegVideoDeviceSource.$(OBJ)  sample-encoder-jpeg.$(OBJ)
 
 USAGE_ENVIRONMENT_DIR = $(LIVEMEDIAPATH)/UsageEnvironment
 USAGE_ENVIRONMENT_LIB = $(USAGE_ENVIRONMENT_DIR)/libUsageEnvironment.$(libUsageEnvironment_LIB_SUFFIX)

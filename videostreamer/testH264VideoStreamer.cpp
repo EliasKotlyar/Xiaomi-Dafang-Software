@@ -28,6 +28,8 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include <BasicUsageEnvironment.hh>
 #include <GroupsockHelper.hh>
 #include "ImpJpegVideoDeviceSource.h"
+#include "sample-encoder-jpeg.h"
+
 
 UsageEnvironment* env;
 char const* inputFileName = "test.264";
@@ -37,6 +39,8 @@ RTPSink* videoSink;
 void play(); // forward
 
 int main(int argc, char** argv) {
+
+  imp_init();
   // Begin by setting up our usage environment:
   TaskScheduler* scheduler = BasicTaskScheduler::createNew();
   env = BasicUsageEnvironment::createNew(*scheduler);

@@ -18,7 +18,7 @@
 
 extern struct chn_conf chn[];
 
-int main(int argc, char *argv[])
+int imp_init()
 {
 	int i, ret;
 
