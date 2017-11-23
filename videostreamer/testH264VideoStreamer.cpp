@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
   videoSink = JPEGVideoRTPSink::createNew(*env, &rtpGroupsock);
 
   // Create (and start) a 'RTCP instance' for this RTP sink:
-  const unsigned estimatedSessionBandwidth = 500; // in kbps; for RTCP b/w share
+  const unsigned estimatedSessionBandwidth = 5000; // in kbps; for RTCP b/w share
   const unsigned maxCNAMElen = 100;
   unsigned char CNAME[maxCNAMElen+1];
   gethostname((char*)CNAME, maxCNAMElen);
@@ -104,13 +104,11 @@ int main(int argc, char** argv) {
   // Create the MJPEG video source:
     ImpJpegVideoDeviceSource* fileSource = ImpJpegVideoDeviceSource::createNew(*env,100);
 
-      MJPEGVideoSource* videoSource = MJPEGVideoSource::createNew(*env, fileSource);
-
 
 
     // Finally, start playing:
     *env << "Beginning to read from file...\n";
-    videoSink->startPlaying(*videoSource, NULL, NULL);
+    videoSink->startPlaying(*fileSource, NULL, NULL);
 
     env->taskScheduler().doEventLoop();
 
