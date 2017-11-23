@@ -2,7 +2,7 @@ INCLUDES = -Iinclude -I../UsageEnvironment/include
 PREFIX = /usr/local
 LIBDIR = $(PREFIX)/lib
 ##### Change the following for your environment:
-CROSS_COMPILE=        /var/www/Dropbear-Dafang/mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-
+CROSS_COMPILE=        $(PWD)/../../mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-
 COMPILE_OPTS =        $(INCLUDES) -I. -O2 -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -DXLOCALE_NOT_USED=1
 C =            c
 C_COMPILER =        $(CROSS_COMPILE)gcc
