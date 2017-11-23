@@ -113,14 +113,7 @@ void afterPlaying(void* /*clientData*/) {
 }
 
 void play() {
-  // Open the input file as a 'byte-stream file source':
-  ByteStreamFileSource* fileSource
-    = ByteStreamFileSource::createNew(*env, inputFileName);
-  if (fileSource == NULL) {
-    *env << "Unable to open file \"" << inputFileName
-         << "\" as a byte-stream file source\n";
-    exit(1);
-  }
+  ImpJpegVideoDeviceSource* fileSource = ImpJpegVideoDeviceSource::createNew(*env,100);
 
   FramedSource* videoES = fileSource;
 
