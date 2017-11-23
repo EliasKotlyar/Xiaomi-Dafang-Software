@@ -20,8 +20,8 @@ ImpJpegVideoDeviceSource::~ImpJpegVideoDeviceSource(){
 
 void ImpJpegVideoDeviceSource::doGetNextFrame(){
 
-  imp_get_h264_frame(fTo);
-
+  //imp_get_h264_frame(fTo);
+  imp_get_jpeg(fTo);
   // Switch to another task, and inform the reader that he has data:
   nextTask() = envir().taskScheduler().scheduleDelayedTask(0,
 			   (TaskFunc*)FramedSource::afterGetting, this);
