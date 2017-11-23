@@ -32,7 +32,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 
 UsageEnvironment* env;
-char const* inputFileName = "test.264";
+char const* inputFileName = "test.jpeg";
 H264VideoStreamFramer* videoSource;
 RTPSink* videoSink;
 
@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
 
   // Create a 'H264 Video RTP' sink from the RTP 'groupsock':
   OutPacketBuffer::maxSize = 100000;
-  videoSink = H264VideoRTPSink::createNew(*env, &rtpGroupsock, 96);
+  videoSink = JPEGVideoRTPSink::createNew(*env, &rtpGroupsock);
 
   // Create (and start) a 'RTCP instance' for this RTP sink:
   const unsigned estimatedSessionBandwidth = 500; // in kbps; for RTCP b/w share
@@ -99,32 +99,24 @@ int main(int argc, char** argv) {
 
   // Start the streaming:
   *env << "Beginning streaming...\n";
-  play();
 
-  env->taskScheduler().doEventLoop(); // does not return
+
+  // Create the MJPEG video source:
+    ImpJpegVideoDeviceSource* fileSource = ImpJpegVideoDeviceSource::createNew(*env,100);
+
+      MJPEGVideoSource* videoSource = MJPEGVideoSource::createNew(*env, fileSource);
+
+
+
+    // Finally, start playing:
+    *env << "Beginning to read from file...\n";
+    videoSink->startPlaying(*videoSource, NULL, NULL);
+
+    env->taskScheduler().doEventLoop();
+
+
+
 
   return 0; // only to prevent compiler warning
 }
 
-void afterPlaying(void* /*clientData*/) {
-  *env << "...done reading from file\n";
-  videoSink->stopPlaying();
-  Medium::close(videoSource);
-  // Note that this also closes the input file that this source read from.
-
-  // Start playing once again:
-  play();
-}
-
-void play() {
-  ImpJpegVideoDeviceSource* fileSource = ImpJpegVideoDeviceSource::createNew(*env,100);
-
-  FramedSource* videoES = fileSource;
-
-  // Create a framer for the Video Elementary Stream:
-  videoSource = H264VideoStreamFramer::createNew(*env, videoES);
-
-  // Finally, start playing:
-  *env << "Beginning to read from file...\n";
-  videoSink->startPlaying(*videoSource, afterPlaying, videoSink);
-}

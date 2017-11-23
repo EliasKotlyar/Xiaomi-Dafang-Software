@@ -164,6 +164,7 @@ int imp_get_jpeg(void* buffer)
 			}
 
 			ret = save_stream(buffer, &stream);
+			IMP_LOG_ERR(TAG, "JPEG saved!\n");
 			if (ret < 0) {
 
 				return -1;
@@ -191,11 +192,6 @@ int save_stream(void* buffer, IMPEncoderStream *stream)
 	for (i = 0; i < nr_pack; i++) {
 	    memcpy(memoryAddress,(void *)stream->pack[i].virAddr,stream->pack[i].length);
 		memoryAddress = memoryAddress + stream->pack[i].length;
-		if (ret != stream->pack[i].length) {
-			IMP_LOG_ERR(TAG, "stream write error:%s\n", strerror(errno));
-			return -1;
-		}
-		//IMP_LOG_DBG(TAG, "stream->pack[%d].dataType=%d\n", i, ((int)stream->pack[i].dataType.h264Type));
 	}
 
 	return 0;
