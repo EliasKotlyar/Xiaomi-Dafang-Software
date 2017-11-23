@@ -31,17 +31,17 @@ class DeviceException : public std::exception {
 
 };
 
-class WebcamJPEGDeviceSource: public JPEGVideoSource {
+class ImpJpegVideoDeviceSource: public JPEGVideoSource {
 public:
-    static WebcamJPEGDeviceSource* createNew(UsageEnvironment& env,
+    static ImpJpegVideoDeviceSource* createNew(UsageEnvironment& env,
 					   unsigned timePerFrame);
     // "timePerFrame" is in microseconds
 
 protected:
-    WebcamJPEGDeviceSource(UsageEnvironment& env,
+    ImpJpegVideoDeviceSource(UsageEnvironment& env,
 			 int fd, unsigned timePerFrame);
     // called only by createNew()
-    virtual ~WebcamJPEGDeviceSource();
+    virtual ~ImpJpegVideoDeviceSource();
 
 private:
     // redefined virtual functions:

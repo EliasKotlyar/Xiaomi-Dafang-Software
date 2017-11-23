@@ -17,7 +17,7 @@
 // Webcam MJPEG camera input device
 // Implementation
 
-#include "WebcamJPEGDeviceSource.hh"
+#include "ImpJpegVideoDeviceSource.h"
 #include <fcntl.h>              /* low-level i/o */
 #include <unistd.h>
 #include <errno.h>
@@ -49,8 +49,8 @@ static int xioctl(int fh, int request, void *arg)
 }
 #endif
 
-WebcamJPEGDeviceSource*
-WebcamJPEGDeviceSource::createNew(UsageEnvironment& env,
+ImpJpegVideoDeviceSource*
+ImpJpegVideoDeviceSource::createNew(UsageEnvironment& env,
 				  unsigned timePerFrame) {
     int fd = -1;
 #ifndef JPEG_TEST
@@ -61,14 +61,14 @@ WebcamJPEGDeviceSource::createNew(UsageEnvironment& env,
     }
 #endif
     try {
-        return new WebcamJPEGDeviceSource(env, fd, timePerFrame);
+        return new ImpJpegVideoDeviceSource(env, fd, timePerFrame);
     } catch (DeviceException) {
         return NULL;
     }
 }
 
 #ifndef JPEG_TEST
-int WebcamJPEGDeviceSource::initDevice(UsageEnvironment& env, int fd)
+int ImpJpegVideoDeviceSource::initDevice(UsageEnvironment& env, int fd)
 {
     struct v4l2_capability cap;
     struct v4l2_cropcap cropcap;
@@ -250,8 +250,8 @@ int WebcamJPEGDeviceSource::initDevice(UsageEnvironment& env, int fd)
 }
 #endif // JPEG_TEST
 
-WebcamJPEGDeviceSource
-::WebcamJPEGDeviceSource(UsageEnvironment& env, int fd, unsigned timePerFrame)
+ImpJpegVideoDeviceSource
+::ImpJpegVideoDeviceSource(UsageEnvironment& env, int fd, unsigned timePerFrame)
   : JPEGVideoSource(env), fFd(fd), fTimePerFrame(timePerFrame)
 {
 #ifdef JPEG_TEST
@@ -270,7 +270,7 @@ WebcamJPEGDeviceSource
 #endif
 }
 
-WebcamJPEGDeviceSource::~WebcamJPEGDeviceSource()
+ImpJpegVideoDeviceSource::~ImpJpegVideoDeviceSource()
 {
 #ifdef JPEG_TEST
     delete [] jpeg_dat;
@@ -314,7 +314,7 @@ static float timeval_diff(struct timeval *x, struct timeval *y)
 
 static struct timezone Idunno;
 
-void WebcamJPEGDeviceSource::doGetNextFrame()
+void ImpJpegVideoDeviceSource::doGetNextFrame()
 {
     static unsigned long framecount = 0;
     static struct timeval starttime;
@@ -345,7 +345,7 @@ void WebcamJPEGDeviceSource::doGetNextFrame()
         printf("frame rate=%f\n", (float)framecount/timeval_diff(&fLastCaptureTime, &starttime));
      */
     if(buf.bytesused > fMaxSize) {
-        fprintf(stderr, "WebcamJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n", fMaxSize);
+        fprintf(stderr, "ImpJpegVideoDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n", fMaxSize);
     }
     fFrameSize = jpeg_to_rtp(fTo, fBuffers[buf.index].start, std::min(buf.bytesused, fMaxSize));
     if(-1==xioctl(fFd, VIDIOC_QBUF, &buf)) {
@@ -375,7 +375,7 @@ static unsigned char calcQ(unsigned char const *qt)
     return (unsigned char) q;
 }
 
-size_t WebcamJPEGDeviceSource::jpeg_to_rtp(void *pto, void *pfrom, size_t len)
+size_t ImpJpegVideoDeviceSource::jpeg_to_rtp(void *pto, void *pfrom, size_t len)
 {
     unsigned char *to=(unsigned char*)pto, *from=(unsigned char*)pfrom;
     unsigned int datlen;
@@ -389,28 +389,28 @@ size_t WebcamJPEGDeviceSource::jpeg_to_rtp(void *pto, void *pfrom, size_t len)
     return 0;
 }
 
-u_int8_t const * WebcamJPEGDeviceSource::quantizationTables(u_int8_t & precision, u_int16_t & length)
+u_int8_t const * ImpJpegVideoDeviceSource::quantizationTables(u_int8_t & precision, u_int16_t & length)
 {
     precision = parser.precision();
     return parser.quantizationTables(length);
 }
 
-u_int8_t WebcamJPEGDeviceSource::type()
+u_int8_t ImpJpegVideoDeviceSource::type()
 {
     return parser.type();
 }
 
-u_int8_t WebcamJPEGDeviceSource::qFactor()
+u_int8_t ImpJpegVideoDeviceSource::qFactor()
 {
     return parser.qFactor();
 }
 
-u_int8_t WebcamJPEGDeviceSource::width()
+u_int8_t ImpJpegVideoDeviceSource::width()
 {
     return parser.width();
 }
 
-u_int8_t WebcamJPEGDeviceSource::height()
+u_int8_t ImpJpegVideoDeviceSource::height()
 {
     return parser.height();
 }
