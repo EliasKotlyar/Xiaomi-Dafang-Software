@@ -14,12 +14,20 @@ ImpJpegVideoDeviceSource::ImpJpegVideoDeviceSource(UsageEnvironment& env,unsigne
     imp_init();
 };
 
+ImpJpegVideoDeviceSource::~ImpJpegVideoDeviceSource(){
+    imp_shutdown();
+}
+
 void ImpJpegVideoDeviceSource::doGetNextFrame(){
 
+  memmove(fTo, newFrameDataStart, fFrameSize);
   // Switch to another task, and inform the reader that he has data:
   nextTask() = envir().taskScheduler().scheduleDelayedTask(0,
 			   (TaskFunc*)FramedSource::afterGetting, this);
 }
+
+
+
 u_int8_t ImpJpegVideoDeviceSource::type(){
     return 1;
 }

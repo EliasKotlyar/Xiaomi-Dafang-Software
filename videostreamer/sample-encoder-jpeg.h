@@ -6,8 +6,9 @@ extern "C"
 {
 #endif
 
-int imp_init();
-int sample_get_jpeg_snap();
+void imp_init();
+void sample_get_jpeg_snap();
+void imp_shutdown();
 
 
 #if __cplusplus

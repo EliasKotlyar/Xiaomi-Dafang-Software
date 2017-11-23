@@ -29,6 +29,7 @@ class ImpJpegVideoDeviceSource : public JPEGVideoSource {
 					   unsigned timePerFrame);
 					   // Constructor
   ImpJpegVideoDeviceSource(UsageEnvironment& env,unsigned timePerFrame);
+  ~ImpJpegVideoDeviceSource();
 
 
   private:
