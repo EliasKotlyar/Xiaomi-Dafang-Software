@@ -22,7 +22,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #define _ELPHEL_JPEG_DEVICE_SOURCE_HH
 
 
-class ImpJpegVideoDeviceSource {
+class ImpJpegVideoDeviceSource : public JPEGVideoSource {
     public:
   static ImpJpegVideoDeviceSource* createNew(UsageEnvironment& env,
 					   unsigned timePerFrame);
