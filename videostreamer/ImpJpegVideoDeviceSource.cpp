@@ -11,7 +11,7 @@ ImpJpegVideoDeviceSource* ImpJpegVideoDeviceSource::createNew(UsageEnvironment& 
 
 ImpJpegVideoDeviceSource::ImpJpegVideoDeviceSource(UsageEnvironment& env,unsigned timePerFrame) : JPEGVideoSource(env)
 {
-    imp_init();
+    imp_init(1);
 };
 
 ImpJpegVideoDeviceSource::~ImpJpegVideoDeviceSource(){

@@ -30,7 +30,7 @@
 
 extern struct chn_conf chn[];
 
-int imp_init()
+int imp_init(int mode)
 {
 	int i, ret;
 
@@ -58,21 +58,24 @@ int imp_init()
 		}
 	}
 
-	/* Step.3 Encoder init */
-	/*ret = sample_jpeg_init();
-	if (ret < 0) {
-		IMP_LOG_ERR(TAG, "Encoder init failed\n");
-		return -1;
-	}
-	*/
+    if(mode == 1){
+    	/* Step.3 Encoder init */
+    	ret = sample_jpeg_init();
+    	if (ret < 0) {
+    		IMP_LOG_ERR(TAG, "Encoder JPEG init failed\n");
+    		return -1;
+    	}
+
+    }else{
+    	/* Step.3 Encoder init */
+    	ret = sample_encoder_init();
+    	if (ret < 0) {
+    		IMP_LOG_ERR(TAG, "Encoder h264 init failed\n");
+    		return -1;
+    	}
+    }
 
 
-	/* Step.3 Encoder init */
-	ret = sample_encoder_init();
-	if (ret < 0) {
-		IMP_LOG_ERR(TAG, "Encoder init failed\n");
-		return -1;
-	}
 
 		/* Step.4 Bind */
 	for (i = 0; i < FS_CHN_NUM; i++) {
