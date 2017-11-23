@@ -24,9 +24,22 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 class ImpJpegVideoDeviceSource : public JPEGVideoSource {
     public:
+    // Static Method:
   static ImpJpegVideoDeviceSource* createNew(UsageEnvironment& env,
 					   unsigned timePerFrame);
+					   // Constructor
+  ImpJpegVideoDeviceSource(UsageEnvironment& env,unsigned timePerFrame);
+
+
+  private:
+    // redefined virtual functions:
+    virtual void doGetNextFrame();
+    virtual u_int8_t type();
+    virtual u_int8_t qFactor();
+    virtual u_int8_t width();
+    virtual u_int8_t height();
 };
+
 
 
 #endif

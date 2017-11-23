@@ -7,3 +7,9 @@ ImpJpegVideoDeviceSource* ImpJpegVideoDeviceSource::createNew(UsageEnvironment& 
 {
     return new ImpJpegVideoDeviceSource(env,timePerFrame);
 };
+
+
+ImpJpegVideoDeviceSource::ImpJpegVideoDeviceSource(UsageEnvironment& env,unsigned timePerFrame) : JPEGVideoSource(env)
+{
+
+};
