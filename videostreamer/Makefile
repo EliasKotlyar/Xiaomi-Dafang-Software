@@ -42,7 +42,7 @@ extra:	testGSMStreamer$(EXE)
 	$(CPLUSPLUS_COMPILER) -c $(CPLUSPLUS_FLAGS) $<
 
 
-H264_VIDEO_STREAMER_OBJS = testH264VideoStreamer.$(OBJ)
+H264_VIDEO_STREAMER_OBJS = testH264VideoStreamer.$(OBJ) ImpJpegVideoDeviceSource.$(OBJ)
 
 USAGE_ENVIRONMENT_DIR = $(LIVEMEDIAPATH)/UsageEnvironment
 USAGE_ENVIRONMENT_LIB = $(USAGE_ENVIRONMENT_DIR)/libUsageEnvironment.$(libUsageEnvironment_LIB_SUFFIX)
