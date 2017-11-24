@@ -29,7 +29,7 @@
 #define TAG "Sample-Common"
 
 
-struct chn_conf chn[FS_CHN_NUM] = {
+struct chn_conf chn[2] = {
 	{
 		.index = CH0_INDEX,
 		.enable = CHN0_EN,

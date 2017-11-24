@@ -52,6 +52,8 @@ ImpJpegVideoDeviceSource::createNew(UsageEnvironment& env,
 int ImpJpegVideoDeviceSource::initDevice(UsageEnvironment& env, int fd)
 {
     imp_init(1);
+    impBuffer = malloc(IMP_BUFFER_SIZE);
+
     return 0;
 }
 #endif // JPEG_TEST
@@ -85,29 +87,6 @@ ImpJpegVideoDeviceSource::~ImpJpegVideoDeviceSource()
 #endif
 }
 
-static int timeval_subtract(struct timeval *result, struct timeval *x, struct timeval *y)
-{
-    if(x->tv_usec < y->tv_usec) {
-        int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
-        y->tv_usec -= 1000000 * nsec;
-        y->tv_sec += nsec;
-    }
-    if(x->tv_usec - y->tv_usec > 1000000) {
-        int nsec = (x->tv_usec - y->tv_usec) / 1000000;
-        y->tv_usec += 1000000 * nsec;
-        y->tv_sec -= nsec;
-    }
-    result->tv_sec = x->tv_sec - y->tv_sec;
-    result->tv_usec = x->tv_usec - y->tv_usec;
-    return x->tv_sec < y->tv_sec;
-}
-
-static float timeval_diff(struct timeval *x, struct timeval *y)
-{
-    struct timeval result;
-    timeval_subtract(&result, x, y);
-    return result.tv_sec + result.tv_usec/1000000.0;
-}
 
 static struct timezone Idunno;
 
@@ -130,16 +109,16 @@ void ImpJpegVideoDeviceSource::doGetNextFrame()
         starttime = fLastCaptureTime;
     framecount++;
     fPresentationTime = fLastCaptureTime;
-    void* buffer = malloc(fMaxSize);
-    int bytesRead = imp_get_jpeg(buffer);
 
-    if(bytesRead > fMaxSize) {
+    int bytesRead = imp_get_jpeg(impBuffer);
+
+    if(bytesRead > (int)fMaxSize) {
         fprintf(stderr, "WebcamJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n", fMaxSize);
     }
 
 
 
-    fFrameSize = jpeg_to_rtp(fTo, buffer, bytesRead);
+    fFrameSize = jpeg_to_rtp(fTo, impBuffer, bytesRead);
 
 #endif // JPEG_TEST
     // Switch to another task, and inform the reader that he has data:
@@ -147,23 +126,6 @@ void ImpJpegVideoDeviceSource::doGetNextFrame()
                     (TaskFunc*)FramedSource::afterGetting, this);
 }
 
-static unsigned char calcQ(unsigned char const *qt);
-
-static unsigned char calcQ(unsigned char const *qt)
-{
-    unsigned int q;
-    q = (qt[0]*100-50)/16;
-    //q = (qt[64]*100-50)/17;
-    if(q>5000)
-        q = 5000;
-    if(q<2)
-        q = 2;
-    if(q>100)
-        q = 5000/q;
-    else
-        q = (200-q)/2;
-    return (unsigned char) q;
-}
 
 size_t ImpJpegVideoDeviceSource::jpeg_to_rtp(void *pto, void *pfrom, size_t len)
 {

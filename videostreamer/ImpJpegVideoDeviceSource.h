@@ -27,6 +27,9 @@
 
 #define MAX_JPEG_FILE_SZ 100000
 
+#define IMP_BUFFER_SIZE 200000
+
+
 class DeviceException : public std::exception {
 
 };
@@ -77,6 +80,8 @@ private:
     unsigned char *jpeg_dat;
     size_t jpeg_datlen;
 #endif
+
+    void* impBuffer;
 
 };
 
