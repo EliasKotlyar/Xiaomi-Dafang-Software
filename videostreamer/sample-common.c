@@ -22,7 +22,6 @@
 #include <imp/imp_isp.h>
 #include <imp/imp_osd.h>
 
-#include "logodata_100x100_bgra.h"
 
 #include "sample-common.h"
 
@@ -524,7 +523,7 @@ IMPRgnHandle *sample_osd_init(int grpNum) {
     rAttrLogo.rect.p1.x = rAttrLogo.rect.p0.x + picw - 1;     //p0 is start，and p1 well be epual p0+width(or heigth)-1
     rAttrLogo.rect.p1.y = rAttrLogo.rect.p0.y + pich - 1;
     rAttrLogo.fmt = PIX_FMT_BGRA;
-    rAttrLogo.data.picData.pData = logodata_100x100_bgra;
+    //rAttrLogo.data.picData.pData = logodata_100x100_bgra;
     ret = IMP_OSD_SetRgnAttr(rHanderLogo, &rAttrLogo);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_OSD_SetRgnAttr Logo error !\n");
