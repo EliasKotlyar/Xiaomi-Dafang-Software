@@ -27,16 +27,17 @@
 #include <sys/time.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+
 #ifndef JPEG_TEST
 #endif
 
 #include "JpegFrameParser.hh"
-#include <algorithm> 
+#include <algorithm>
 #include <iostream>
 
-ImpJpegVideoDeviceSource*
-ImpJpegVideoDeviceSource::createNew(UsageEnvironment& env,
-				  unsigned timePerFrame) {
+ImpJpegVideoDeviceSource *
+ImpJpegVideoDeviceSource::createNew(UsageEnvironment &env,
+                                    unsigned timePerFrame) {
     int fd = -1;
 #ifndef JPEG_TEST
 
@@ -49,19 +50,19 @@ ImpJpegVideoDeviceSource::createNew(UsageEnvironment& env,
 }
 
 #ifndef JPEG_TEST
-int ImpJpegVideoDeviceSource::initDevice(UsageEnvironment& env, int fd)
-{
+
+int ImpJpegVideoDeviceSource::initDevice(UsageEnvironment &env, int fd) {
     imp_init(1);
     impBuffer = malloc(IMP_BUFFER_SIZE);
 
     return 0;
 }
+
 #endif // JPEG_TEST
 
 ImpJpegVideoDeviceSource
-::ImpJpegVideoDeviceSource(UsageEnvironment& env, int fd, unsigned timePerFrame)
-  : JPEGVideoSource(env), fFd(fd), fTimePerFrame(timePerFrame)
-{
+::ImpJpegVideoDeviceSource(UsageEnvironment &env, int fd, unsigned timePerFrame)
+        : JPEGVideoSource(env), fFd(fd), fTimePerFrame(timePerFrame) {
 #ifdef JPEG_TEST
     jpeg_dat = new unsigned char [MAX_JPEG_FILE_SZ];
     FILE *fp = fopen("test.jpg", "rb");
@@ -72,14 +73,13 @@ ImpJpegVideoDeviceSource
     jpeg_datlen = fread(jpeg_dat, 1, MAX_JPEG_FILE_SZ, fp);
     fclose(fp);
 #else
-    if(initDevice(env, fd)) {
+    if (initDevice(env, fd)) {
         throw DeviceException();
     }
 #endif
 }
 
-ImpJpegVideoDeviceSource::~ImpJpegVideoDeviceSource()
-{
+ImpJpegVideoDeviceSource::~ImpJpegVideoDeviceSource() {
 #ifdef JPEG_TEST
     delete [] jpeg_dat;
 #else
@@ -90,11 +90,10 @@ ImpJpegVideoDeviceSource::~ImpJpegVideoDeviceSource()
 
 static struct timezone Idunno;
 
-void ImpJpegVideoDeviceSource::doGetNextFrame()
-{
+void ImpJpegVideoDeviceSource::doGetNextFrame() {
     static unsigned long framecount = 0;
     static struct timeval starttime;
-    
+
 #ifdef JPEG_TEST
     fFrameSize = jpeg_to_rtp(fTo, jpeg_dat, jpeg_datlen);
     gettimeofday(&fLastCaptureTime, &Idunno);
@@ -105,17 +104,18 @@ void ImpJpegVideoDeviceSource::doGetNextFrame()
     fDurationInMicroseconds = fTimePerFrame;
 #else
     gettimeofday(&fLastCaptureTime, &Idunno);
-    if(framecount==0)
+    if (framecount == 0)
         starttime = fLastCaptureTime;
     framecount++;
     fPresentationTime = fLastCaptureTime;
 
     int bytesRead = imp_get_jpeg(impBuffer);
 
-    if(bytesRead > (int)fMaxSize) {
-        fprintf(stderr, "WebcamJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n", fMaxSize);
+    if (bytesRead > (int) fMaxSize) {
+        fprintf(stderr,
+                "WebcamJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n",
+                fMaxSize);
     }
-
 
 
     fFrameSize = jpeg_to_rtp(fTo, impBuffer, bytesRead);
@@ -123,16 +123,15 @@ void ImpJpegVideoDeviceSource::doGetNextFrame()
 #endif // JPEG_TEST
     // Switch to another task, and inform the reader that he has data:
     nextTask() = envir().taskScheduler().scheduleDelayedTask(0,
-                    (TaskFunc*)FramedSource::afterGetting, this);
+                                                             (TaskFunc *) FramedSource::afterGetting, this);
 }
 
 
-size_t ImpJpegVideoDeviceSource::jpeg_to_rtp(void *pto, void *pfrom, size_t len)
-{
-    unsigned char *to=(unsigned char*)pto, *from=(unsigned char*)pfrom;
+size_t ImpJpegVideoDeviceSource::jpeg_to_rtp(void *pto, void *pfrom, size_t len) {
+    unsigned char *to = (unsigned char *) pto, *from = (unsigned char *) pfrom;
     unsigned int datlen;
-    unsigned char const * dat;
-    if(parser.parse(from, len) == 0) { // successful parsing
+    unsigned char const *dat;
+    if (parser.parse(from, len) == 0) { // successful parsing
         dat = parser.scandata(datlen);
         memcpy(to, dat, datlen);
         to += datlen;
@@ -141,28 +140,23 @@ size_t ImpJpegVideoDeviceSource::jpeg_to_rtp(void *pto, void *pfrom, size_t len)
     return 0;
 }
 
-u_int8_t const * ImpJpegVideoDeviceSource::quantizationTables(u_int8_t & precision, u_int16_t & length)
-{
+u_int8_t const *ImpJpegVideoDeviceSource::quantizationTables(u_int8_t &precision, u_int16_t &length) {
     precision = parser.precision();
     return parser.quantizationTables(length);
 }
 
-u_int8_t ImpJpegVideoDeviceSource::type()
-{
+u_int8_t ImpJpegVideoDeviceSource::type() {
     return parser.type();
 }
 
-u_int8_t ImpJpegVideoDeviceSource::qFactor()
-{
+u_int8_t ImpJpegVideoDeviceSource::qFactor() {
     return parser.qFactor();
 }
 
-u_int8_t ImpJpegVideoDeviceSource::width()
-{
+u_int8_t ImpJpegVideoDeviceSource::width() {
     return parser.width();
 }
 
-u_int8_t ImpJpegVideoDeviceSource::height()
-{
+u_int8_t ImpJpegVideoDeviceSource::height() {
     return parser.height();
 }

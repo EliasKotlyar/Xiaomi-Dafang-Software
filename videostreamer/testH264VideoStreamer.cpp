@@ -23,22 +23,20 @@
 #include <GroupsockHelper.hh>
 #include "ImpJpegVideoDeviceSource.h"
 
-UsageEnvironment* env;
-char* progName;
+UsageEnvironment *env;
+char *progName;
 int fps;
 
 void play(); // forward
 
-void usage()
-{
+void usage() {
     *env << "Usage: " << progName << " <frames-per-second>\n";
     exit(1);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
     // Begin by setting up our usage environment:
-    TaskScheduler* scheduler = BasicTaskScheduler::createNew();
+    TaskScheduler *scheduler = BasicTaskScheduler::createNew();
     env = BasicUsageEnvironment::createNew(*scheduler);
 
     //OutPacketBuffer::numPacketsLimit = 100;
@@ -57,30 +55,30 @@ int main(int argc, char** argv)
     return 0;
 }
 
-void afterPlaying(void* clientData); // forward
+void afterPlaying(void *clientData); // forward
 
 // A structure to hold the state of the current session.
 // It is used in the "afterPlaying()" function to clean up the session.
 struct sessionState_t {
-    FramedSource* source;
-    RTPSink* sink;
-    RTCPInstance* rtcpInstance;
-    Groupsock* rtpGroupsock;
-    Groupsock* rtcpGroupsock;
-    RTSPServer* rtspServer;
+    FramedSource *source;
+    RTPSink *sink;
+    RTCPInstance *rtcpInstance;
+    Groupsock *rtpGroupsock;
+    Groupsock *rtcpGroupsock;
+    RTSPServer *rtspServer;
 } sessionState;
 
 void play() {
     // Open the webcam
-    unsigned timePerFrame = 1000000/fps; // microseconds
+    unsigned timePerFrame = 1000000 / fps; // microseconds
 
     sessionState.source
-             = ImpJpegVideoDeviceSource::createNew(*env,timePerFrame);
+            = ImpJpegVideoDeviceSource::createNew(*env, timePerFrame);
 
 
     if (sessionState.source == NULL) {
         *env << "Unable to open webcam: "
-            << env->getResultMsg() << "\n";
+             << env->getResultMsg() << "\n";
         exit(1);
     }
 
@@ -89,55 +87,55 @@ void play() {
     destinationAddress.s_addr = chooseRandomIPv4SSMAddress(*env);
 
     const unsigned short rtpPortNum = 16384;
-    const unsigned short rtcpPortNum = rtpPortNum+1;
+    const unsigned short rtcpPortNum = rtpPortNum + 1;
     const unsigned char ttl = 255;
-  
+
     const Port rtpPort(rtpPortNum);
     const Port rtcpPort(rtcpPortNum);
-  
+
     sessionState.rtpGroupsock
-        = new Groupsock(*env, destinationAddress, rtpPort, ttl);
+            = new Groupsock(*env, destinationAddress, rtpPort, ttl);
     sessionState.rtpGroupsock->multicastSendOnly(); // we're a SSM source
     sessionState.rtcpGroupsock
-        = new Groupsock(*env, destinationAddress, rtcpPort, ttl);
+            = new Groupsock(*env, destinationAddress, rtcpPort, ttl);
     sessionState.rtcpGroupsock->multicastSendOnly(); // we're a SSM source
-  
+
     // Create an appropriate RTP sink from the RTP 'groupsock':
     sessionState.sink
-        = JPEGVideoRTPSink::createNew(*env, sessionState.rtpGroupsock);
-  
+            = JPEGVideoRTPSink::createNew(*env, sessionState.rtpGroupsock);
+
     // Create (and start) a 'RTCP instance' for this RTP sink:
     unsigned const averageFrameSizeInBytes = 120000; // estimate
     const unsigned totalSessionBandwidth
-        = (8*1000*averageFrameSizeInBytes)/timePerFrame;
-        // in kbps; for RTCP b/w share
+            = (8 * 1000 * averageFrameSizeInBytes) / timePerFrame;
+    // in kbps; for RTCP b/w share
     const unsigned maxCNAMElen = 100;
-    unsigned char CNAME[maxCNAMElen+1];
+    unsigned char CNAME[maxCNAMElen + 1];
     //gethostname((char*)CNAME, maxCNAMElen);
-    sprintf((char*)CNAME, "Webcam"); // "gethostname()" isn't supported
+    sprintf((char *) CNAME, "Webcam"); // "gethostname()" isn't supported
     CNAME[maxCNAMElen] = '\0'; // just in case
     sessionState.rtcpInstance
-        = RTCPInstance::createNew(*env, sessionState.rtcpGroupsock,
-			      totalSessionBandwidth, CNAME,
-			      sessionState.sink, NULL /* we're a server */,
-			      True /* we're a SSM source*/);
+            = RTCPInstance::createNew(*env, sessionState.rtcpGroupsock,
+                                      totalSessionBandwidth, CNAME,
+                                      sessionState.sink, NULL /* we're a server */,
+                                      True /* we're a SSM source*/);
     // Note: This starts RTCP running automatically
 
     // Create and start a RTSP server to serve this stream:
     sessionState.rtspServer
-        = RTSPServer::createNew(*env, 7070);
+            = RTSPServer::createNew(*env, 7070);
     if (sessionState.rtspServer == NULL) {
         *env << "Failed to create RTSP server: " << env->getResultMsg() << "\n";
         exit(1);
     }
-    ServerMediaSession* sms
-        = ServerMediaSession::createNew(*env, NULL, progName,
-            "Session streamed by the Webcam", True/*SSM*/);
+    ServerMediaSession *sms
+            = ServerMediaSession::createNew(*env, NULL, progName,
+                                            "Session streamed by the Webcam", True/*SSM*/);
     sms->addSubsession(PassiveServerMediaSubsession
-		    ::createNew(*sessionState.sink));
+                       ::createNew(*sessionState.sink));
     sessionState.rtspServer->addServerMediaSession(sms);
- 
-    char* url = sessionState.rtspServer->rtspURL(sms);
+
+    char *url = sessionState.rtspServer->rtspURL(sms);
     *env << "Play this stream using the URL \"" << url << "\"\n";
     delete[] url;
 
@@ -149,8 +147,7 @@ void play() {
 }
 
 
-void afterPlaying(void* /*clientData*/)
-{
+void afterPlaying(void * /*clientData*/) {
     *env << "...done streaming\n";
 
     // End by closing the media:

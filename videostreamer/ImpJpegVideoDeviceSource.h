@@ -34,34 +34,42 @@ class DeviceException : public std::exception {
 
 };
 
-class ImpJpegVideoDeviceSource: public JPEGVideoSource {
+class ImpJpegVideoDeviceSource : public JPEGVideoSource {
 public:
-    static ImpJpegVideoDeviceSource* createNew(UsageEnvironment& env,
-					   unsigned timePerFrame);
+    static ImpJpegVideoDeviceSource *createNew(UsageEnvironment &env,
+                                               unsigned timePerFrame);
     // "timePerFrame" is in microseconds
 
 protected:
-    ImpJpegVideoDeviceSource(UsageEnvironment& env,
-			 int fd, unsigned timePerFrame);
+    ImpJpegVideoDeviceSource(UsageEnvironment &env,
+                             int fd, unsigned timePerFrame);
+
     // called only by createNew()
     virtual ~ImpJpegVideoDeviceSource();
 
 private:
     // redefined virtual functions:
     virtual void doGetNextFrame();
+
     virtual u_int8_t type();
+
     virtual u_int8_t qFactor();
+
     virtual u_int8_t width();
+
     virtual u_int8_t height();
-    virtual u_int8_t const * quantizationTables(u_int8_t & precision, u_int16_t & length);
+
+    virtual u_int8_t const *quantizationTables(u_int8_t &precision, u_int16_t &length);
 
 private:
 #ifndef JPEG_TEST
-    int initDevice(UsageEnvironment& env, int fd);
+
+    int initDevice(UsageEnvironment &env, int fd);
+
 #endif
     struct buffer {
-        void   *start;
-        size_t  length;
+        void *start;
+        size_t length;
     };
 
     size_t jpeg_to_rtp(void *to, void *from, size_t len);
@@ -81,7 +89,7 @@ private:
     size_t jpeg_datlen;
 #endif
 
-    void* impBuffer;
+    void *impBuffer;
 
 };
 
