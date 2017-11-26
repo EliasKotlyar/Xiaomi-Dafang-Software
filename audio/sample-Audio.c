@@ -1484,7 +1484,7 @@ static void *IMP_Audio_Play_ALGO_AO_Thread(void *argv)
 	}
 
 	/* Step 4: Set audio channel volume. */
-	int chnVol = 60;
+	int chnVol = 100;
 	ret = IMP_AO_SetVol(devID, chnID, chnVol);
 	if(ret != 0) {
 		IMP_LOG_ERR(TAG, "Audio Play set volume failed\n");
@@ -1532,74 +1532,8 @@ static void *IMP_Audio_Play_ALGO_AO_Thread(void *argv)
 		IMP_LOG_INFO(TAG, "Play: TotalNum %d, FreeNum %d, BusyNum %d\n",
 				play_status.chnTotalNum, play_status.chnFreeNum, play_status.chnBusyNum);
 
-		if(++i == 100) {
-			ret = IMP_AO_PauseChn(devID, chnID);
-			if(ret != 0) {
-				IMP_LOG_ERR(TAG, "IMP_AO_PauseChn error\n");
-				return NULL;
-			}
-
-			printf("[INFO] Test : Audio Play Pause test.\n");
-			printf("[INFO]      : Please input any key to continue.\n");
-			getchar();
-
-			ret = IMP_AO_ClearChnBuf(devID, chnID);
-			if(ret != 0) {
-				IMP_LOG_ERR(TAG, "IMP_AO_ClearChnBuf error\n");
-				return NULL;
-			}
-
-			ret = IMP_AO_ResumeChn(devID, chnID);
-			if(ret != 0) {
-				IMP_LOG_ERR(TAG, "IMP_AO_ResumeChn error\n");
-				return NULL;
-			}
-		}
 	}
 
-	IMPAudioAgcConfig agcConfig = {
-		.TargetLevelDbfs = 0,
-		.CompressionGaindB = 9
-	};
-
-	ret = IMP_AO_EnableAgc(&attr, agcConfig);
-	if(ret != 0) {
-		printf("enable audio agc error.\n");
-		IMP_LOG_INFO(TAG, "enable audio agc error.\n");
-		return NULL;
-	}
-
-	i = 0;
-	fseek(play_file, 0, 0);
-	while(1) {
-		size = fread(buf, 1, IMP_AUDIO_BUF_SIZE, play_file);
-		if(size < IMP_AUDIO_BUF_SIZE)
-			break;
-
-		/* Step 5: send frame data. */
-		IMPAudioFrame frm;
-		frm.virAddr = (uint32_t *)buf;
-		frm.len = size;
-		ret = IMP_AO_SendFrame(devID, chnID, &frm, BLOCK);
-		if(ret != 0) {
-			IMP_LOG_ERR(TAG, "send Frame Data error\n");
-			return NULL;
-		}
-	}
-
-	ret = IMP_AO_DisableHpf();
-	if(ret != 0) {
-		printf("enable audio hpf error.\n");
-		IMP_LOG_INFO(TAG, "enable audio hpf error.\n");
-		return NULL;
-	}
-
-	ret = IMP_AO_DisableAgc();
-	if(ret != 0) {
-		printf("disable audio ns error.\n");
-		IMP_LOG_INFO(TAG, "disable audio ns error.\n");
-		return NULL;
-	}
 
 	/* Step 6: disable the audio channel. */
 	ret = IMP_AO_DisableChn(devID, chnID);
