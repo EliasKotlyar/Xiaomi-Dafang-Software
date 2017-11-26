@@ -74,9 +74,7 @@ ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment& env, FILE* 
         : FramedFileSource(env, fid), fFileSize(0), fPreferredFrameSize(preferredFrameSize),
           fPlayTimePerFrame(playTimePerFrame), fLastPlayTime(0),
           fHaveStartedReading(False), fLimitNumBytesToStream(False), fNumBytesToStream(0) {
-#ifndef READ_FROM_FILES_SYNCHRONOUSLY
-    makeSocketNonBlocking(fileno(fFid));
-#endif
+
 
     // Test whether the file is seekable
     fFidIsSeekable = FileIsSeekable(fFid);
@@ -85,9 +83,6 @@ ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment& env, FILE* 
 ImpH264VideoDeviceSource::~ImpH264VideoDeviceSource() {
     if (fFid == NULL) return;
 
-#ifndef READ_FROM_FILES_SYNCHRONOUSLY
-    envir().taskScheduler().turnOffBackgroundReadHandling(fileno(fFid));
-#endif
 
     CloseInputFile(fFid);
 }
@@ -98,24 +93,14 @@ void ImpH264VideoDeviceSource::doGetNextFrame() {
         return;
     }
 
-#ifdef READ_FROM_FILES_SYNCHRONOUSLY
+
     doReadFromFile();
-#else
-    if (!fHaveStartedReading) {
-        // Await readable data from the file:
-        envir().taskScheduler().turnOnBackgroundReadHandling(fileno(fFid),
-                                                             (TaskScheduler::BackgroundHandlerProc*)&fileReadableHandler, this);
-        fHaveStartedReading = True;
-    }
-#endif
+
 }
 
 void ImpH264VideoDeviceSource::doStopGettingFrames() {
     envir().taskScheduler().unscheduleDelayedTask(nextTask());
-#ifndef READ_FROM_FILES_SYNCHRONOUSLY
-    envir().taskScheduler().turnOffBackgroundReadHandling(fileno(fFid));
-    fHaveStartedReading = False;
-#endif
+
 }
 
 void ImpH264VideoDeviceSource::fileReadableHandler(ImpH264VideoDeviceSource* source, int /*mask*/) {
@@ -134,16 +119,9 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
     if (fPreferredFrameSize > 0 && fPreferredFrameSize < fMaxSize) {
         fMaxSize = fPreferredFrameSize;
     }
-#ifdef READ_FROM_FILES_SYNCHRONOUSLY
+
     fFrameSize = fread(fTo, 1, fMaxSize, fFid);
-#else
-    if (fFidIsSeekable) {
-        fFrameSize = fread(fTo, 1, fMaxSize, fFid);
-    } else {
-        // For non-seekable files (e.g., pipes), call "read()" rather than "fread()", to ensure that the read doesn't block:
-        fFrameSize = read(fileno(fFid), fTo, fMaxSize);
-    }
-#endif
+
     if (fFrameSize == 0) {
         handleClosure();
         return;
@@ -172,13 +150,8 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
     }
 
     // Inform the reader that he has data:
-#ifdef READ_FROM_FILES_SYNCHRONOUSLY
     // To avoid possible infinite recursion, we need to return to the event loop to do this:
   nextTask() = envir().taskScheduler().scheduleDelayedTask(0,
 				(TaskFunc*)FramedSource::afterGetting, this);
-#else
-    // Because the file read was done from the event loop, we can call the
-    // 'after getting' function directly, without risk of infinite recursion:
-    FramedSource::afterGetting(this);
-#endif
+
 }
