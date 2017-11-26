@@ -18,7 +18,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 // A file source that is a plain byte stream (rather than frames)
 // Implementation
 
-#include "ImpH264VideoDeviceSource.hh"
+#include "ImpH264VideoDeviceSource.h"
 #include "InputFile.hh"
 #include "GroupsockHelper.hh"
 

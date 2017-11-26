@@ -40,7 +40,7 @@ all: $(ALL)
 	$(CPLUSPLUS_COMPILER) -c $(CPLUSPLUS_FLAGS) $<
 
 
-H264_VIDEO_STREAMER_OBJS = ImpJpegVideoDeviceSource.$(OBJ)  sample-encoder-jpeg.$(OBJ) sample-common.$(OBJ) JpegFrameParser.$(OBJ)
+H264_VIDEO_STREAMER_OBJS = ImpJpegVideoDeviceSource.$(OBJ)  sample-encoder-jpeg.$(OBJ) sample-common.$(OBJ) JpegFrameParser.$(OBJ) ImpH264VideoDeviceSource.$(OBJ)
 
 USAGE_ENVIRONMENT_DIR = $(LIVEMEDIAPATH)/UsageEnvironment
 USAGE_ENVIRONMENT_LIB = $(USAGE_ENVIRONMENT_DIR)/libUsageEnvironment.$(libUsageEnvironment_LIB_SUFFIX)

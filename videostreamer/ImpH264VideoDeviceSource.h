@@ -5,7 +5,7 @@
 #ifndef DROPBEAR_DAFANG_IMPH264VIDEODEVICESOURCE_CPP_H
 #define DROPBEAR_DAFANG_IMPH264VIDEODEVICESOURCE_CPP_H
 
-#endif //DROPBEAR_DAFANG_IMPH264VIDEODEVICESOURCE_CPP_H
+
 #ifndef _FRAMED_FILE_SOURCE_HH
 #include "FramedFileSource.hh"
 #endif
@@ -64,4 +64,4 @@ private:
     u_int64_t fNumBytesToStream; // used iff "fLimitNumBytesToStream" is True
 };
 
-#endif
+#endif //DROPBEAR_DAFANG_IMPH264VIDEODEVICESOURCE_CPP_H
