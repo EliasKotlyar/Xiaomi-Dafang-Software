@@ -26,7 +26,7 @@
 #define IMP_AUDIO_RECORD_VOLTEST_FILE "/tmp/record_voltest_file.pcm"
 #define IMP_AUDIO_RECORD_FILE "/tmp/record_file.pcm"
 #define IMP_AUDIO_ENCODE_FILE "/tmp/record_file.g711"
-#define IMP_AUDIO_PLAY_FILE "/tmp/play_file.pcm"
+#define IMP_AUDIO_PLAY_FILE "file.wav"
 #define IMP_AUDIO_FILTER_FILE "/tmp/filter_file.pcm"
 
 /* My G711 Encoder */
@@ -1318,7 +1318,7 @@ static void *IMP_Audio_Play_Thread(void *argv)
 	}
 
 	/* Step 4: Set audio channel volume. */
-	int chnVol = 60;
+	int chnVol = 100;
 	ret = IMP_AO_SetVol(devID, chnID, chnVol);
 	if(ret != 0) {
 		IMP_LOG_ERR(TAG, "Audio Play set volume failed\n");
@@ -1787,152 +1787,16 @@ int  main(int argc, char *argv[])
 {
 	int ret;
 
-	pthread_t record_thread_id, play_thread_id;
+	pthread_t play_thread_id;
 
-	printf("[INFO] Test ai vol: Start audio record vol test.\n");
-	printf("[INFO]        : Can create the %s file.\n", IMP_AUDIO_RECORD_VOLTEST_FILE);
-	printf("[INFO]        : Please input any key to continue.\n");
-	getchar();
-
-	ret = pthread_create(&record_thread_id, NULL, IMP_Audio_Record_VolTest_Thread, IMP_AUDIO_RECORD_VOLTEST_FILE);
-	if(ret != 0) {
-		IMP_LOG_ERR(TAG, "[ERROR] %s: pthread_create Audio Record failed\n", __func__);
-		return -1;
-	}
-	pthread_join(record_thread_id, NULL);
-
-	printf("[INFO] Test ao vol: Start audio play vol test.\n");
-	printf("[INFO]       : Play the %s file.\n", IMP_AUDIO_RECORD_VOLTEST_FILE);
-	printf("[INFO]       : Please input any key to continue.\n");
-	getchar();
-	ret = pthread_create(&play_thread_id, NULL, IMP_Audio_Play_VolTest_Thread, IMP_AUDIO_RECORD_VOLTEST_FILE);
+	ret = pthread_create(&play_thread_id, NULL, IMP_Audio_Play_ALGO_AO_Thread, IMP_AUDIO_PLAY_FILE);
 	if(ret != 0) {
 		IMP_LOG_ERR(TAG, "[ERROR] %s: pthread_create Audio Play failed\n", __func__);
 		return -1;
 	}
 	pthread_join(play_thread_id, NULL);
 
-	printf("[INFO] Test algo ai: Start audio record algo ai test.\n");
-	printf("[INFO]        : Can create the %s file.\n", IMP_AUDIO_RECORD_ALGO_AI_FILE);
-	printf("[INFO]        : Please input any key to continue.\n");
-	getchar();
 
-	ret = pthread_create(&record_thread_id, NULL, IMP_Audio_Record_ALGO_AI_Thread, IMP_AUDIO_RECORD_ALGO_AI_FILE);
-	if(ret != 0) {
-		IMP_LOG_ERR(TAG, "[ERROR] %s: pthread_create Audio Record failed\n", __func__);
-		return -1;
-	}
-	pthread_join(record_thread_id, NULL);
-
-	printf("[INFO] Test algo ao: Start audio play algo ao test.\n");
-	printf("[INFO]       : Play the %s file.\n", IMP_AUDIO_RECORD_ALGO_AI_FILE);
-	printf("[INFO]       : Please input any key to continue.\n");
-	getchar();
-
-	ret = pthread_create(&play_thread_id, NULL, IMP_Audio_Play_ALGO_AO_Thread, IMP_AUDIO_RECORD_ALGO_AI_FILE);
-	if(ret != 0) {
-		IMP_LOG_ERR(TAG, "[ERROR] %s: pthread_create Audio Play failed\n", __func__);
-		return -1;
-	}
-	pthread_join(play_thread_id, NULL);
-
-	printf("[INFO] Test 1: Start audio record test.\n");
-	printf("[INFO]        : Can create the %s file.\n", IMP_AUDIO_RECORD_FILE);
-	printf("[INFO]        : Please input any key to continue.\n");
-	getchar();
-
-	/* Step 1: Start audio recording thread. */
-	ret = pthread_create(&record_thread_id, NULL, IMP_Audio_Record_Thread, IMP_AUDIO_RECORD_FILE);
-	if(ret != 0) {
-		IMP_LOG_ERR(TAG, "[ERROR] %s: pthread_create Audio Record failed\n", __func__);
-		return -1;
-	}
-	pthread_join(record_thread_id, NULL);
-
-	printf("[INFO] Test 2: Start audio data encode.\n");
-	printf("[INFO]       : PCM ---> G711, %s ---> %s\n", IMP_AUDIO_RECORD_FILE, IMP_AUDIO_ENCODE_FILE);
-	printf("[INFO]       : Can create the %s file.\n", IMP_AUDIO_ENCODE_FILE);
-	printf("[INFO]       : Please input any key to continue.\n");
-	getchar();
-
-	/* Step 2: Start audio encode. */
-	ret = IMP_Audio_Encode();
-	if(ret < 0) {
-		IMP_LOG_ERR(TAG, "[ERROR] %s: IMP_Audio_Encode failed\n", __func__);
-		return -1;
-	}
-
-	printf("[INFO] Test 3: Start audio data decode.\n");
-	printf("[INFO]       : G711 ---> PCM, %s ---> %s\n", IMP_AUDIO_ENCODE_FILE, IMP_AUDIO_PLAY_FILE);
-	printf("[INFO]       : Can create the %s file.\n", IMP_AUDIO_PLAY_FILE);
-	printf("[INFO]       : Please input any key to continue.\n");
-	getchar();
-
-	/* Step 3: Start audio decode. */
-	ret = IMP_Audio_Decode();
-	if(ret < 0) {
-		IMP_LOG_ERR(TAG, "[ERROR] %s: IMP_Audio_Decode failed\n", __func__);
-		return -1;
-	}
-
-	printf("[INFO] Test 4: Start audio play test.\n");
-	printf("[INFO]       : Play the %s file.\n", IMP_AUDIO_PLAY_FILE);
-	printf("[INFO]       : Please input any key to continue.\n");
-	getchar();
-
-	/* Step 4: Start audio play test. */
-	ret = pthread_create(&play_thread_id, NULL, IMP_Audio_Play_Thread, IMP_AUDIO_PLAY_FILE);
-	if(ret != 0) {
-		IMP_LOG_ERR(TAG, "[ERROR] %s: pthread_create Audio Play failed\n", __func__);
-		return -1;
-	}
-	pthread_join(play_thread_id, NULL);
-
-	printf("[INFO] Test 5: Start AEC test.\n");
-	printf("[INFO]       : Play the %s file.\n", IMP_AUDIO_PLAY_FILE);
-	printf("[INFO]       : Can create the %s file.\n", IMP_AUDIO_FILTER_FILE);
-	printf("[INFO]       : Please input any key to continue.\n");
-	getchar();
-
-	/* Step 5: Start AEC test. */
-	ret = pthread_create(&play_thread_id, NULL, IMP_Audio_Play_Thread, IMP_AUDIO_PLAY_FILE);
-	if(ret != 0) {
-		IMP_LOG_ERR(TAG, "[ERROR] %s: pthread_create Audio Play failed\n", __func__);
-		return -1;
-	}
-
-	ret = pthread_create(&record_thread_id, NULL, IMP_Audio_Record_Thread, IMP_AUDIO_FILTER_FILE);
-	if(ret != 0) {
-		IMP_LOG_ERR(TAG, "[ERROR] %s: pthread_create Audio Record failed\n", __func__);
-		return -1;
-	}
-
-	pthread_join(play_thread_id, NULL);
-	pthread_join(record_thread_id, NULL);
-
-	printf("[INFO] Test 6: Start audio play test.\n");
-	printf("[INFO]       : Play the %s file.\n", IMP_AUDIO_FILTER_FILE);
-	printf("[INFO]       : Please input any key to continue.\n");
-	getchar();
-
-	/* Step 6: Start audio play test. */
-	ret = pthread_create(&play_thread_id, NULL, IMP_Audio_Play_Thread, IMP_AUDIO_FILTER_FILE);
-	if(ret != 0) {
-		IMP_LOG_ERR(TAG, "[ERROR] %s: pthread_create Audio Play failed\n", __func__);
-		return -1;
-	}
-	pthread_join(play_thread_id, NULL);
-
-	printf("[INFO] Test ao vol: Start audio play vol test.\n");
-	printf("[INFO]       : Play the %s file.\n", IMP_AUDIO_RECORD_VOLTEST_FILE);
-	printf("[INFO]       : Please input any key to continue.\n");
-	getchar();
-	ret = pthread_create(&play_thread_id, NULL, IMP_Audio_Play_MuteTest_Thread, IMP_AUDIO_RECORD_VOLTEST_FILE);
-	if(ret != 0) {
-		IMP_LOG_ERR(TAG, "[ERROR] %s: pthread_create Audio Play failed\n", __func__);
-		return -1;
-	}
-	pthread_join(play_thread_id, NULL);
 
 	return 0;
 }
