@@ -9,3 +9,4 @@ export CPPFLAGS="-muclibc -O2"
 export LDFLAGS="-muclibc -O2"
 make clean
 make mJpegStreamer
+make h264streamer
