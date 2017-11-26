@@ -18,57 +18,57 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 // A file source that is a plain byte stream (rather than frames)
 // Implementation
 
-#include "ByteStreamFileSource.hh"
+#include "ImpH264VideoDeviceSource.hh"
 #include "InputFile.hh"
 #include "GroupsockHelper.hh"
 
-////////// ByteStreamFileSource //////////
+////////// ImpH264VideoDeviceSource //////////
 
-ByteStreamFileSource*
-ByteStreamFileSource::createNew(UsageEnvironment& env, char const* fileName,
+ImpH264VideoDeviceSource*
+ImpH264VideoDeviceSource::createNew(UsageEnvironment& env, char const* fileName,
                                 unsigned preferredFrameSize,
                                 unsigned playTimePerFrame) {
     FILE* fid = OpenInputFile(env, fileName);
     if (fid == NULL) return NULL;
 
-    ByteStreamFileSource* newSource
-            = new ByteStreamFileSource(env, fid, preferredFrameSize, playTimePerFrame);
+    ImpH264VideoDeviceSource* newSource
+            = new ImpH264VideoDeviceSource(env, fid, preferredFrameSize, playTimePerFrame);
     newSource->fFileSize = GetFileSize(fileName, fid);
 
     return newSource;
 }
 
-ByteStreamFileSource*
-ByteStreamFileSource::createNew(UsageEnvironment& env, FILE* fid,
+ImpH264VideoDeviceSource*
+ImpH264VideoDeviceSource::createNew(UsageEnvironment& env, FILE* fid,
                                 unsigned preferredFrameSize,
                                 unsigned playTimePerFrame) {
     if (fid == NULL) return NULL;
 
-    ByteStreamFileSource* newSource = new ByteStreamFileSource(env, fid, preferredFrameSize, playTimePerFrame);
+    ImpH264VideoDeviceSource* newSource = new ImpH264VideoDeviceSource(env, fid, preferredFrameSize, playTimePerFrame);
     newSource->fFileSize = GetFileSize(NULL, fid);
 
     return newSource;
 }
 
-void ByteStreamFileSource::seekToByteAbsolute(u_int64_t byteNumber, u_int64_t numBytesToStream) {
+void ImpH264VideoDeviceSource::seekToByteAbsolute(u_int64_t byteNumber, u_int64_t numBytesToStream) {
     SeekFile64(fFid, (int64_t)byteNumber, SEEK_SET);
 
     fNumBytesToStream = numBytesToStream;
     fLimitNumBytesToStream = fNumBytesToStream > 0;
 }
 
-void ByteStreamFileSource::seekToByteRelative(int64_t offset, u_int64_t numBytesToStream) {
+void ImpH264VideoDeviceSource::seekToByteRelative(int64_t offset, u_int64_t numBytesToStream) {
     SeekFile64(fFid, offset, SEEK_CUR);
 
     fNumBytesToStream = numBytesToStream;
     fLimitNumBytesToStream = fNumBytesToStream > 0;
 }
 
-void ByteStreamFileSource::seekToEnd() {
+void ImpH264VideoDeviceSource::seekToEnd() {
     SeekFile64(fFid, 0, SEEK_END);
 }
 
-ByteStreamFileSource::ByteStreamFileSource(UsageEnvironment& env, FILE* fid,
+ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment& env, FILE* fid,
                                            unsigned preferredFrameSize,
                                            unsigned playTimePerFrame)
         : FramedFileSource(env, fid), fFileSize(0), fPreferredFrameSize(preferredFrameSize),
@@ -82,7 +82,7 @@ ByteStreamFileSource::ByteStreamFileSource(UsageEnvironment& env, FILE* fid,
     fFidIsSeekable = FileIsSeekable(fFid);
 }
 
-ByteStreamFileSource::~ByteStreamFileSource() {
+ImpH264VideoDeviceSource::~ImpH264VideoDeviceSource() {
     if (fFid == NULL) return;
 
 #ifndef READ_FROM_FILES_SYNCHRONOUSLY
@@ -92,7 +92,7 @@ ByteStreamFileSource::~ByteStreamFileSource() {
     CloseInputFile(fFid);
 }
 
-void ByteStreamFileSource::doGetNextFrame() {
+void ImpH264VideoDeviceSource::doGetNextFrame() {
     if (feof(fFid) || ferror(fFid) || (fLimitNumBytesToStream && fNumBytesToStream == 0)) {
         handleClosure();
         return;
@@ -110,7 +110,7 @@ void ByteStreamFileSource::doGetNextFrame() {
 #endif
 }
 
-void ByteStreamFileSource::doStopGettingFrames() {
+void ImpH264VideoDeviceSource::doStopGettingFrames() {
     envir().taskScheduler().unscheduleDelayedTask(nextTask());
 #ifndef READ_FROM_FILES_SYNCHRONOUSLY
     envir().taskScheduler().turnOffBackgroundReadHandling(fileno(fFid));
@@ -118,7 +118,7 @@ void ByteStreamFileSource::doStopGettingFrames() {
 #endif
 }
 
-void ByteStreamFileSource::fileReadableHandler(ByteStreamFileSource* source, int /*mask*/) {
+void ImpH264VideoDeviceSource::fileReadableHandler(ImpH264VideoDeviceSource* source, int /*mask*/) {
     if (!source->isCurrentlyAwaitingData()) {
         source->doStopGettingFrames(); // we're not ready for the data yet
         return;
@@ -126,7 +126,7 @@ void ByteStreamFileSource::fileReadableHandler(ByteStreamFileSource* source, int
     source->doReadFromFile();
 }
 
-void ByteStreamFileSource::doReadFromFile() {
+void ImpH264VideoDeviceSource::doReadFromFile() {
     // Try to read as many bytes as will fit in the buffer provided (or "fPreferredFrameSize" if less)
     if (fLimitNumBytesToStream && fNumBytesToStream < (u_int64_t)fMaxSize) {
         fMaxSize = (unsigned)fNumBytesToStream;
