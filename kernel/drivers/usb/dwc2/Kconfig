@@ -1,0 +1,111 @@
+config USB_JZ_DWC2
+	tristate "DesignWare USB2 DRD Core Support"
+	depends on USB_SUPPORT
+	help
+	  Say Y or M here if your system has a Dual Role SuperSpeed
+	  USB controller based on the DesignWare USB2.0 IP Core.
+
+	  If you choose to build this driver is a dynamically linked
+	  module, the module will be called dwc2.ko.
+
+if USB_JZ_DWC2
+
+choice
+	prompt "Driver Mode"
+	help
+	  Select Driver Mode
+
+config USB_DWC2_DUAL_ROLE
+	bool "Both Host and Device"
+	depends on (USB && USB_GADGET)
+	select USB_OTG
+	help
+	  Say Y here to enable both Host and Device function
+
+config USB_DWC2_HOST_ONLY
+	bool "Host Mode Only"
+	depends on USB
+	help
+	  Say Y here to enable Host function only
+
+config USB_DWC2_DEVICE_ONLY
+	bool "Device Mode Only"
+	depends on USB_GADGET
+	select USB_OTG
+	help
+	  Say Y Here to enable Device function only
+
+endchoice
+
+config USB_DWC2_DRVVBUS_FUNCTION_PIN
+       bool "Allow use dwc2 drvvbus function pin"
+	depends on (USB_DWC2_HOST_ONLY || USB_DWC2_DUAL_ROLE)
+	default n
+	help
+	 Say Y here to use dwc2 drvvbus pin
+
+config USB_DWC2_ALLOW_WAKEUP
+       bool "Allow wakeup when usb cable plug/unplug"
+       depends on (USB_DWC2_DUAL_ROLE || USB_DWC2_DEVICE_ONLY)
+       default y
+       help
+         Say Y here if you want usb cable plug/unplug to wakeup the system
+
+config BOARD_HAS_NO_DETE_FACILITY
+       bool "Board has no plug detect facility"
+       default n
+       help
+         Say Y here if your board has no plug detect facility
+
+config USB_DWC2_DEBUG
+	bool "Enable Debugging(dev_dbg) Messages"
+	help
+	  Say Y here to enable debugging messages on DWC2 Driver.
+
+config USB_DWC2_VERBOSE
+	bool "Enable Verbose Debugging(dev_vdbg) Messages"
+	depends on USB_DWC2_DEBUG
+	help
+	  Say Y here to enable verbose debugging messages on DWC2 Driver.
+
+config USB_CHARGER_SOFTWARE_JUDGE
+	bool "Enable software to judge connect to usb adapter or host"
+	depends on (USB_DWC2_DUAL_ROLE || USB_DWC2_DEVICE_ONLY)
+	default n
+	help
+		Say Y here if you want increase usb charger current limit,
+		when connect to adapter
+
+config USB_DWC2_VERBOSE_VERBOSE
+	bool "Enable Very Verbose Debugging Messagers"
+	default y
+	help
+	  enable debugging messages for developer debug, these debugging messages
+          are switchable write 1 to file under /sys/module/dwc2/parameters/,
+          the default value is 0, so you can always say Y here and won't get boring.
+
+config USB_DWC2_HOST_TRACER
+	bool "Enable tracing host operation flow"
+	depends on (USB_DWC2_DUAL_ROLE || USB_DWC2_HOST_ONLY)
+	help
+	  Say Y here to enable tracing host operation flow,
+	  you must reserve 192M~256M memory
+
+config USB_DWC2_INPUT_EVDEV
+       bool "Enable host mode device wakeup"
+       depends on (USB_DWC2_DUAL_ROLE || USB_DWC2_HOST_ONLY)
+       help
+         Say Y here to enable host device insert to wakeup screen
+
+config USB_DWC2_SAVING_POWER
+       bool "Disable clock and power off controller when usb cable unplug"
+       depends on USB_DWC2_DEVICE_ONLY || (USB_DWC2_DUAL_ROLE && !USB_DWC2_DRVVBUS_FUNCTION_PIN)
+       default y
+       help
+         Say Y here to disable clock gate when usb cable unplug.
+	 Currently only support Device Mode and OTG Mode , but this does not means
+	 that we do not support Host Mode. Especially when OTG Mode ,
+	 Note : 1, we can not support drvvbus function pin, because , insert otg may bring some jitter
+	 our controler will have an session end interrupt.
+		2, if we don not have detect pin or id pin clock and phy always keep on except suspend
+endif

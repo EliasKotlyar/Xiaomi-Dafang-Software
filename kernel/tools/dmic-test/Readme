@@ -1,0 +1,7 @@
+
+1. to record 15 seconds.
+
+./dmic-test -R -w 123.wav -d 15
+
+
+

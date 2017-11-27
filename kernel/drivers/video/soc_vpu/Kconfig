@@ -1,0 +1,22 @@
+#
+# soc_vpu configuration
+#
+config SOC_VPU
+bool "soc vpu driver"
+depends on !JZ_VPU_V12
+default n
+config CHANNEL_NODE_NUM
+depends on SOC_VPU
+int "channel node number"
+default 4
+
+config VPU_NODE_NUM
+depends on SOC_VPU
+int "vpu node number"
+default 1
+
+config JZ_NVPU
+bool "client device of soc_vpu"
+depends on SOC_VPU
+default y
+
