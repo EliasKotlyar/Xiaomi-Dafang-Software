@@ -1,0 +1,9 @@
+1. pwm通道配置
+修改Makefie，默认打开PWM0,如要打开多路，打开对应的宏即可;
+DEFS += -DCONFIG_PWM0
+#DEFS += -DCONFIG_PWM1
+#DEFS += -DCONFIG_PWM2
+#DEFS += -DCONFIG_PWM3
+
+2. KO加载
+直接make，会生成sample_pwm_core.ko和sample_pwm_hal.ko,先加载sample_pwm_core.ko，后加载sample_pwm_hal.ko;
