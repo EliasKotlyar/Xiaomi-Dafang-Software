@@ -18,10 +18,10 @@
 #define MOTOR0_MAX_GPIO		-1		/**< motor stop point */
 #define MOTOR0_GPIO_LEVEL	0		/**< motor irq style */
 
-#define MOTOR0_ST1_GPIO		GPIO_PB(17)	/**< Phase A */
-#define MOTOR0_ST2_GPIO		GPIO_PC(18)	/**< Phase B */
-#define MOTOR0_ST3_GPIO		GPIO_PC(2)	/**< Phase C */
-#define MOTOR0_ST4_GPIO		GPIO_PC(3)	/**< Phase D */
+#define MOTOR0_ST1_GPIO		GPIO_PB(19)	/**< Phase A */
+#define MOTOR0_ST2_GPIO		GPIO_PC(20)	/**< Phase B */
+#define MOTOR0_ST3_GPIO		GPIO_PC(21)	/**< Phase C */
+#define MOTOR0_ST4_GPIO		GPIO_PC(22)	/**< Phase D */
 
 #define MOTOR0_MAX_SPEED	1000		/**< unit : ns */
 #define MOTOR0_MIN_SPEED	10
