@@ -59,6 +59,12 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
 
 
     int bytesRead = imp_get_h264_frame(impBuffer);
+
+    if (bytesRead > (int) fMaxSize) {
+        fprintf(stderr,
+                "WebcamJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n",
+                fMaxSize);
+    }
     memcpy(fTo, impBuffer, bytesRead);
 
 

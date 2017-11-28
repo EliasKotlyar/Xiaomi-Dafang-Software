@@ -96,6 +96,7 @@ int imp_init(int mode) {
     /* drop several pictures of invalid data */
     sleep(SLEEP_TIME);
 
+/*
     for (i = 0; i < FS_CHN_NUM; i++) {
         if (chn[i].enable) {
             ret = IMP_Encoder_StartRecvPic(2 + chn[i].index);
@@ -107,6 +108,7 @@ int imp_init(int mode) {
 
         }
     }
+    */
 
 
     return 0;
@@ -232,13 +234,15 @@ int save_stream(void *buffer, IMPEncoderStream *stream) {
 int imp_get_h264_frame(void *buffer) {
     int nr_frames = 1;
     int ret;
-
+    int bytesRead = 0;
     /* H264 Channel start receive picture */
+
     ret = IMP_Encoder_StartRecvPic(ENC_H264_CHANNEL);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", ENC_H264_CHANNEL);
         return -1;
     }
+
 
 
     int i;
@@ -259,6 +263,7 @@ int imp_get_h264_frame(void *buffer) {
         }
 
         ret = save_stream(buffer, &stream);
+        bytesRead = ret;
         if (ret < 0) {
             return ret;
         }
@@ -267,11 +272,13 @@ int imp_get_h264_frame(void *buffer) {
     }
 
 
+
     ret = IMP_Encoder_StopRecvPic(ENC_H264_CHANNEL);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
         return -1;
     }
 
-    return 0;
+
+    return bytesRead;
 }
