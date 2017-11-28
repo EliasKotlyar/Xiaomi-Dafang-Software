@@ -33,11 +33,13 @@ ImpH264VideoDeviceSource::createNew(UsageEnvironment& env) {
 
 ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment& env)
         : FramedSource(env) {
+        imp_init(2);
+        impBuffer = malloc(IMP_BUFFER_SIZE);
 
 }
 
 ImpH264VideoDeviceSource::~ImpH264VideoDeviceSource() {
-
+    imp_shutdown();
 }
 
 void ImpH264VideoDeviceSource::doGetNextFrame() {
@@ -53,24 +55,14 @@ void ImpH264VideoDeviceSource::doStopGettingFrames() {
 }
 
 void ImpH264VideoDeviceSource::doReadFromFile() {
-    // Try to read as many bytes as will fit in the buffer provided (or "fPreferredFrameSize" if less)
-    if (fLimitNumBytesToStream && fNumBytesToStream < (u_int64_t)fMaxSize) {
-        fMaxSize = (unsigned)fNumBytesToStream;
-    }
-    if (fPreferredFrameSize > 0 && fPreferredFrameSize < fMaxSize) {
-        fMaxSize = fPreferredFrameSize;
-    }
-
-    //fFrameSize = fread(fTo, 1, fMaxSize, fFid);
-
-    if (fFrameSize == 0) {
-        handleClosure();
-        return;
-    }
-    fNumBytesToStream -= fFrameSize;
 
 
-   gettimeofday(&fPresentationTime, NULL);
+
+    int bytesRead = imp_get_h264_frame(impBuffer);
+    memcpy(fTo, impBuffer, bytesRead);
+
+
+    gettimeofday(&fPresentationTime, NULL);
 
 
     // Inform the reader that he has data:

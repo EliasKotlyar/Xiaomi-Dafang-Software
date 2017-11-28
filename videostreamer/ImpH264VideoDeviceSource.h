@@ -5,6 +5,10 @@
 #ifndef DROPBEAR_DAFANG_IMPH264VIDEODEVICESOURCE_CPP_H
 #define DROPBEAR_DAFANG_IMPH264VIDEODEVICESOURCE_CPP_H
 
+#include "sample-encoder-jpeg.h"
+
+#define IMP_BUFFER_SIZE 200000
+
 
 #ifndef _FRAMED_FILE_SOURCE_HH
 #include "FramedFileSource.hh"
@@ -37,6 +41,7 @@ private:
     Boolean fHaveStartedReading;
     Boolean fLimitNumBytesToStream;
     u_int64_t fNumBytesToStream; // used iff "fLimitNumBytesToStream" is True
+    void *impBuffer;
 };
 
 #endif //DROPBEAR_DAFANG_IMPH264VIDEODEVICESOURCE_CPP_H
