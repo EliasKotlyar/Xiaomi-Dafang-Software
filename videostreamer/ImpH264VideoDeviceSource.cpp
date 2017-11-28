@@ -47,7 +47,10 @@ void ImpH264VideoDeviceSource::doGetNextFrame() {
 
 }
 
+void ImpH264VideoDeviceSource::doStopGettingFrames() {
+    envir().taskScheduler().unscheduleDelayedTask(nextTask());
 
+}
 
 void ImpH264VideoDeviceSource::doReadFromFile() {
     // Try to read as many bytes as will fit in the buffer provided (or "fPreferredFrameSize" if less)
