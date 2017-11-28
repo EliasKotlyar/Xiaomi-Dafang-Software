@@ -115,7 +115,7 @@ void afterPlaying(void* /*clientData*/) {
 void play() {
     // Open the input file as a 'byte-stream file source':
     ImpH264VideoDeviceSource* fileSource
-            = ImpH264VideoDeviceSource::createNew(*env, inputFileName);
+            = ImpH264VideoDeviceSource::createNew(*env);
     if (fileSource == NULL) {
         *env << "Unable to open file \"" << inputFileName
              << "\" as a byte-stream file source\n";
