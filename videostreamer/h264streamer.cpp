@@ -31,7 +31,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 UsageEnvironment* env;
 char const* inputFileName = "test.264";
-H264VideoStreamFramer* videoSource;
+H264VideoStreamDiscreteFramer* videoSource;
 RTPSink* videoSink;
 
 void play(); // forward
@@ -125,7 +125,7 @@ void play() {
     FramedSource* videoES = fileSource;
 
     // Create a framer for the Video Elementary Stream:
-    videoSource = H264VideoStreamFramer::createNew(*env, videoES);
+    videoSource = H264VideoStreamDiscreteFramer::createNew(*env, videoES);
 
     // Finally, start playing:
     *env << "Beginning to read from file...\n";
