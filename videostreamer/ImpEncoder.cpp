@@ -24,44 +24,57 @@
 #include <unistd.h>
 
 
-#include "sample-common.h"
-
+#include "impfuncs.h"
+#include "ImpEncoder.h"
+#include <stdexcept>
 #define TAG "Sample-Encoder-jpeg"
 
 extern struct chn_conf chn[];
 
-int imp_init(int mode) {
+
+
+
+
+
+
+
+void* ImpEncoder::getBuffer(){
+
+}
+
+
+
+
+ImpEncoder::ImpEncoder(int mode){
     int i, ret;
 
     /* Step.1 System init */
     ret = sample_system_init();
     if (ret < 0) {
-        IMP_LOG_ERR(TAG, "IMP_System_Init() failed\n");
-        return -1;
+        throw std::runtime_error("IMP_System_Init() failed\n");
     }
 
     /* Step.2 FrameSource init */
     ret = sample_framesource_init();
     if (ret < 0) {
-        IMP_LOG_ERR(TAG, "FrameSource init failed\n");
+        throw std::runtime_error( "FrameSource init failed\n");
         return -1;
     }
 
-    for (i = 0; i < FS_CHN_NUM; i++) {
-        if (chn[i].enable) {
-            ret = IMP_Encoder_CreateGroup(chn[i].index);
-            if (ret < 0) {
-                IMP_LOG_ERR(TAG, "IMP_Encoder_CreateGroup(%d) error !\n", i);
-                return -1;
+    if (chn[0].enable) {
+                ret = IMP_Encoder_CreateGroup(chn[0].index);
+                if (ret < 0) {
+                    throw std::runtime_error( "IMP_Encoder_CreateGroup(%d) error !\n", i);
+                    return -1;
+                }
             }
-        }
-    }
+
 
     if (mode == 1) {
         /* Step.3 Encoder init */
         ret = sample_jpeg_init();
         if (ret < 0) {
-            IMP_LOG_ERR(TAG, "Encoder JPEG init failed\n");
+            throw std::runtime_error( "Encoder JPEG init failed\n");
             return -1;
         }
 
@@ -69,28 +82,25 @@ int imp_init(int mode) {
         /* Step.3 Encoder init */
         ret = sample_encoder_init();
         if (ret < 0) {
-            IMP_LOG_ERR(TAG, "Encoder h264 init failed\n");
+            throw std::runtime_error( "Encoder h264 init failed\n");
             return -1;
         }
     }
 
 
-
-    /* Step.4 Bind */
-    for (i = 0; i < FS_CHN_NUM; i++) {
         if (chn[i].enable) {
             ret = IMP_System_Bind(&chn[i].framesource_chn, &chn[i].imp_encoder);
             if (ret < 0) {
-                IMP_LOG_ERR(TAG, "Bind FrameSource channel%d and Encoder failed\n", i);
+                throw std::runtime_error( sprintf("Bind FrameSource channel%d and Encoder failed\n", i));
                 return -1;
             }
         }
-    }
+
 
     /* Step.5 Stream On */
     ret = sample_framesource_streamon();
     if (ret < 0) {
-        IMP_LOG_ERR(TAG, "ImpStreamOn failed\n");
+        throw std::runtime_error( "ImpStreamOn failed\n");
         return -1;
     }
     /* drop several pictures of invalid data */
@@ -101,7 +111,7 @@ int imp_init(int mode) {
         if (chn[i].enable) {
             ret = IMP_Encoder_StartRecvPic(2 + chn[i].index);
             if (ret < 0) {
-                IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", 2 + chn[i].index);
+                throw std::runtime_error( "IMP_Encoder_StartRecvPic(%d) failed\n", 2 + chn[i].index);
                 return -1;
             }
 
@@ -115,25 +125,22 @@ int imp_init(int mode) {
 }
 
 
-int imp_shutdown() {
+ImpEncoder::~ImpEncoder(){
     int i, ret;
 
+
     /* Step.b UnBind */
-    for (i = 0; i < FS_CHN_NUM; i++) {
-        if (chn[i].enable) {
-            ret = IMP_Encoder_StopRecvPic(2 + chn[i].index);
+            ret = IMP_Encoder_StopRecvPic(2 + chn[0].index);
             if (ret < 0) {
-                IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
+                throw std::runtime_error( "IMP_Encoder_StopRecvPic() failed\n");
                 return -1;
             }
-        }
-    }
 
     /* Exit sequence as follow... */
     /* Step.a Stream Off */
     ret = sample_framesource_streamoff();
     if (ret < 0) {
-        IMP_LOG_ERR(TAG, "FrameSource StreamOff failed\n");
+        throw std::runtime_error( "FrameSource StreamOff failed\n");
         return -1;
     }
 
@@ -142,7 +149,7 @@ int imp_shutdown() {
         if (chn[i].enable) {
             ret = IMP_System_UnBind(&chn[i].framesource_chn, &chn[i].imp_encoder);
             if (ret < 0) {
-                IMP_LOG_ERR(TAG, "UnBind FrameSource channel%d and Encoder failed\n", i);
+                throw std::runtime_error( "UnBind FrameSource channel%d and Encoder failed\n", i);
                 return -1;
             }
         }
@@ -151,27 +158,27 @@ int imp_shutdown() {
     /* Step.c Encoder exit */
     ret = sample_encoder_exit();
     if (ret < 0) {
-        IMP_LOG_ERR(TAG, "Encoder exit failed\n");
+        throw std::runtime_error( "Encoder exit failed\n");
         return -1;
     }
 
     /* Step.d FrameSource exit */
     ret = sample_framesource_exit();
     if (ret < 0) {
-        IMP_LOG_ERR(TAG, "FrameSource exit failed\n");
+        throw std::runtime_error( "FrameSource exit failed\n");
         return -1;
     }
 
     /* Step.e System exit */
     ret = sample_system_exit();
     if (ret < 0) {
-        IMP_LOG_ERR(TAG, "sample_system_exit() failed\n");
+        throw std::runtime_error( "sample_system_exit() failed\n");
         return -1;
     }
 
 }
 
-int imp_get_jpeg(void *buffer) {
+int ImpEncoder::snap_jpeg(){
     int i, ret;
     char snap_path[64];
     int bytesRead = 0;
@@ -182,7 +189,7 @@ int imp_get_jpeg(void *buffer) {
             /* Polling JPEG Snap, set timeout as 1000msec */
             ret = IMP_Encoder_PollingStream(2 + chn[i].index, 100);
             if (ret < 0) {
-                IMP_LOG_ERR(TAG, "Polling stream timeout\n");
+                throw std::runtime_error( "Polling stream timeout\n");
                 continue;
             }
 
@@ -190,15 +197,15 @@ int imp_get_jpeg(void *buffer) {
             /* Get JPEG Snap */
             ret = IMP_Encoder_GetStream(chn[i].index + 2, &stream, 1);
             if (ret < 0) {
-                IMP_LOG_ERR(TAG, "IMP_Encoder_GetStream() failed\n");
+                throw std::runtime_error( "IMP_Encoder_GetStream() failed\n");
                 return -1;
             }
 
             ret = save_stream(buffer, &stream);
             bytesRead = ret;
-            //IMP_LOG_ERR(TAG, "Read %d bytes \n", ret);
+            //throw std::runtime_error( "Read %d bytes \n", ret);
             //extractHeader(buffer,ret);
-            //IMP_LOG_ERR(TAG, "JPEG saved!\n");
+            //throw std::runtime_error( "JPEG saved!\n");
             if (ret < 0) {
 
                 return -1;
@@ -215,7 +222,7 @@ int imp_get_jpeg(void *buffer) {
 
 int save_stream(void *buffer, IMPEncoderStream *stream) {
     int ret, i, nr_pack = stream->packCount;
-    //IMP_LOG_ERR(TAG, "Pack count: %d\n", nr_pack);
+    //throw std::runtime_error( "Pack count: %d\n", nr_pack);
 
     void *memoryAddress = buffer;
     int bytesRead = 0;
@@ -224,14 +231,14 @@ int save_stream(void *buffer, IMPEncoderStream *stream) {
         memcpy(memoryAddress, (void *) stream->pack[i].virAddr, stream->pack[i].length);
         memoryAddress = memoryAddress + stream->pack[i].length;
         bytesRead = bytesRead + stream->pack[i].length;
-        //IMP_LOG_ERR(TAG, "Pack Len: %d\n", packLen);
+        //throw std::runtime_error( "Pack Len: %d\n", packLen);
     }
 
     return bytesRead;
 }
 
 
-int imp_get_h264_frame(void *buffer) {
+int ImpEncoder::snap_h264(){
     int nr_frames = 1;
     int ret;
     int bytesRead = 0;
@@ -239,7 +246,7 @@ int imp_get_h264_frame(void *buffer) {
 
     ret = IMP_Encoder_StartRecvPic(ENC_H264_CHANNEL);
     if (ret < 0) {
-        IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", ENC_H264_CHANNEL);
+        throw std::runtime_error( "IMP_Encoder_StartRecvPic(%d) failed\n", ENC_H264_CHANNEL);
         return -1;
     }
 
@@ -250,7 +257,7 @@ int imp_get_h264_frame(void *buffer) {
         /* Polling H264 Stream, set timeout as 1000msec */
         ret = IMP_Encoder_PollingStream(ENC_H264_CHANNEL, 1000);
         if (ret < 0) {
-            IMP_LOG_ERR(TAG, "Polling stream timeout\n");
+            throw std::runtime_error( "Polling stream timeout\n");
             continue;
         }
 
@@ -258,7 +265,7 @@ int imp_get_h264_frame(void *buffer) {
         /* Get H264 Stream */
         ret = IMP_Encoder_GetStream(ENC_H264_CHANNEL, &stream, 1);
         if (ret < 0) {
-            IMP_LOG_ERR(TAG, "IMP_Encoder_GetStream() failed\n");
+            throw std::runtime_error( "IMP_Encoder_GetStream() failed\n");
             return -1;
         }
 
@@ -275,7 +282,7 @@ int imp_get_h264_frame(void *buffer) {
 
     ret = IMP_Encoder_StopRecvPic(ENC_H264_CHANNEL);
     if (ret < 0) {
-        IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
+        throw std::runtime_error( "IMP_Encoder_StopRecvPic() failed\n");
         return -1;
     }
 

@@ -40,7 +40,7 @@ all: $(ALL)
 	$(CPLUSPLUS_COMPILER) -c $(CPLUSPLUS_FLAGS) $<
 
 
-H264_VIDEO_STREAMER_OBJS = ImpJpegVideoDeviceSource.$(OBJ)  sample-encoder-jpeg.$(OBJ) sample-common.$(OBJ) JpegFrameParser.$(OBJ) ImpH264VideoDeviceSource.$(OBJ)
+H264_VIDEO_STREAMER_OBJS = ImpJpegVideoDeviceSource.$(OBJ) impfuncs.$(OBJ) ImpEncoder.$(OBJ) JpegFrameParser.$(OBJ) ImpH264VideoDeviceSource.$(OBJ)
 
 USAGE_ENVIRONMENT_DIR = $(LIVEMEDIAPATH)/UsageEnvironment
 USAGE_ENVIRONMENT_LIB = $(USAGE_ENVIRONMENT_DIR)/libUsageEnvironment.$(libUsageEnvironment_LIB_SUFFIX)
@@ -59,6 +59,9 @@ mJpegStreamer: 	mJpegStreamer.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LOCAL_LIBS)
 	$(LINK)$@ $(CONSOLE_LINK_OPTS) mJpegStreamer.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LIBS)
 
 h264streamer: 	h264streamer.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LOCAL_LIBS)
+	$(LINK)$@ $(CONSOLE_LINK_OPTS) h264streamer.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LIBS)
+
+jpegSnap: 	jpegSnap.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LOCAL_LIBS)
 	$(LINK)$@ $(CONSOLE_LINK_OPTS) h264streamer.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LIBS)
 
 clean:

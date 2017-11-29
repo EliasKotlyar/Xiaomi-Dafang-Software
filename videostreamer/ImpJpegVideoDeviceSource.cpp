@@ -18,7 +18,8 @@
 // Implementation
 
 #include "ImpJpegVideoDeviceSource.h"
-#include "sample-encoder-jpeg.h"
+#include "ImpEncoder.h"
+
 #include <fcntl.h>              /* low-level i/o */
 #include <unistd.h>
 #include <errno.h>
@@ -52,8 +53,8 @@ ImpJpegVideoDeviceSource::createNew(UsageEnvironment &env,
 #ifndef JPEG_TEST
 
 int ImpJpegVideoDeviceSource::initDevice(UsageEnvironment &env, int fd) {
-    imp_init(1);
-    impBuffer = malloc(IMP_BUFFER_SIZE);
+    impEncoder = new ImpEncoder(1);
+
 
     return 0;
 }
@@ -83,7 +84,7 @@ ImpJpegVideoDeviceSource::~ImpJpegVideoDeviceSource() {
 #ifdef JPEG_TEST
     delete [] jpeg_dat;
 #else
-    imp_shutdown();
+    delete impEncoder;
 #endif
 }
 
@@ -109,7 +110,7 @@ void ImpJpegVideoDeviceSource::doGetNextFrame() {
     framecount++;
     fPresentationTime = fLastCaptureTime;
 
-    int bytesRead = imp_get_jpeg(impBuffer);
+    int bytesRead = impEncoder->snap_jpeg();
 
     if (bytesRead > (int) fMaxSize) {
         fprintf(stderr,
@@ -118,7 +119,7 @@ void ImpJpegVideoDeviceSource::doGetNextFrame() {
     }
 
 
-    fFrameSize = jpeg_to_rtp(fTo, impBuffer, bytesRead);
+    fFrameSize = jpeg_to_rtp(fTo, impEncoder->getBuffer(), bytesRead);
 
 #endif // JPEG_TEST
     // Switch to another task, and inform the reader that he has data:

@@ -23,7 +23,7 @@
 #include <imp/imp_osd.h>
 
 
-#include "sample-common.h"
+#include "impfuncs.h"
 
 #define TAG "Sample-Common"
 

@@ -28,7 +28,7 @@
 #define MAX_JPEG_FILE_SZ 100000
 
 #define IMP_BUFFER_SIZE 200000
-
+#include "ImpEncoder.h"
 
 class DeviceException : public std::exception {
 
@@ -89,7 +89,7 @@ private:
     size_t jpeg_datlen;
 #endif
 
-    void *impBuffer;
+    ImpEncoder* impEncoder;
 
 };
 
