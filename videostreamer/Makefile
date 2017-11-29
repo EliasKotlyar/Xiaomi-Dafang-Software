@@ -62,7 +62,7 @@ h264streamer: 	h264streamer.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LOCAL_LIBS)
 	$(LINK)$@ $(CONSOLE_LINK_OPTS) h264streamer.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LIBS)
 
 jpegSnap: 	jpegSnap.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LOCAL_LIBS)
-	$(LINK)$@ $(CONSOLE_LINK_OPTS) h264streamer.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LIBS)
+	$(LINK)$@ $(CONSOLE_LINK_OPTS) jpegSnap.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LIBS)
 
 clean:
 	-rm -rf *.$(OBJ) $(ALL) core *.core *~ include/*~
