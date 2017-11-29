@@ -24,22 +24,21 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 ////////// ImpH264VideoDeviceSource //////////
 
-ImpH264VideoDeviceSource*
-ImpH264VideoDeviceSource::createNew(UsageEnvironment& env) {
-    ImpH264VideoDeviceSource* newSource
+ImpH264VideoDeviceSource *
+ImpH264VideoDeviceSource::createNew(UsageEnvironment &env) {
+    ImpH264VideoDeviceSource *newSource
             = new ImpH264VideoDeviceSource(env);
     return newSource;
 }
 
-ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment& env)
+ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment &env)
         : FramedSource(env) {
-        imp_init(2);
-        impBuffer = malloc(IMP_BUFFER_SIZE);
+    impEncoder = new ImpEncoder(2);
 
 }
 
 ImpH264VideoDeviceSource::~ImpH264VideoDeviceSource() {
-    imp_shutdown();
+    delete impEncoder;
 }
 
 void ImpH264VideoDeviceSource::doGetNextFrame() {
@@ -57,15 +56,14 @@ void ImpH264VideoDeviceSource::doStopGettingFrames() {
 void ImpH264VideoDeviceSource::doReadFromFile() {
 
 
-
-    int bytesRead = imp_get_h264_frame(impBuffer);
+    int bytesRead = impEncoder->snap_h264();
 
     if (bytesRead > (int) fMaxSize) {
         fprintf(stderr,
                 "WebcamJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n",
                 fMaxSize);
     }
-    memcpy(fTo, impBuffer, bytesRead);
+    memcpy(fTo, impEncoder->getBuffer(), bytesRead);
 
 
     gettimeofday(&fPresentationTime, NULL);
@@ -73,7 +71,7 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
 
     // Inform the reader that he has data:
     // To avoid possible infinite recursion, we need to return to the event loop to do this:
-  nextTask() = envir().taskScheduler().scheduleDelayedTask(0,
-				(TaskFunc*)FramedSource::afterGetting, this);
+    nextTask() = envir().taskScheduler().scheduleDelayedTask(0,
+                                                             (TaskFunc *) FramedSource::afterGetting, this);
 
 }
