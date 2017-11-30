@@ -57,9 +57,7 @@ void setMovement(int direction,int steps){
         motor_move.motor_directional = direction;
         motor_move.motor_move_speed = 1000;
         motor_move.motor_move_steps = steps;
-        void* buffer = malloc(sizeof(motor_move_st));
-        memcpy(buffer,&motor_move, sizeof(motor_move_st));
-        sendCommand(MOTOR_MOVE,buffer);
+        sendCommand(MOTOR_MOVE,&motor_move);
     }
 
 }
@@ -95,17 +93,17 @@ void getStatus(){
 int main() {
 
 
-    reset();
-    setStop();
-    getStatus();
+    //reset();
+    //setStop();
+    //getStatus();
     //setSpeed(900);
-    //setMovement(MOTOR_DIRECTIONAL_LEFT,30);
-    //sleep(1);
-    //setMovement(MOTOR_DIRECTIONAL_RIGHT,30);
+    setMovement(MOTOR_DIRECTIONAL_LEFT,300);
+    sleep(1);
+    setMovement(MOTOR_DIRECTIONAL_RIGHT,300);
     //sleep(1);
     //setMovement(MOTOR_DIRECTIONAL_UP,30);
     //sleep(1);
-    setMovement(MOTOR_DIRECTIONAL_DOWN,30);
+    //setMovement(MOTOR_DIRECTIONAL_DOWN,30);
 
     return 0;
 }
