@@ -93,7 +93,8 @@ int sample_system_init() {
     memcpy(sensor_info.i2c.type, SENSOR_NAME, sizeof(SENSOR_NAME));
     sensor_info.i2c.addr = SENSOR_I2C_ADDR;
 
-    IMP_LOG_DBG(TAG, "sample_system_init start\n");
+    IMP_LOG_ERR(TAG, "Imp Log %d\n",IMP_Log_Get_Option());
+    //IMP_Log_Set_Option()
 
     ret = IMP_ISP_Open();
     if (ret < 0) {
@@ -114,11 +115,15 @@ int sample_system_init() {
         return -1;
     }
 
+
     ret = IMP_System_Init();
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_System_Init failed\n");
         return -1;
     }
+
+
+
 
     /* enable turning, to debug graphics */
 
@@ -136,7 +141,9 @@ int sample_system_init() {
     }
 
 
-    IMP_LOG_DBG(TAG, "ImpSystemInit success\n");
+
+
+    //IMP_LOG_ERR(TAG, "ImpSystemInit success\n");
 
     return 0;
 }
@@ -144,7 +151,7 @@ int sample_system_init() {
 int sample_system_exit() {
     int ret = 0;
 
-    IMP_LOG_DBG(TAG, "sample_system_exit start\n");
+    IMP_LOG_ERR(TAG, "sample_system_exit start\n");
 
 
     IMP_System_Exit();
@@ -172,12 +179,20 @@ int sample_system_exit() {
         return -1;
     }
 
-    IMP_LOG_DBG(TAG, " sample_system_exit success\n");
+    IMP_LOG_ERR(TAG, " sample_system_exit success\n");
 
     return 0;
 }
 
 int sample_framesource_streamon() {
+
+    int out_pipe[2];
+    int saved_stdout;
+    saved_stdout = dup(STDOUT_FILENO);
+    pipe(out_pipe);
+    dup2(out_pipe[1], STDOUT_FILENO);
+
+
     int ret = 0, i = 0;
     /* Enable channels */
     for (i = 0; i < FS_CHN_NUM; i++) {
@@ -189,7 +204,9 @@ int sample_framesource_streamon() {
             }
         }
     }
+    fflush(stdout);
 
+    dup2(saved_stdout, STDOUT_FILENO);
     return 0;
 }
 

@@ -39,6 +39,7 @@ void *ImpEncoder::getBuffer() {
 
 ImpEncoder::ImpEncoder(int mode) {
     int  ret;
+    int i;
 
     buffer = malloc(IMP_BUFFER_SIZE);
 
@@ -54,6 +55,8 @@ ImpEncoder::ImpEncoder(int mode) {
         IMP_LOG_ERR(TAG, "FrameSource init failed\n");
 
     }
+
+
 
     if (chn[0].enable) {
         ret = IMP_Encoder_CreateGroup(chn[0].index);
@@ -82,10 +85,15 @@ ImpEncoder::ImpEncoder(int mode) {
     }
 
 
-    ret = IMP_System_Bind(&chn[0].framesource_chn, &chn[0].imp_encoder);
-    if (ret < 0) {
-        IMP_LOG_ERR(TAG, "Bind FrameSource channel%d and Encoder failed\n", 0);
 
+    /* Step.4 Bind */
+    for (i = 0; i < FS_CHN_NUM; i++) {
+        if (chn[i].enable) {
+            ret = IMP_System_Bind(&chn[i].framesource_chn, &chn[i].imp_encoder);
+            if (ret < 0) {
+                IMP_LOG_ERR(TAG, "Bind FrameSource channel%d and Encoder failed\n", i);
+            }
+        }
     }
 
 
@@ -95,22 +103,21 @@ ImpEncoder::ImpEncoder(int mode) {
         IMP_LOG_ERR(TAG, "ImpStreamOn failed\n");
 
     }
+    //exit(0);
+
     /* drop several pictures of invalid data */
     sleep(SLEEP_TIME);
 
-/*
     for (i = 0; i < FS_CHN_NUM; i++) {
         if (chn[i].enable) {
             ret = IMP_Encoder_StartRecvPic(2 + chn[i].index);
             if (ret < 0) {
-                 IMP_LOG_ERR(TAG,  "IMP_Encoder_StartRecvPic(%d) failed\n", 2 + chn[i].index);
-                return -1;
+                IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", 2 + chn[i].index);
             }
 
 
         }
     }
-    */
 
 
 }
