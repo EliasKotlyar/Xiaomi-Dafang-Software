@@ -31,8 +31,6 @@ EXE =
 
 
 PREFIX = /usr/local
-ALL = testH264VideoStreamer
-all: $(ALL)
 
 .$(C).$(OBJ):
 	$(C_COMPILER) -c $(C_FLAGS) $<
@@ -54,6 +52,8 @@ LOCAL_LIBS =	$(LIVEMEDIA_LIB) $(GROUPSOCK_LIB) \
 		$(BASIC_USAGE_ENVIRONMENT_LIB) $(USAGE_ENVIRONMENT_LIB)
 LIBS =			$(LOCAL_LIBS) $(LIBS_FOR_CONSOLE_APPLICATION) $(SDK_LIB_DIR)/libimp.so $(SDK_LIB_DIR)/libalog.so -lpthread -lm -lrt
 
+all: mJpegStreamer h264streamer jpegSnap h264Snap
+
 
 mJpegStreamer: 	mJpegStreamer.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LOCAL_LIBS)
 	$(LINK)$@ $(CONSOLE_LINK_OPTS) mJpegStreamer.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LIBS)
@@ -63,6 +63,9 @@ h264streamer: 	h264streamer.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LOCAL_LIBS)
 
 jpegSnap: 	jpegSnap.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LOCAL_LIBS)
 	$(LINK)$@ $(CONSOLE_LINK_OPTS) jpegSnap.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LIBS)
+
+h264Snap: 	h264Snap.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LOCAL_LIBS)
+	$(LINK)$@ $(CONSOLE_LINK_OPTS) h264Snap.$(OBJ) $(H264_VIDEO_STREAMER_OBJS) $(LIBS)
 
 clean:
 	-rm -rf *.$(OBJ) $(ALL) core *.core *~ include/*~
