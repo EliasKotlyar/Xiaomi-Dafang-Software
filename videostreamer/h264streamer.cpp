@@ -30,7 +30,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "ImpH264VideoDeviceSource.h"
 
 UsageEnvironment* env;
-char const* inputFileName = "test.264";
+char const* inputFileName = "stdin";
 H264VideoStreamFramer* videoSource;
 RTPSink* videoSink;
 
@@ -114,8 +114,14 @@ void afterPlaying(void* /*clientData*/) {
 
 void play() {
     // Open the input file as a 'byte-stream file source':
-    ImpH264VideoDeviceSource* fileSource
-            = ImpH264VideoDeviceSource::createNew(*env);
+    /*ImpH264VideoDeviceSource* fileSource
+            = ImpH264VideoDeviceSource::createNew(*env);*/
+
+    // Open the input file as a 'byte-stream file source':
+    ByteStreamFileSource* fileSource
+            = ByteStreamFileSource::createNew(*env, inputFileName);
+
+
     if (fileSource == NULL) {
         *env << "Unable to open file \"" << inputFileName
              << "\" as a byte-stream file source\n";
