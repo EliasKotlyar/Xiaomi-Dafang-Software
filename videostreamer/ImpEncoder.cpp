@@ -108,15 +108,24 @@ ImpEncoder::ImpEncoder(int mode) {
     /* drop several pictures of invalid data */
     sleep(SLEEP_TIME);
 
-    for (i = 0; i < FS_CHN_NUM; i++) {
-        if (chn[i].enable) {
-            ret = IMP_Encoder_StartRecvPic(2 + chn[i].index);
-            if (ret < 0) {
-                IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", 2 + chn[i].index);
+    if (mode == 1) {
+        for (i = 0; i < FS_CHN_NUM; i++) {
+            if (chn[i].enable) {
+                ret = IMP_Encoder_StartRecvPic(2 + chn[i].index);
+                if (ret < 0) {
+                    IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", 2 + chn[i].index);
+                }
+
+
             }
-
-
         }
+
+    }else{
+        ret = IMP_Encoder_StartRecvPic(ENC_H264_CHANNEL);
+        if (ret < 0) {
+            IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", ENC_H264_CHANNEL);
+        }
+
     }
 
 
@@ -126,13 +135,26 @@ ImpEncoder::ImpEncoder(int mode) {
 ImpEncoder::~ImpEncoder() {
     int i, ret;
 
+    int mode = 2;
+    if (mode == 1) {
+        /* Step.b UnBind */
+        ret = IMP_Encoder_StopRecvPic(2 + chn[0].index);
+        if (ret < 0) {
+            IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
 
-    /* Step.b UnBind */
-    ret = IMP_Encoder_StopRecvPic(2 + chn[0].index);
-    if (ret < 0) {
-        IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
+        }
+    }else{
+        ret = IMP_Encoder_StopRecvPic(ENC_H264_CHANNEL);
+        if (ret < 0) {
+            IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
+
+        }
 
     }
+
+
+
+
 
     /* Exit sequence as follow... */
     /* Step.a Stream Off */
@@ -241,11 +263,6 @@ int ImpEncoder::snap_h264() {
     int bytesRead = 0;
     /* H264 Channel start receive picture */
 
-    ret = IMP_Encoder_StartRecvPic(ENC_H264_CHANNEL);
-    if (ret < 0) {
-        IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", ENC_H264_CHANNEL);
-        return -1;
-    }
 
 
     int i;
@@ -275,11 +292,6 @@ int ImpEncoder::snap_h264() {
     }
 
 
-    ret = IMP_Encoder_StopRecvPic(ENC_H264_CHANNEL);
-    if (ret < 0) {
-        IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
-        return -1;
-    }
 
 
     return bytesRead;
