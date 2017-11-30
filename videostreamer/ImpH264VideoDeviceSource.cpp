@@ -64,7 +64,7 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
                 fMaxSize);
     }
     memcpy(fTo, impEncoder->getBuffer(), bytesRead);
-
+    fFrameSize = bytesRead;
 
     gettimeofday(&fPresentationTime, NULL);
 
