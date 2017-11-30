@@ -3,7 +3,7 @@
 int main() {
 
 
-    ImpEncoder* impEncoder = new ImpEncoder(1);
+    ImpEncoder* impEncoder = new ImpEncoder(IMP_MODE_JPEG,1920,1080);
     int bytesRead = impEncoder->snap_jpeg();
     void* buffer = impEncoder->getBuffer();
 

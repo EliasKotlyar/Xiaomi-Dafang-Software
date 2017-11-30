@@ -37,14 +37,17 @@ void *ImpEncoder::getBuffer() {
 }
 
 
-ImpEncoder::ImpEncoder(int mode) {
+ImpEncoder::ImpEncoder(int mode,int width,int height) {
+
+
+    encoderMode = mode;
     int  ret;
     int i;
 
     buffer = malloc(IMP_BUFFER_SIZE);
 
     /* Step.1 System init */
-    ret = sample_system_init();
+    ret = sample_system_init(width,height);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_System_Init() failed\n");
     }
@@ -67,7 +70,7 @@ ImpEncoder::ImpEncoder(int mode) {
     }
 
 
-    if (mode == 1) {
+    if (encoderMode == IMP_MODE_JPEG) {
         /* Step.3 Encoder init */
         ret = sample_jpeg_init();
         if (ret < 0) {
@@ -108,7 +111,7 @@ ImpEncoder::ImpEncoder(int mode) {
     /* drop several pictures of invalid data */
     sleep(SLEEP_TIME);
 
-    if (mode == 1) {
+    if (encoderMode == IMP_MODE_JPEG) {
         for (i = 0; i < FS_CHN_NUM; i++) {
             if (chn[i].enable) {
                 ret = IMP_Encoder_StartRecvPic(2 + chn[i].index);
@@ -135,8 +138,7 @@ ImpEncoder::ImpEncoder(int mode) {
 ImpEncoder::~ImpEncoder() {
     int i, ret;
 
-    int mode = 2;
-    if (mode == 1) {
+    if (encoderMode == IMP_MODE_JPEG) {
         /* Step.b UnBind */
         ret = IMP_Encoder_StopRecvPic(2 + chn[0].index);
         if (ret < 0) {

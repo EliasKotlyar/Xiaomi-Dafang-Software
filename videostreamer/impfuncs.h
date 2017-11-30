@@ -27,8 +27,8 @@ extern "C"
 #define SENSOR_NAME                "jxf22"
 #define SENSOR_CUBS_TYPE        TX_SENSOR_CONTROL_INTERFACE_I2C
 #define SENSOR_I2C_ADDR            0x40
-#define SENSOR_WIDTH            640
-#define SENSOR_HEIGHT            480
+#define SENSOR_WIDTH            320
+#define SENSOR_HEIGHT            240
 #define CHN0_EN                 1
 #define CHN1_EN                 1
 #define CROP_EN                    1
@@ -74,7 +74,7 @@ struct chn_conf {
 
 #define  CHN_NUM  ARRAY_SIZE(chn)
 
-int sample_system_init();
+int sample_system_init(int, int);
 
 int sample_system_exit();
 

@@ -33,7 +33,7 @@ ImpH264VideoDeviceSource::createNew(UsageEnvironment &env) {
 
 ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment &env)
         : FramedSource(env) {
-    impEncoder = new ImpEncoder(2);
+    impEncoder = new ImpEncoder(IMP_MODE_H264,320,240);
 
 }
 
