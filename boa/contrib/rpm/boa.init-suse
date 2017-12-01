@@ -1,0 +1,127 @@
+#! /bin/sh
+#
+# Portions Copyright (c) 2003 SuSE Linux AG
+# Original Author: Peter Poeml <poeml@suse.de>
+#
+# Based on the init script for OpenVPN
+#
+### BEGIN INIT INFO
+# Provides:			boa
+# Required-Start:		$local_fs $remote_fs $network
+# Required-Stop:		$local_fs $remote_fs $network
+# Default-Start:		3 5
+# Default-Stop:			0 1 2 6
+# Short-Description:		Boa httpd
+# Description:			Start Boa httpd
+### END INIT INFO
+
+
+DAEMON="Boa"
+boa=/usr/sbin/boa
+#piddir=/var/run
+
+test -x $boa || exit 5
+
+# Shell functions sourced from /etc/rc.status:
+#      rc_check 	check and set local and overall rc status
+#      rc_status	check and set local and overall rc status
+#      rc_status -v	ditto but be verbose in local rc status
+#      rc_status -v -r	ditto and clear the local rc status
+#      rc_failed	set local and overall rc status to failed
+#      rc_failed <num>	set local and overall rc status to <num><num>
+#      rc_reset 	clear local rc status (overall remains)
+#      rc_exit		exit appropriate to overall rc status
+. /etc/rc.status
+
+# First reset status of this service
+rc_reset
+
+# Return values acc. to LSB for all commands but status:
+# 0 - success
+# 1 - generic or unspecified error
+# 2 - invalid or excess argument(s)
+# 3 - unimplemented feature (e.g. "reload")
+# 4 - insufficient privilege
+# 5 - program is not installed
+# 6 - program is not configured
+# 7 - program is not running
+# 
+# Note that starting an already running service, stopping
+# or restarting a not-running service as well as the restart
+# with force-reload (in case signalling is not supported) are
+# considered a success.
+
+shopt -s nullglob
+ret=true
+
+case "$1" in
+    start)
+	echo -n "Starting $DAEMON "
+
+	$boa || ret=false
+
+	# Remember status and be verbose
+	$ret
+	rc_status -v
+	;;
+    stop)
+	echo -n "Shutting down $DAEMON "
+
+	## Stop daemon with killproc(8) and if this fails
+	## set echo the echo return value.
+	killproc -TERM $boa || ret=false
+
+	# Remember status and be verbose
+	$ret
+	rc_status -v
+	;;
+    try-restart)
+	## Do a restart only if the service was active before.
+	## Note: try-restart is now part of LSB (as of 1.9).
+	## RH has a similar command named condrestart.
+	$0 status
+	if test $? = 0; then
+		$0 restart
+	else
+		rc_reset	# Not running is not a failure.
+	fi
+	# Remember status and be quiet
+	rc_status
+	;;
+    restart)
+	## Stop the service and regardless of whether it was
+	## running or not, start it again.
+	$0 stop
+	sleep 3
+	$0 start
+
+	# Remember status and be quiet
+	rc_status
+	;;
+    reload)
+	killproc -HUP $boa || ret=false
+	rc_status -v
+	;;
+    reopen)
+	killproc -USR1 $boa || ret=false
+	rc_status -v
+	;;
+#    status)
+#	echo -n "Checking for $DAEMON: "
+#	running=false
+#	running=true
+#	killproc -p $i -USR2 $boa || { rv=$?; ret=false; }
+#	if $running; then
+#		$ret
+#		rc_status -v
+#		echo Status written to /var/log/messages
+#	else
+#		rc_failed 3
+#		rc_status -v
+#	fi
+#	;;
+    *)
+	echo "Usage: $0 {start|stop|status|try-restart|restart|reload|reopen}"
+	exit 1
+esac
+rc_exit

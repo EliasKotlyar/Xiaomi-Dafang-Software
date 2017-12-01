@@ -1,0 +1,45 @@
+#!/bin/sh
+# The following two lines enable chkconfig(1) to manipulate this script
+# chkconfig: 345 87 13
+# description: Boa is a World Wide Web server.  It is used to serve \
+#              HTML files and CGI.
+# processname: boa
+# config: /etc/boa/boa.conf
+#  There is no pid file
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# See how we were called.
+case "$1" in
+  start)
+	echo -n "Starting boa: "
+	daemon boa
+	touch /var/lock/subsys/boa
+	echo
+	;;
+  stop)
+	echo -n "Shutting down boa: "
+	killproc boa
+	echo
+	rm -f /var/lock/subsys/boa
+	rm -f /var/run/boa.pid
+	;;
+  status)
+	status boa
+	;;
+  restart)
+	$0 stop
+	$0 start
+	;;
+  reload)
+	echo -n "Reloading boa: "
+	killproc boa -HUP
+	echo
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|reload|status}"
+	exit 1
+esac
+
+exit 0

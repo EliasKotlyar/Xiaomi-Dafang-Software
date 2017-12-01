@@ -1,0 +1,158 @@
+Boa chroot mini-HOWTO 
+===================================================
+by Liam Widdowson <lbw@telstra.com>
+modified slightly by Jon Nelson <jnelson@boa.org>
+
+The following is required to get Boa working in a chroot jail. Whilst this
+README is about Solaris specifically, the principals here will apply to
+other operating systems.
+
+The following assumptions are made:
+
+	- Boa has been compiled and installed in /opt/boa
+	- The chroot jail will be created in /var/www
+	- A user and group 'www' have been created.
+
+Make sure you change the above directories to suit your system.
+
+Your boa.conf should look something like the following:
+
+## begin config file
+
+Port 80
+User www
+Group www
+
+# Note, these paths are used releative to the chroot jail. i.e /var/log is
+# really /var/www/var/log
+ErrorLog /var/log/error_log
+AccessLog /var/log/access_log
+DocumentRoot /var/www
+
+# You won't be able to access user home directories outside of the chroot
+# but you may replicate them into the chroot jail. You'll need a working
+# and valid /etc/passwd as well
+UserDir public_html
+
+DirectoryIndex index.html
+
+# this binary must exist in the chroot jail. Again, the path is relative.
+DirectoryMaker /usr/bin/boa_indexer
+
+KeepAliveMax 1000
+KeepAliveTimeout 10
+
+# this file must exist inside AND outside the chroot jail. 
+MimeTypes /opt/boa/mime.types
+
+DefaultType text/plain
+
+## end config file
+
+Once the configuration file is created, you must begin creating your
+chroot jail. A variety of libraries, timezone files, device files and other 
+bits and pieces must be copied in order for this to work. Below is a ls -lR 
+of what your jail should be at a minimum:
+
+.:
+total 10
+drwxr-xr-x   2 root     other        512 Jan 21 18:58 dev
+drwxr-xr-x   2 root     other        512 Jan 21 19:20 etc
+drwxr-xr-x   3 root     other        512 Jan 21 19:20 opt
+drwxr-xr-x   5 root     other        512 Jan 21 19:08 usr
+drwxr-xr-x   4 root     other        512 Jan 21 18:57 var
+
+./dev:
+total 0
+crw-rw-rw-   1 root     other     13,  2 Jan 21 18:58 null
+crw-rw-rw-   1 root     other     41,  0 Jan 21 18:58 udp
+
+./etc:
+total 16
+-r-xr-xr-x   1 root     other        482 Jan 21 19:20 TIMEZONE
+-r--r--r--   1 root     other         74 Jan 21 19:20 hosts
+-rw-r--r--   1 root     other       1239 Jan 21 19:20 netconfig
+-rw-r--r--   1 root     other       1298 Jan 21 19:20 nsswitch.conf
+-r--r--r--   1 root     other        514 Jan 21 19:44 passwd
+-rw-r--r--   1 root     other         94 Jan 21 19:20 resolv.conf
+drwx------   2 root     other        512 Jan 21 19:20 boa
+
+./boa:
+total 4
+-rw-r--r--   1 root     other       1234 Jan 21 19:26 boa.conf
+
+./opt:
+total 2
+drwxr-xr-x   2 root     other        512 Jan 21 19:26 boa
+
+./opt/boa:
+total 20
+-rw-r--r--   1 root     other       9964 Jan 21 19:26 mime.types
+
+./usr:
+total 6
+drwxr-xr-x   2 root     other        512 Jan 21 19:21 bin
+drwxr-xr-x   2 root     other        512 Jan 21 19:03 lib
+drwxr-xr-x   3 root     other        512 Jan 21 19:08 share
+
+./usr/bin:
+total 18
+-rwxr-xr-x   1 root     other       8944 Jan 21 19:23 boa_indexer
+
+./usr/lib:
+total 5094
+-rwxr-xr-x   1 root     other     185020 Jan 21 19:03 ld.so.1
+-rwxr-xr-x   1 root     other    1126652 Jan 21 18:56 libc.so.1
+-rwxr-xr-x   1 root     other       4308 Jan 21 18:56 libdl.so.1
+-rwxr-xr-x   1 root     other      24968 Jan 21 18:56 libmp.so.2
+-rwxr-xr-x   1 root     other     883500 Jan 21 18:56 libnsl.so.1
+-rwxr-xr-x   1 root     other     265860 Jan 21 18:56 libresolv.so.2
+-rwxr-xr-x   1 root     other      70260 Jan 21 18:56 libsocket.so.1
+
+./usr/share:
+total 2
+drwxr-xr-x   3 root     other        512 Jan 21 19:08 lib
+
+./usr/share/lib:
+total 2
+drwxr-xr-x   3 root     other        512 Jan 21 19:08 zoneinfo
+
+./usr/share/lib/zoneinfo:
+total 2
+drwxr-xr-x   2 root     other        512 Jan 21 19:09 Australia
+
+./usr/share/lib/zoneinfo/Australia:
+total 22
+-rw-r--r--   1 root     other        785 Jan 21 19:09 ACT
+-rw-r--r--   1 root     other        785 Jan 21 19:09 Broken_Hill
+-rw-r--r--   1 root     other        663 Jan 21 19:09 LHI
+-rw-r--r--   1 root     other        785 Jan 21 19:09 NSW
+-rw-r--r--   1 root     other        104 Jan 21 19:09 North
+-rw-r--r--   1 root     other        160 Jan 21 19:09 Queensland
+-rw-r--r--   1 root     other        785 Jan 21 19:09 South
+-rw-r--r--   1 root     other        825 Jan 21 19:09 Tasmania
+-rw-r--r--   1 root     other        785 Jan 21 19:09 Victoria
+-rw-r--r--   1 root     other        150 Jan 21 19:09 West
+-rw-r--r--   1 root     other        785 Jan 21 19:09 Yancowinna
+
+./var:
+total 4
+drwxr-xr-x   2 www      www          512 Jan 21 19:44 log
+drwxr-xr-x   2 root     other        512 Jan 21 18:57 www
+
+./var/log:
+total 4
+-rw-r--r--   1 root     other        202 Jan 21 19:47 access_log
+-rw-r--r--   1 root     other        590 Jan 21 19:49 error_log
+
+./var/www:
+total 0
+
+Note, your boa binary should be kept outside of the chroot jail as 
+they are not required. 
+
+The commandline issued to boa requires "-r /var/www" which tells
+boa to chroot to /var/www before it does anything else, including
+reading its configuration file.
+
+That's all that's required. Start your new chrooting boa up and enjoy!

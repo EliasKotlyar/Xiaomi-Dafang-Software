@@ -1,0 +1,15 @@
+This is Boa, a high performance web server for Unix-alike computers,
+covered by the Gnu General Public License.  This is version 0.94,
+released January 2000.  It is well tested and appears to be of
+at least "gamma" quality.
+
+Boa was created in 1991 by Paul Phillips <paulp@go2net.com>.  It is now being
+maintained and enhanced by Larry Doolittle <ldoolitt@boa.org>
+and Jon Nelson <jnelson@boa.org>.
+
+For more information (including installation instructions) examine
+the file docs/boa.txt or docs/boa.dvi, point your web browser to docs/boa.html,
+or visit the Boa homepage at
+
+        http://www.boa.org/
+

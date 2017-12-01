@@ -1,0 +1,6 @@
+/var/log/boa/*_log {
+  weekly
+  compress
+  copytruncate
+  missingok
+}

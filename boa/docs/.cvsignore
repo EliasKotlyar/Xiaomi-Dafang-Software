@@ -1,0 +1,6 @@
+Makefile
+*.xml
+*.html
+*.txt
+*.dvi
+*.info

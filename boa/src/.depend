@@ -1,0 +1,31 @@
+alias.o: alias.c boa.h compat.h config.h defines.h globals.h escape.h
+boa.o: boa.c boa.h compat.h config.h defines.h globals.h escape.h
+buffer.o: buffer.c boa.h compat.h config.h defines.h globals.h escape.h
+cgi.o: cgi.c boa.h compat.h config.h defines.h globals.h escape.h
+cgi_header.o: cgi_header.c boa.h compat.h config.h defines.h globals.h \
+  escape.h
+config.o: config.c boa.h compat.h config.h defines.h globals.h escape.h \
+  access.h
+escape.o: escape.c boa.h compat.h config.h defines.h globals.h escape.h
+get.o: get.c boa.h compat.h config.h defines.h globals.h escape.h \
+  access.h
+hash.o: hash.c boa.h compat.h config.h defines.h globals.h escape.h
+ip.o: ip.c boa.h compat.h config.h defines.h globals.h escape.h
+log.o: log.c boa.h compat.h config.h defines.h globals.h escape.h
+mmap_cache.o: mmap_cache.c boa.h compat.h config.h defines.h globals.h \
+  escape.h
+pipe.o: pipe.c boa.h compat.h config.h defines.h globals.h escape.h
+queue.o: queue.c boa.h compat.h config.h defines.h globals.h escape.h
+range.o: range.c boa.h compat.h config.h defines.h globals.h escape.h
+read.o: read.c boa.h compat.h config.h defines.h globals.h escape.h
+request.o: request.c boa.h compat.h config.h defines.h globals.h escape.h
+response.o: response.c boa.h compat.h config.h defines.h globals.h \
+  escape.h
+signals.o: signals.c boa.h compat.h config.h defines.h globals.h escape.h
+util.o: util.c boa.h compat.h config.h defines.h globals.h escape.h
+sublog.o: sublog.c compat.h config.h
+select.o: select.c boa.h compat.h config.h defines.h globals.h escape.h
+select.o: select.c boa.h compat.h config.h defines.h globals.h escape.h
+poll.o: poll.c boa.h compat.h config.h defines.h globals.h escape.h
+access.o: access.c boa.h compat.h config.h defines.h globals.h escape.h \
+  access.h

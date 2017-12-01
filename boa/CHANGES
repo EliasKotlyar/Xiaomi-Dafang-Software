@@ -1,0 +1,712 @@
+** Changes from 0.94.13 to 0.94.14
+ * SUBSTANTIALLY UPDATE AUTOCONF SYSTEM
+   - all of the autoconf stuff is now located in the top level
+     directory, and creates the appropriate Makefiles for building
+     the system and documentation.
+ * add [optional, Linux-only] check for sendfile system call
+ * add new state, IOSHUFFLE, which utilizes sendfile (or
+   emulates it using the request's buffer, otherwise)
+ * make the default socket size 32K.  The client_stream_size stays constant
+   at 8K, and the new 'buffer' size is 4K
+   Note also that the new code uses the "default" socket buffer size
+   it obtains with the first accept()ed socket.
+ * use setjmp, instead of sigsetjmp (we dont mess with the signal mask
+   so why bother!  it's one less syscall)
+ * explicitly set pending_requests to 0 in select.c when sigterm_flag has
+   been set, and also when the server socket is *not* set despite checking
+   for it.
+ * make default behavior be to leave stderr alone, but tie it
+   to cgilog otherwise
+ * add initial vhost_root support
+ * remove support for normalize_path
+ * use --disable-sendfile to disable sendfile support
+   sendfile support for files > 100K is default, now.
+   It's significantly faster and easier than the alternative
+ * add "Host" header support to CGI environment
+ * umask ~0770 before exec
+ * backport hash.c from 0.95 and use fnv1a hash (see CREDITS)
+ * don't set stderr close-on-exec
+ * make some minor for very useful optimizations in the read/write
+   loop for CGIs
+ * make some adjustments for Solaris and other platforms
+ * add yyerror function definition to boa_lexer.l
+ * tie stdout to the access_log, unless there is no access_log,
+   in which case tie it to /dev/null
+ * use sensible defaults for umask (077) and (027 for CGI)
+ * add and document new parameters (CGILog and CGIumask)
+ * vast improvements to the cgi-test.cgi program, by Jon Nelson
+   and Landon Curt Noll.
+ * next 3 items by Don Mahurin (patches modified somewhat):
+ * pidfile patch
+ * default mime_types patch
+ * NCSA environment environment variables wrapped in
+   #ifdef USE_NCSA_CGI_ENV
+ * fix some escaping issues with the directory indexer
+   (Ulf Harnhammar)
+ * poll or select available at compile time
+ * as of 0.94.14rc2 through 0.94.14rc3:
+ * remove support for lex/yacc (backported from 0.95)
+ * add conditional support for http/1.1
+ * as of 0.94.14rc4:
+ * replace many #defines with enumerations
+ * update specfile (thanks to Supreet Sethi via SourceForge)
+ * support optional config file name argument
+ * tentatively support Ranges
+ * as of 0.94.14rc5 through 0.94.14rc7:
+ * dummy install target and some cleanups for *BSD
+ * update index_dir.c to be *really* safe WRT html and http escaping*
+   * Note to self - please make that code less ugly
+ * basic access (Allow/Deny) control
+ * fix check-for-broken-setuid check in boa.c -- root *is* a legal user
+ * as of 0.94.14rc9:
+ * fix reversed argument passing in add_mime_type
+ * disable-gunzip support
+ * capitalization changes, etc.. to configure.in
+ * use slightly newer AC_DEFINE 3-argument style in configure.in
+ * add new member of struct, bytes_written, and use it to more accurately
+   report the number of bytes actually written to the socket.
+ * When sendfile(2) reports ECONNRESET treat it like EPIPE, which is to
+   say silently shut it down and don't be noisy about logging it.
+ * wrap sa_family_t typedef in
+   #ifdef DONT_HAVE_SA_FAMILY_T
+   to deal with non-POSIX (1g) systems (Cygwin?)
+ * add req->bytes_written member variable, and use it instead of filepos
+ * apply Peter Korsgaard's "configure --help" patch
+ * apply Peter Korsgaard's "configure --disable-gunzip" patch
+ * use newer 3-argument AC_DEFINE
+ * update config.sub and config.guess
+ * clean up and update configure.in somewhat
+ * don't close stderr in terminal signal handlers
+ * free range pool and server_name in (final) sigterm handler
+ * refactor select and poll loops
+ * as of 0.94.14rc10:
+ * change to using PF_ prefix instead of AF_ prefix (PF_ is POSIX?)
+ * fix copying too-much-memory (read-side, write-side was OK) in
+   ascii_sockaddr.  Also optimize slightly (note, may actually be a wee
+   slower due to strlen check -- is there a way around this?)
+ * fix a few shadow variable problems and improve select and poll loops
+ * check for and use madvise (may or may not help)
+ * update depends (the cause of SIGSEGs when ./configure was re-run to
+   switch from select to poll, *without* running make clean)
+ * always remove select.o and poll.o (and access.o) because these are
+   the usual conditional files.
+ * if we aren't using IPv6, define BOA_NI_MAXHOST to 20. 1025 is
+   far too huge for a single IPv4 IP address in dotted-quad notation.
+ * move access_init to earlier in the config reading
+ * allow a MAX_FILE_MMAP value of 0 to mean "always mmap"
+ * as of 0.94.14rc11:
+ * fix 'HEAD' requests (bug introduced in rc6)
+ * as of 0.94.14rc12:
+ * *huge* patch to try to eliminate shadow variables, use unsigned ints
+   instead of signed ints, and "const" where appropriate.
+ * check for and use __func__, a C99 construct that is used
+   in the DIE and WARN macros to also describe the name of the current
+   function.
+ * fix a very minor IPv6 issue, and include netdb.h in compat.h so that
+   NI_MAXHOST is defined for IPv6
+ * when we can't mmap a file, fall back to IOSHUFFLE.  If we couldn't
+   mmap the file due to an error in mmap or madvise, report the error,
+   otherwise it is safe to assume we simply ran out of hash table space.
+   This was reported by Davide Pagnin
+ * The following 2 changes borrowed from Hydra (which is itself
+   based on Boa):
+   * Some optimizations in HTTP header parsing.
+   * Added DefaultCharset configuration directive. If given, the default
+     character set will be appended to the Content-Type for all
+     'text' mime types.
+ * update boa.texi with some missing configuration directives
+ * as of 0.94.14rc13:
+ * force select.c, poll.c, and access.c to always be included in
+   dependency stuff fix use of HAVE_FUNC
+ * if FD_SETSIZE is undefined, set MAX_FD to OPEN_MAX instead of
+   arbitarily setting it to 2048.
+ * improve the poll code slightly
+ * give Boa more breathing room WRT MaxConnections and total current
+   connections -- currently simply set at 20.
+ * forcibly clear the server_s from the block_read_fdset when it won't
+   be checked.
+ * as of 0.94.14rc14:
+ * fix more spelling errors (LRD) and remove use of const int
+ * better sa_family_t detection on *BSD (Peter Pentchev)
+ * as of 0.94.14rc15:
+ * fix a potential NULL-pointer dereference when generating
+   CGI environment variables *and* we are extremely low on memory
+ * when unable to set new sockets to non-block or close-on-exec, don't
+   just warn, also close it down and place on the free list.
+ * use log_error_doc in some places instead of log_error_time
+ * clean up logline parsing.  This fixes a potential sigseg!
+ * fix use of ACCEPT_ON #define in process_option_line
+ * as of 0.94.14rc16:
+ * be more stringent about verifying that all of the proper variables got
+   allocated in create_common_env
+ * when unable to add an environment to the CGI space, note what the key
+   and values are to the error log.
+ * use log_error_doc instead of log_error_time in some places
+ * make sure to _exit if strdup fails in create_argv
+ * DO NOT accept control characters in the http header stream
+ * DO NOT accept control characters in the decoded URI
+ * warn when the hash function is sent an NULL or empty value
+ * warn when find_alias is sent a uri_len of 0.
+ * clean up and fix some of the path construction code paths
+ * add log_error_doc in some places
+ * when checking for a user home dir, if the full URI is "/~" then
+   log it and send back a bad request response
+ * mild clean up of req_write_escape_html
+ * refactor code so all hash functions start with hash
+ * check for and complain about empty or NULL keys and values
+   in the various hash function
+ * change the maximum number of environment variables to 100 from 50
+ * as of 0.94.14rc17:
+ * #define QUIET_DISCONNECT to silence read and write errors to client
+ * when range requests are determined to be invalid, use log_error_doc
+ * make log messages when URI contains invalid characters or doesn't
+   start with a '/' less scary
+ * if creating a temporary file, or setting it to close-on-exec fails,
+   send_r_error
+ * if key or value for an http header is invalid, log it.
+ * be more strict with range parsing
+ * handle 0-byte sendfile attempt better
+ * as of 0.94.14rc18:
+ * add log_error_mesg_fatal, which does log_error_mesg and then exits
+ * fix malloc thinko in buffer code
+ * use ULONG_MAX instead of -1 to describe unbounded ranges
+ * log '-' instead of req->logline if req->logline is undefined
+ * remove some superflous send_r_error statements.
+ * fix a logic inversion regarding QUIET_DISCONNECT
+ * move rate limit code very slightly, and force http version of 1.0
+ * move req->ka_count decrement out of sanitize_request
+ * /always/ issue log_access in free_request
+ * use BOA_FD_CLR to clear file descriptors out of the FD_SETs that
+   they might be in.
+ * disable keepalive when response status is 0 or >= 500
+ * update a comment regarding the 100 Continue response
+ * use BOA_READ and BOA_WRITE macros in select.c
+ * backport (but leave it commented out) USE_SETRLIMIT stuff for cgi's
+   This (currently disabled) functionality enables the use of
+   CGIRlimit{CPU,Data,Nice} configuration values for CGI execution.
+ * backported DEBUG debugging and logging code allows run-time
+   enabling of finer-grained debugging. Disable with
+   --disable-verbose (worth about 4K of binary size)
+ * split out usage and parsing commandline tasks into their own functions
+   (usage and parse_commandline)
+ * in poll.c, don't just check for BOA_READ, but handle all "error"
+   conditions first, then check for /any/ revent.
+ * force response code to 400 when client closes connection before request
+   is fully read.
+ * use code 408 to indicate timed-out response
+ * use isalnum instead of isalpha to verify hostname as per Alan's
+   suggestion
+ * fix 2 copy-and-paste error messages in mmap_cache.c (error message
+   was wrong)
+ * add and use TIMED_OUT state for requests that time out.
+ * reset signals (in child process) after forking for CGI
+ * fix multipart range responses
+ * as of 0.94.14rc19:
+ * change many instances of log_error_mesg + send_r_error to boa_perror
+ * set timezone right away at program startup
+ * add new_clean_pathname from now-defunct 0.95 branch
+   (unused via #if 0)
+ * change common_cgi_env to be dynamically sized, using realloc.
+ * add new keyword, CGIEnv, which takes 2 parameters and adds them as
+   the key and value of another common environment variable for CGI.
+   This item requires the previous change.
+ * split modified_since into 2 routines:
+   date_to_tm, which parses various date formats into a 'struct tm', and
+   modified_since, which then just compares the struct tm to the
+    items from a statbuf.
+ * remove fake status codes R_413 and R_415, and manually set
+   R_REQUEST_URI_TOO_LONG to 414 and R_INVALID_RANGE to 416
+ * move CRLF macro definition to defines.h
+ * use CRLF macro everywhere
+ * don't print content-length in print_partial_content_continue
+ * remove extra CRLF in print_partial_content_done
+ * *do* print content-length in 206 response's "primary" headers IFF There
+   is only 1 range.
+ * move CRLF in 206 *after* to the print_partial_content_continue
+ * in 503, remove \r from the human-readable message.
+ * #define and use CRLF macro, fix some tabs/spaces issues
+ * in date_to_tm, use 70 not 50 as the cutoff date (makes sense, 1970)
+ * adapt some code from Squid to return -1 in date_to_tm on invalid dates
+   (seconds > 59, etc...)
+ * implement ConcealServerIdentity
+ * treat headers with blank content as non-error but do not parse them
+ * as of 0.94.14rc20:
+ * fix potential NULL-pointer dereference in hash_insert, introduced
+   in 0.94.14rc16.
+ * try to make SuSE-ready:
+   rpm/{boa.init, boa.init-redhat, boa.init-suse, boa.spec}
+ * use S_ISREG combined with access(2) rather than
+   using the statbuf stuff to determine if a cgi is accessible
+ * optionally #define EXIT_FAILURE and EXIT_SUCCESS, and use them
+   everywhere.
+ * mark a few variables and functions 'static'
+ * use %u instead of %d when printing an unsigned int
+ * mmap returns void * not char *
+ * change access_node->type to an enum
+ * make boa.h #include 'config.h' *first*
+ * use -1 instead of ULONG_MAX (that way, if the datatype ever changes,
+   we always get it's maximum)
+ * fix bug in multiple non-contiguous range requests for files that
+   use sendfile(2)
+ * reduce some noise if a request in a keepalive chain is shut down
+   without having read a single byte.
+ * fix potential memory access bug in hashing
+ * update config.sub and config.guess to the latest available
+ * use CHANGES not ChangeLog
+ * as of 0.94.14rc21:
+ * shift from GNU Autoconf 2.58 to GNU Autoconf 2.59
+ * increase warning level in GCC_FLAGS another notch
+ * skip superfluous unsigned qualifier for char in get_alias_hash_value
+ * skip check for error in umask(), since it doesn't happen
+ * reorder read_config_files() and create_common_env()
+ * drop incorrect preprocessor usage in TIMEZONE macro
+ * make very sure default_type is set
+ * correct error message in index_dir for .gz files
+ * make mmap_cache 64-bit clean
+ * try to deal with signed file offsets when using sendfile()
+ * clean up signed/unsigned char issues in read_header()
+ * use socklen_t where appropriate in request.c
+ * call range_pool_empty() in response to SIGHUP
+ * add more const qualifiers
+ * eliminate signed/unsigned comparison warnings: change ka_timeout to signed
+ * spelling fixes
+ * miscellaneous whitespace changes
+ * update Copyright dates
+ * drop webindex.pl
+
+** Changes from 0.94.12 to 0.94.13
+ * Change many instances of log_error_mesg + exit to DIE macro
+ * Change all instance of log_error_mesg (without exit) to WARN macro
+ * do a much better job of checking return values from malloc and
+   especially strdup.
+ * check results of calling umask and getrlimit
+ * server_s is no longer a global int
+ * check results of fork via switch instead of if (fork())
+ * check for getopt.h and include it if found
+ * remove unused #defines, and add WARN macro, and replace
+   many calls to log_error_mesg(..) with WARN macro
+ * fix bug in get_commonlog_time where time_offset calculation was
+   the opposite of what it should be ('-' and '+' were swapped)
+ * fix compatability bug with old and newer versions of flex/yacc
+ * add check for AC_FUNC_MMAP to configure.in
+ * fix really lame thinko in normalize_path, which would prepend the
+   results of earlier calls to results from later calls
+ * Add MaxConnections, a configuration directive which allows the
+   user to specify the maximum number of connections that Boa will
+   accept concurrently.
+ * add SERVER_ADDR and REQUEST_URI to environment of CGI
+ * handle SIGBUS during writes of data that has been memory mapped
+ * minor optimization in select.c that prevents DEAD requests from
+   being added to the block set
+ * fix bug in CGI environment script_name - closes sf.net bug #576725
+ * make 'status' variable local to requests.c, not local to every file
+   by forgetting to declare 'extern' in globals.h :-|
+ * make getsockname non-fatal, and do it every time because we may
+   need it for the CGI
+ * some minor refactoring optimizations in hash.c
+ * enlarge MMAP hash table to 1024 from 256, and enlarge other
+   mmap-related hash table #defines appropriately (4x, or (x+1)*4-1)
+
+** Changes from 0.94.11 to 0.94.12
+ * Renamed Changelog ChangeLog, and moved up to top-level directory
+ * Next 3 items due in part or whole thanks to
+   Liam Widdowson
+ * when printf'ing a pid type, force to int, because it could be
+   something else on other platforms.  Should probably change it to
+   a long, and use that.
+ * backported chroot commandline support from 0.95
+ * backported support for strdup, strstr, alphasort, and scandir
+   from 0.95
+ * Fixed src/Makefile.in -- it didn't remove index_dir.o
+ * backport create_temporary_file from 0.95
+   (instead of using tmpnam)
+ * Allow non-standard date format 31 September 2000 23:59:59 GMT
+   Patch by Landon Curt Noll
+ * Skip whitespace before HTTP/major.minor
+   Adapted patch from Landon Curt Noll
+ * open /dev/null first thing (affects chrooting)
+ * properly handle sigalrm -- use sigalrm_flag and sigalrm_run
+   instead of handling the signal in the signal handler
+ * update manpage slightly
+ * send 400 BAD Request when resource does not start with '/'
+ * add grp.h to boa.h's includes -- remove from boa.c and config.c
+ * removed duplicate header includes from boa.c, config.c, get.c,
+   ip.c, request.c, response.c
+ * factor out creating the server socket and dropping privs
+   into create_server_socket and drop_privs
+ * type all functions in boa.c (except main) as static
+ * set umask after opening /dev/null
+ * tie stdin/stdout to /dev/null before commandline parse
+ * removed old, unused chroot code
+ * move builds_needs_escape earlier in the startup
+ * move fork later in the startup
+ * type all c_set_* as static in config.c
+ * don't bother trying to change uid/gid (or error if the
+   requested uid/gid doesn't exist) if not UID 0
+ * return more appropriate error code when foo.html gives
+   access denied, but foo.html.gz gives some other error
+   (essentially report error associated with foo.html, not foo.html.gz)
+ * send NOT Implemented when an unknown method is attempted
+ * always attempt a 32k read right before close
+   (stopgap until blackhole can be merged)
+ * allow more than 1 space in logline between method, resource,
+   and http version
+ * don't use inline functions
+ * update configure.in so that autoconf 2.50 doesn't complain (as much)
+ * properly use VPATH and srcdir according to autoconf docs
+ * change curly-braces to parentheses in Makefilein
+ * use $^ instead of manually listing the dependencies in Makefile.in
+ * remove tests section in Makefile.in
+ * write tags not TAGS in Makefile.in
+ * Add gethostbyname and inet_aton to function checks
+ * Add code from 0.95 which checks for socket in -lsocket,
+   inet_aton in -lresolv, and gethost{by}name in -lnsl
+ * Also remove broken bc-based "how big is an unsigned int" checks:
+   assume minimum of 32 bits and check in escape.c at runtime.
+ * Added new file: README.chroot.solaris, based on a
+   modified version by Liam Widdowson
+ * Add check_struct_for.m4, which allows us to check a structure
+   for a member (found at http://www.gnu.org/software/ac-archive/
+    authored by Wes Hardaker
+ * Call "aclocal -I ." to rebuild aclocal.m4
+ * Using new check-struct-for-member autoconf macro, check
+   for tm_gmtoff and tm_zone in struct tm -- useful in
+   portability tests for localtime.
+ * Also check sockaddr_in for structure sin_len so we can set
+   it properly.
+ * index_dir.c (which ends up in boa_indexer) can now be compiled
+   with USE_LOCALTIME, and if so, it will report the local time
+   using the timezone name. Otherwise it uses UTC time and UTC
+   timezone designation.
+ * fix buglet in mmap_cache.c which shows up when under
+   heavy load by many different files.
+   Found and squashed by Michal Kara
+ * normalize paths on Aliases, log files, server root, dirmaker
+   This makes sure that paths are 'absolute'
+ * don't generate DOCUMENT_ROOT or SERVER_ROOT,
+   CGIs have no business knowing that information
+ * if CGI, chdir to the cgi's root path
+   Bug found by Matt Callaway
+ * remove ChrootPath and PidFile directives from the parser
+   (they aren't used anyway)
+ * keep track of maximum file descriptor in use to optimize call
+   to select()
+ * apply IPv6 patch from Jari Korva
+ * optimize keep-alive copy data routine
+ * try to use memcpy instead of strcpy/strcat in more places (alias.c)
+ * update .depend file
+ * use fcntl + GET_FL to get a file descriptor's flags, then
+   add or remove only the bits we want to set. This prevents
+   accidentally setting or unsettings bits we don't have anything
+   to do with inadvertantly. (removed, at least temporarily.
+   Show me a system where it is needed -- LRD)
+ * make sure to call FD_ZERO when we handle a restart
+ * in read.c, don't call boa_perror on read failure -- socket is
+   dead or messed up anyway, no reason to try to write to it.
+ * explicit .SUFFIXES in Makefile.in
+ * boa.objdump target added
+ * use @MAKE_SET@ (for when $(MAKE) != "make")
+ * add  -Wundef -Wwrite-strings -Wredundant-decls -Winline to GCC_FLAGS
+ * change Paul Phillips' and Larry Doolittle's emails in source
+ * add --disable-debug, --enable-profile, --with-dmalloc, and --with-efence
+ * test for failed-but-return-was-successful setuid:
+   http://www.securityfocus.com/bid/1322
+ * use _exit not exit in CGI child
+ * always place new keepalive request on blocked list, we can't be
+   sure of the state of the active list, and since enqueue places
+   things at the *front* of the list, it doesn't do us much good
+   to place the new request on the active list anyway.
+ * update some Copyright statements for 2002
+ * When comparing the uri to an alias, only compare if
+   the uri length is greater than or equal to the length of the alias
+ * in init_script_alias, make sure to check for document_root before
+   trying to use it
+ * script_name is now just a copy of the request, rather
+   than some complicated variation on the pathname
+ * change the way the CGI environment is handled.
+   Now, it is allocated at request allocation time, and exists
+   throughout the life of the structure.
+ * check memory allocations, etc.. when creating the static
+   CGI environment and when making new CGI environment variables
+ * wait until process_option_end to call unescape_uri, clean_pathname,
+   and translate_uri
+ * remove debian package information
+ * move RedHat packaging information to contrib
+ * remove tests -- they weren't usable anyway
+ * add some new hash routines, and use djb2 (a variant on a
+   hash algorithm popularized by Dan J. Bernstein)
+ * a side-effect of the new hash routines is a bugfix,
+   involving negative return values from hash routines.
+   This has been fixed.
+ * add a routine, show_hash_stats, which is called with other
+   statistical output via sigalarm
+ * remove some duplicate prototypes from config.c
+ * make simple_itoa take an unsigned int
+ * try to make NOBLOCK handling in compat.h compatible with Solaris
+ * make sure to update current_time before calling signal handlers
+ * alter primary loop to make sure that select gets called even
+   when there are requests that are not blocking, and call fdset_update
+   and process_requests (when appropriate) after signal handlers but
+   before select to make sure that blocked requests are still handled
+   by select after a sighup. (Thanks to Karl Olsen)
+ * pull select loop into select.c
+ * poll server socket once per active connection
+ * add send_r_service_unavailable and use it when appropriate
+ * state uptime in seconds at normal program termination
+ * include sys/fcntl.h if it is found by configure
+ * fix POST bug where a content-length < 0 would cause Boa to
+   consume its full share of CPU until killed
+   Bug report by Landon Curt Noll
+ * add CGIPath configuration variable
+   based upon a patch by Landon Curt Noll
+ * add function boa_atoi, which wraps atoi, but does not
+   accept negative values. Additionally, it checks to make sure
+   the converted value and the original value are the same, avoiding
+   issues like "124.3" -> "123" and "123abc" -=> "123".
+   Either a value is an int or it isn't - no middle ground.
+ * use boa_atoi to convert content-length from client.
+ * add new #define - SINGLE_POST_LIMIT_DEFAULT, which defines
+   (in bytes) the *default* single_post_limit.
+ * single_post_limit is now in bytes.
+ * when adding aliases, only "normalize" paths that start
+   with "./" - this is a departure from previous behavior
+ * add "?" to the list of characters that it is safe to leave unescaped
+ * clean up Makefile.in of no-longer-pertinent comments
+ * add send_r_bad_gateway and use it
+ * tie stderr to either cgi_log_fd or devnullfd - either way
+   make sure stderr is a valid filehandle before cgi execution
+ * cgi_env is no longer allocated, it's part of the struct now
+ * fix bug in CgiPath logic
+ * when unable to allocate memory for an environment variable, log it
+ * add clear_common_env, which de-allocates the cgi_common_env stuff
+   [NEVER USE THIS outside of a terminal signal handler!]
+ * don't be so wasteful of memory in normalize_path
+ * adapted fix for alias expansion from Brieuc Jeunhomme
+
+** Changes from 0.94.10.1 to 0.94.11
+ * use LIBS in Makefile.in (which propagates from autoconf)
+ * properly free memory allocated by scandir in index_dir.c
+ * rearrange some header files and includes
+ * on reads and writes, don't check for -1, check for < 0
+ * include fix by William Meadows
+   for escape.c which fixes segfaults due to improper allocation
+ * above fix by William Meadows no longer needed;
+   escape.c and escape.h rewritten by Larry Doolittle -- requires
+   at least 32 bit words, but is correct (jdn's 1st attempt was faulty)
+
+** Changes from 0.94.10 to 0.94.10.1
+ * Actually update the SERVER_VERSION in src/defines.h
+
+** Changes from 0.94.9 to 0.94.10
+ * Fixes escaping rules
+ * Fixes segfault when directory_index is undefined and
+   directory needs to be generated
+ * adds dummy signal handlers for SIGUSR1 and SIGUSR2 (Closes SF #425921)
+ * Update documentation regarding mime.types (Closes Debian #69991)
+ * Make sure documentation builds (Closes Debian #110818)
+
+** Changes from 0.94.8.3 to 0.94.9
+ * src/Makefile.in updated to take CFLAGS, LIBS, and LDFLAGS
+   from autoconf
+ * Update escaping rules with latest RFC
+ * unescape_uri skips fragments and also stop parsing at '?'
+ * Don't accept fd over FD_SETSIZE in request.c:get_request
+ * use backported documentation from 0.95
+ * make sure POST fd gets closed even on client cancel
+ * use backported index_dir.c from 0.95
+ * support subdirectories in ScriptAlias directories
+ * add SinglePostLimit (int, in Kilobytes) to config system
+ * add CGIPath configuration to set the CGI's PATH variable.
+ * check for ENOSPC on body write
+ * use environment variable TMP (or "/tmp" if not available),
+   and chdir there when boa exits.
+ * add 1-time-only hack to make a 32kB read at the end of a request
+   on POST or PUT
+ * close unused file descriptors (/dev/null in boa.c, and the
+   unused part of the pipes call in cgi.c)
+ * made Makefile.in VPATH happy
+
+** Changes from 0.94.8.2 to 0.94.8.3
+ * Move unescape_uri *before* clean_pathname to prevent
+   encoding of / and .. in pathname
+ * wrap execution of GUNZIP in cgi.c with #ifdef GUNZIP
+ * stop parsing when fragment found in URL ('#')
+
+** Changes from 0.94.8.1 to 0.94.8.2
+ * close pipes[1] in child and generate HTTP_REFERER environment
+   variable in cgi.c
+ * Minor changes to the Debian package
+
+** Changes from 0.94.8 to 0.94.8.1
+ * Change umask call from (umask(0600)) to (umask(~0600))
+
+** Changes from 0.94.7 to 0.94.8
+ * Fix major thinko in temp file permissions
+ * unlink temporary file immediately following creation
+ * implement maximum # of active connections at 10 less than RLIMIT_NOFILE
+   to avoid or eliminate crashes resulting from running out of
+   file descriptors
+ * Fix thinko in POST
+
+** Changes from 0.94.6 to 0.94.7
+ * STDIN and STDOUT are now tied to /dev/null
+ * sets PATH_MAX to 2048 if not defined (for Hurd)
+ * core dumps (should never happen) would be located in /tmp
+ * alter behavior when select gets a EBADF
+ * add translation for the \" char -> &quot;
+ * remove use of sys_errlist.  Use perror.
+ * better makedist.sh (still a stupid program though)
+
+** Changes from 0.94.5 to 0.94.6
+ * Removed doc++ commenting
+ * Removed erroneous debugging statments
+ * Move some stuff out of config.c (read_config_file) to boa.c
+ * Altered some of fixup_server_root()
+ * Bug fix in get.c re: automatic gunzip
+ * Added some stubs for chroot code (*not* ready yet)
+
+** Changes from 0.94.4 to 0.94.5
+ * Alteration of most of the comments and such for doc++ use
+ * Fixed buffer overflow in alias.c
+ * Fixed buffer underflow in util.c
+
+** Changes from 0.94.3 to 0.94.4
+ * Better escaping of data to user, both for HTTP headers and HTML body
+ * Proper escaping of output in CGI example perl scripts
+
+** Changes from 0.94.0 to 0.94.2
+ * Fixed obnoxious pipeline bug
+ * Fixed (sorta) a compilation/core bug for *BSD systems
+   Original code by Thomas Neumann
+ * Moved to GPLv2
+ * Changed manpage to section 8
+ * boa.sgml now references a .png file instead of evil .gif
+
+** Changes from 0.93.19.2 to 0.94.0
+ * Added UseGMT to the configuration parser
+ * util.c commonlog now logs in Apache-style commonlog time format
+ * Remove SO_SNDBUF on-start message
+
+** Changes from 0.93.19 to 0.93.19.2
+ * Changed to combined log (from NCSA access_log format) ala Drew Streib
+ * Altered POST cgi code to handle bug in Netscape
+ * SO_SNDBUF changes by Larry
+
+** Changes from 0.93.17.2 to 0.93.19 (all 0.93.18.x changes inclusive)
+ * Update of some copyright statements for 99
+ * Replacement of sprintf with strlen/memcpy or strcpy/strcat
+   wherever possible
+ * Significant rearrangement in alias.c, minor functional differences
+   (some CGI environment variables handled differently)
+ * Removal of die function. Replace with log_err_mesg and exit.
+ * initial IPv6 stubs and support
+ * Move #include "config.h" to top of boa.h where it will do some good
+ * Stubs and functions for strstr and strdup
+ * Seperation of buffer code into it's own file
+ * Significant changes to cgi.c et al (cgi_header.c, etc...)
+ * Speed patches by removal of "extra" calls to time(): Use global variable!
+ * pipelining changes... it works now.
+ * require content-length from clients (ala rfc1945)
+ * alter body_read and body_write to work more efficiently with known content-length
+ * move read(2) part to *after* parsing...
+ * added support for additional header message in send_redirect_temp
+ * change use of NO_ZERO_FILL_LENGTH to offsetof() use
+ * Remove SO_REUSEADDR setting on each client socket, Paul Saab
+ * Avoid SO_SNDBUF setting if possible
+ * Large quantities of otherwise not-insignificant changes
+
+** Changes from 0.93.17.2 to 0.93.17.3
+ * Put on-the-fly directories back in, stripped down from the 0.92 version
+ * Fixed DocumentRoot, ServerAdmin and ServerName null-value handling in
+   CGI environment generation
+ * Fixed argument order in Script* directives (bug introduced in 0.93.17.2)
+ * Got rid of MAX_CGI_VARS because it was not being used consistently, or
+   for that matter, at all, really.
+ * Added some more FASCIST_LOGGING to cgi.c
+ * Minor mmap patch by LRD for request.c
+
+** Changes from 0.93.17.1 to 0.93.17.2
+ * Added "Listen" directive for server bind address, as most recently
+   suggested by David N. Welton
+ * Put virtualhost feature in, was experimental in 0.92q
+
+** Changes from 0.93.16.2 to 0.93.17.1
+ * New config file parser (supposed to be more maintainable) (LRD)
+ * Support for "|command" and ":host:port" syntax for logfiles (untested) (LRD)
+
+** Changes for the 0.93 version **
+ * Huge quantities of changes
+ * keepalive Bugfix in 0.93.16.2 by Jon Nelson
+   report by Craig Silverstein of Google fame.
+ * patch for config.h by Craig Silverstein
+ * fixed "Parent Directory" problem in boa_indexer for title "/"
+   (Debian bug #36165)
+ * More Craig Silverstein
+   modifications, namely:
+   ErrorLog        (if omitted, print to stderr)
+   DocumentRoot    (if omitted, can only server user-dir files)
+   DirectoryIndex  (if omitted, always use DirectoryMaker)
+   MimeTypes       (if omitted, don't load -- users can use AddType instead)
+
+
+** Changes from v0.92o to v0.92p **
+
+ * Documented misbehavior of CGI, SIGHUP, short aliases, stale dircache.
+ * Documented how to patch signals.c for use on SunOS.
+ * Closed file descriptor leak when redirecting a bare directory URL to
+ one with an appended "/".
+ * Closed potential file descriptor leak if errors encountered generating
+ on-the-fly index.
+ * Cleaned up include file handling to be simultaneously compatible with
+ Linux, SunOS, HP-UX, and AIX.
+ * Supress message body for codes 302, 400, 403, 404, 500, and 501 if
+ incoming request is "HEAD".
+
+** Changes from v0.91 to v0.92o **
+ (0.92o released 27 December, 1996)
+
+ * Maintenance handover from Paul Phillips to Larry Doolittle
+ * Changed (char)NULL to '\0'
+ * Cleaned up signal handler prototypes in signals.c
+ * Modified handling of CGI environment variable PATH_TRANSLATED,
+ should now work the same as NCSA.
+ * More conservative buffer size in add_cgi_env()
+ * Build argv list for a CGI script according to spec
+ * Speedup process_header_line, eliminate potential memory leak
+ * Occasional spelling fixes and lint removal
+ * Added REMOTE_PORT env var for CGI scripts, to allow easy ident lookups
+ * Changed rfc822 time format
+ * Log timeouts and broken connections
+ * Fix mime suffix handling for filenames with multiple "."s
+ * Initialize conn->time_last, fixes bug with rapid-fire connections
+ * Performance tweak to req_write()
+ * Changed http_version from float to char[8]
+ * Rewrote on-the-fly directory generation; it works now
+ * Added user configurable dircache directory in boa.conf
+ * Fixed "simple" response bugs, including incorrect CGI handling
+ * Keepalive (HTTP/1.1 draft) support, mostly by Jon Nelson
+ * Close data_fd in 304 Not Modified flow of control
+ * Switch socket flags to non-blocking before cgi handoff
+ * Try to handle errno properly in the face of multiple errors
+ * Close fd's of all other transactions before cgi handoff
+ * Move real work for sighup and sigchld out of signal handler
+ * Fix free(req->cgi_env) in request.c
+ * Response message cleanup - better match to HTML-2.0 DTD
+ * Experimental Virtual Host code from Russ Nelson
+ * Expand buffer for escaped URI in init_get()
+ * SIGTERM triggers lame duck mode until all pending transactions complete
+ * Close and unlink temp file for POST in parent process
+
+** Changes from v0.90 to v0.91 **
+
+ * Cleaned up main while loop
+ * Optimized request line parsing
+ * Added state machine for header reads -- necessary to deal wtih
+ possibility of obtaining header data in multiple reads.  This
+ also allows interactive use of server.
+ * Added 500/501 return codes for various conditions
+
+** v0.90 **
+
+ * Initial release
+

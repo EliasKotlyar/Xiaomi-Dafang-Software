@@ -1,0 +1,80 @@
+Liam Widdowson <lbw at telstra.com>
+ Lots of improvement for Solaris support
+
+Wes Hardaker <wjhardaker at ucdavis.edu>
+
+Michal Kara <lemming at netcentrum.cz>
+ mmap_cache buglet fix
+
+Matt Callaway <matt at securepipe.com>
+ CGI chdir issue
+
+Jari Korva <jpkorva at iki.fi>
+ IPv6 patch
+
+William Meadows <wmeadows at linux-support.net>
+ escape.c bug notification and (first) fix
+
+Thomas Neumann <tn at tmr-online.de>
+ *BSD compilation/core bugfixes
+
+Paul Saab <paul at mu.org>
+ Remove SO_REUSEADDR setting on each client socket
+
+David N. Welton <davidw at linuxcare.com>
+ Added "Listen" directive for server bind address
+
+Craig Silverstein <csilvers at google.com>
+ patches for config.h and config.c
+
+Russ Nelson <nelson at crynwr.com>
+ Original, Experimental IP-based Virtual Host code
+
+Landon Curt Noll http://www.isthe.com/chongo
+ Allow non-standard date format 31 September 2000 23:59:59 GMT
+ Skip whitespace before HTTP/major.minor
+ FNV1a hash in hash.c
+
+Brieuc Jeunhomme <bbp at via.ecp.fr>
+ fix buglet in alias expansion
+ the name-based virtualhost code patch send to us by Brieuc
+  was *very* close to the one that had been developed in-house,
+  so we merged them.  Special thanks for *actually* writing
+  DOCS!!
+
+Laurent Pelecq  <lpelecq at users.sourceforge.net>
+ test for socket in -lnet for BeOS
+ tests for herror and inet_addr
+
+Don Mahurin (dma) <dmahurin at dma.org>
+ pidfile patch
+ default mime_types patch
+ NCSA environment environment variables wrapped in 
+  #ifdef USE_NCSA_CGI_ENV
+ 
+Ulf Harnhammar <ulfh at update.uu.se>
+ fixed a small escaping issue with the automatic directory
+  index maker
+
+Fraser McCrossan <fraser at joat.homeunix.org>
+ dummy install target
+ some prototype cleaning for *BSD
+ sprintf -> snprintf for local redirection in get.c
+
+MJ Pomraning <mjp at pilcrow.madison.wi.us>
+ suggestions to update index_dir.c to make sure filenames are 
+  http and html safe.
+
+Peter Korsgaard <jacmet at sunsite.dk>
+ basic access control
+ disable-gunzip support
+ capitalization changes, etc.. to configure.in
+ 
+Davide Pagnin <pagnin at sssup.it>
+ notes regarding find_mmap misuse
+
+Peter Pentchev <roam at ringlet.net>
+ fixes to sa_family_t detection on *BSD
+
+Alan H. Teague <at-boa at beprivate.com>
+ general cleanups
