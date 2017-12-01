@@ -86,10 +86,10 @@ IMPSensorInfo sensor_info;
 
 int sample_system_init(int width,int height) {
 
-    chn[0].fs_chn_attr.crop.width = SENSOR_WIDTH;
-    chn[0].fs_chn_attr.crop.height = SENSOR_HEIGHT;
-    chn[0].fs_chn_attr.picWidth = SENSOR_WIDTH;
-    chn[0].fs_chn_attr.picHeight = SENSOR_HEIGHT;
+    chn[0].fs_chn_attr.crop.width = width;
+    chn[0].fs_chn_attr.crop.height = height;
+    chn[0].fs_chn_attr.picWidth = width;
+    chn[0].fs_chn_attr.picHeight = height;
 
 
 
