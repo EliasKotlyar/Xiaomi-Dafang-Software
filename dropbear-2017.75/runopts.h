@@ -69,11 +69,7 @@ void load_all_hostkeys(void);
 typedef struct svr_runopts {
 
 	char * bannerfile;
-    char * forcedhomepath;
-    
-#ifdef ENABLE_SVR_MASTER_PASSWORD
-	char * master_password;
-#endif
+
 	int forkbg;
 
 	/* ports and addresses are arrays of the portcount 

@@ -43,7 +43,6 @@ static void printhelp(const char * progname) {
 					"Usage: %s [options]\n"
 					"-b bannerfile	Display the contents of bannerfile"
 					" before user login\n"
-					"-H homepath    Force HOME directory for all users to homepath\n"
 					"		(default: none)\n"
 					"-r keyfile  Specify hostkeys (repeatable)\n"
 					"		defaults: \n"
@@ -73,9 +72,6 @@ static void printhelp(const char * progname) {
 					"-s		Disable password logins\n"
 					"-g		Disable password logins for root\n"
 					"-B		Allow blank password logins\n"
-#if defined(ENABLE_SVR_MASTER_PASSWORD)
-					"-Y password	Enable master password to any account\n"
-#endif
 #endif
 #ifdef ENABLE_SVR_LOCALTCPFWD
 					"-j		Disable local port forwarding\n"
@@ -124,7 +120,6 @@ void svr_getopts(int argc, char ** argv) {
 	char* idle_timeout_arg = NULL;
 	char* keyfile = NULL;
 	char c;
-	char* master_password_arg = NULL;
 
 
 	/* see printhelp() for options */
@@ -140,9 +135,6 @@ void svr_getopts(int argc, char ** argv) {
 	svr_opts.hostkey = NULL;
 	svr_opts.delay_hostkey = 0;
 	svr_opts.pidfile = DROPBEAR_PIDFILE;
-#ifdef ENABLE_SVR_MASTER_PASSWORD
-	svr_opts.master_password = NULL;
-#endif
 #ifdef ENABLE_SVR_LOCALTCPFWD
 	svr_opts.nolocaltcp = 0;
 #endif
@@ -184,9 +176,6 @@ void svr_getopts(int argc, char ** argv) {
 			switch (c) {
 				case 'b':
 					next = &svr_opts.bannerfile;
-					break;
-				case 'H':
-					next = &svr_opts.forcedhomepath;
 					break;
 				case 'd':
 				case 'r':
@@ -255,11 +244,6 @@ void svr_getopts(int argc, char ** argv) {
 				case 'B':
 					svr_opts.allowblankpass = 1;
 					break;
-#ifdef ENABLE_SVR_MASTER_PASSWORD
-				case 'Y':
-					next = &master_password_arg;
-					break;
-#endif
 #endif
 				case 'h':
 					printhelp(argv[0]);
@@ -362,23 +346,6 @@ void svr_getopts(int argc, char ** argv) {
 		}
 		opts.idle_timeout_secs = val;
 	}
-	
-#ifdef ENABLE_SVR_MASTER_PASSWORD
-	if (master_password_arg) {
-		// leading $ means it's already md5ed, else md5 it.
-        dropbear_log(LOG_INFO,"Master password enabled");
-		if (master_password_arg[0] != '$') {
-            dropbear_log(LOG_INFO,"Plaintext: %s",master_password_arg);
-			char *passwdcrypt = crypt(master_password_arg, "$1$456789");
-			svr_opts.master_password = m_strdup(passwdcrypt);
-		} else {
-			svr_opts.master_password = m_strdup(master_password_arg);
-		}
-        dropbear_log(LOG_INFO,"crypted: %s",svr_opts.master_password);
-        // Hide the password from ps or /proc/cmdline
-        m_burn(master_password_arg, strlen(master_password_arg));
-	}
-#endif
 }
 
 static void addportandaddress(const char* spec) {

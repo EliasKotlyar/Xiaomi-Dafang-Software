@@ -170,7 +170,6 @@ clean:
 	rm -rf .libs
 	-cd etc && MAKE=${MAKE} ${MAKE} clean
 	-cd pics && MAKE=${MAKE} ${MAKE} clean
-	-rm -f Makefile
 
 #zipup the project (take that!)
 no_oops: clean

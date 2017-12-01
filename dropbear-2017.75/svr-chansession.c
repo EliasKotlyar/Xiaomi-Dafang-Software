@@ -589,14 +589,6 @@ static int sessionpty(struct ChanSess * chansess) {
 	}
 
 	pw = getpwnam(ses.authstate.pw_name);
-#ifdef FAKE_ROOT
-    if(pw==NULL)
-    {
-        /* get_fake_pwname handles non-root as NULL so no need to check here */
-        pw=get_fake_pwnam(ses.authstate.pw_name);
-    }
-#endif /* FAKE_ROOT */
-    
 	if (!pw)
 		dropbear_exit("getpwnam failed after succeeding previously");
 	pty_setowner(pw, chansess->tty);
@@ -666,9 +658,7 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 			}
 		}
 		if (issubsys) {
-		dropbear_log(LOG_INFO, "SUBSYSTEM CALL");
 #ifdef SFTPSERVER_PATH
-dropbear_log(LOG_INFO, "Starting SFTP");
 			if ((cmdlen == 4) && strncmp(chansess->cmd, "sftp", 4) == 0) {
 				m_free(chansess->cmd);
 				chansess->cmd = m_strdup(SFTPSERVER_PATH);

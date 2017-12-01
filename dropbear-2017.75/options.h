@@ -21,15 +21,14 @@
 
 /* Default hostkey paths - these can be specified on the command line */
 #ifndef DSS_PRIV_FILENAME
-#define DSS_PRIV_FILENAME "/system/dafang/dropbear_dss_host_key"
+#define DSS_PRIV_FILENAME "/etc/dropbear/dropbear_dss_host_key"
 #endif
 #ifndef RSA_PRIV_FILENAME
-#define RSA_PRIV_FILENAME "/system/dafang/dropbear_rsa_host_key"
+#define RSA_PRIV_FILENAME "/etc/dropbear/dropbear_rsa_host_key"
 #endif
 #ifndef ECDSA_PRIV_FILENAME
-#define ECDSA_PRIV_FILENAME "/system/dafang/dropbear_ecdsa_host_key"
+#define ECDSA_PRIV_FILENAME "/etc/dropbear/dropbear_ecdsa_host_key"
 #endif
-
 
 /* Set NON_INETD_MODE if you require daemon functionality (ie Dropbear listens
  * on chosen ports and keeps accepting connections. This is the default.
@@ -212,7 +211,6 @@ If you test it please contact the Dropbear author */
  * PAM challenge/response.
  * You can't enable both PASSWORD and PAM. */
 
-#define ENABLE_SVR_MASTER_PASSWORD
 /* This requires crypt() */
 #ifdef HAVE_CRYPT
 #define ENABLE_SVR_PASSWORD_AUTH
@@ -302,7 +300,7 @@ Homedir is prepended unless path begins with / */
  * OpenSSH), set the path below. If the path isn't defined, sftp will not
  * be enabled */
 #ifndef SFTPSERVER_PATH
-#define SFTPSERVER_PATH "/system/sdcard/sftp-server -l INFO"
+#define SFTPSERVER_PATH "/usr/libexec/sftp-server"
 #endif
 
 /* This is used by the scp binary when used as a client binary. If you're
@@ -312,8 +310,7 @@ Homedir is prepended unless path begins with / */
 /* Whether to log commands executed by a client. This only logs the 
  * (single) command sent to the server, not what a user did in a 
  * shell/sftp session etc. */
-/* #define LOG_COMMANDS */t
-#define LOG_COMMANDS
+/* #define LOG_COMMANDS */
 
 /* Window size limits. These tend to be a trade-off between memory
    usage and network performance: */

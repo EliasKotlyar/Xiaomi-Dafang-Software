@@ -55,10 +55,6 @@ void update_channel_prio(void);
 const char* get_user_shell(void);
 void fill_passwd(const char* username);
 
-#ifdef FAKE_ROOT
-struct passwd *get_fake_pwnam(const char *username);
-#endif
-
 /* Server */
 void svr_session(int sock, int childpipe) ATTRIB_NORETURN;
 void svr_dropbear_exit(int exitcode, const char* format, va_list param) ATTRIB_NORETURN;
