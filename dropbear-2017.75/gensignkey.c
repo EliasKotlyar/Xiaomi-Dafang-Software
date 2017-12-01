@@ -137,7 +137,7 @@ int signkey_generate(enum signkey_type keytype, int bits, const char* filename, 
 		goto out;
 	}
 
-	if (link(fn_temp, filename) < 0) {
+	if (rename(fn_temp, filename) < 0) {
 		/* If generating keys on connection (skipexist) it's OK to get EEXIST 
 		- we probably just lost a race with another connection to generate the key */
 		if (!(skip_exist && errno == EEXIST)) {
