@@ -1,9 +1,42 @@
 #include <iostream>
 #include "ImpEncoder.h"
-int main() {
+
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+void print_usage() {
+    printf("Usage: jpegSnap -w 1920 -h 1080\n");
+}
+
+int main(int argc, char *argv[]) {
+
+    int width = 1920;
+    int height = 1080;
+
+    // Parse Arguments:
+    int c;
+      while ((c = getopt (argc, argv, "w:h:")) != -1){
+        switch (c)
+                {
+                case 'w':
+                  width = atoi(optarg);
+                  break;
+                case 'l':
+                  height = atoi(optarg);
+                  break;
+                default:
+                  exit(EXIT_FAILURE);
+            }
+      }
 
 
-    ImpEncoder* impEncoder = new ImpEncoder(IMP_MODE_JPEG,1920,1080);
+
+
+
+
+    ImpEncoder* impEncoder = new ImpEncoder(IMP_MODE_JPEG,width,height);
     int bytesRead = impEncoder->snap_jpeg();
     void* buffer = impEncoder->getBuffer();
 
