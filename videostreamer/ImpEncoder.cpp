@@ -44,7 +44,7 @@ ImpEncoder::ImpEncoder(int mode,int width,int height) {
     int  ret;
     int i;
 
-    buffer = malloc(IMP_BUFFER_SIZE);
+    buffer = malloc(width*height);
 
     /* Step.1 System init */
     ret = sample_system_init(width,height);

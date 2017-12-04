@@ -3,7 +3,6 @@
 
 #include "impfuncs.h"
 #include <imp/imp_encoder.h>
-#define IMP_BUFFER_SIZE 200000
 #define IMP_MODE_JPEG 1
 #define IMP_MODE_H264 2
 
