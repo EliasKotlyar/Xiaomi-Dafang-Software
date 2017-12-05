@@ -324,6 +324,7 @@ std::list <IMPEncoderPack> ImpEncoder::geth264frames() {
     }
 
     for (i = 0; i < stream.packCount; i++) {
+        //printf("1. Got Frame with size %d\n",stream.pack[i].length);
         frameList.push_back(stream.pack[i]);
     }
 
