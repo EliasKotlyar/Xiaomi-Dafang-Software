@@ -33,7 +33,7 @@ ImpH264VideoDeviceSource::createNew(UsageEnvironment &env) {
 
 ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment &env)
         : FramedSource(env) {
-    impEncoder = new ImpEncoder(IMP_MODE_H264,320,240);
+    impEncoder = new ImpEncoder(IMP_MODE_H264,640,480);
 
 }
 
@@ -60,8 +60,8 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
         frameList = impEncoder->geth264frames();
     }
     IMPEncoderPack frame = frameList.front();
-    void* frameAdr = (void *) frame.virAddr;
-    int frameSize = frame.length;
+    void* frameAdr = (void *) frame.virAddr +8 ;
+    int frameSize = frame.length-8;
 
     if (frameSize > (int) fMaxSize) {
         /*fprintf(stderr,
@@ -75,12 +75,12 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
 
     memcpy(fTo, frameAdr, frameSize);
     fFrameSize = frameSize;
-    //gettimeofday(&fPresentationTime, NULL);
+    gettimeofday(&fPresentationTime, NULL);
     //fPresentationTime =
     //memcpy(&fPresentationTime,&frame.timestamp,sizeof(timeval));
-    fPresentationTime.tv_usec = frame.timestamp;
+    //fPresentationTime.tv_usec = frame.timestamp;
     frameList.pop_front();
-    printf("Got Frame with size %d & with the type of %d, seconds: %d, miliseconds %d \n",frameSize,frame.dataType.h264Type,(int)fPresentationTime.tv_sec,(int)fPresentationTime.tv_usec);
+    //printf("Got Frame with size %d & with the type of %d, seconds: %d, miliseconds %d \n",frameSize,frame.dataType.h264Type,(int)fPresentationTime.tv_sec,(int)fPresentationTime.tv_usec);
 
 
 
