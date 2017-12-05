@@ -23,14 +23,14 @@ int main(int argc, char *argv[]) {
                 case 'w':
                   width = atoi(optarg);
                   break;
-                case 'l':
+                case 'h':
                   height = atoi(optarg);
                   break;
                 default:
+                  printf("Invalid Argument %c\n",c);
                   exit(EXIT_FAILURE);
             }
       }
-
 
 
 
