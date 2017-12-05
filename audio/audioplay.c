@@ -1717,13 +1717,23 @@ out:
 	pthread_exit(0);
 }
 
+void usage() {
+	IMP_LOG_ERR(TAG, "Usage: audioplay file\r\n");
+	exit(1);
+}
+
 int  main(int argc, char *argv[])
 {
+
+	if (argc != 2)
+		usage();
+
+	char* file = argv[1];
 	int ret;
 
 	pthread_t play_thread_id;
 
-	ret = pthread_create(&play_thread_id, NULL, IMP_Audio_Play_ALGO_AO_Thread, IMP_AUDIO_PLAY_FILE);
+	ret = pthread_create(&play_thread_id, NULL, IMP_Audio_Play_ALGO_AO_Thread, file);
 	if(ret != 0) {
 		IMP_LOG_ERR(TAG, "[ERROR] %s: pthread_create Audio Play failed\n", __func__);
 		return -1;

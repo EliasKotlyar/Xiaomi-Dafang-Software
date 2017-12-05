@@ -32,7 +32,7 @@ LDFLAG += -Wl,-gc-sections
 
 all: 	$(SAMPLES)
 
-sample-Audio: $(SDK_LIB_DIR)/libimp.so $(SDK_LIB_DIR)/libalog.so  sample-Audio.o
+audioplay: $(SDK_LIB_DIR)/libimp.so $(SDK_LIB_DIR)/libalog.so  audioplay.o
 	$(CPLUSPLUS) $(LDFLAG) -o $@ $^ $(LIBS) -lpthread -lm -lrt
 	$(STRIP) $@
 
