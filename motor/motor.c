@@ -17,8 +17,10 @@
 #define MOTOR_DIRECTIONAL_LEFT    0x2
 #define MOTOR_DIRECTIONAL_RIGHT    0x3
 #define MOTOR_INIT_SPEED    1000    /* unit :ns */
+
 #include <arpa/inet.h>
 #include <string.h>
+
 typedef struct {
     int motor_directional;
     int motor_move_steps;
@@ -38,72 +40,98 @@ typedef struct {
 } motor_status_st;
 
 
-void sendCommand(int cmd,void* buffer){
+void sendCommand(int cmd, void *buffer) {
     int fd = open("/dev/motor", O_WRONLY);
     ioctl(fd, cmd, buffer);
     close(fd);
 }
 
-void setSpeed(int speed){
+void setSpeed(int speed) {
     int motorspeed = speed;
-    sendCommand(MOTOR_SPEED,&motorspeed);
+    sendCommand(MOTOR_SPEED, &motorspeed);
 }
 
-void setMovement(int direction,int steps){
+void setMovement(int direction, int steps) {
 
     int i;
-    for( i = 0; i < steps ; i++){
+    for (i = 0; i < steps; i++) {
         motor_move_st motor_move;
         motor_move.motor_directional = direction;
         motor_move.motor_move_speed = 1000;
         motor_move.motor_move_steps = steps;
-        sendCommand(MOTOR_MOVE,&motor_move);
+        sendCommand(MOTOR_MOVE, &motor_move);
     }
 
 }
 
-void setStop(){
-    sendCommand(MOTOR_STOP,0);
-}
-void reset(){
-    sendCommand(MOTOR_RESET,0);
+void setStop() {
+    sendCommand(MOTOR_STOP, 0);
 }
 
+void reset() {
+    sendCommand(MOTOR_RESET, 0);
+}
 
 
-void getStatus(){
+void getStatus() {
     motor_status_st status;
-    sendCommand(MOTOR_GET_STATUS,&status);
+    sendCommand(MOTOR_GET_STATUS, &status);
 
-    printf ("directional_attr: %d\n",status.directional_attr);
-    printf ("total_steps: %d\n",status.total_steps);
-    printf ("current_steps: %d\n",status.current_steps);
-    printf ("min_speed: %d\n",status.min_speed);
-    printf ("cur_speed: %d\n",status.cur_speed);
-    printf ("max_speed: %d\n",status.max_speed);
-    printf ("move_is_min: %d\n",status.move_is_min);
-    printf ("move_is_max: %d\n",status.move_is_max);
-    printf ("sizeof int: %d\n", sizeof(int));
-
-
+    printf("directional_attr: %d\n", status.directional_attr);
+    printf("total_steps: %d\n", status.total_steps);
+    printf("current_steps: %d\n", status.current_steps);
+    printf("min_speed: %d\n", status.min_speed);
+    printf("cur_speed: %d\n", status.cur_speed);
+    printf("max_speed: %d\n", status.max_speed);
+    printf("move_is_min: %d\n", status.move_is_min);
+    printf("move_is_max: %d\n", status.move_is_max);
+    printf("sizeof int: %d\n", sizeof(int));
 
 
 }
 
-int main() {
+
+int main(int argc, char *argv[]) {
+
+    char direction = 0;
+    int stepsize = 100;
+
+    // Parse Arguments:
+    int c;
+    while ((c = getopt(argc, argv, "d:s:")) != -1) {
+        switch (c) {
+            case 'd':
+                direction = optarg[0];
+                break;
+            case 's':
+                stepsize = atoi(optarg);
+                break;
+            default:
+                printf("Invalid Argument %c\n", c);
+                exit(EXIT_FAILURE);
+        }
+    }
 
 
-    //reset();
-    //setStop();
-    //getStatus();
-    //setSpeed(900);
-    setMovement(MOTOR_DIRECTIONAL_LEFT,300);
-    sleep(1);
-    setMovement(MOTOR_DIRECTIONAL_RIGHT,300);
-    //sleep(1);
-    //setMovement(MOTOR_DIRECTIONAL_UP,30);
-    //sleep(1);
-    //setMovement(MOTOR_DIRECTIONAL_DOWN,30);
+    switch (direction) {
+        case 'u':
+            setMovement(MOTOR_DIRECTIONAL_UP, stepsize);
+            break;
+        case 'd':
+            setMovement(MOTOR_DIRECTIONAL_DOWN, stepsize);
+            break;
+        case 'l':
+            setMovement(MOTOR_DIRECTIONAL_LEFT, stepsize);
+            break;
+        case 'r':
+            setMovement(MOTOR_DIRECTIONAL_RIGHT, stepsize);
+            break;
+        default:
+            printf("Invalid Direction Argument %c\n", c);
+            exit(EXIT_FAILURE);
+    }
 
     return 0;
+
+
 }
