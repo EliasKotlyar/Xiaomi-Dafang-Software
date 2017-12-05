@@ -57,7 +57,7 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
 
 
     if(frameList.empty()){
-        frameList = impEncoder->snap_h264();
+        frameList = impEncoder->geth264frames();
     }
     IMPEncoderPack frame = frameList.front();
     void* frameAdr = (void *) frame.virAddr;

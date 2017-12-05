@@ -12,7 +12,8 @@ public:
     ImpEncoder(int mode,int width,int height);
     ~ImpEncoder();
     int snap_jpeg();
-    std::list <IMPEncoderPack> snap_h264();
+    std::list <IMPEncoderPack> geth264frames();
+    int snap_h264();
     void* getBuffer();
 
 private:
