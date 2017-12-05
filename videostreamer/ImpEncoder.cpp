@@ -37,17 +37,17 @@ void *ImpEncoder::getBuffer() {
 }
 
 
-ImpEncoder::ImpEncoder(int mode,int width,int height) {
+ImpEncoder::ImpEncoder(int mode, int width, int height) {
 
 
     encoderMode = mode;
-    int  ret;
+    int ret;
     int i;
 
-    buffer = malloc(width*height);
+    buffer = malloc(width * height);
 
     /* Step.1 System init */
-    ret = sample_system_init(width,height);
+    ret = sample_system_init(width, height);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_System_Init() failed\n");
     }
@@ -58,7 +58,6 @@ ImpEncoder::ImpEncoder(int mode,int width,int height) {
         IMP_LOG_ERR(TAG, "FrameSource init failed\n");
 
     }
-
 
 
     if (chn[0].enable) {
@@ -123,7 +122,7 @@ ImpEncoder::ImpEncoder(int mode,int width,int height) {
             }
         }
 
-    }else{
+    } else {
         ret = IMP_Encoder_StartRecvPic(ENC_H264_CHANNEL);
         if (ret < 0) {
             IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", ENC_H264_CHANNEL);
@@ -145,7 +144,7 @@ ImpEncoder::~ImpEncoder() {
             IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
 
         }
-    }else{
+    } else {
         ret = IMP_Encoder_StopRecvPic(ENC_H264_CHANNEL);
         if (ret < 0) {
             IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
@@ -250,7 +249,7 @@ int ImpEncoder::save_stream(void *buffer, IMPEncoderStream *stream) {
     for (i = 0; i < nr_pack; i++) {
         int packLen = stream->pack[i].length;
         memcpy(memoryAddress, (void *) stream->pack[i].virAddr, packLen);
-        memoryAddress = (void*)((int)memoryAddress + packLen);
+        memoryAddress = (void *) ((int) memoryAddress + packLen);
         bytesRead = bytesRead + packLen;
         // IMP_LOG_ERR(TAG,  "Pack Len: %d\n", packLen);
     }
@@ -259,42 +258,36 @@ int ImpEncoder::save_stream(void *buffer, IMPEncoderStream *stream) {
 }
 
 
-int ImpEncoder::snap_h264() {
-    int nr_frames = 1;
+std::list <IMPEncoderPack> ImpEncoder::snap_h264() {
+
+    std::list <IMPEncoderPack> frameList;
+
     int ret;
-    int bytesRead = 0;
     /* H264 Channel start receive picture */
 
 
 
-    int i;
-    for (i = 0; i < nr_frames; i++) {
-        /* Polling H264 Stream, set timeout as 1000msec */
-        ret = IMP_Encoder_PollingStream(ENC_H264_CHANNEL, 1000);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "Polling stream timeout\n");
-            continue;
-        }
-
-        IMPEncoderStream stream;
-        /* Get H264 Stream */
-        ret = IMP_Encoder_GetStream(ENC_H264_CHANNEL, &stream, 1);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "IMP_Encoder_GetStream() failed\n");
-            return -1;
-        }
-
-        ret = save_stream(buffer, &stream);
-        bytesRead = ret;
-        if (ret < 0) {
-            return ret;
-        }
-
-        IMP_Encoder_ReleaseStream(ENC_H264_CHANNEL, &stream);
+    unsigned int i;
+    /* Polling H264 Stream, set timeout as 1000msec */
+    ret = IMP_Encoder_PollingStream(ENC_H264_CHANNEL, 1000);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "Polling stream timeout\n");
     }
 
+    IMPEncoderStream stream;
+    /* Get H264 Stream */
+    ret = IMP_Encoder_GetStream(ENC_H264_CHANNEL, &stream, 1);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_Encoder_GetStream() failed\n");
+
+    }
+
+    for (i = 0; i < stream.packCount; i++) {
+        frameList.push_back(stream.pack[i]);
+    }
+
+    IMP_Encoder_ReleaseStream(ENC_H264_CHANNEL, &stream);
 
 
-
-    return bytesRead;
+    return frameList;
 }

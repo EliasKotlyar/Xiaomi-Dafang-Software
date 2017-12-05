@@ -6,12 +6,13 @@
 #define IMP_MODE_JPEG 1
 #define IMP_MODE_H264 2
 
+#include <list>
 class ImpEncoder {
 public:
     ImpEncoder(int mode,int width,int height);
     ~ImpEncoder();
     int snap_jpeg();
-    int snap_h264();
+    std::list <IMPEncoderPack> snap_h264();
     void* getBuffer();
 
 private:

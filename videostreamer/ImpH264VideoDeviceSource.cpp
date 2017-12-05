@@ -56,18 +56,15 @@ void ImpH264VideoDeviceSource::doStopGettingFrames() {
 void ImpH264VideoDeviceSource::doReadFromFile() {
 
 
-    int bytesRead = impEncoder->snap_h264();
-
-    if (bytesRead > (int) fMaxSize) {
-        /*fprintf(stderr,
-                "WebcamJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n",
-                fMaxSize);
-                */
-       bytesRead = fMaxSize;
-       fNumTruncatedBytes = bytesRead - fMaxSize;
+    if(frameList.empty()){
+        frameList = impEncoder->snap_h264();
     }
-    memcpy(fTo, impEncoder->getBuffer(), bytesRead);
-    fFrameSize = bytesRead;
+    IMPEncoderPack frame = frameList.front();
+    void* frameAdr = (void *) frame.virAddr;
+    int frameSize = frame.length;
+    memcpy(fTo, frameAdr, frameSize);
+
+    fFrameSize = frameSize;
     gettimeofday(&fPresentationTime, NULL);
 
 
