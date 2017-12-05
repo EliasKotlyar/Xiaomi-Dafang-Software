@@ -62,24 +62,26 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
     IMPEncoderPack frame = frameList.front();
     void* frameAdr = (void *) frame.virAddr;
     int frameSize = frame.length;
-    printf("Got Frame with size %d & with the type of %d \n",frameSize,frame.dataType.h264Type);
 
     if (frameSize > (int) fMaxSize) {
         /*fprintf(stderr,
                 "WebcamJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n",
                 fMaxSize);
                 */
-        frameSize = fMaxSize;
+
         fNumTruncatedBytes = frameSize - fMaxSize;
+        frameSize = fMaxSize;
     }
 
     memcpy(fTo, frameAdr, frameSize);
     fFrameSize = frameSize;
-    gettimeofday(&fPresentationTime, NULL);
+    //gettimeofday(&fPresentationTime, NULL);
     //fPresentationTime =
     //memcpy(&fPresentationTime,&frame.timestamp,sizeof(timeval));
-    //fPresentationTime = frame.timestamp;
+    fPresentationTime.tv_usec = frame.timestamp;
     frameList.pop_front();
+    printf("Got Frame with size %d & with the type of %d, seconds: %d, miliseconds %d \n",frameSize,frame.dataType.h264Type,(int)fPresentationTime.tv_sec,(int)fPresentationTime.tv_usec);
+
 
 
     // Inform the reader that he has data:
