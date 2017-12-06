@@ -106,6 +106,7 @@ private:
 
     chn_conf chn;
 
+    int framesCount;
 
 
 

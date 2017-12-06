@@ -46,7 +46,7 @@ private:
     u_int64_t fNumBytesToStream; // used iff "fLimitNumBytesToStream" is True
     ImpEncoder* impEncoder;
     std::list <IMPEncoderPack> frameList;
-    int framesCount;
+
 };
 
 #endif //DROPBEAR_DAFANG_IMPH264VIDEODEVICESOURCE_CPP_H

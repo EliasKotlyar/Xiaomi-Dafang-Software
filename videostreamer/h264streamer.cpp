@@ -69,8 +69,8 @@ int main(int argc, char** argv) {
 
     // Create a 'H264 Video RTP' sink from the RTP 'groupsock':
     //OutPacketBuffer::maxSize = 100000;
-    int bitrate = 2000;
-    OutPacketBuffer::maxSize = bitrate << 8; //2X Bitrate as the max packet size
+   // int bitrate = 2000;
+    //OutPacketBuffer::maxSize = bitrate << 8; //2X Bitrate as the max packet size
 
     //OutPacketBuffer::maxSize = width * height * 3 / 2;
 
@@ -126,15 +126,18 @@ void afterPlaying(void* /*clientData*/) {
 
 void play() {
     impParams params;
-    params.width = 1280;
-    params.height = 720;
-    params.framerate = 10;
+    params.width = 640;
+    params.height = 480;
+    params.framerate = 25;
+    params.bitrate = 2000;
 
     // Open the input file as a 'byte-stream file source':
     ImpH264VideoDeviceSource* fileSource
             = ImpH264VideoDeviceSource::createNew(*env,params);
 
     OutPacketBuffer::maxSize = params.width * params.height * 3 / 2;
+    //OutPacketBuffer::maxSize = params.bitrate << 8;
+
     // Open the input file as a 'byte-stream file source':
     /*ByteStreamFileSource* fileSource
             = ByteStreamFileSource::createNew(*env, inputFileName);*/

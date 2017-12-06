@@ -67,7 +67,7 @@ void *ImpEncoder::getBuffer() {
 
 ImpEncoder::ImpEncoder(impParams params) {
     currentParams = params;
-
+    framesCount = 0;
 
     // Init Structure:
     memset(&chn, 0, sizeof(chn_conf));
@@ -75,7 +75,7 @@ ImpEncoder::ImpEncoder(impParams params) {
     chn.index = 0;
     chn.enable = 1;
     chn.fs_chn_attr.pixFmt = PIX_FMT_NV12;
-    chn.fs_chn_attr.outFrmRateNum = SENSOR_FRAME_RATE_NUM;
+    chn.fs_chn_attr.outFrmRateNum = currentParams.framerate;
     chn.fs_chn_attr.outFrmRateDen = 1;
     chn.fs_chn_attr.nrVBs = 3;
     chn.fs_chn_attr.type = FS_PHY_CHANNEL;
@@ -357,6 +357,16 @@ std::list <IMPEncoderPack> ImpEncoder::geth264frames() {
 
     std::list <IMPEncoderPack> frameList;
 
+
+    if(framesCount == currentParams.framerate){
+        framesCount = 0;
+        requestIDR();
+    }else{
+        framesCount++;
+    }
+
+
+
     int ret;
     /* H264 Channel start receive picture */
 
@@ -630,8 +640,7 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264Cbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
     rc_attr->attrH264Cbr.maxGop =
             2 * rc_attr->attrH264Cbr.outFrmRate.frmRateNum / rc_attr->attrH264Cbr.outFrmRate.frmRateDen;
-    rc_attr->attrH264Cbr.outBitRate =
-            2000 * (imp_chn_attr_tmp->picWidth * imp_chn_attr_tmp->picHeight) / (1280 * 720);
+    rc_attr->attrH264Cbr.outBitRate = currentParams.bitrate;
     rc_attr->attrH264Cbr.maxQp = 38;
     rc_attr->attrH264Cbr.minQp = 15;
     rc_attr->attrH264Cbr.maxFPS = 100;

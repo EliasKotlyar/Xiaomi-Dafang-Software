@@ -34,7 +34,6 @@ ImpH264VideoDeviceSource::createNew(UsageEnvironment &env, impParams params) {
 ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment &env, impParams params)
         : FramedSource(env) {
     impEncoder = new ImpEncoder(params);
-    framesCount=0;
 
 }
 
@@ -58,11 +57,7 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
 
 
     if(frameList.empty()){
-        framesCount++;
-        if(framesCount == 25){
-            framesCount = 0;
-            impEncoder->requestIDR();
-        }
+
         frameList = impEncoder->geth264frames();
     }
     IMPEncoderPack frame = frameList.front();
@@ -70,10 +65,10 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
     int frameSize = frame.length-4;
 
     if (frameSize > (int) fMaxSize) {
-        /*fprintf(stderr,
+        fprintf(stderr,
                 "WebcamJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n",
                 fMaxSize);
-                */
+
 
         fNumTruncatedBytes = frameSize - fMaxSize;
         frameSize = fMaxSize;
