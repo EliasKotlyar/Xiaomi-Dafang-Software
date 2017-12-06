@@ -12,6 +12,17 @@
 #define IMP_MODE_JPEG 1
 #define IMP_MODE_H264_STREAM 2
 #define IMP_MODE_H264_SNAP 3
+#define CH0_INDEX  0
+#define CH1_INDEX  1
+#define CHN_ENABLE 1
+#define CHN_DISABLE 0
+#define CHN0_EN                 1
+#define CHN1_EN                 1
+#define CROP_EN                    1
+#define SENSOR_FRAME_RATE_NUM        25
+#define SENSOR_FRAME_RATE_DEN        1
+#define SENSOR_WIDTH_SECOND        640
+#define SENSOR_HEIGHT_SECOND        360
 
 #define FS_CHN_NUM            1
 #define ENC_H264_CHANNEL        0
@@ -91,6 +102,11 @@ private:
     impParams currentParams;
 
     int encoder_chn_exit(int encChn);
+
+    chn_conf chn;
+
+
+
 
 };
 
