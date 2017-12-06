@@ -4,12 +4,21 @@
 #include "impfuncs.h"
 #include <imp/imp_encoder.h>
 #define IMP_MODE_JPEG 1
-#define IMP_MODE_H264 2
-
+#define IMP_MODE_H264_STREAM 2
+#define IMP_MODE_H264_SNAP 3
 #include <list>
+
+struct impParams {
+    int mode;
+    int width;
+    int height;
+    int bitrate;
+};
+
+
 class ImpEncoder {
 public:
-    ImpEncoder(int mode,int width,int height);
+    ImpEncoder(impParams params);
     ~ImpEncoder();
     int snap_jpeg();
     std::list <IMPEncoderPack> geth264frames();

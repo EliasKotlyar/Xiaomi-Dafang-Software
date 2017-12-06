@@ -53,7 +53,7 @@ ImpJpegVideoDeviceSource::createNew(UsageEnvironment &env,
 #ifndef JPEG_TEST
 
 int ImpJpegVideoDeviceSource::initDevice(UsageEnvironment &env, int fd) {
-    impEncoder = new ImpEncoder(IMP_MODE_JPEG,320,240);
+    //impEncoder = new ImpEncoder(IMP_MODE_JPEG,320,240);
 
 
     return 0;

@@ -37,10 +37,10 @@ void *ImpEncoder::getBuffer() {
 }
 
 
-ImpEncoder::ImpEncoder(int mode, int width, int height) {
+ImpEncoder::ImpEncoder(impParams params) {
 
 
-    encoderMode = mode;
+    encoderMode = params.;
     int ret;
     int i;
 

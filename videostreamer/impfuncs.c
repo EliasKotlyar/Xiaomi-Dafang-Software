@@ -84,7 +84,7 @@ struct chn_conf chn[2] = {
 
 IMPSensorInfo sensor_info;
 
-int sample_system_init(int width,int height) {
+int sample_system_init(impParams params) {
 
     chn[0].fs_chn_attr.crop.width = width;
     chn[0].fs_chn_attr.crop.height = height;

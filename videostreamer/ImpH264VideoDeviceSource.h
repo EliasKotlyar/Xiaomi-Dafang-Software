@@ -15,11 +15,7 @@
 
 #include "ImpEncoder.h"
 
-struct impParams {
-    int width;
-    int height;
-    int bitrate;
-};
+
 
 class ImpH264VideoDeviceSource: public FramedSource {
 public:

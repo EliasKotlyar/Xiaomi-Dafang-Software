@@ -74,7 +74,7 @@ struct chn_conf {
 
 #define  CHN_NUM  ARRAY_SIZE(chn)
 
-int sample_system_init(int, int);
+int sample_system_init(impParams params);
 
 int sample_system_exit();
 
