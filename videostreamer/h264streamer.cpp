@@ -128,6 +128,7 @@ void play() {
     impParams params;
     params.width = 1280;
     params.height = 720;
+    params.framerate = 10;
 
     // Open the input file as a 'byte-stream file source':
     ImpH264VideoDeviceSource* fileSource

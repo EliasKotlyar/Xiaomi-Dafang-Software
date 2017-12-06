@@ -66,39 +66,38 @@ void *ImpEncoder::getBuffer() {
 
 
 ImpEncoder::ImpEncoder(impParams params) {
-
-/*
-    index = CH0_INDEX,
-            enable = CHN0_EN,
-            fs_chn_attr = {
-                    pixFmt = PIX_FMT_NV12,
-                    outFrmRateNum = SENSOR_FRAME_RATE_NUM,
-                    outFrmRateDen = SENSOR_FRAME_RATE_DEN,
-                    nrVBs = 3,
-                    type = FS_PHY_CHANNEL,
-
-                    crop = {
-                            enable = CROP_EN,
-                            top = 0,
-                            left = 0,
-                            width = SENSOR_WIDTH,
-                            height = SENSOR_HEIGHT,
-                    },
-
-                    //.scaler.enable = 0,
-
-                    picWidth = SENSOR_WIDTH,
-                    picHeight = SENSOR_HEIGHT,
-            },
-            framesource_chn = {DEV_ID_FS, 0, 0},
-            imp_encoder = {DEV_ID_ENC, 0, 0},
-    chn[0].fs_chn_attr.crop.width = currentParams.width;
-    chn[0].fs_chn_attr.crop.height = currentParams.height;
-    chn[0].fs_chn_attr.picWidth = currentParams.width;
-    chn[0].fs_chn_attr.picHeight = currentParams.height;
-*/
-
     currentParams = params;
+
+
+    // Init Structure:
+    chn.index = 0;
+    chn.fs_chn_attr.pixFmt = PIX_FMT_NV12;
+    chn.fs_chn_attr.outFrmRateNum = currentParams.framerate;
+    chn.fs_chn_attr.outFrmRateDen = 1;
+    chn.fs_chn_attr.nrVBs = 3;
+    chn.fs_chn_attr.type = FS_PHY_CHANNEL;
+
+    chn.fs_chn_attr.crop.enable=0;
+    chn.fs_chn_attr.crop.width = currentParams.width;
+    chn.fs_chn_attr.crop.height = currentParams.height;
+    chn.fs_chn_attr.crop.top = 0;
+    chn.fs_chn_attr.crop.left = 0;
+
+
+
+    chn.fs_chn_attr.picWidth = currentParams.width;
+    chn.fs_chn_attr.picHeight = currentParams.height;
+
+    IMPCell framesourceCell = {DEV_ID_FS, 0, 0};
+    IMPCell encoderCell = {DEV_ID_ENC, 0, 0};
+
+
+    chn.framesource_chn = framesourceCell;
+    chn.imp_encoder = encoderCell;
+
+
+
+
     encoderMode = currentParams.mode;
     int width = currentParams.width;
     int height = currentParams.height;

@@ -38,6 +38,7 @@ struct impParams {
     int width;
     int height;
     int bitrate;
+    int framerate;
 };
 struct chn_conf {
     unsigned int index;//0 for main channel ,1 for second channel
