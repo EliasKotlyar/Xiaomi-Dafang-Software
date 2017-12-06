@@ -345,6 +345,11 @@ int sample_encoder_init() {
 			rc_attr->attrH264Cbr.AdaptiveMode = false;
 			rc_attr->attrH264Cbr.GOPRelation = false;
 
+            rc_attr->attrH264FrmUsed.enable = true;
+            rc_attr->attrH264FrmUsed.frmUsedMode = ENC_FRM_SKIP;
+            rc_attr->attrH264FrmUsed.frmUsedTimes = 1;
+
+
 
             /*
             rc_attr->rcMode = ENC_RC_MODE_H264VBR;

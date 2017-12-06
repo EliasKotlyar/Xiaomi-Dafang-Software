@@ -28,18 +28,19 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include <BasicUsageEnvironment.hh>
 #include <GroupsockHelper.hh>
 #include "ImpH264VideoDeviceSource.h"
+#include "h264streamer.h"
 #include <signal.h>
 UsageEnvironment* env;
 char const* inputFileName = "stdin";
 H264VideoStreamDiscreteFramer* videoSource;
 RTPSink* videoSink;
 
-void play(); // forward
-
 char quit = 0;
+
 void sighandler(int n) {
     printf("Signal received (%d)\n", n);
     quit = 1;
+
 }
 
 int main(int argc, char** argv) {
@@ -121,10 +122,6 @@ void afterPlaying(void* /*clientData*/) {
     *env << "...done reading from file\n";
     videoSink->stopPlaying();
     Medium::close(videoSource);
-    // Note that this also closes the input file that this source read from.
-
-    // Start playing once again:
-    play();
 }
 
 void play() {
