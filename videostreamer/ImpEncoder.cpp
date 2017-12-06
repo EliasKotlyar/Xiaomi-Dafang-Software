@@ -358,13 +358,16 @@ std::list <IMPEncoderPack> ImpEncoder::geth264frames() {
     std::list <IMPEncoderPack> frameList;
 
 
-    if(framesCount == currentParams.framerate){
+    // Request it every 2 Seconds:
+    /*
+    if(framesCount == currentParams.framerate*3){
         framesCount = 0;
         requestIDR();
     }else{
         framesCount++;
     }
-
+     */
+    requestIDR();
 
 
     int ret;
@@ -388,7 +391,10 @@ std::list <IMPEncoderPack> ImpEncoder::geth264frames() {
 
     for (i = 0; i < stream.packCount; i++) {
         //printf("1. Got Frame with size %d\n",stream.pack[i].length);
-        frameList.push_back(stream.pack[i]);
+        //if(stream.pack[i].dataType.h264Type == 5){
+            frameList.push_back(stream.pack[i]);
+        //}
+
     }
 
     IMP_Encoder_ReleaseStream(0, &stream);
@@ -413,7 +419,7 @@ int ImpEncoder::sample_system_init() {
     memcpy(sensor_info.i2c.type, SENSOR_NAME, sizeof(SENSOR_NAME));
     sensor_info.i2c.addr = SENSOR_I2C_ADDR;
 
-    IMP_LOG_ERR(TAG, "Imp Log %d\n", IMP_Log_Get_Option());
+    //IMP_LOG_ERR(TAG, "Imp Log %d\n", IMP_Log_Get_Option());
     //IMP_Log_Set_Option()
 
     ret = IMP_ISP_Open();
@@ -650,6 +656,16 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264Cbr.GOPQPStep = 15;
     rc_attr->attrH264Cbr.AdaptiveMode = false;
     rc_attr->attrH264Cbr.GOPRelation = false;
+
+
+    /*
+    rc_attr->attrH264FrmUsed.enable = true;
+    rc_attr->attrH264FrmUsed.dnIQp = ENC_FRM_REUSED ;
+    rc_attr->attrH264FrmUsed.frmUsedTimes = 50;
+*/
+
+
+
 
     /*
     rc_attr->attrH264FrmUsed.enable = true;

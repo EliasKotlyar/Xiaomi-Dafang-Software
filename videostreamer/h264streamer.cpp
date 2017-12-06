@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     videoSink = H264VideoRTPSink::createNew(*env, &rtpGroupsock, 96);
 
     // Create (and start) a 'RTCP instance' for this RTP sink:
-    const unsigned estimatedSessionBandwidth = 500; // in kbps; for RTCP b/w share
+    const unsigned estimatedSessionBandwidth = 50; // in kbps; for RTCP b/w share
     const unsigned maxCNAMElen = 100;
     unsigned char CNAME[maxCNAMElen+1];
     gethostname((char*)CNAME, maxCNAMElen);
@@ -126,8 +126,8 @@ void afterPlaying(void* /*clientData*/) {
 
 void play() {
     impParams params;
-    params.width = 640;
-    params.height = 480;
+    params.width = 1280;
+    params.height = 720;
     params.framerate = 25;
     params.bitrate = 2000;
 
@@ -135,8 +135,8 @@ void play() {
     ImpH264VideoDeviceSource* fileSource
             = ImpH264VideoDeviceSource::createNew(*env,params);
 
-    OutPacketBuffer::maxSize = params.width * params.height * 3 / 2;
-    //OutPacketBuffer::maxSize = params.bitrate << 8;
+    //OutPacketBuffer::maxSize = params.width * params.height * 3 / 2;
+    OutPacketBuffer::maxSize = params.bitrate << 8;
 
     // Open the input file as a 'byte-stream file source':
     /*ByteStreamFileSource* fileSource
