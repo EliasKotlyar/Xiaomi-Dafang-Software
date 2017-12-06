@@ -15,12 +15,18 @@
 
 #include "ImpEncoder.h"
 
+struct impParams {
+    int width;
+    int height;
+    int bitrate;
+};
+
 class ImpH264VideoDeviceSource: public FramedSource {
 public:
-    static ImpH264VideoDeviceSource* createNew(UsageEnvironment& env);
+    static ImpH264VideoDeviceSource* createNew(UsageEnvironment& env, impParams params);
 
 protected:
-    ImpH264VideoDeviceSource(UsageEnvironment& env);
+    ImpH264VideoDeviceSource(UsageEnvironment& env, impParams params);
     // called only by createNew()
 
     virtual ~ImpH264VideoDeviceSource();

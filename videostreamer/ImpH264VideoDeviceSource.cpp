@@ -25,15 +25,15 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 ////////// ImpH264VideoDeviceSource //////////
 
 ImpH264VideoDeviceSource *
-ImpH264VideoDeviceSource::createNew(UsageEnvironment &env) {
+ImpH264VideoDeviceSource::createNew(UsageEnvironment &env, impParams params) {
     ImpH264VideoDeviceSource *newSource
-            = new ImpH264VideoDeviceSource(env);
+            = new ImpH264VideoDeviceSource(env,params);
     return newSource;
 }
 
-ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment &env)
+ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment &env, impParams params)
         : FramedSource(env) {
-    impEncoder = new ImpEncoder(IMP_MODE_H264,640,480);
+    impEncoder = new ImpEncoder(IMP_MODE_H264,params.width,params.height);
 
 }
 
@@ -60,8 +60,8 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
         frameList = impEncoder->geth264frames();
     }
     IMPEncoderPack frame = frameList.front();
-    void* frameAdr = (void *) frame.virAddr +8 ;
-    int frameSize = frame.length-8;
+    void* frameAdr = (void *) frame.virAddr +4 ;
+    int frameSize = frame.length-4;
 
     if (frameSize > (int) fMaxSize) {
         /*fprintf(stderr,

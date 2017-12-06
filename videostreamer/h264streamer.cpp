@@ -31,7 +31,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 UsageEnvironment* env;
 char const* inputFileName = "stdin";
-H264VideoStreamFramer* videoSource;
+H264VideoStreamDiscreteFramer* videoSource;
 RTPSink* videoSink;
 
 void play(); // forward
@@ -61,7 +61,13 @@ int main(int argc, char** argv) {
     rtcpGroupsock.multicastSendOnly(); // we're a SSM source
 
     // Create a 'H264 Video RTP' sink from the RTP 'groupsock':
-    OutPacketBuffer::maxSize = 100000;
+    //OutPacketBuffer::maxSize = 100000;
+    int bitrate = 2000;
+    OutPacketBuffer::maxSize = bitrate << 8; //2X Bitrate as the max packet size
+
+    //OutPacketBuffer::maxSize = width * height * 3 / 2;
+
+
     videoSink = H264VideoRTPSink::createNew(*env, &rtpGroupsock, 96);
 
     // Create (and start) a 'RTCP instance' for this RTP sink:
@@ -113,9 +119,13 @@ void afterPlaying(void* /*clientData*/) {
 }
 
 void play() {
+    impParams params;
+    params.width = 1280;
+    params.height = 720;
+
     // Open the input file as a 'byte-stream file source':
     ImpH264VideoDeviceSource* fileSource
-            = ImpH264VideoDeviceSource::createNew(*env);
+            = ImpH264VideoDeviceSource::createNew(*env,params);
 
     // Open the input file as a 'byte-stream file source':
     /*ByteStreamFileSource* fileSource
@@ -132,7 +142,7 @@ void play() {
 
 
     // Create a framer for the Video Elementary Stream:
-    videoSource = H264VideoStreamFramer::createNew(*env, videoES);
+    videoSource = H264VideoStreamDiscreteFramer::createNew(*env, videoES);
 
     // Finally, start playing:
     *env << "Beginning to read from file...\n";
