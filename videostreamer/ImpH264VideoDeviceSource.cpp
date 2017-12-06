@@ -34,6 +34,7 @@ ImpH264VideoDeviceSource::createNew(UsageEnvironment &env, impParams params) {
 ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment &env, impParams params)
         : FramedSource(env) {
     impEncoder = new ImpEncoder(IMP_MODE_H264,params.width,params.height);
+    framesCount=0;
 
 }
 
@@ -57,10 +58,15 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
 
 
     if(frameList.empty()){
+        framesCount++;
+        if(framesCount == 50){
+            framesCount = 0;
+            impEncoder->requestIDR();
+        }
         frameList = impEncoder->geth264frames();
     }
     IMPEncoderPack frame = frameList.front();
-    void* frameAdr = (void *) frame.virAddr +4 ;
+    void* frameAdr = (void *) ((int)frame.virAddr +4) ;
     int frameSize = frame.length-4;
 
     if (frameSize > (int) fMaxSize) {

@@ -13,6 +13,7 @@ public:
     ~ImpEncoder();
     int snap_jpeg();
     std::list <IMPEncoderPack> geth264frames();
+    void requestIDR();
     int snap_h264();
     void* getBuffer();
 

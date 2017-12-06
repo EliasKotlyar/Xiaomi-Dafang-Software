@@ -306,7 +306,7 @@ std::list <IMPEncoderPack> ImpEncoder::geth264frames() {
     int ret;
     /* H264 Channel start receive picture */
 
-    //IMP_Encoder_FlushStream(ENC_H264_CHANNEL);
+
 
     unsigned int i;
     /* Polling H264 Stream, set timeout as 1000msec */
@@ -332,4 +332,7 @@ std::list <IMPEncoderPack> ImpEncoder::geth264frames() {
 
 
     return frameList;
+}
+void ImpEncoder::requestIDR(){
+    IMP_Encoder_FlushStream(ENC_H264_CHANNEL);
 }
