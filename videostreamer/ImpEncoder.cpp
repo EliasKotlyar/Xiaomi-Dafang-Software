@@ -70,30 +70,38 @@ ImpEncoder::ImpEncoder(impParams params) {
 
 
     // Init Structure:
+    memset(&chn, 0, sizeof(chn_conf));
+
     chn.index = 0;
+    chn.enable = 1;
     chn.fs_chn_attr.pixFmt = PIX_FMT_NV12;
-    chn.fs_chn_attr.outFrmRateNum = currentParams.framerate;
+    chn.fs_chn_attr.outFrmRateNum = SENSOR_FRAME_RATE_NUM;
     chn.fs_chn_attr.outFrmRateDen = 1;
     chn.fs_chn_attr.nrVBs = 3;
     chn.fs_chn_attr.type = FS_PHY_CHANNEL;
 
-    chn.fs_chn_attr.crop.enable=0;
+    chn.fs_chn_attr.crop.enable = 1;
     chn.fs_chn_attr.crop.width = currentParams.width;
     chn.fs_chn_attr.crop.height = currentParams.height;
     chn.fs_chn_attr.crop.top = 0;
     chn.fs_chn_attr.crop.left = 0;
 
+    chn.fs_chn_attr.scaler.enable = 0;
+    chn.fs_chn_attr.scaler.outwidth = currentParams.width;
+    chn.fs_chn_attr.scaler.outheight = currentParams.height;
 
 
     chn.fs_chn_attr.picWidth = currentParams.width;
     chn.fs_chn_attr.picHeight = currentParams.height;
 
-    IMPCell framesourceCell = {DEV_ID_FS, 0, 0};
-    IMPCell encoderCell = {DEV_ID_ENC, 0, 0};
+    chn.framesource_chn.deviceID = DEV_ID_FS;
+    chn.framesource_chn.groupID = 0;
+    chn.framesource_chn.outputID = 0;
 
+    chn.imp_encoder.deviceID = DEV_ID_ENC;
+    chn.imp_encoder.groupID = 0;
+    chn.imp_encoder.outputID = 0;
 
-    chn.framesource_chn = framesourceCell;
-    chn.imp_encoder = encoderCell;
 
 
 
@@ -146,6 +154,7 @@ ImpEncoder::ImpEncoder(impParams params) {
 
 
 
+
     /* Step.4 Bind */
 
     ret = IMP_System_Bind(&chn.framesource_chn, &chn.imp_encoder);
@@ -161,6 +170,7 @@ ImpEncoder::ImpEncoder(impParams params) {
 
     }
     //exit(0);
+
 
     /* drop several pictures of invalid data */
     sleep(SLEEP_TIME);
@@ -351,7 +361,6 @@ std::list <IMPEncoderPack> ImpEncoder::geth264frames() {
     /* H264 Channel start receive picture */
 
 
-
     unsigned int i;
     /* Polling H264 Stream, set timeout as 1000msec */
     ret = IMP_Encoder_PollingStream(0, 1000);
@@ -435,11 +444,14 @@ int ImpEncoder::sample_system_init() {
     }
 
 
+    /*
     ret = IMP_ISP_Tuning_SetWDRAttr(IMPISP_TUNING_OPS_MODE_DISABLE);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "failed to set WDR\n");
         return -1;
     }
+     */
+
 
 
 
@@ -499,14 +511,15 @@ int ImpEncoder::sample_framesource_streamon() {
     /* Enable channels */
 
     ret = IMP_FrameSource_EnableChn(0);
+    fflush(stdout);
+
+    dup2(saved_stdout, STDOUT_FILENO);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_FrameSource_EnableChn(%d) error: %d\n", ret, 0);
         return -1;
     }
 
-    fflush(stdout);
 
-    dup2(saved_stdout, STDOUT_FILENO);
     return 0;
 }
 
@@ -593,6 +606,7 @@ int ImpEncoder::sample_jpeg_init() {
 }
 
 int ImpEncoder::sample_encoder_init() {
+
     int ret;
     IMPEncoderAttr *enc_attr;
     IMPEncoderRcAttr *rc_attr;
@@ -665,7 +679,6 @@ int ImpEncoder::sample_encoder_init() {
                     0, 0, ret);
         return -1;
     }
-
     return 0;
 }
 
