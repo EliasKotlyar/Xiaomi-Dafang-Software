@@ -334,5 +334,5 @@ std::list <IMPEncoderPack> ImpEncoder::geth264frames() {
     return frameList;
 }
 void ImpEncoder::requestIDR(){
-    IMP_Encoder_FlushStream(ENC_H264_CHANNEL);
+    IMP_Encoder_RequestIDR(ENC_H264_CHANNEL);
 }

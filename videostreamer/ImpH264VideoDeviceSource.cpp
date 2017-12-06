@@ -59,7 +59,7 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
 
     if(frameList.empty()){
         framesCount++;
-        if(framesCount == 50){
+        if(framesCount == 25){
             framesCount = 0;
             impEncoder->requestIDR();
         }
