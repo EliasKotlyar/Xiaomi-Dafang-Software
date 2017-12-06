@@ -28,13 +28,19 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include <BasicUsageEnvironment.hh>
 #include <GroupsockHelper.hh>
 #include "ImpH264VideoDeviceSource.h"
-
+#include <signal.h>
 UsageEnvironment* env;
 char const* inputFileName = "stdin";
 H264VideoStreamDiscreteFramer* videoSource;
 RTPSink* videoSink;
 
 void play(); // forward
+
+char quit = 0;
+void sighandler(int n) {
+    printf("Signal received (%d)\n", n);
+    quit = 1;
+}
 
 int main(int argc, char** argv) {
     // Begin by setting up our usage environment:
@@ -103,7 +109,10 @@ int main(int argc, char** argv) {
     *env << "Beginning streaming...\n";
     play();
 
-    env->taskScheduler().doEventLoop(); // does not return
+    // main loop
+    signal(SIGINT,sighandler);
+
+    env->taskScheduler().doEventLoop(&quit); // does not return
 
     return 0; // only to prevent compiler warning
 }
