@@ -374,14 +374,16 @@ void ImpEncoder::geth264frames() {
 
 
     // Request it every 2 Seconds:
+
     /*
-    if(framesCount == currentParams.framerate*3){
+    if(framesCount == currentParams.framerate*1){
         framesCount = 0;
         requestIDR();
     }else{
         framesCount++;
     }
      */
+
     requestIDR();
 
 

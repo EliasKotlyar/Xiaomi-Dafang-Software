@@ -42,7 +42,7 @@ void* ImpH264VideoDeviceSource::thread()
 {
     while(1){
         //sleep(1);
-        printf("Got Frame...\n");
+        //printf("Got Frame...\n");
         impEncoder->geth264frames();
     }
     return NULL;
@@ -67,10 +67,10 @@ void ImpH264VideoDeviceSource::doStopGettingFrames() {
 void ImpH264VideoDeviceSource::doReadFromFile() {
     fDurationInMicroseconds = 0;
     fFrameSize = 0;
-    //if (! impEncoder->listEmpty()) {
+    if (! impEncoder->listEmpty()) {
         //printf("Readfile Handler...\n");
-        //IMPEncoderPack frame = impEncoder->getFrame();
-        /*
+        IMPEncoderPack frame = impEncoder->getFrame();
+
 
         void *frameAdr = (void *) ((int) frame.virAddr + 4);
         int frameSize = frame.length - 4;
@@ -88,15 +88,12 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
         memcpy(fTo, frameAdr, frameSize);
         fFrameSize = frameSize;
         gettimeofday(&fPresentationTime, NULL);
-        //fPresentationTime =
-        //memcpy(&fPresentationTime,&frame.timestamp,sizeof(timeval));
-        //fPresentationTime.tv_usec = frame.timestamp;
 
+        //printf("Got Frame with size %d & with the type of %d, seconds: %d, miliseconds %d \n",frameSize,frame.dataType.h264Type,(int)fPresentationTime.tv_sec,(int)fPresentationTime.tv_usec);
 
-        printf("Got Frame with size %d & with the type of %d, seconds: %d, miliseconds %d \n",frameSize,frame.dataType.h264Type,(int)fPresentationTime.tv_sec,(int)fPresentationTime.tv_usec);
-        */
-    //}
-
+    }
+    nextTask() = envir().taskScheduler().scheduleDelayedTask(0,
+                                                             (TaskFunc *) FramedSource::afterGetting, this);
 
 
     //FramedSource::afterGetting(this);
