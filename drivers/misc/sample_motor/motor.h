@@ -14,8 +14,10 @@
 #ifndef __MOTOR_H__
 #define __MOTOR_H__
 /****************************** MOTOR ************************************/
-#define MOTOR0_MIN_GPIO		77		/**< motor start point */
-#define MOTOR0_MAX_GPIO		78		/**< motor stop point */
+//#define MOTOR0_MIN_GPIO		77		/**< motor start point */
+//#define MOTOR0_MAX_GPIO		78		/**< motor stop point */
+#define MOTOR0_MIN_GPIO		-1		/**< motor start point */
+#define MOTOR0_MAX_GPIO		-1		/**< motor stop point */
 #define MOTOR0_GPIO_LEVEL	0		/**< motor irq style */
 
 #define MOTOR0_ST1_GPIO		GPIO_PB(19)	/**< Phase A */
@@ -26,8 +28,10 @@
 #define MOTOR0_MAX_SPEED	1000		/**< unit : ns */
 #define MOTOR0_MIN_SPEED	10
 
-#define MOTOR1_MIN_GPIO		41
-#define MOTOR1_MAX_GPIO		60
+//#define MOTOR1_MIN_GPIO		41
+//#define MOTOR1_MAX_GPIO		60
+#define MOTOR1_MIN_GPIO		-1
+#define MOTOR1_MAX_GPIO		-1
 #define MOTOR1_GPIO_LEVEL	0
 
 
