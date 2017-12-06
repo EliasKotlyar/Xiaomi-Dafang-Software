@@ -127,6 +127,7 @@ void play() {
     ImpH264VideoDeviceSource* fileSource
             = ImpH264VideoDeviceSource::createNew(*env,params);
 
+    OutPacketBuffer::maxSize = params.width * params.height * 3 / 2;
     // Open the input file as a 'byte-stream file source':
     /*ByteStreamFileSource* fileSource
             = ByteStreamFileSource::createNew(*env, inputFileName);*/

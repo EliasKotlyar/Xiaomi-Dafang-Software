@@ -83,10 +83,5 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
     //printf("Got Frame with size %d & with the type of %d, seconds: %d, miliseconds %d \n",frameSize,frame.dataType.h264Type,(int)fPresentationTime.tv_sec,(int)fPresentationTime.tv_usec);
 
 
-
-    // Inform the reader that he has data:
-    // To avoid possible infinite recursion, we need to return to the event loop to do this:
-    nextTask() = envir().taskScheduler().scheduleDelayedTask(0,
-                                                             (TaskFunc *) FramedSource::afterGetting, this);
-
+    FramedSource::afterGetting(this);
 }
