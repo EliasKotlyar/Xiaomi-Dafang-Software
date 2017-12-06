@@ -27,14 +27,25 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 ImpH264VideoDeviceSource *
 ImpH264VideoDeviceSource::createNew(UsageEnvironment &env, impParams params) {
     ImpH264VideoDeviceSource *newSource
-            = new ImpH264VideoDeviceSource(env,params);
+            = new ImpH264VideoDeviceSource(env, params);
     return newSource;
 }
 
 ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment &env, impParams params)
         : FramedSource(env) {
     impEncoder = new ImpEncoder(params);
+    pthread_create(&m_thid, NULL, threadStub, this);
 
+
+}
+void* ImpH264VideoDeviceSource::thread()
+{
+    while(1){
+        //sleep(1);
+        printf("Got Frame...\n");
+        impEncoder->geth264frames();
+    }
+    return NULL;
 }
 
 ImpH264VideoDeviceSource::~ImpH264VideoDeviceSource() {
@@ -54,35 +65,39 @@ void ImpH264VideoDeviceSource::doStopGettingFrames() {
 }
 
 void ImpH264VideoDeviceSource::doReadFromFile() {
+    fDurationInMicroseconds = 0;
+    fFrameSize = 0;
+    //if (! impEncoder->listEmpty()) {
+        //printf("Readfile Handler...\n");
+        //IMPEncoderPack frame = impEncoder->getFrame();
+        /*
+
+        void *frameAdr = (void *) ((int) frame.virAddr + 4);
+        int frameSize = frame.length - 4;
+
+        if (frameSize > (int) fMaxSize) {
+            fprintf(stderr,
+                    "WebcamJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n",
+                    fMaxSize);
 
 
-    if(frameList.empty()){
+            fNumTruncatedBytes = frameSize - fMaxSize;
+            frameSize = fMaxSize;
+        }
 
-        frameList = impEncoder->geth264frames();
-    }
-    IMPEncoderPack frame = frameList.front();
-    void* frameAdr = (void *) ((int)frame.virAddr +4) ;
-    int frameSize = frame.length-4;
-
-    if (frameSize > (int) fMaxSize) {
-        fprintf(stderr,
-                "WebcamJPEGDeviceSource::doGetNextFrame(): read maximum buffer size: %d bytes.  Frame may be truncated\n",
-                fMaxSize);
+        memcpy(fTo, frameAdr, frameSize);
+        fFrameSize = frameSize;
+        gettimeofday(&fPresentationTime, NULL);
+        //fPresentationTime =
+        //memcpy(&fPresentationTime,&frame.timestamp,sizeof(timeval));
+        //fPresentationTime.tv_usec = frame.timestamp;
 
 
-        fNumTruncatedBytes = frameSize - fMaxSize;
-        frameSize = fMaxSize;
-    }
-
-    memcpy(fTo, frameAdr, frameSize);
-    fFrameSize = frameSize;
-    gettimeofday(&fPresentationTime, NULL);
-    //fPresentationTime =
-    //memcpy(&fPresentationTime,&frame.timestamp,sizeof(timeval));
-    //fPresentationTime.tv_usec = frame.timestamp;
-    frameList.pop_front();
-    //printf("Got Frame with size %d & with the type of %d, seconds: %d, miliseconds %d \n",frameSize,frame.dataType.h264Type,(int)fPresentationTime.tv_sec,(int)fPresentationTime.tv_usec);
+        printf("Got Frame with size %d & with the type of %d, seconds: %d, miliseconds %d \n",frameSize,frame.dataType.h264Type,(int)fPresentationTime.tv_sec,(int)fPresentationTime.tv_usec);
+        */
+    //}
 
 
-    FramedSource::afterGetting(this);
+
+    //FramedSource::afterGetting(this);
 }

@@ -103,9 +103,6 @@ ImpEncoder::ImpEncoder(impParams params) {
     chn.imp_encoder.outputID = 0;
 
 
-
-
-
     encoderMode = currentParams.mode;
     int width = currentParams.width;
     int height = currentParams.height;
@@ -190,6 +187,9 @@ ImpEncoder::ImpEncoder(impParams params) {
         }
 
     }
+    memset(&m_mutex, 0, sizeof(m_mutex));
+    pthread_mutex_init(&m_mutex, NULL);
+
 
 
 }
@@ -352,10 +352,25 @@ int ImpEncoder::snap_h264() {
     return bytesRead;
 }
 
+bool ImpEncoder::listEmpty() {
+    pthread_mutex_lock(&m_mutex);
+    bool listEmpty = frameList.empty();
+    pthread_mutex_unlock(&m_mutex);
+    return listEmpty;
+}
 
-std::list <IMPEncoderPack> ImpEncoder::geth264frames() {
+IMPEncoderPack ImpEncoder::getFrame() {
+    pthread_mutex_lock(&m_mutex);
+    IMPEncoderPack frame = frameList.front();
+    frameList.pop_front();
+    pthread_mutex_unlock(&m_mutex);
+    return frame;
+}
 
-    std::list <IMPEncoderPack> frameList;
+
+void ImpEncoder::geth264frames() {
+
+
 
 
     // Request it every 2 Seconds:
@@ -392,15 +407,15 @@ std::list <IMPEncoderPack> ImpEncoder::geth264frames() {
     for (i = 0; i < stream.packCount; i++) {
         //printf("1. Got Frame with size %d\n",stream.pack[i].length);
         //if(stream.pack[i].dataType.h264Type == 5){
-            frameList.push_back(stream.pack[i]);
+        pthread_mutex_lock(&m_mutex);
+        frameList.push_back(stream.pack[i]);
+        pthread_mutex_unlock(&m_mutex);
         //}
 
     }
 
     IMP_Encoder_ReleaseStream(0, &stream);
 
-
-    return frameList;
 }
 
 void ImpEncoder::requestIDR() {
@@ -531,7 +546,7 @@ int ImpEncoder::sample_framesource_streamon() {
         dup2(saved_stdout, STDOUT_FILENO);
         IMP_LOG_ERR(TAG, "IMP_FrameSource_EnableChn(%d) error: %d\n", ret, 0);
         return -1;
-    }else{
+    } else {
         fflush(stdout);
         dup2(saved_stdout, STDOUT_FILENO);
     }
@@ -659,7 +674,7 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264Cbr.GOPRelation = false;
 
     rc_attr->attrH264Denoise.enable = false;
-    rc_attr->attrH264Denoise.dnType = 2 ;
+    rc_attr->attrH264Denoise.dnType = 2;
     rc_attr->attrH264Denoise.dnIQp = 1;
     rc_attr->attrH264Denoise.dnPQp = 1;
 

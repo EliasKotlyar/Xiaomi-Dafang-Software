@@ -56,13 +56,17 @@ public:
 
     int snap_jpeg();
 
-    std::list <IMPEncoderPack> geth264frames();
+    void geth264frames();
 
     void requestIDR();
 
     int snap_h264();
 
     void *getBuffer();
+
+    bool listEmpty();
+
+    IMPEncoderPack getFrame();
 
 private:
     int save_stream(void *buffer, IMPEncoderStream *stream);
@@ -98,6 +102,7 @@ private:
     int sample_get_h264_stream();
 
     int sample_do_get_jpeg_snap(void);
+
     IMPSensorInfo sensor_info;
 
     impParams currentParams;
@@ -108,6 +113,8 @@ private:
 
     int framesCount;
 
+    std::list <IMPEncoderPack> frameList;
+    pthread_mutex_t m_mutex;
 
 
 };

@@ -45,7 +45,9 @@ private:
     Boolean fLimitNumBytesToStream;
     u_int64_t fNumBytesToStream; // used iff "fLimitNumBytesToStream" is True
     ImpEncoder* impEncoder;
-    std::list <IMPEncoderPack> frameList;
+    pthread_t m_thid;
+    void* thread();
+    static void* threadStub(void* clientData) { return ((ImpH264VideoDeviceSource*) clientData)->thread();};
 
 };
 
