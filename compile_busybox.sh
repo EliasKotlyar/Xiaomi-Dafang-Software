@@ -9,4 +9,5 @@ export LDFLAGS="-muclibc -O2"
 
 cd busybox/
 make clean
-make
+make CROSS_COMPILE=$CROSS_COMPILE defconfig
+make CROSS_COMPILE=$CROSS_COMPILE
