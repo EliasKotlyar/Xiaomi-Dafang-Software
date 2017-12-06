@@ -2,8 +2,12 @@
 #include "ImpEncoder.h"
 int main() {
 
+    impParams params;
+    params.width = 1280;
+    params.height = 720;
+    params.mode = IMP_MODE_H264_SNAP;
+    ImpEncoder* impEncoder = new ImpEncoder(params);
 
-    ImpEncoder* impEncoder = new ImpEncoder(IMP_MODE_H264,320,240);
     int ret;
     while(1){
         int bytesRead = impEncoder->snap_h264();

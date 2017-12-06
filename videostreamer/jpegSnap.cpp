@@ -35,8 +35,11 @@ int main(int argc, char *argv[]) {
 
 
 
-
-    ImpEncoder* impEncoder = new ImpEncoder(IMP_MODE_JPEG,width,height);
+    impParams params;
+    params.width = 1280;
+    params.height = 720;
+    params.mode = IMP_MODE_JPEG;
+    ImpEncoder* impEncoder = new ImpEncoder(params);
     int bytesRead = impEncoder->snap_jpeg();
     void* buffer = impEncoder->getBuffer();
 
