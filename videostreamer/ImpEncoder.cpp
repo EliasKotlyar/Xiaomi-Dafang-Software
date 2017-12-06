@@ -527,12 +527,13 @@ int ImpEncoder::sample_framesource_streamon() {
     /* Enable channels */
 
     ret = IMP_FrameSource_EnableChn(0);
-    fflush(stdout);
-
-    dup2(saved_stdout, STDOUT_FILENO);
     if (ret < 0) {
+        dup2(saved_stdout, STDOUT_FILENO);
         IMP_LOG_ERR(TAG, "IMP_FrameSource_EnableChn(%d) error: %d\n", ret, 0);
         return -1;
+    }else{
+        fflush(stdout);
+        dup2(saved_stdout, STDOUT_FILENO);
     }
 
 
@@ -656,6 +657,11 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264Cbr.GOPQPStep = 15;
     rc_attr->attrH264Cbr.AdaptiveMode = false;
     rc_attr->attrH264Cbr.GOPRelation = false;
+
+    rc_attr->attrH264Denoise.enable = false;
+    rc_attr->attrH264Denoise.dnType = 2 ;
+    rc_attr->attrH264Denoise.dnIQp = 1;
+    rc_attr->attrH264Denoise.dnPQp = 1;
 
 
     /*
