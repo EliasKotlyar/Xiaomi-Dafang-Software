@@ -38,9 +38,9 @@ ImpH264VideoDeviceSource::ImpH264VideoDeviceSource(UsageEnvironment &env, impPar
 
 
 }
-void* ImpH264VideoDeviceSource::thread()
-{
-    while(1){
+
+void *ImpH264VideoDeviceSource::thread() {
+    while (1) {
         //sleep(1);
         //printf("Got Frame...\n");
         impEncoder->geth264frames();
@@ -67,13 +67,27 @@ void ImpH264VideoDeviceSource::doStopGettingFrames() {
 void ImpH264VideoDeviceSource::doReadFromFile() {
     fDurationInMicroseconds = 0;
     fFrameSize = 0;
-    if (! impEncoder->listEmpty()) {
+    if (!impEncoder->listEmpty()) {
         //printf("Readfile Handler...\n");
         IMPEncoderPack frame = impEncoder->getFrame();
+        void *frameAdr = (void *) (frame.virAddr);
+        int frameSize = frame.length;
+        char *charPtr = (char *) frameAdr;
 
+        if (frameSize >= 4 && charPtr[0] == 0 && charPtr[1] == 0) {
+            if ((charPtr[2] == 0 && charPtr[3] == 1)) {
 
-        void *frameAdr = (void *) ((int) frame.virAddr + 4);
-        int frameSize = frame.length - 4;
+                //printf("1. Found header,correcting it...\n");
+                frameAdr = (void *) ((int) (frameAdr) + 4);
+                frameSize = frameSize - 4;
+            } else if (charPtr[2] == 1) {
+                //printf("2. Found header,correcting it2...\n");
+                frameAdr = (void *) ((int) (frameAdr) + 3);
+                frameSize = frameSize - 3;
+            }
+
+        }
+
 
         if (frameSize > (int) fMaxSize) {
             fprintf(stderr,
@@ -89,7 +103,11 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
         fFrameSize = frameSize;
         gettimeofday(&fPresentationTime, NULL);
 
-        //printf("Got Frame with size %d & with the type of %d, seconds: %d, miliseconds %d \n",frameSize,frame.dataType.h264Type,(int)fPresentationTime.tv_sec,(int)fPresentationTime.tv_usec);
+        /*
+        printf("Got Frame with size %d & with the type of %d, seconds: %d, miliseconds %d \n", frameSize,
+               frame.dataType.h264Type, (int) fPresentationTime.tv_sec, (int) fPresentationTime.tv_usec);
+        sleep(1);
+         */
 
     }
     nextTask() = envir().taskScheduler().scheduleDelayedTask(0,

@@ -659,7 +659,7 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr = &channel_attr.rcAttr;
 
 
-    /*
+
     rc_attr->rcMode = ENC_RC_MODE_H264CBR;
     rc_attr->attrH264Cbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
     rc_attr->attrH264Cbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
@@ -676,7 +676,7 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264Cbr.AdaptiveMode = false;
     rc_attr->attrH264Cbr.GOPRelation = false;
 
-     */
+
     rc_attr->attrH264Denoise.enable = false;
     rc_attr->attrH264Denoise.dnType = 2;
     rc_attr->attrH264Denoise.dnIQp = 1;
@@ -699,7 +699,7 @@ int ImpEncoder::sample_encoder_init() {
     */
 
 
-
+/*
     rc_attr->rcMode = ENC_RC_MODE_H264VBR;
     rc_attr->attrH264Vbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
     rc_attr->attrH264Vbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
@@ -714,6 +714,7 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264Vbr.FrmQPStep = 3;
     rc_attr->attrH264Vbr.GOPQPStep = 15;
     rc_attr->attrH264FrmUsed.enable = 1;
+    */
 
 
 
