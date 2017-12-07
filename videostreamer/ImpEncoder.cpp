@@ -423,6 +423,8 @@ int ImpEncoder::sample_system_init() {
         return -1;
     }
 
+    setNightVision(currentParams.nightvision);
+
 
     /*
     ret = IMP_ISP_Tuning_SetWDRAttr(IMPISP_TUNING_OPS_MODE_DISABLE);
@@ -748,11 +750,11 @@ void ImpEncoder::geth264frames() {
 
 
 
-    if(framesCount == currentParams.framerate*8){
+    if (framesCount == currentParams.framerate * 8) {
         framesCount = 0;
         //requestIDR();
         IMP_Encoder_FlushStream(0);
-    }else{
+    } else {
         framesCount++;
     }
 
@@ -785,12 +787,12 @@ void ImpEncoder::geth264frames() {
         //printf("1. Got Frame with size %d\n",stream.pack[i].length);
         //if(stream.pack[i].dataType.h264Type == 5){
         IMPEncoderPack frame = stream.pack[i];
-        if(i == 0) {
+        if (i == 0) {
             void *frameAdr = (void *) (frame.virAddr);
             int frameSize = frame.length;
             frameAdr = (void *) ((int) (frameAdr) + 4);
             frameSize = frameSize - 4;
-            frame.virAddr = (uint32_t)frameAdr;
+            frame.virAddr = (uint32_t) frameAdr;
             frame.length = frameSize;
         }
         pthread_mutex_lock(&m_mutex);
@@ -805,16 +807,25 @@ void ImpEncoder::geth264frames() {
 }
 
 void ImpEncoder::setNightVision(bool state) {
-    IMPISPRunningMode mode;
-
+    IMPISPRunningMode isprunningmode;
+    IMPISPSceneMode sceneMode;
+    int ret;
     if (state) {
-        mode = IMPISP_RUNNING_MODE_NIGHT;
+        isprunningmode = IMPISP_RUNNING_MODE_NIGHT;
+        sceneMode =  IMPISP_SCENE_MODE_NIGHT;
     } else {
-        mode = IMPISP_RUNNING_MODE_DAY;
+        isprunningmode = IMPISP_RUNNING_MODE_DAY;
+        sceneMode =  IMPISP_SCENE_MODE_AUTO;
     }
-    int ret = IMP_ISP_Tuning_SetISPRunningMode(mode);
+    ret = IMP_ISP_Tuning_SetISPRunningMode(isprunningmode);
     if (ret) {
         IMP_LOG_ERR(TAG, "IMP_ISP_Tuning_SetISPRunningMode error !\n");
     }
+    ret = IMP_ISP_Tuning_SetSceneMode(sceneMode);
+    if (ret) {
+        IMP_LOG_ERR(TAG, "IMP_ISP_Tuning_SetSceneMode error !\n");
+    }
+
+
 }
 
