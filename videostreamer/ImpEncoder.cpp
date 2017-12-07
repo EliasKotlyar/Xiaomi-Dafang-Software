@@ -784,8 +784,17 @@ void ImpEncoder::geth264frames() {
     for (i = 0; i < stream.packCount; i++) {
         //printf("1. Got Frame with size %d\n",stream.pack[i].length);
         //if(stream.pack[i].dataType.h264Type == 5){
+        IMPEncoderPack frame = stream.pack[i];
+        if(i == 0) {
+            void *frameAdr = (void *) (frame.virAddr);
+            int frameSize = frame.length;
+            frameAdr = (void *) ((int) (frameAdr) + 4);
+            frameSize = frameSize - 4;
+            frame.virAddr = (uint32_t)frameAdr;
+            frame.length = frameSize;
+        }
         pthread_mutex_lock(&m_mutex);
-        frameList.push_back(stream.pack[i]);
+        frameList.push_back(frame);
         pthread_mutex_unlock(&m_mutex);
         //}
 

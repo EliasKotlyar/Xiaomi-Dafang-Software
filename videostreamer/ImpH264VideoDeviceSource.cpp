@@ -113,10 +113,11 @@ void ImpH264VideoDeviceSource::doReadFromFile() {
         fFrameSize = frameSize;
         gettimeofday(&fPresentationTime, NULL);
 
-
+        /*
         printf("Got Frame with size %d & with the type of %d, seconds: %d, miliseconds %d \n", frameSize,
                frame.dataType.h264Type, (int) fPresentationTime.tv_sec, (int) fPresentationTime.tv_usec);
-        //sleep(1);
+        */
+         //sleep(1);
 
 
 
