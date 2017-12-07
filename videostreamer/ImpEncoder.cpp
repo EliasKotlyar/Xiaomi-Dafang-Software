@@ -191,7 +191,6 @@ ImpEncoder::ImpEncoder(impParams params) {
     pthread_mutex_init(&m_mutex, NULL);
 
 
-
 }
 
 
@@ -367,58 +366,6 @@ IMPEncoderPack ImpEncoder::getFrame() {
     return frame;
 }
 
-
-void ImpEncoder::geth264frames() {
-
-
-
-
-    // Request it every 2 Seconds:
-
-    /*
-    if(framesCount == currentParams.framerate*1){
-        framesCount = 0;
-        requestIDR();
-    }else{
-        framesCount++;
-    }
-     */
-
-    requestIDR();
-
-
-    int ret;
-    /* H264 Channel start receive picture */
-
-
-    unsigned int i;
-    /* Polling H264 Stream, set timeout as 1000msec */
-    ret = IMP_Encoder_PollingStream(0, 1000);
-    if (ret < 0) {
-        IMP_LOG_ERR(TAG, "Polling stream timeout\n");
-    }
-
-    IMPEncoderStream stream;
-    /* Get H264 Stream */
-    ret = IMP_Encoder_GetStream(0, &stream, 1);
-    if (ret < 0) {
-        IMP_LOG_ERR(TAG, "IMP_Encoder_GetStream() failed\n");
-
-    }
-
-    for (i = 0; i < stream.packCount; i++) {
-        //printf("1. Got Frame with size %d\n",stream.pack[i].length);
-        //if(stream.pack[i].dataType.h264Type == 5){
-        pthread_mutex_lock(&m_mutex);
-        frameList.push_back(stream.pack[i]);
-        pthread_mutex_unlock(&m_mutex);
-        //}
-
-    }
-
-    IMP_Encoder_ReleaseStream(0, &stream);
-
-}
 
 void ImpEncoder::requestIDR() {
     IMP_Encoder_RequestIDR(0);
@@ -659,7 +606,6 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr = &channel_attr.rcAttr;
 
 
-
     rc_attr->rcMode = ENC_RC_MODE_H264CBR;
     rc_attr->attrH264Cbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
     rc_attr->attrH264Cbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
@@ -682,6 +628,10 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264Denoise.dnIQp = 1;
     rc_attr->attrH264Denoise.dnPQp = 1;
 
+
+    rc_attr->attrH264FrmUsed.enable = 1;
+    rc_attr->attrH264FrmUsed.frmUsedMode = ENC_FRM_SKIP;
+    rc_attr->attrH264FrmUsed.frmUsedTimes = 2000;
 
     /*
     rc_attr->attrH264FrmUsed.enable = true;
@@ -787,3 +737,75 @@ int ImpEncoder::sample_encoder_exit(void) {
 
     return 0;
 }
+
+
+void ImpEncoder::geth264frames() {
+
+
+
+
+    // Request it every 2 Seconds:
+
+
+
+    if(framesCount == currentParams.framerate*8){
+        framesCount = 0;
+        //requestIDR();
+        IMP_Encoder_FlushStream(0);
+    }else{
+        framesCount++;
+    }
+
+
+
+
+    //requestIDR();
+
+
+    int ret;
+    /* H264 Channel start receive picture */
+
+
+    unsigned int i;
+    /* Polling H264 Stream, set timeout as 1000msec */
+    ret = IMP_Encoder_PollingStream(0, 1000);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "Polling stream timeout\n");
+    }
+
+    IMPEncoderStream stream;
+    /* Get H264 Stream */
+    ret = IMP_Encoder_GetStream(0, &stream, 1);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_Encoder_GetStream() failed\n");
+
+    }
+
+    for (i = 0; i < stream.packCount; i++) {
+        //printf("1. Got Frame with size %d\n",stream.pack[i].length);
+        //if(stream.pack[i].dataType.h264Type == 5){
+        pthread_mutex_lock(&m_mutex);
+        frameList.push_back(stream.pack[i]);
+        pthread_mutex_unlock(&m_mutex);
+        //}
+
+    }
+
+    IMP_Encoder_ReleaseStream(0, &stream);
+
+}
+
+void ImpEncoder::setNightVision(bool state) {
+    IMPISPRunningMode mode;
+
+    if (state) {
+        mode = IMPISP_RUNNING_MODE_NIGHT;
+    } else {
+        mode = IMPISP_RUNNING_MODE_DAY;
+    }
+    int ret = IMP_ISP_Tuning_SetISPRunningMode(mode);
+    if (ret) {
+        IMP_LOG_ERR(TAG, "IMP_ISP_Tuning_SetISPRunningMode error !\n");
+    }
+}
+

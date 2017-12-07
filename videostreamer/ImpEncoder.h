@@ -68,6 +68,8 @@ public:
 
     IMPEncoderPack getFrame();
 
+    void setNightVision(bool state);
+
 private:
     int save_stream(void *buffer, IMPEncoderStream *stream);
 
