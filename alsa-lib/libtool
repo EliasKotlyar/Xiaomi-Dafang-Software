@@ -1,8 +1,8 @@
-#! /bin/sh
+#! /bin/bash
 
 # libtool - Provide generalized library-building support services.
 # Generated automatically by config.status (alsa-lib) 1.1.5
-# Libtool was configured on host alsa.alsa-project.org:
+# Libtool was configured on host eko-GE62VR-6RF:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
@@ -56,7 +56,7 @@ pic_mode=default
 fast_install=yes
 
 # Shell to use when invoking shell scripts.
-SHELL="/bin/sh"
+SHELL="/bin/bash"
 
 # An echo program that protects backslashes.
 ECHO="printf %s\\n"
@@ -65,8 +65,8 @@ ECHO="printf %s\\n"
 PATH_SEPARATOR=":"
 
 # The host system.
-host_alias=
-host=x86_64-unknown-linux-gnu
+host_alias=mips-linux
+host=mips-unknown-linux-gnu
 host_os=linux-gnu
 
 # The build system.
@@ -75,22 +75,22 @@ build=x86_64-unknown-linux-gnu
 build_os=linux-gnu
 
 # A sed program that does not truncate output.
-SED="/usr/bin/sed"
+SED="/bin/sed"
 
 # Sed that helps us avoid accidentally triggering echo(1) options like -n.
 Xsed="$SED -e 1s/^X//"
 
 # A grep program that handles long lines.
-GREP="/usr/bin/grep"
+GREP="/bin/grep"
 
 # An ERE matcher.
-EGREP="/usr/bin/grep -E"
+EGREP="/bin/grep -E"
 
 # A literal string matcher.
-FGREP="/usr/bin/grep -F"
+FGREP="/bin/grep -F"
 
 # A BSD- or MS-compatible name lister.
-NM="/usr/bin/nm -B"
+NM="nm"
 
 # Whether we need soft or hard links.
 LN_S="ln -s"
@@ -161,10 +161,10 @@ old_postuninstall_cmds=""
 lock_old_archive_extraction=no
 
 # A C compiler.
-LTCC="gcc"
+LTCC="/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-O2 -fomit-frame-pointer -Wall -pipe"
+LTCFLAGS=""
 
 # Take the output of nm and produce a listing of raw symbols and C names.
 global_symbol_pipe="sed -n -e 's/^.*[	 ]\\([ABCDGIRSTW][ABCDGIRSTW]*\\)[	 ][	 ]*\\([_A-Za-z][_A-Za-z0-9]*\\)\$/\\1 \\2 \\2/p' | sed '/ __gnu_lto/d'"
@@ -272,19 +272,19 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/usr/lib/gcc/x86_64-redhat-linux/4.7.2 /usr/lib64 /lib64 "
+sys_lib_search_path_spec="/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/lib/gcc/mips-linux-gnu/4.7.2/uclibc /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/lib/gcc /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/mips-linux-gnu/lib/uclibc /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/mips-linux-gnu/libc/lib /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/mips-linux-gnu/libc/usr/lib "
 
 # Run-time system search path for libraries.
-sys_lib_dlsearch_path_spec="/lib64 /usr/lib64 /lib /usr/lib /usr/lib64/mysql /usr/lib64/qt-3.3/lib "
+sys_lib_dlsearch_path_spec="/lib64 /usr/lib64 /lib /usr/lib /usr/lib/x86_64-linux-gnu/libfakeroot /usr/local/lib /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu/mesa-egl /usr/lib/x86_64-linux-gnu/mesa "
 
 # Whether dlopen is supported.
 dlopen_support=yes
 
 # Whether dlopen of programs is supported.
-dlopen_self=yes
+dlopen_self=unknown
 
 # Whether dlopen of statically linked programs is supported.
-dlopen_self_static=yes
+dlopen_self_static=unknown
 
 # Commands to strip libraries.
 old_striplib="strip --strip-debug"
@@ -292,7 +292,7 @@ striplib="strip --strip-unneeded"
 
 
 # The linker used to build libraries.
-LD="/usr/bin/ld -m elf_x86_64"
+LD="/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-ld"
 
 # How to create reloadable object files.
 reload_flag=" -r"
@@ -302,7 +302,7 @@ reload_cmds="\$LD\$reload_flag -o \$output\$reload_objs"
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs~\$RANLIB \$tool_oldlib"
 
 # A language specific compiler.
-CC="gcc"
+CC="/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-gcc"
 
 # Is the compiler the GNU compiler?
 with_gcc=yes
@@ -317,7 +317,7 @@ pic_flag=" -fPIC -DPIC"
 wl="-Wl,"
 
 # Compiler flag to prevent dynamic linking.
-link_static_flag=""
+link_static_flag="-static"
 
 # Does compiler simultaneously support -c and -o options?
 compiler_c_o="yes"

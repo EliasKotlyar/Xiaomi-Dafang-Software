@@ -7,7 +7,8 @@ export CFLAGS=""
 export CPPFLAGS="-muclibc -O2"
 export LDFLAGS="-muclibc -O2"
 
-cd alsa-utils/
+cd alsa-lib/
 make clean
-./configure --host=mips-linux
+./configure --host=mips-linux --disable-python --prefix=${PWD}/_install
 make
+make install
