@@ -1,0 +1,105 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>NewIODialogBase</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>NewIODialogBase</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>297</width>
+            <height>284</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Form2</string>
+    </property>
+    <hbox>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QListView">
+            <column>
+                <property name="text">
+                    <string>Num</string>
+                </property>
+                <property name="clickable">
+                    <bool>true</bool>
+                </property>
+                <property name="resizable">
+                    <bool>true</bool>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>New Column</string>
+                </property>
+                <property name="clickable">
+                    <bool>true</bool>
+                </property>
+                <property name="resizable">
+                    <bool>true</bool>
+                </property>
+            </column>
+            <property name="name">
+                <cstring>lvIOs</cstring>
+            </property>
+        </widget>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout1</cstring>
+            </property>
+            <vbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>pbOK</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>false</bool>
+                    </property>
+                    <property name="text">
+                        <string>&amp;OK</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+O</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>pbCancel</cstring>
+                    </property>
+                    <property name="text">
+                        <string>&amp;Cancel</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+C</string>
+                    </property>
+                </widget>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer1</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Vertical</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>41</width>
+                            <height>171</height>
+                        </size>
+                    </property>
+                </spacer>
+            </vbox>
+        </widget>
+    </hbox>
+</widget>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

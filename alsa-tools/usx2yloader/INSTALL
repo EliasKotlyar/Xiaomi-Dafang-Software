@@ -1,0 +1,19 @@
+
+Prerequisites
+-------------
+
+- a Linux kernel, with USB, usbfs and hotplugging support enabled
+  (2.2.18 or 2.4.18 or later should work)
+- hotplugging scripts from <http://linux-hotplug.sourceforge.net/>
+  (release dated 2002_08_26 or later)
+- the fxload package from <http://linux-hotplug.sourceforge.net/>
+  (release dated 2002_04_11 or later)
+
+
+Installing
+----------
+
+For Installing from GIT do:
+./gitcompile
+make install
+

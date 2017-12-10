@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=HDSPMixer
+Comment=Hammerfall DSP matrix mixer control GUI
+Exec=hdspmixer
+FilePattern=hdspmixer
+Icon=hdspmixer.png
+Terminal=false
+Type=Application
+Categories=Application;AudioVideo;

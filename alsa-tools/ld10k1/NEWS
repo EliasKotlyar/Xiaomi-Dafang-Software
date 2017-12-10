@@ -1,0 +1,66 @@
+0.1.8p1
+	By Tim...
+	Now loads as10k1 bin patch files from ALSA alsa-tools AND from EMU10K1 project emu-utils.
+	Fixed init_live bug. 
+	Fixed bug in liblo10k1.c liblo10k1_patch_get().
+0.1.8
+	Sync with ALSA 1.0.8rc1
+0.1.7test4
+	ld10k1 options for pid file and log file  - Mikael Magnusson
+	Script for start and end of ld10k1
+0.1.7test3
+	Fixed bug in liblo10k1lf_save_patch - Mikael Magnusson
+	ld10k1 will exit with error code if it can not connect to ld10k1 - Mikael Magnusson
+0.1.7test2
+	License for liblo10k1 was changed from GPL to LGPL. Other parts are still GPLed.
+	Fixed getopt_long handling - Mikael Magnusson
+	Fixed free bug in liblo10k1lf_get_dsp_config - Mikael Magnusson
+	Fixed (copy & paste) bug in liblo10k1lf_load_patch - thanks to Mikael Magnusson
+0.1.7test1
+	!!! This version of ld10k1 requires ALSA 1.0.7 - both alsa-lib and alsa-driver !!!
+	!!! In current kernel 2.6.8.1 is still ALSA 1.0.4 !!!
+	Moved emu patch loading to liblo10k1
+	Moved emu patch to ld10k1 patch transforming to liblo10k1
+	DSP config can by stored and restored.
+	New lo10k1 options --store, --restore, --save_patch, --load_patch, --wait
+	Some source reorganization.
+	Source cleaning - Mikael Magnusson
+0.1.6
+	Moved ld10k1 and dl10k1 to sbin directory - Mikael Magnusson
+	Fixed bug in call to ld10k1_free_reserved_ctls - Mikael Magnusson
+	Some cleanup from Mikael Magnusson
+	ld10k1 not use list.h header from linux kernel - Mikael Magnusson
+	configure.in and makefile.am cleanup - Mikael Magnusson
+	Init script for sb live, effect path - Mikael Magnusson
+	Daemonize of ld10k1, some ideas from Mikael Magnusson.
+	Aditional cleanups.
+0.1.5
+	Fixed bug in control index.
+	Reworking of communication between client and server.
+	Some work on liblo10k1 to support GUI.
+	Support for ALSA 1.0.6rc1
+	Fixed bug in connecion add
+0.1.4
+	Control indexes can be used now - see -ctrl (i option)
+	Check for AC97 controls which can not be deleted.
+	Corrected bug in free_comm - Mikael Magnusson
+	Some cleanup from Mikael Magnusson
+	Splitted lo10k1 to two parts - lo10k1 and liblo10k1.
+	Fixed bug in tram allocation.
+	Some effects for SB Live from Josep Andreu (holborn) in contrib subdir
+	Check if ld10k1 run under root
+0.1.3p2
+	Corected bug in accept_comm. Thanks to Mikael Magnusson and Joachim Falk
+0.1.3p1
+	Corrected bug for constant registers
+0.1.3
+	Dump loader (dl10k1).
+	ld10k1 can now use named socked or normal netework socket
+	Simpler connecting outputs from multiple outputs to input
+0.1.2
+	Rewriten some parts (many new bugs)
+	Simpler connecting
+0.1.1
+	Working TRAM on Audigy, many bugs fixed, many new bugs
+0.1
+	Initial release

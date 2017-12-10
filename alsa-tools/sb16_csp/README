@@ -1,0 +1,11 @@
+TO COMPILE:
+
+1. install ALSA driver
+2. compile with:
+	'./configure; make'
+   or
+        './gitcompile'
+3. install with:
+	'make install'
+4. read cspctl.1 manpage:
+	'man cspctl'

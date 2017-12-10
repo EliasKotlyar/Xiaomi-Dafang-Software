@@ -1,0 +1,17 @@
+
+
+                               HDSPMixer
+
+
+HDSPMixer is the Linux equivalent of the Totalmix application from RME.
+It is a tool to control the advanced routing features of the RME Hammerfall DSP
+soundcard series.
+
+Users of Totalmix shouldn't be disapointed because HDSPMixer presents the
+same interface.
+New users should read Totalmix documentation available from RME's website
+(http://www.rme-audio.de)
+
+NOTE:
+As the ALT key is often used by window managers, the effect of ALT+Click and
+ALT+Drag can be achieved using mouse button 2.

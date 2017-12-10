@@ -1,0 +1,86 @@
+    USX2YLOADER - Second Phase Firmware loader for Tascam USX2Y USB soundcards
+	    2003-09-15 Karsten Wiese <annabellesgarden@yahoo.de>
+
+
+GENERAL
+=======
+
+Usx2yloader is a helper program to load the 2nd Phase firmware binaries
+onto the Tascam USX2Y USB soundcards.
+It has proven to work so far for the US122, US224 and US428.
+The snd-usb-usx2y module requires this program.
+
+
+USX2Y initialisation outlined
+=============================
+
+A.  Phase 1
+A.1.  USx2y is plugged to the PC and powered on.
+      This makes the kernel see a new USB-device with the Vendor/Product
+      ID 0x1604/0x8000 (US428), 0x1604/0x8004 (US224) or 0x1604/0x8006 
+      (US122).
+      The kernel reacts by starting the usb-hotplug script.
+A.2.  The usb-hotplug script starts the executable fxload,
+      which transfers the EZUSB firmware to the USx2y.
+A.3.  The USx2y disconnects itself from the USB-Bus and ... (see Phase 2).
+
+B.  Phase 2
+B.1.  The USx2y reintroduces itself as USB-device with the Vendor/Product
+      ID 0x1604/0x8001 (US428), 0x1604/0x8005 (US224) or 0x1604/0x8007
+      (US122)
+      The kernel reacts by loading the module snd-usb-usx2y, if it is not
+      already loaded.
+B.2   The module snd-usb-usx2y "takes" the USx2y as its device and sets up
+      a "hardware dependent interface".
+      (The module doesn't create any pcm nor midi devices now.)
+B.3   Subsequently the kernel starts the usb-hotplug script, which launches
+      usx2yloader.
+B.4   usx2yloader transfers the 2nd Phase firmware binary to the USx2y by means
+      of the "hardware dependent interface". When this transfer finishes,
+      the snd-usb-usx2y module creates the pcm- and midi-devices.
+      Initialisation is complete.
+
+
+USAGE
+=====
+
+When usx2yloader is invoked without options, it will probe all existing
+soundcards until a valid USX2Y-driver is found.  If a valid USX2Y-driver is
+found, usx2yloader reads the board type from the driver.  The corresponding
+firmware binaries are then read and transferred to the driver.
+Finally, usx2yloader initializes the PCM, MIDI and the mixer devices on the
+driver for making the soundcard full functional.
+
+Instead of auto-probing, you can specify the card number or the hwdep
+device name or the usb device name via -c, -D or -u options, respectively.
+
+	% usx2yloader -c 1
+	% usx2yloader -D hw:0
+	% usx2yloader -u /proc/bus/usb/001/003
+
+For loading everything automatically in response to a hotplug event
+there are the hotplug script files
+ - tascam_fw.usermap
+ - tascam_fw
+ - tascam_fpga
+and the Firmwarefiles.
+You also need fxload and hotplug to be installed.
+
+
+FIRMWAREFILES
+=============
+
+The firmware binaries are installed on /usr/share/alsa/firmware/usx2yloader
+(or /usr/local/share/alsa/firmware/usx2yloader, depending to the
+prefix option of configure).  There will be *.conf files, which
+define the dsp image files for each different card type.
+
+
+COPYRIGHT
+=========
+
+Copyright (c) 2003 Karsten Wiese <annabellesgarden@yahoo.de>
+Distributable under GPL.
+
+The firmware files included in alsa-firmware package are copyright
+by Tascam / TEAC Corporation.

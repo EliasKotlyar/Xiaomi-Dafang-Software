@@ -1,0 +1,253 @@
+#!/bin/sh
+
+LO10K1=@bindir@/lo10k1
+
+#PCM Multi
+$LO10K1 -s -n --ctrl c-Left,Right:PCM\ Front\ Playback\ Volume,t-PCM\ Front\ Playback\ Volume:1,c-LeftSurr,RightSurr:PCM\ Surround\ Playback\ Volume,t-PCM\ Surround\ Playback\ Volume:1,c-Center:PCM\ Center\ Playback\ Volume,t-PCM\ Center\ Playback\ Volume:1,c-LFE:PCM\ LFE\ Playback\ Volume,t-PCM\ LFE\ Playback\ Volume:1 --patch_name PCM\ Multi\ Volume -a simple.emu10k1
+#Input
+$LO10K1 --conadd "PIN(PCM Multi Volume)=FX(8,9,2,3,6,7)"
+
+#PCM switch
+#$LO10K1 -n --ctrl c-switchL,switchR:PCM\ Playback\ Switch,t-PCM\ Playback\ Switch:4 --patch_name PCM\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(PCM Switch,0,1)=FX(0,1)"
+#PCM
+$LO10K1 -n --ctrl c-Left,Right:PCM\ Playback\ Volume,t-PCM\ Playback\ Volume:1 --patch_name PCM\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(PCM Switch,0,1)=PIN(PCM Volume,0,1)"
+$LO10K1 --conadd "PIN(PCM Volume,0,1)=FX(0,1)"
+#PCM Capture switch
+#$LO10K1 -n --ctrl c-switchL,switchR:PCM\ Capture\ Switch,t-PCM\ Capture\ Switch:4 --patch_name PCM\ Cap\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(PCM Cap Switch,0,1)=FX(0,1)"
+# PCM Capture
+$LO10K1 -n --ctrl c-Left,Right:PCM\ Capture\ Volume,t-PCM\ Capture\ Volume:1 --patch_name PCM\ Cap\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(PCM Cap Switch,0,1)=PIN(PCM Cap Volume,0,1)"
+$LO10K1 --conadd "PIN(PCM Cap Volume,0,1)=FX(0,1)"
+
+#Analog Mix switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Analog\ Mix\ Playback\ Switch,t-Analog\ Mix\ Playback\ Switch:4 --patch_name Analog\ Mix\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Analog Mix Switch)=IN(10,11)"
+#Analog Mix
+$LO10K1 -n --ctrl c-Left,Right:Analog\ Mix\ Playback\ Volume,t-Analog\ Mix\ Playback\ Volume:1,s-Analog\ Mix\ Playback\ Volume:100#100 --patch_name Analog\ Mix\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Analog Mix Switch)=PIN(Analog Mix Volume)"
+$LO10K1 --conadd "PIN(Analog Mix Volume)=IN(10,11)"
+#Analog Mix capture switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Analog\ Mix\ Capture\ Switch,t-Analog\ Mix\ Capture\ Switch:4 --patch_name Analog\ Mix\ Cap\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Analog Mix Cap Switch)=IN(10,11)"
+#Analog Mix Capture
+$LO10K1 -n --ctrl c-Left,Right:Analog\ Mix\ Capture\ Volume,t-Analog\ Mix\ Capture\ Volume:1 --patch_name Analog\ Mix\ Cap\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Analog Mix Cap Switch)=PIN(Analog Mix Cap Volume)"
+$LO10K1 --conadd "PIN(Analog Mix Cap Volume)=IN(10,11)"
+
+#Music switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Music\ Playback\ Switch,t-Music\ Playback\ Switch:4 --patch_name Music\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Music Switch)=FX(4,5)"
+#Music
+$LO10K1 -n --ctrl c-Left,Right:Music\ Playback\ Volume,t-Music\ Playback\ Volume:1 --patch_name Music\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Music Switch)=PIN(Music Volume)"
+$LO10K1 --conadd "PIN(Music Volume)=FX(4,5)"
+#Music capture switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Music\ Capture\ Switch,t-Music\ Capture\ Switch:4 --patch_name Music\ Cap\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Music Cap Switch)=FX(4,5)"
+#Music Capture
+$LO10K1 -n --ctrl c-Left,Right:Music\ Capture\ Volume,t-Music\ Capture\ Volume:1 --patch_name Music\ Cap\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Music Cap Switch)=PIN(Music Cap Volume)"
+$LO10K1 --conadd "PIN(Music Cap Volume)=FX(4,5)"
+
+#Mic switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Mic\ Playback\ Switch,t-Mic\ Playback\ Switch:4 --patch_name Mic\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Mic Switch)=IN(0,1)"
+#Mic
+$LO10K1 -n --ctrl c-Left,Right:Mic\ Playback\ Volume,t-Mic\ Playback\ Volume:1 --patch_name Mic\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Mic Switch)=PIN(Mic Volume)"
+$LO10K1 --conadd "PIN(Mic Volume)=IN(0,1)"
+#Mic capture switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Mic\ Capture\ Switch,t-Mic\ Capture\ Switch:4 --patch_name Mic\ Cap\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Mic Cap Switch)=IN(0,1)"
+#Mic Capture
+$LO10K1 -n --ctrl c-Left,Right:Mic\ Capture\ Volume,t-Mic\ Capture\ Volume:1 --patch_name Mic\ Cap\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Mic Cap Switch)=PIN(Mic Cap Volume)"
+$LO10K1 --conadd "PIN(Mic Cap Volume)=IN(0,1)"
+
+#Audigy CD switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Audigy\ CD\ Playback\ Switch,t-Audigy\ CD\ Playback\ Switch:4 --patch_name Audigy\ CD\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Audigy CD Switch)=IN(2,3)"
+#Audigy CD
+$LO10K1 -n --ctrl c-Left,Right:Audigy\ CD\ Playback\ Volume,t-Audigy\ CD\ Playback\ Volume:1 --patch_name Audigy\ CD\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Audigy CD Switch)=PIN(Audigy CD Volume)"
+$LO10K1 --conadd "PIN(Audigy CD Volume)=IN(2,3)"
+#Audigy CD capture switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Audigy\ CD\ Capture\ Switch,t-Audigy\ CD\ Capture\ Switch:4 --patch_name Audigy\ CD\ Cap\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Audigy CD Cap Switch)=IN(2,3)"
+#Audigy CD Capture
+$LO10K1 -n --ctrl c-Left,Right:Audigy\ CD\ Capture\ Volume,t-Audigy\ CD\ Capture\ Volume:1 --patch_name Audigy\ CD\ Cap\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Audigy CD Cap Switch)=PIN(Audigy CD Cap Volume)"
+$LO10K1 --conadd "PIN(Audigy CD Cap Volume)=IN(2,3)"
+
+#Optical & Coaxial IN switch
+#$LO10K1 -n --ctrl c-switchL,switchR:IEC958\ Opt\ and\ Coax\ Playback\ Switch,t-IEC958\ Opt\ and\ Coax\ Playback\ Switch:4 --patch_name Opt\ and\ Coax\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Opt and Coax Switch)=IN(4,5)"
+#Optical & Coaxial IN
+$LO10K1 -n --ctrl c-Left,Right:IEC958\ Opt\ and\ Coax\ Playback\ Volume,t-IEC958\ Opt\ and\ Coax\ Playback\ Volume:1 --patch_name Opt\ and\ Coax\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Opt and Coax Switch)=PIN(Opt and Coax Volume)"
+$LO10K1 --conadd "PIN(Opt and Coax Volume)=IN(4,5)"
+#Optical & Coaxial IN capture switch
+#$LO10K1 -n --ctrl c-switchL,switchR:IEC958\ Opt\ and\ Coax\ Capture\ Switch,t-IEC958\ Opt\ and\ Coax\ Capture\ Switch:4 --patch_name Opt\ and\ Coax\ Cap\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Opt and Coax Cap Switch)=IN(4,5)"
+#Optical & Coaxial IN Capture
+$LO10K1 -n --ctrl c-Left,Right:IEC958\ Opt\ and\ Coax\ Capture\ Volume,t-IEC958\ Opt\ and\ Coax\ Capture\ Volume:1 --patch_name Opt\ and\ Coax\ Cap\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Opt and Coax Cap Switch)=PIN(Opt and Coax Cap Volume)"
+$LO10K1 --conadd "PIN(Opt and Coax Cap Volume)=IN(4,5)"
+
+#Line2 switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Line2\ Playback\ Switch,t-Line2\ Playback\ Switch:4 --patch_name Line2\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Line2 Switch)=IN(8,9)"
+#Line2
+$LO10K1 -n --ctrl c-Left,Right:Line2\ Playback\ Volume,t-Line2\ Playback\ Volume:1 --patch_name Line2\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Line2 Switch)=PIN(Line2 Volume)"
+$LO10K1 --conadd "PIN(Line2 Volume)=IN(8,9)"
+#Line2 capture switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Line2\ Capture\ Switch,t-Line2\ Capture\ Switch:4 --patch_name Line2\ Cap\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Line2 Cap Switch)=IN(8,9)"
+#Line2 Capture
+$LO10K1 -n --ctrl c-Left,Right:Line2\ Capture\ Volume,t-Line2\ Capture\ Volume:1 --patch_name Line2\ Cap\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Line2 Cap Switch)=PIN(Line2 Cap Volume)"
+$LO10K1 --conadd "PIN(Line2 Cap Volume)=IN(8,9)"
+
+#Aux2 switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Aux2\ Playback\ Switch,t-Aux2\ Playback\ Switch:4 --patch_name Aux2\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Aux2 Switch)=IN(12,13)"
+#Aux2
+$LO10K1 -n --ctrl c-Left,Right:Aux2\ Playback\ Volume,t-Aux2\ Playback\ Volume:1 --patch_name Aux2\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Aux2 Switch)=PIN(Aux2 Volume)"
+$LO10K1 --conadd "PIN(Aux2 Volume)=IN(12,13)"
+#Aux2 capture switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Aux2\ Capture\ Switch,t-Aux2\ Capture\ Switch:4 --patch_name Aux2\ Cap\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "PIN(Aux2 Cap Switch)=IN(12,13)"
+#Aux2 Capture
+$LO10K1 -n --ctrl c-Left,Right:Aux2\ Capture\ Volume,t-Aux2\ Capture\ Volume:1 --patch_name Aux2\ Cap\ Volume -a vol_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Aux2 Cap Switch)=PIN(Aux2 Cap Volume)"
+$LO10K1 --conadd "PIN(Aux2 Cap Volume)=IN(12,13)"
+
+#1
+#Stereo to 5.1
+$LO10K1 -n --ctrl c-Left,Right:Front\ Playback\ Volume,t-Front\ Playback\ Volume:1,s-Front\ Playback\ Volume:100#100,c-LeftSurr,RightSurr:Surround\ Playback\ Volume,t-Surround\ Playback\ Volume:1,c-Center:Center\ Playback\ Volume,t-Center\ Playback\ Volume:1,c-LFE:LFE\ Playback\ Volume,t-LFE\ Playback\ Volume:1 --patch_name Stereo\ To\ 51 -a sto51.emu10k1
+#Input
+$LO10K1 --conadd "POUT(PCM Volume)=PIN(Stereo To 51,0,1)"
+$LO10K1 --conadd "POUT(Analog Mix Volume)>PIN(Stereo To 51,0,1)"
+$LO10K1 --conadd "POUT(Music Volume)>PIN(Stereo To 51,0,1)"
+$LO10K1 --conadd "POUT(Mic Volume)>PIN(Stereo To 51,0,1)"
+$LO10K1 --conadd "POUT(Audigy CD Volume)>PIN(Stereo To 51,0,1)"
+$LO10K1 --conadd "POUT(Opt and Coax Volume)>PIN(Stereo To 51,0,1)"
+$LO10K1 --conadd "POUT(Line2 Volume)>PIN(Stereo To 51,0,1)"
+$LO10K1 --conadd "POUT(Aux2 Volume)>PIN(Stereo To 51,0,1)"
+
+
+#Capture
+#$LO10K1 -n --patch_name Capture\ Copy -a copy_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(PCM Cap Volume)=PIN(Capture Copy)"
+#$LO10K1 --conadd "POUT(Analog Mix Cap Volume)>PIN(Capture Copy)"
+#$LO10K1 --conadd "POUT(Music Cap Volume)>PIN(Capture Copy)"
+#$LO10K1 --conadd "POUT(Mic Cap Volume)>PIN(Capture Copy)"
+#$LO10K1 --conadd "POUT(Audigy CD Cap Volume)>PIN(Capture Copy)"
+#$LO10K1 --conadd "POUT(Opt and Coax Cap Volume)>PIN(Capture Copy)"
+#$LO10K1 --conadd "POUT(Line2 Cap Volume)>PIN(Capture Copy)"
+#$LO10K1 --conadd "POUT(Aux2 Cap Volume)>PIN(Capture Copy)"
+#Output
+#$LO10K1 --conadd "POUT(Capture Copy)=OUT(22,23)"
+
+$LO10K1 --conadd "POUT(PCM Cap Volume)=OUT(22,23)"
+$LO10K1 --conadd "POUT(Analog Mix Cap Volume)>OUT(22,23)"
+$LO10K1 --conadd "POUT(Music Cap Volume)>OUT(22,23)"
+$LO10K1 --conadd "POUT(Mic Cap Volume)>OUT(22,23)"
+$LO10K1 --conadd "POUT(Audigy CD Cap Volume)>OUT(22,23)"
+$LO10K1 --conadd "POUT(Opt and Coax Cap Volume)>OUT(22,23)"
+$LO10K1 --conadd "POUT(Line2 Cap Volume)>OUT(22,23)"
+$LO10K1 --conadd "POUT(Aux2 Cap Volume)>OUT(22,23)"
+
+#Tone
+$LO10K1 -n --ctrl c-bass0,bass1,bass2,bass3,bass4:Tone\ Control\ -\ Bass,t-Tone\ Control\ -\ Bass:2,v-Tone\ Control\ -\ Bass:1,c-treble0,treble1,treble2,treble3,treble4:Tone\ Control\ -\ Treble,t-Tone\ Control\ -\ Treble:3,v-Tone\ Control\ -\ Treble:1,c-toneonoff:Tone\ Control\ -\ Switch,t-Tone\ Control\ -\ Switch:4 --patch_name Tone\ Controls -a tone.emu10k1
+#Input
+$LO10K1 --conadd "POUT(PCM Multi Volume)=PIN(Tone Controls)"
+$LO10K1 --conadd "POUT(Stereo To 51)>PIN(Tone Controls)"
+
+#Equalizer
+$LO10K1 -n --patch_name EQ10 -a eq10.emu10k1
+#Input
+$LO10K1 --conadd "POUT(Tone Controls)>PIN(EQ10)"
+
+#Master
+$LO10K1 -n --ctrl c-VolM:Master\ Playback\ Volume,t-Master\ Playback\ Volume:1 --patch_name Master\ Volume -a vol_master.emu10k1
+#Inputs
+$LO10K1 --conadd "POUT(EQ10)>PIN(Master Volume)"
+
+#$LO10K1 --conadd "POUT(Tone Controls)>PIN(Master Volume)"
+
+
+#Master switch
+#$LO10K1 -n --ctrl c-switch:Master\ Playback\ Switch,t-Master\ Playback\ Switch:4 --patch_name Master\ Switch -a switch_6.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Master Volume)=PIN(Master Switch)"
+
+#Output
+$LO10K1 -n --ctrl c-enableL,enableR:IEC958\ Optical\ Raw\ Playback\ Switch,t-IEC958\ Optical\ Raw\ Playback\ Switch:4 --patch_name Output -a output.emu10k1
+#Inputs
+#$LO10K1 --conadd "POUT(Master Switch)=PIN(Output,0,1,2,3,4,5)"
+$LO10K1 --conadd "POUT(Master Volume)=PIN(Output,0,1,2,3,4,5)"
+$LO10K1 --conadd "PIN(Output,6,7)=FX(20,21)"
+#Output
+$LO10K1 --conadd "POUT(Output,0,1,2,3,4,5)=OUT(8,9,14,15,10,11)"
+#$LO10K1 --conadd "POUT(Output,2,3,4,5)=OUT(14,15,10,11)"
+$LO10K1 --conadd "POUT(Output,6,7,8,9,10,11)=OUT(0,1,6,7,2,3)"
+
+#$LO10K1 -n --patch_name delay1 -a delay.emu10k1
+#$LO10K1 --conadd "POUT(delay1,0)=OUT(8)"
+#$LO10K1 --conadd "PIN(delay1,0)=POUT(Output,0)"
+
+#$LO10K1 -n --patch_name delay2 -a delay.emu10k1
+#$LO10K1 --conadd "POUT(delay2,0)=OUT(9)"
+#$LO10K1 --conadd "PIN(delay2,0)=POUT(Output,1)"
+
+#Headphone
+$LO10K1 -n --ctrl c-Left,Right:Headphone\ Playback\ Volume,t-Headphone\ Playback\ Volume:1 --patch_name Headphone\ Volume -a vol_2.emu10k1
+#Input
+$LO10K1 --conadd "PIN(Headphone Volume,0,1)>PIN(Stereo To 51,0,1)"
+
+#Headphone switch
+#$LO10K1 -n --ctrl c-switchL,switchR:Headphone\ Playback\ Switch,t-Headphone\ Playback\ Switch:4 --patch_name Headphone\ Switch -a switch_2.emu10k1
+#Input
+#$LO10K1 --conadd "POUT(Headphone Volume)=PIN(Headphone Switch)"
+#Output
+#$LO10K1 --conadd "POUT(Headphone Switch,0,1)=OUT(4,5)"
+$LO10K1 --conadd "POUT(Headphone Volume,0,1)=OUT(4,5)"

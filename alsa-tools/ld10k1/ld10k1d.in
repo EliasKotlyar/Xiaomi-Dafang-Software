@@ -1,0 +1,79 @@
+#!/bin/bash
+
+test -x@sbindir@/ld10k1 || exit 0
+
+card=$2
+socket=/tmp/.ld10k1_port
+
+if [ -z "$card" ]; then
+    card=0
+elif [ "$card" = "0" ] ; then
+    card=0
+else
+    socket=$socket"_"$card
+fi
+
+pidfile=/var/run/ld10k1_$card.pid
+dspsetup=/etc/dspstate_$card.ld10k1
+
+start() {
+    if [ ! -f $pidfile ] ; then
+	echo $"Starting ld10k1"
+	@sbindir@/ld10k1 -d -c $card -p $socket -i $pidfile >/dev/null 2>&1
+	if [ -f $dspsetup ]; then
+	    echo $"Restoring DSP setup"
+	    @binarydir@/lo10k1 -p $socket --restore $dspsetup >/dev/null 2>&1
+	fi
+    else
+	echo $"ld10k1 running"
+    fi
+    return 0
+}
+
+stop() {
+    if [ -f $pidfile ] ; then
+	echo $"Storing DSP setup"
+	@binarydir@/lo10k1 -p $socket --store $dspsetup >/dev/null 2>&1
+	echo $"Stoping ld10k1"
+	pid=
+	local line p
+	read line < $pidfile
+	for p in $line ; do
+	    [ -z "${p//[0-9]/}" -a -d "/proc/$p" ] && pid="$pid $p"
+	done
+	kill -s 9 $pid >/dev/null 2>&1
+	
+	if [ -f $pidfile ] ; then
+	    rm -f $pidfile >/dev/null 2>&1
+	fi
+    else
+	echo $"ld10k1 not runing"
+    fi
+    return 0
+}
+
+save() {
+    if [ -f $pidfile ] ; then
+	echo $"Storing DSP setup"
+	@binarydir@/lo10k1 -p $socket --store $dspsetup >/dev/null 2>&1
+    else
+	echo $"ld10k1 not runing"
+    fi
+    return 0
+}
+
+
+case "$1" in
+start)
+    start
+    ;;
+stop)
+    stop
+    ;;
+save)
+    save
+    ;;
+*)
+    echo $"Usage $0 {start|stop}"
+    exit 1
+esac

@@ -1,0 +1,54 @@
+    pcxhrloader - Firmware loader for Digigram pcxhr compatible soundcards
+	    Digigram <alsa@digigram.com>
+
+
+GENERAL
+=======
+
+pcxhrloader is a helper program to load the firmware binaries
+onto Digigram's pcxhr compatible board sound drivers.
+The following modules require this program:
+	snd-pcxhr
+These drivers don't work properly at all until the certain firmwares
+are loaded, i.e. no PCM nor mixer devices will appear.
+
+
+USAGE
+=====
+
+When pcxhrloader is invoked without options, it will probe all existing
+soundcards until a valid pcxhr-driver is found.  If a valid pcxhr-driver is
+found, pcxhrloader reads the board type from the driver.  The corresponding
+firmware binaries are then read and transferred to the driver.
+Finally, pcxhrloader initializes the PCM and the mixer devices on the
+driver for making the soundcard full functional.
+
+Instead of auto-probing, you can specify the card number or the hwdep
+device name via -c and -D options, respectively.
+
+	% pcxhrloader -c 1
+	% pcxhrloader -D hw:0
+
+For loading the firmware automatically after the module is loaded, use
+the post-install command.  For example, add the following entry to
+/etc/modules.conf for pcxhr driver:
+
+	post-install snd-pcxhr /usr/bin/pcxhrloader
+
+FILES
+=====
+
+The firmware binaries are installed on /usr/share/alsa/firmware/pcxhrloader
+(or /usr/local/share/alsa/firmware/pcxhrloader, depending to the prefix
+option of configure).  There will be *.conf files, which define the dsp image
+files for each different card type.
+
+
+COPYRIGHT
+=========
+
+Copyright (c) 2004 Digigram SA <alsa@digigram.com>
+Distributable under GPL.
+
+The firmware files included in alsa-firmware package are copyright
+by Digigram SA

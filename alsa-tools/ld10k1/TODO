@@ -1,0 +1,19 @@
+Priority:
+
+High
+    - TRAM sharing between AC3 passthrough and other effects
+    - ac3 passthrough for SB Live - now is dissabled
+Medium
+    - effect repositry
+    - clean source
+    - optimalize GPR ussage for connect
+    - change notification for ld10k1 clients
+    - control range checking against translation
+    - optimalization - is getting slow
+    - conection del - returned id is sometime invalid
+Low
+    - little and big endian conversion on save and read
+    - utility to enable control of mixer elements from midi
+    - modify as10k1 to support feature that alsa allows for emu10k1
+        
+and much more

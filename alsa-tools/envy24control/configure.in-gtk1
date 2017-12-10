@@ -1,0 +1,42 @@
+AC_INIT(envy24control.c)
+AM_INIT_AUTOMAKE(envy24control, 0.6.0)
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_HEADER_STDC
+
+AM_PATH_GTK(1.0.1)
+AM_PATH_ALSA(1.0.0)
+ENVY24CONTROL_CFLAGS="$CFLAGS $ALSA_CFLAGS $GTK_CFLAGS"
+ENVY24CONTROL_LIBS="$LIBS $ALSA_LIBS $GTK_LIBS"
+AC_SUBST(ENVY24CONTROL_CFLAGS)
+AC_SUBST(ENVY24CONTROL_LIBS)
+#AC_SUBST(ALSACTL)
+
+dnl add the mkdir program 
+AC_ARG_WITH(mkdir-prog,
+[  --with-mkdir-prog=PROG  Complete path and name from mkdir(optional)],
+[mkdir_prog="$withval"], [mkdir_prog=""])
+AC_MSG_CHECKING(for MKDIR)
+if test "$mkdir_prog" != "" ; then
+	MKDIR="$mkdir_prog"
+else
+	if test -x "/bin/mkdir" ; then
+		MKDIR="/bin/mkdir"
+	elif test -x "${bindir}/mkdir" ; then
+		MKDIR="${bindir}/mkdir"
+	elif test -x "${sbindir}/mkdir" ; then
+		MKDIR="${sbindir}/mkdir" 
+	elif test -x "/sbin/mkdir" ; then
+		MKDIR="/sbin/mkdir"
+	elif test -x "/usr/bin/mkdir" ; then
+		MKDIR="/usr/bin/mkdir"
+	elif test -x "/usr/sbin/mkdir" ; then
+		MKDIR="/usr/sbin/mkdir"
+	else
+		MKDIR="not found."
+	fi
+fi
+AC_MSG_RESULT($MKDIR)
+AC_SUBST(MKDIR)
+
+AC_OUTPUT(Makefile)

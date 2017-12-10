@@ -1,0 +1,36 @@
+ld10k1 is server part - linker - it must run to use loader
+There must be exactly one instance for one emu10k1 based card wich you want use.
+
+Parameters:
+
+-h or --help
+    Prints short help message
+    
+-c num or --card num
+    Use card number num - ld10k1 will use device with name hw:0
+    
+    example:
+	ld10k1 -c 1
+	Use card 1 
+	
+-p name or --pipe_name name
+    ld10k1 will listen on named socked name. This socket is used for communication with lo10k1.
+    Default is /tmp/.ld10k1_port
+
+-t size or --tram_size size
+    Initialize initial TRAM size to size size. Size is rounded up to next valid value. Size is in samples and
+    can be one of 0 - external tram is disabled, 1 - 16384, 2 - 32768, 3 - 65536, 4 - 131072, 5 - 262144,
+	6 -524288, 7 - 1048576, 8 - 1048576. For Audigy 1, Audigy 2 you need patch from patch directory,
+	because current ALSA version doesn't supports TRAM on these cards.
+
+    example:
+	ld10k1 -t 7
+
+-n or --network
+	ld10k1 default uses named socket, this switch to use network socket. You can use --port options to
+	define port to listen
+
+--port portnum
+	listen on port portnum.
+-d or --daemon
+	ld10k1 runs as daemon.

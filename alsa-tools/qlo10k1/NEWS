@@ -1,0 +1,21 @@
+0.1.2p1
+    - By Tim...
+    - ld10k1 0.1.8p1 recommended for best operation.
+    - Fixed link disconnect bug.
+    - Now remembers last file open/save dir.
+    - Now unused IO/FX do not disappear upon refresh.
+    - Refresh/redraw fixups.
+0.1.2
+    - ld10k1 0.1.8 required
+    - Colors and better object positioning - Eduardo García-Mádico Portabella
+0.1.1test3
+    - Warning cleaning
+0.1.1test2
+    - Fixed build
+    - Fixed "make dist" - not include moc generated sources
+0.1.1test1
+    - No more needs for kde - only qt is needed
+    - Sync with lo10k1 - save dsp config, load dsp config, save patch
+    - Source cleanup
+0.1.0
+    - First version 

@@ -1,0 +1,34 @@
+This is attempt to make EMU10K1 (EMU10K2) patch loader for ALSA.
+This is work in progress. It is not very user friendly.
+Loading, unloading, connecting, disconnecting patches works.
+It should by able to load identical setup for Audigy as it is in kernel driver.
+This dissables AC3 passthrough on SB Live.
+
+ALSA (both alsa-lib and in kernel drivers) version 1.0.7rc1 and higher are required.
+
+There are two parts:
+Server - ld10k1 - runing as service - it is storing driver state - it must run
+		under root or by setuided
+Client - lo10k1 - controls server
+and dump loader dl10k1 - loads dumps previously created with lo10k1 & ld10k1.
+
+For options list run 
+./ld10k1 -h 
+and 
+./lo10k1 -h
+and 
+./dl10k1 -h
+and look in doc directory.
+
+ld10k1 will clear card DSP program and you will hear nothing.
+You must load some patches to route sound from inputs to outputs (use audigy_init script for
+audigy 1, 2 or init_live for sb live).
+After loading patch check and set oss mixer emulation through proc file (/proc/asound/card/oss_mixer)
+
+In directory setup are some patches which I use on my Audigy for testing.
+With this you will have exactly same mixer as with original driver (+headphone control, not tested 
+AudigyDrive inputs and outputs, AC3 passthrought).
+Most of them are from emu-tools-0.9.4 package from OSS driver (but not all).
+Use as10k1 compiler from alsa-tools package to compile patches.
+
+Peter Zubaj

@@ -1,0 +1,19 @@
+dl10k1 is dump loader
+You can load config  with ld10k1, lo10k1 and then make dump. This dum can be loaded without usage
+of ld10k1
+
+Parameters:
+
+-h or --help
+    Prints short help message
+
+-c num or --card num
+    Use card number num - dl10k1 will use device with name hw:0
+
+    example:
+	dl10k1 -c 1
+	Use card 1
+
+-d or --dump
+    File with dump
+

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=HDSPConf
+Comment=Hammerfall DSP control application
+Exec=hdspconf
+FilePattern=hdspconf
+Icon=hdspconf.png
+Terminal=false
+Type=Application
+Categories=Application;AudioVideo;

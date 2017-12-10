@@ -1,0 +1,82 @@
+This is sbiload - an OPL2/3 FM instrument loader for ALSA hwdep
+
+Written by Uros Bizjak <uros@kss-loka.si>
+Web: http://www.kss-loka.si/~uros/sbiload.html
+
+See the file COPYING for licence details.
+
+Build and install
+-----------------
+
+You should be able to just type 'make'.  All configuration variables
+are in make.conf if you need to change anything.
+
+By default it will install into /usr/local/bin, change INSTDIR in
+make.conf to change this.
+
+Usage
+-----
+
+	sbiload [options] [instfile [drumfile]]
+	sbiload [options] -c
+
+	  -D, --device=name       - An ALSA hwdep name to use
+	  -c, --clear             - Clear patches and exit
+	  -2  --opl2              - Two operators (OPL2) file type
+	  -4  --opl3              - Four operators (OPL3) file type
+	  -P, --path=path         - Specify the patch path
+	  -v, --verbose=level     - Verbose level
+	  -q, --quiet             - Be quiet, no error/warning messages
+          -V, --version           - Show version
+
+When you have multiple sound cards and/or there may be multiple OPL2/3
+synth devices, you have to tell sbiload which one to use, and pass its
+hwdep name via -D option.  Otherwise, sbiload will load the data onto
+the first found device.
+
+To find out the hwdep name of the OPL devices,  check
+/proc/asound/hwdep file first.  It has the list of hwdep devices
+currently available on your system.
+
+	% cat /proc/asound/hwdep
+	00-00: Emux WaveTable
+        00-01: OPL3 FM
+	01-00: OPL3 FM
+
+In the example above, you have two OPL3 devices.  To the first one
+(00-01), which means the first card (00-) and the second device (01),
+pass "-D hw:0,1".  For the second OPL3 device (01-00), pass "-D
+hw:1,0" instead.
+
+For convenience, -D option accepts a string like /dev/snd/hwC0D3.
+This is automatically parsed as "hw:0,3".
+
+Running sbiload
+---------------
+
+Pass the instrument and drum file data as arguments.
+
+	% sbiload std.o3 drums.o3
+
+Without a file type option (-2 or -4), sbiload will guess the file
+type according to the hwdep iface type.  If it's not correct, pass -2
+or -4 option explicitly.
+Also, when the given file isn't found, sbiload tries to load a file
+with an appropriate extension, .sb for OPL2 and .o3 for OPL3.
+
+You can omit the instrument and the drum file names, too.  In this
+case, the default file name "std" and "drums" are chosen.
+
+The option -c is to mean just to clear patches and exit without
+loading patches.
+
+Acknowledgements
+----------------
+
+sbiload includes work from Steve Ratcliffe (pmidi-1.4.1.tar.gz) and
+Jaroslav Kysela (alsamod-1999-09-01.tar.gz).
+
+Where to report bugs and feedback
+---------------------------------
+
+Please report any problems to uros@kss-loka.si

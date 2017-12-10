@@ -1,0 +1,61 @@
+
+			      RMEDIGICONTROL
+			      ==============
+
+
+ABOUT:
+------
+
+Rmedigicontrol is a control tool for RME Digi32 and RME Digi96 soundcards. 
+It depends on ALSA and GTK+ and offers a graphical frontend for all your 
+switches.
+
+
+
+REQUIRED:
+---------        
+
+- a soundcard that works with the rme32/rme96 driver:
+
+	- RME Digi32
+	- RME Digi32 Pro
+	- RME Digi32/8
+	- RME Digi96
+	- RME Digi96/8
+	- RME Digi96/8 PRO
+	- RME Digi96/8 PAD
+	- RME Digi96/8 PST
+	- Sek'd Prodif 32
+	- Sek'd Prodif 96
+	- Sek'd Prodif Gold
+
+- ALSA 0.9.x
+
+- GTK+ 
+
+
+
+INSTALL:
+--------
+
+	./gitcompile
+or
+	./configure
+
+If you use GTK+-1.2, pass --with-gtk2=no.
+
+	make install
+
+
+
+USAGE:
+------
+
+You can start rmedigicontrol with the command:
+
+	rmedigicontrol
+
+
+
+Enjoy It!
+

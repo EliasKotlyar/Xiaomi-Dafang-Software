@@ -1,0 +1,120 @@
+.TH cspctl 1 "April 27, 2000"
+.SH NAME
+cspctl \- Sound Blaster 16 ASP/CSP control program
+
+.SH SYNOPSIS
+.B cspctl
+command [\-options] <filename>
+
+.SH DESCRIPTION
+.B cspctl
+is a simple CSP microcode loader for Creative Sound Blaster 16ASP and some Sound Blaster AWE32 sound cards with Creative Signal Processor (CSP) chip (CT1748A) installed.
+.B cspctl
+can also be used as a post-install function to
+.I snd\-sb16\-csp
+module to load default codec at module installation. If CSP chip is successfully detected and initialized, it will be installed as a hardware dependent device
+.I hwC0D2
+into /dev/snd directory. Currently, following codecs can be loaded to CSP device:
+.IP "" 4
+.Sp
+.nf
+.ta \w'\fBwfm0000a.csp\fP  'u
+\&\fBwfm0001a.csp\fP	QSound decoder
+\&\fBwfm0006a.csp\fP	A\-law codec
+\&\fBwfm0007a.csp\fP	u\-law codec
+\&\fBwfm0011a.csp\fP	IMA ADPCM codec (distorted output for IMA test files)
+\&\fBwfm0200a.csp\fP	Creative ADPCM codec (sounds like Intel/DVI IMA ADPCM compatible)
+\&\fBwfm0202a.csp\fP	Fast Speech 8 codec
+\&\fBwfm0203a.csp\fP	Fast Speech 10 codec
+.Sp
+.fi
+.PP
+These codecs are not yet supported by ALSA:
+.IP "" 4
+.ta \w'\fBwfm0000a.csp\fP  'u
+\&\fBwfm0201a.csp\fP	Text2Speech decoder
+.Sp
+.fi
+.PP
+Qsound microcode file has
+.B four functions,
+each function is a decoder for different sample rate. Rates for QSound functions #1, #2, #3 and #4 are 44100, 22050, 11025 and 8000Hz respectively. IMA ADPCM and FastSpeech codecs are formed of
+.B two functions,
+the first one is for capture and the second one is for playback. A\-law and u\-law codecs have only
+.B one function.
+To load for example function #2 from QSound microcode file (decoder for 22050Hz), run as follows:
+.IP "" 4
+% cspctl load \-f 2 \-d QSound wfm0001a.csp
+.PP
+After successful loading, /proc/asound/SB16/cspD2 will show:
+.IP "" 4
+.Sp
+.nf
+Creative Signal Processor [v1.0]
+State: \-x\-\-L
+Codec: QSound [func #2]
+Sample rates: 22050Hz
+QSound decoder disabled
+.Sp
+.fi
+.PP
+With QSound decoder microcode loaded, all simple PCM file formats can be played with QSound 180 degree positioning applied. QSound element is dynamically added into mixer structure as
+.I 3DEffect1\-space
+element. It will only show if support for CSP has been compiled into ALSA drivers, CSP chip has been found, and QSound codec is loaded into CSP. When enabled, QSound position can be dynamically changed by mixer slider, and proc interface should follow the state of CSP chip and its current QSound position:
+.IP "" 4
+.Sp
+.nf
+Creative Signal Processor [v1.0]
+State: Qx\-RL
+Codec: QSound [func #2]
+Sample rates: 22050Hz
+QSound decoder enabled
+Processing 16bit mono PCM samples
+Qsound position: left = 0x9, right = 0x9
+.Sp
+.fi
+.PP
+Driver supports autoloading of u\-Law, A\-Law and Ima\-ADPCM hardware codecs. Autoloading is active only when there is no microcode loaded to CSP, and there is no need to preload appropriate *.csp files. To unload manually loaded microcode, you should run
+.IP "" 4
+% cspctl unload
+.PP
+If hardware codec microcode has been manually loaded, then CSP will support only loaded PCM format and autoloading will be disabled. In such case, proc interface will show loaded codec properties:
+.IP "" 4
+.Sp
+.nf
+Creative Signal Processor [v1.0]
+State: \-x\-\-L
+Codec: IMA\-ADPCM [func #2]
+Sample rates: All
+PCM format ID: 0x400000 (16bit/\-) [mono/stereo] [playback/\-]
+.Sp
+.fi
+.PP
+.SH COMMANDS
+.TP
+.B load
+Load microcode from filename to CSP.
+.TP
+.B unload
+Unload microcode from CSP.
+.SH OPTIONS
+.TP
+.B \-h, \-\-help
+Display a short help.
+.TP
+.B \-c card
+Select a card number. Option defaults to 0.
+.TP
+.B \-f function
+Select a function from microcode file. Option defaults to 1.
+.TP
+.B \-d description
+Optional microcode description string.
+
+.SH AUTHOR
+Uros Bizjak <uros@kss\-loka.si>.
+
+
+
+
+

@@ -1,0 +1,20 @@
+
+
+                               Echomixer
+
+
+Emixer is the Linux equivalent of the Echoaudio console application from Echoaudio.
+It is a tool to control all the features of any Echoaudio soundcard. This includes
+clock sources, input and output gains, mixers, etc.
+
+The interface is quite different than Echoaudio console. There are no pans: you set
+the channels gains directly on both mixers and volume controls. Emixer manages
+master, PCM and monitors gains separately and it provides emulation of master volume
+for cards that don't support it in hardware (all non-Vmixer cards). Furthermore it
+has a matrix mixer which is more easy to use than the Echoaudio console interface.
+
+Emixer requires GTK+ 1.2 or GTK+ 2.x.
+To build with GTK+-1.2, pass --with-gtk2=no configure option.
+
+For more informations:  http://xoomer.virgilio.it/g_pochini/ea-emixer.html
+

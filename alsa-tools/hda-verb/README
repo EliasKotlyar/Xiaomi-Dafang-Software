@@ -1,0 +1,36 @@
+HDA-VERB -- Send a HD-audio command
+
+hda-verb is a small program to send HD-audio commands to the given
+ALSA hwdep device on the hd-audio interface.
+
+First off, build HD-audio driver with hwdep support.  For the kernel
+config, set CONFIG_SND_HDA_HWDEP=y.  When you build ALSA drivers from
+alsa-driver tarball, usually this is set automatically.
+
+Once snd-hda-intel driver is built with the hwdep support, you should
+have a hwdep device such as /dev/snd/hwC0D0.
+
+The program takes four arguments, the hwdep device name, the widget NID,
+the verb and the parameter.  For example,
+
+	% hda-verb /dev/snd/hwC0D0 0x12 0x701 2
+
+The verb argument can be a string like "PARAMETERS".  Also the
+parameter argument can be a string like "VENDOR_ID" as well.
+
+	% hda-verb /dev/snd/hwC0D0 0x0 PARAMETERS VENDOR_ID
+
+The string is case insensitive.  Also, it doesn't have to be the full
+string but only has to be unique.  E.g. "par" is enough to mean
+"PARAMETER", and "set_a" is enough as "SET_AMP_GAIN_MUTE".
+
+	% hda-verb /dev/snd/hwC0D0 2 set_a 0xb080
+
+The program executs the given verb, shows the result and quits.
+Usually you need to be root to run this command.
+
+
+*WARNING*
+Use this program carefully.  Sending an invalid verb may screw up the
+codec communication, which requires either a reboot or reloading of
+the sound driver eventually.

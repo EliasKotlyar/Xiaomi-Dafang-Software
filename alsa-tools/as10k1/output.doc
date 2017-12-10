@@ -1,0 +1,50 @@
+EMU10K1 patch binary file format (.emu10k1)
+-------------------------------------------
+
+Notice: this format is a bit different from the original as10k1 assembler.
+
+16 bytes signature 'EMU10K1 FX8010 1'	; last number means the patch version
+32 bytes name				; ASCIIZ patch name
+1  byte count of input/output GPRS
+?  bytes input/output GPRS
+1  byte count of dynamic GPRS
+?  bytes dynamic GPRS
+1  byte count of static GPRS
+?  pairs
+   1 byte static GPRS
+   1 dword (little-endian, 32-bit) value
+1  byte count of control GPRS
+?  entries
+   1 byte control GPRS
+   1 dword (little-endian, 32-bit) value
+   1 dword (little-endian, 32-bit) range - min
+   1 dword (little-endian, 32-bit) range - max
+   32 bytes symbol name			; ASCIIZ symbol name
+1  byte count of constant GPRS
+?  pairs
+   1 byte constant GPRS
+   1 dword (little-endian, 32-bit) value
+1  byte count of TRAM lookup tables
+?  entries
+   1 dword (little-endian, 32-bit) size
+   1 byte count of read lines
+   ? pairs
+     1 char address of the TRAM line
+     1 dword (little-endian, 32-bit) size in samples
+   1 byte count of write lines
+   ? pairs
+     1 char address of the TRAM line
+     1 dword (little-endian, 32-bit) size in samples
+1  byte count of TRAM delay tables
+?  entries
+   1 dword (little-endian, 32-bit) size
+   1 byte count of read lines
+   ? pairs
+     1 char address of the TRAM line
+     1 dword (little-endian, 32-bit) size in samples
+   1 byte count of write lines
+   ? pairs
+     1 char address of the TRAM line
+     1 dword (little-endian, 32-bit) size in samples
+2  word (little-endian, 16-bit), count of 64-bit instructions
+?  double-dwords (little-endian, 64-bit) instruction

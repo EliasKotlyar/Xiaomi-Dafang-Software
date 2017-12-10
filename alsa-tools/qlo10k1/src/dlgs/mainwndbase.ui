@@ -1,0 +1,179 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>MainWndBase</class>
+<widget class="QMainWindow">
+    <property name="name">
+        <cstring>MainWndBase</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>494</width>
+            <height>360</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>qlo10k1 - emu10k1 patch loader</string>
+    </property>
+    <grid>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QTabWidget" row="0" column="0">
+            <property name="name">
+                <cstring>tabMain</cstring>
+            </property>
+            <widget class="QWidget">
+                <property name="name">
+                    <cstring>tabLoad</cstring>
+                </property>
+                <attribute name="title">
+                    <string>&amp;Load</string>
+                </attribute>
+                <grid>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <widget class="QLayoutWidget" row="0" column="0">
+                        <property name="name">
+                            <cstring>layout11</cstring>
+                        </property>
+                        <grid>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QListView" row="1" column="0">
+                                <column>
+                                    <property name="text">
+                                        <string>Order</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <column>
+                                    <property name="text">
+                                        <string>Num</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <column>
+                                    <property name="text">
+                                        <string>Patch name</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <property name="name">
+                                    <cstring>lvPatches</cstring>
+                                </property>
+                                <property name="allColumnsShowFocus">
+                                    <bool>true</bool>
+                                </property>
+                            </widget>
+                            <widget class="QLayoutWidget" row="1" column="1">
+                                <property name="name">
+                                    <cstring>layout3</cstring>
+                                </property>
+                                <vbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <widget class="QPushButton">
+                                        <property name="name">
+                                            <cstring>pbLoad</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Load</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QCheckBox">
+                                        <property name="name">
+                                            <cstring>cbFromFile</cstring>
+                                        </property>
+                                        <property name="enabled">
+                                            <bool>false</bool>
+                                        </property>
+                                        <property name="text">
+                                            <string>From file</string>
+                                        </property>
+                                        <property name="checked">
+                                            <bool>true</bool>
+                                        </property>
+                                    </widget>
+                                    <widget class="QPushButton">
+                                        <property name="name">
+                                            <cstring>pbUnload</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Unload</string>
+                                        </property>
+                                    </widget>
+                                    <spacer>
+                                        <property name="name">
+                                            <cstring>spacer2</cstring>
+                                        </property>
+                                        <property name="orientation">
+                                            <enum>Vertical</enum>
+                                        </property>
+                                        <property name="sizeType">
+                                            <enum>Expanding</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                            <size>
+                                                <width>31</width>
+                                                <height>71</height>
+                                            </size>
+                                        </property>
+                                    </spacer>
+                                </vbox>
+                            </widget>
+                            <widget class="QLabel" row="0" column="0">
+                                <property name="name">
+                                    <cstring>tlPatches</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Patches:</string>
+                                </property>
+                            </widget>
+                        </grid>
+                    </widget>
+                </grid>
+            </widget>
+            <widget class="QWidget">
+                <property name="name">
+                    <cstring>tabRouting</cstring>
+                </property>
+                <attribute name="title">
+                    <string>&amp;Routing</string>
+                </attribute>
+                <grid>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                </grid>
+            </widget>
+        </widget>
+    </grid>
+</widget>
+<menubar>
+    <property name="name">
+        <cstring>menubar</cstring>
+    </property>
+</menubar>
+<toolbars>
+</toolbars>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

@@ -1,0 +1,46 @@
+Version 1.11 (2011-03-22):
+    * Fix ALSA snd_ctl_open error when running with three cards.
+    * Fix metering for non-MADI cards
+    * Fix labels on H9652
+    * Fix preset activation segfault on AES(32)
+    * Adjust playback channel count on Multiface
+    * Provide headphones out on Multiface/Digiface
+    * Update pixmaps
+    * Save and restore level meter settings
+      WARNING: New mix files cannot be read by older versions of hdspmixers
+
+Version 1.10 (2011-02-24):
+    * Add support for RME MADI, RayDAT, AES, AES32 and AIO
+
+Version 1.6 (24/11/2003):
+    * Fixes compilation warnings
+    * AutoSync sample rate detection scheme changed
+    * Fixes default preset 7 for H9632 cards
+
+Version 1.5 (21/11/2003):
+    * Added a .desktop file
+    * H9632 bug fixes (thanks to Pentti Ala-Vannesluoma)
+    * Fixes presets handling for H9632 cards
+    
+Version 1.4 (01/11/2003):
+    * Adds support for H9632 cards
+
+Version 1.3 (no public release):
+    * Adds metering for H9652 cards
+    * Stops shipping unused pixmaps
+    * Shows stereo relationships in the mixer
+    * pixmap directory has been cleaned up 
+
+Version 1.2 (no public release):
+    * Fixes a graphical bug for H9652 cards
+    * Changes FLTK detection scheme in configure
+
+Version 1.1 (27/07/2003):
+    * Fixes a typo for Digiface and H9652 cards in HDSPMixerSelector.cxx
+      (caused a crash on startup)
+    * Fixes a menu messing bug in Submix handling
+    * Fixes FLTK detection in configure
+    * Fixes a bug preventing full reset to factory settings
+
+Version 1.0 (27/07/2003):
+    * Initial release

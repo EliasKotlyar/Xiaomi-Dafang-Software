@@ -1,0 +1,247 @@
+<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<class>PatchDialogBase</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>PatchDialogBase</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>600</width>
+            <height>480</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Patch info</string>
+    </property>
+    <grid>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QLayoutWidget" row="0" column="0">
+            <property name="name">
+                <cstring>layout35</cstring>
+            </property>
+            <grid>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QTabWidget" row="1" column="0">
+                    <property name="name">
+                        <cstring>tabOptions</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <widget class="QWidget">
+                        <property name="name">
+                            <cstring>tabControls</cstring>
+                        </property>
+                        <attribute name="title">
+                            <string>Con&amp;trols</string>
+                        </attribute>
+                        <grid>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QLayoutWidget" row="0" column="0">
+                                <property name="name">
+                                    <cstring>layout33</cstring>
+                                </property>
+                                <vbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <widget class="QLabel">
+                                        <property name="name">
+                                            <cstring>textLabel5</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Loaded controls:</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QListBox">
+                                        <property name="name">
+                                            <cstring>lbLoadedCtrl</cstring>
+                                        </property>
+                                    </widget>
+                                </vbox>
+                            </widget>
+                        </grid>
+                    </widget>
+                    <widget class="QWidget">
+                        <property name="name">
+                            <cstring>tabNames</cstring>
+                        </property>
+                        <attribute name="title">
+                            <string>&amp;Names</string>
+                        </attribute>
+                        <grid>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QLayoutWidget" row="0" column="0">
+                                <property name="name">
+                                    <cstring>layout10</cstring>
+                                </property>
+                                <vbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <widget class="QLabel">
+                                        <property name="name">
+                                            <cstring>textLabel2</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Inputs:</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QListBox">
+                                        <property name="name">
+                                            <cstring>lbInputs</cstring>
+                                        </property>
+                                    </widget>
+                                    <widget class="QLabel">
+                                        <property name="name">
+                                            <cstring>textLabel1</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Outputs:</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QListBox">
+                                        <property name="name">
+                                            <cstring>lbOutputs</cstring>
+                                        </property>
+                                    </widget>
+                                </vbox>
+                            </widget>
+                        </grid>
+                    </widget>
+                    <widget class="QWidget">
+                        <property name="name">
+                            <cstring>tabConnection</cstring>
+                        </property>
+                        <attribute name="title">
+                            <string>Co&amp;nnection</string>
+                        </attribute>
+                        <grid>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QLayoutWidget" row="0" column="0">
+                                <property name="name">
+                                    <cstring>layout11</cstring>
+                                </property>
+                                <vbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <widget class="QLabel">
+                                        <property name="name">
+                                            <cstring>lbInputs_2</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Inputs:</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QListBox">
+                                        <property name="name">
+                                            <cstring>lbConnInputs</cstring>
+                                        </property>
+                                    </widget>
+                                    <widget class="QLabel">
+                                        <property name="name">
+                                            <cstring>lbInputs_2_2</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Outputs:</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QListBox">
+                                        <property name="name">
+                                            <cstring>lbConnOutputs</cstring>
+                                        </property>
+                                    </widget>
+                                </vbox>
+                            </widget>
+                        </grid>
+                    </widget>
+                </widget>
+                <widget class="QLayoutWidget" row="0" column="0">
+                    <property name="name">
+                        <cstring>layout34</cstring>
+                    </property>
+                    <hbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QLabel">
+                            <property name="name">
+                                <cstring>textLabel6</cstring>
+                            </property>
+                            <property name="text">
+                                <string>Patch name:</string>
+                            </property>
+                        </widget>
+                        <widget class="QLineEdit">
+                            <property name="name">
+                                <cstring>lePatchName</cstring>
+                            </property>
+                        </widget>
+                    </hbox>
+                </widget>
+                <widget class="QLayoutWidget" row="2" column="0">
+                    <property name="name">
+                        <cstring>layout17_2</cstring>
+                    </property>
+                    <hbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <spacer>
+                            <property name="name">
+                                <cstring>spacer7</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Horizontal</enum>
+                            </property>
+                            <property name="sizeType">
+                                <enum>Expanding</enum>
+                            </property>
+                            <property name="sizeHint">
+                                <size>
+                                    <width>211</width>
+                                    <height>31</height>
+                                </size>
+                            </property>
+                        </spacer>
+                        <widget class="QPushButton">
+                            <property name="name">
+                                <cstring>pbOK</cstring>
+                            </property>
+                            <property name="text">
+                                <string>&amp;OK</string>
+                            </property>
+                            <property name="default">
+                                <bool>true</bool>
+                            </property>
+                        </widget>
+                        <widget class="QPushButton">
+                            <property name="name">
+                                <cstring>pbCancel</cstring>
+                            </property>
+                            <property name="text">
+                                <string>&amp;Cancel</string>
+                            </property>
+                        </widget>
+                    </hbox>
+                </widget>
+            </grid>
+        </widget>
+    </grid>
+</widget>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

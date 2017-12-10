@@ -1,0 +1,4 @@
+audigy_ms.dl10k1 - dump with default configuration + mute switches + capture switches + headphone
+		You can load this with dl10k1 -d audigy_ms.dl10k1
+audigy.dl10k1 - dump with default configuration + headphone
+		You can load this with dl10k1 -d audigy_p.dl10k1

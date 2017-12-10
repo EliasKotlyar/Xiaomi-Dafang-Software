@@ -1,0 +1,39 @@
+TRAM setup:
+
+TCBS (0x44) and TCB (0x41) has same meaning as on SB Live
+
+Internal TRAM size is 0x4000
+Max external TRAM size is 0x100000 - as on SB Live
+
+Register description:
+
+0xdb - Internal TRAM Delay Base Address Counter
+0xde - External TRAM Delay Base Address Counter
+
+0x100 - 0x1ff - tram access control registers (?)
+	- only 5 bit valid 
+		bit :  4 - 0 - use log. compresion on write and read
+			   1 - use raw access - data from/to tram are read/wrote
+		               as 16 bit samples
+		bits : 321 - ???
+		       001 - read from tram
+		       010 - read from tram
+		       011 - write to tram + 0111, 1001
+		       100 - read from tram
+		       101 - read from tram
+		       110 - read from tram
+		       others - ?????
+		bit:   0 - 0 - normal mode
+		           1 - clear tram - set to data register valid address
+			       until TRAM counter reaches this address, reads from
+			       tram will return 0, then this flag is zeroed and
+			       tram is working in normal mode, working for read
+0x200 - 0x2ff - tram access data registers
+	- same as on SB Live
+0x300 - 0x3ff - tram access address registers
+	- address format - host: 32 bit offset 20 bit integer part + 12 bit fractional part
+	  to set offset to 0x123(SB Live) - 0x123 << 11 (Audigy)
+	- address format - DSP: same as SB Live ???
+
+internal TRAM has index 0x00 - 0xbf
+external TRAM has index 0xc0 - 0xff

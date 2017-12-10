@@ -1,0 +1,8 @@
+Version 1.4 (24/11/2003) :
+    * Fix compilation warnings
+    
+Version 1.3 (21/11/2003) :
+    * Added a .desktop file and icon
+    
+Version 1.2 (01/11/2003) :
+    * added support for HDSP 9652 and HDSP 9632 specific features

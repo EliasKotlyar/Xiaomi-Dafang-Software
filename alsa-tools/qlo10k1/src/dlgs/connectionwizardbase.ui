@@ -1,0 +1,181 @@
+<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<class>ConnectionWizardBase</class>
+<widget class="QWizard">
+    <property name="name">
+        <cstring>ConnectionWizardBase</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>282</width>
+            <height>229</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Connection</string>
+    </property>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>pageType</cstring>
+        </property>
+        <attribute name="title">
+            <string>Connection target</string>
+        </attribute>
+        <grid>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <widget class="QButtonGroup" row="0" column="0">
+                <property name="name">
+                    <cstring>buttonGroup1</cstring>
+                </property>
+                <property name="frameShape">
+                    <enum>NoFrame</enum>
+                </property>
+                <property name="frameShadow">
+                    <enum>Plain</enum>
+                </property>
+                <property name="title">
+                    <string></string>
+                </property>
+                <grid>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <property name="margin">
+                        <number>1</number>
+                    </property>
+                    <property name="spacing">
+                        <number>0</number>
+                    </property>
+                    <widget class="QLayoutWidget" row="0" column="0">
+                        <property name="name">
+                            <cstring>layout17</cstring>
+                        </property>
+                        <vbox>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QRadioButton">
+                                <property name="name">
+                                    <cstring>rbNone</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>None</string>
+                                </property>
+                            </widget>
+                            <widget class="QRadioButton">
+                                <property name="name">
+                                    <cstring>rbFX</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>FX</string>
+                                </property>
+                            </widget>
+                            <widget class="QRadioButton">
+                                <property name="name">
+                                    <cstring>rbInput</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Input</string>
+                                </property>
+                            </widget>
+                            <widget class="QRadioButton">
+                                <property name="name">
+                                    <cstring>rbOutput</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Output</string>
+                                </property>
+                            </widget>
+                            <widget class="QRadioButton">
+                                <property name="name">
+                                    <cstring>rbPatch</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Patch</string>
+                                </property>
+                            </widget>
+                        </vbox>
+                    </widget>
+                </grid>
+            </widget>
+        </grid>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>pagePatch</cstring>
+        </property>
+        <attribute name="title">
+            <string>Patch</string>
+        </attribute>
+        <grid>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <widget class="QLayoutWidget" row="0" column="0">
+                <property name="name">
+                    <cstring>layout5</cstring>
+                </property>
+                <vbox>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <widget class="QListBox">
+                        <property name="name">
+                            <cstring>lbPatch</cstring>
+                        </property>
+                    </widget>
+                    <widget class="QLayoutWidget">
+                        <property name="name">
+                            <cstring>layout4</cstring>
+                        </property>
+                        <hbox>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QCheckBox">
+                                <property name="name">
+                                    <cstring>cbMulti</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Multi</string>
+                                </property>
+                            </widget>
+                            <widget class="QCheckBox">
+                                <property name="name">
+                                    <cstring>cbSimple</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Simple</string>
+                                </property>
+                            </widget>
+                        </hbox>
+                    </widget>
+                </vbox>
+            </widget>
+        </grid>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>pageEnd</cstring>
+        </property>
+        <attribute name="title">
+            <string>End</string>
+        </attribute>
+        <grid>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <widget class="QListBox" row="0" column="0">
+                <property name="name">
+                    <cstring>lbEnd</cstring>
+                </property>
+            </widget>
+        </grid>
+    </widget>
+</widget>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

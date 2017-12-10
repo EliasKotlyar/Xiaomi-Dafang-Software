@@ -1,0 +1,245 @@
+lo10k1 is loader.
+
+Parameters:
+
+-h or --help
+    Prints short help message
+    
+-l patch_name or --list path_name
+    List some usefull informations about patch in file patch_name. lo10k1 uses patch produced by as10k1 from
+    alsatools package.
+    
+-p name or --pipe_name name
+    lo10k1 will use local named pipe with name name to communication with linker. Default is /tmp/.ld10k1_port
+
+-i or --info
+    Prints some info about card - not wery usefull
+    
+-a patch_name or --add patch_name
+    Loads patch from file patch_name to DSP
+
+-d num or --del num
+    Unloads patch with number num from DSP. Use option --debug 4 to obtain patch numbers.
+    
+--conadd conn_string
+    Connects patches between each others or to inputs or outputs.
+    Format of conn_string:
+	FX buses:
+	FX(f1, ...) - specify fx bus register f1 can be number or fx bus register name
+		Names can be optained by lo10k1 --debug 7
+	    FX(1)
+	    FX(1,2)
+	    FX(FX_PCM_Left,FX_PCM_Right)
+	    
+	Inputs:
+	IN(i1, ...) - specify input register i1 can be number or input register name
+		Names can be optained by lo10k1 --debug 8
+	    IN(1)
+	    IN(1,2)
+	    IN(IN_AC97_Left,IN_AC97_Right)
+
+	Outputs:
+	OUT(o1, ...) - specify input register o1 can be number or input register name
+		Names can be optained by lo10k1 --debug 9
+	    OUT(1)
+	    OUT(1,2)
+	    OUT(OUT_AC97_Front_Left,OUT_AC97_Front_Right)
+	    
+	Patch inputs:
+	PIN(p, i1, ...) - p is patch number or patch name, i1 is input register i1 can be number or input register name
+		Patch numbers and names can be optained by lo10k1 --debug 5
+		Names can be optained by lo10k1 --debug patch_num
+	    PIN(1) - all patch inputs for patch 1
+	    PIN(Volume,IL,IL) - inputs IL and IR for patch Volume
+	    PIN(2,0,1,2,3,4,5) - inputs 0,1,2,3,4,5 patch 2
+	    
+	Patch outputs:
+	POUT(p, o1, ...) - p is patch number or patch name, o1 is output register o1 can be number or outpur register name
+		Patch numbers and names can be optained by lo10k1 --debug 5
+		Names can be optained by lo10k1 --debug patch_num
+	    POUT(1) - all patch outputs for patch 1
+	    POUT(Volume,OL,OL) - outputs OL and OR for patch Volume
+	    POUT(2,0,1,2,3,4,5) - outputs 0,1,2,3,4,5 patch 2
+
+	
+	- connecting two patches:
+	    something1=something2
+	    or
+		something1:something2
+	    or
+	    something1>something2
+		something1,something2 - strings specify fx bus, input, output, patch input or patch output
+		something1 - must be patch input or output
+
+	    Difference between = and > is that = connect only two patches > enables connecting more
+	    patches together. If you have three patches p1,p2,p3 - p1 with output o1, p2 with input i2,
+	    and p3 with input i3.
+	    PIN(p2,i2)=POUT(p1,o1) - will connect p1 with p2
+	    then next connect
+	    PIN(p3,i3)=POUT(p1,o1) - will disconnect p1 and p2 and connect p1 with p2
+	    but
+	    PIN(p3,i3)>POUT(p1,o1) - will connect p1 and p2 - p2 input i2 and p3 input i3 will be connected
+	    to p1 output o1
+
+		Diffrence between = and : is that = allocate extra instructions and register to properly add
+		sources. : uses same register for all sources and patches must care about this register.
+
+	    Counts of connected inputs and outputs must be same.
+
+	    FX busses, inputs and outputs can have multiple patches connected to them.
+	    Examples:
+	    lo10k1 --conadd "PIN(1)=FX(0,1)"
+		- connect to patch 1 input to fx bus 0 and 1
+
+	    lo10k1 --conadd "PIN(2)=POUT(PCM)"
+		- connect to all patch 2 inputs all outputs from patch PCM
+
+
+--condel conndel_string
+    Disconnects patch register.
+    Format of conndel_string:
+	something
+		something - strings specify patch input or patch output
+		
+	Examples:
+	    lo10k1 --condel "PIN(1)"
+		- disconnect all inputs of patch 1
+		
+	    lo10k1 --condel "POUT(PCM1,1,Center))"
+		- disconnect output 1 and Center from patch PCM
+
+--debug num
+    Prints on console some debug information. 
+    mum = 1 - prints registers information
+    mum = 2 - prints consts information
+    mum = 3 - prints instruction information
+    mum = 4 - prints information about TRAM
+    mum = 5 - prints loaded patch names and numbers
+    mum = 6 - prints patch order in DSP instruction memory
+    mum = 7 - prints fx information
+    mum = 8 - prints input information
+    mum = 9 - prints output information
+    mum = 100 and more - prints informations about loaded patches (--debug 100 - about patch number 0,
+	-- debug 101 about patch number 1, and so on)
+	
+--defionames
+    When patch is loaded, this assign default names for patch input and output registers.
+    Input/Output count:
+	1/1 - In/Out
+	2/2 - IL,IR/OL,OR
+	4/4 - IL,IR,IRL,IRR/OL,OR,ORL,ORR
+	6/6 - IL,IR,IRL,IRR,IC,ILFE/OL,OR,ORL,ORR,OC,OLFE
+    where:
+	In = Input
+	On = Output
+	IL = Input Left
+	OL = Output Left
+	IR = Input Right
+	OR = Output Right
+	IRL = Input Rear Left
+	ORL = Output Rear Left
+	IRR = Input Rear Right
+	ORR = Output Rear Right
+	IC = Input Center
+	OC = Output Center
+	ILFE = Input LFE
+	OLFE = Output LFE
+	
+--ctrl string
+    This options is used to concate, rename controls and sets various parameters for controls
+    String format:
+
+	c-name1,name2,...namen:outname
+
+	This concate controls with names name1, name2, ..namen to one control with name outname
+	Input controls must have same range and are single channel (this is limitation of as10k1).
+	Output control has n channes. This can be used only for as10k1 file format.
+
+	example:
+	    c-masterl,masterr:master,t-master:1
+
+	    Concate two controls masterl and masterr into one stereo control master with translaton table100
+
+	t-name:type
+
+	This sets translate function whitch translate range and current value from mixer value to gpr
+	value for control with name name. This can be used only for as10k1 file format.
+	Type can be:
+	    0 - no translation is used
+	    1 - table 100 - range 0-100 in mixer is translated to range 0-2^31
+	    2 - bass - range 0-40 in mixer is translated to range 0-2^31 - used for bass control
+	    3 - treble - range 0-40 in mixer is translated to range 0-2^31 - used for treble control
+	    4 - on/off - control uses range 0-1
+
+	v-name:count
+
+	This sets number off visible channel in mixer. This can be used only for as10k1 file format.
+	
+	example:
+	     v-bass:1
+
+	     for bass control which has 5 channels is in mixer visible only one
+
+	s-name:value1#value2# ...
+
+	This sets initial value for control.
+	
+	i-name:value
+
+	Sets control index value to control
+	
+	r-name:outname
+
+	This rename control with name name to control with name outname. This can be used only for native file format.
+	
+	example:
+	    r-master:PCM Master
+
+	    Rename control master to control PCM Master
+	    
+--patch_name name
+    Sets name for actualy loaded patch (it is used with -a option). Dafault name comes from patch file.
+
+--where num
+    Used with -a option. Actualy loaded path will by loaded before patch with order num.
+    You can get patch order with --debug 5
+    
+--setup
+    When this option is used DSP on card is cleared.
+	
+--renam something=new_name
+    Same string as in connection add and plus PATCH(p) - specify patch with name p or number p
+    
+    Examples:
+    lo10k1 --renam "IN(5)=CD Left"
+	- renames input 5 to CD Left
+	
+    lo10k1 --renam "PATCH(Volume)=Mic Volume"
+	- renames patch Volume to Mic Volume
+	
+    lo10k1 --renam "PIN(Volume,IC)=Center IN"
+	- renames patch Volume input IL to Center IN
+
+--dump file
+	This will dump dsp instructions and register to file. This file can be loaded with dl10k1 without
+	ld10k1.
+
+--host machine:port
+	ld10k1 default uses named socket, this switch to use network socket.
+
+-P or --path add effect search paths (default will lo10k1 search in effects dir)
+
+--store file.ld10k1
+	Stores DSP config to native ld10k1 file file.ld10k1
+
+--restore file.ld10k1
+	Restores DSP config from native ld10k1 file file.ld10k1
+	
+--save_patch file.ld10k1
+	Saves patch specified with --where option to file file.ld10k1
+	
+--load_patch file.ld10k1
+	Loads patch to dsp on position specified with --where option from file file.ld10k1
+	
+--wait msec
+	Wait for ld10k1 for msec mili second.

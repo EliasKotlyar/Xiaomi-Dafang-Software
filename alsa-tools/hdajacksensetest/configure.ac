@@ -1,0 +1,10 @@
+AC_INIT(hdajacksensetest, 0.20141006)
+AM_INIT_AUTOMAKE(subdir-objects)
+AM_MAINTAINER_MODE([enable])
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_HEADER_STDC
+
+PKG_CHECK_MODULES([GLIB], [glib-2.0])
+
+AC_OUTPUT(Makefile)

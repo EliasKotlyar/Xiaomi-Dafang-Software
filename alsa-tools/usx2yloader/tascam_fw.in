@@ -1,0 +1,60 @@
+#!/bin/sh
+
+# load the firmware into Tascam USB devices
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+FIRMWARE=
+FIRMWAREDIR=@datadir@/alsa/firmware/usx2yloader
+FLAGS=
+LOADER=/sbin/fxload
+LOADERFIRMWARE=$FIRMWAREDIR/tascam_loader.ihx
+
+case $PRODUCT in
+1604/8000/*)
+	FIRMWARE=$FIRMWAREDIR/us428fw.ihx
+	;;
+1604/8004/*)
+	FIRMWARE=$FIRMWAREDIR/us224fw.ihx
+	;;
+1604/8006/*)
+	FIRMWARE=$FIRMWAREDIR/us122fw.ihx
+	;;
+*)
+	if [ -x /usr/bin/logger ]; then
+		/usr/bin/logger -t $0 "unknown product $PRODUCT"
+	fi
+	exit 1
+esac
+
+# missing loader firmware?
+if [ ! -r $LOADERFIRMWARE ]; then
+	if [ -x /usr/bin/logger ]; then
+		/usr/bin/logger -t $0 "missing $LOADERFIRMWARE ??"
+	fi
+	exit 1
+fi
+
+# missing firmware?
+if [ ! -r $FIRMWARE ]; then
+	if [ -x /usr/bin/logger ]; then
+		/usr/bin/logger -t $0 "missing $FIRMWARE for $PRODUCT ??"
+	fi
+	exit 1
+fi
+
+# missing loader?
+if [ ! -x $LOADER ]; then
+	if [ -x /usr/bin/logger ]; then
+		/usr/bin/logger -t $0 "missing $LOADER ??"
+	fi
+	exit 1
+fi
+
+if [ -x /usr/bin/logger ]; then
+	/usr/bin/logger -t $0 "load $FIRMWARE for $PRODUCT to $DEVNAME"
+fi
+$LOADER $FLAGS -s $LOADERFIRMWARE -I $FIRMWARE -D $DEVNAME
+
+exit 0

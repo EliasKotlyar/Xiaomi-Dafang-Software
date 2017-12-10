@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if test -z "$AUTOMAKE_DIR" ; then
+  if test -d /usr/local/share/automake; then
+    AUTOMAKE_DIR=/usr/local/share/automake
+  fi
+  if test -d /usr/share/automake; then
+    AUTOMAKE_DIR="/usr/share/automake"
+  fi
+  if test -z "$AUTOMAKE_DIR" ; then
+    AUTOMAKE_DIR=/usr/share/`ls /usr/share | grep automake | tail -n 1`
+  fi
+fi
+
+for f in install-sh mkinstalldirs missing; do
+  cp -av $AUTOMAKE_DIR/$f . || exit 1
+done
+
+aclocal $ACLOCAL_FLAGS || exit 1
+automake --foreign --add-missing --copy || exit 1
+touch depcomp || exit 1
+autoconf || exit 1
+export CFLAGS='-O2 -Wall -pipe -g'
+echo "CFLAGS=$CFLAGS"
+echo "./configure $@"
+./configure $@ || exit 1
+unset CFLAGS
+if test -z "$GITCOMPILE_NO_MAKE" ; then
+  make || exit 1
+fi

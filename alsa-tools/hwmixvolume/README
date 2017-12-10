@@ -1,0 +1,19 @@
+hwmixvolume
+===========
+
+This tool allows you to control the volume of individual streams on sound cards
+that use hardware mixing, i.e., those based on the following chips:
+* Creative Emu10k1 (SoundBlaster Live!) (driver: snd-emu10k1)
+* VIA VT823x southbridge (driver: snd-via82xx)
+* Yamaha DS-1 (YMF-724/740/744/754) (driver: snd-ymfpci)
+
+
+This tool requires Python, pygtk, and alsa-pyton 1.0.22 or later.
+
+It is recommended to use at least Linux kernel 2.6.32 or alsa-driver 1.0.22;
+otherwise, the name of the program that is using a stream cannot be shown.
+
+Need to use alsa-driver kernel 3.4 for Aureal sound cards
+* Aureal Vortex/Vortex2/Advantage (driver: snd-au8820, snd-au8830, snd-au8810)
+
+Author: Clemens Ladisch <clemens@ladisch.de>

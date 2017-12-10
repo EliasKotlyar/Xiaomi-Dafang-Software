@@ -1,0 +1,9 @@
+Future plans :
+    * add latest Totalmix features (matrix view ?)
+    * midi automation (alsa seq)
+    * ladcca support
+    * integrate with freedesktop.org's notification area (systray like)
+
+Thoughts :
+    * switch to OpenGL for faster meter rendering
+    * import/export presets in the windows/mac format

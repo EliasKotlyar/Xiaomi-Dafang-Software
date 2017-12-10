@@ -1,0 +1,89 @@
+.TH "envy24control" "1" "30 July 2005" "" ""
+.SH "NAME"
+envy24control \- GUI control tool for Envy24 (ice1712) based
+soundcards, under ALSA.
+
+.SH "SYNOPSIS"
+\fBenvy24control\fP [\fI\-c\fP card\-number] [\fI\-D\fP control\-name] [\fI\-o\fP 0\-num DACs max 8] [\fI\-i\fP 0\-num ADCs max 8] [\fI\-p\fP 0\-8] [\fI\-s\fP 0\-2] [\fI\-f\fP <profiles file name>] [\fI\-v\fP] [<profile number>|<profile name>] [\fI\-m\fP midi\-channel] [\fI\-M\fP] [\fI\-w\fP window\-width] [\fI\-t\fP 0\-9]
+
+.SH "DESCRIPTION"
+\fBenvy24control\fP allows control of the digital mixer, channel gains
+and other hardware settings for sound cards based on the ice1712
+chipset (Midiman Delta series, Terratec EWS and EWX series). It also
+displays a level meter for each input and output channel.
+
+.SH "INVOKING"
+\fBenvy24control\fP [\fI\-c\fP card\-number] [\fI\-D\fP control\-name] [\fI\-o\fP 0\-num DACs max 8] [\fI\-i\fP 0\-num ADCs max 8] [\fI\-p\fP 0\-8] [\fI\-s\fP 0\-2] [\fI\-f\fP <profiles file name>] [\fI\-v\fP] [<profile number>|<profile name>] [\fI\-m\fP midi\-channel] [\fI\-M\fP] [\fI\-w\fP window\-width] [\fI\-t\fP 0\-9]
+.TP 
+If no control\-name is given, then the first sound card is used.
+
+.SS Options
+.TP 
+\fI\-c\fP card\-number
+Use the card specified by card\-number rather than the first card.
+This is equivalent with \fI\-Dhw:n\fP option where \fIn\fP is the card number.
+.TP 
+\fI\-D\fP control\-name
+Use the card specified by control\-name rather than the first card,
+normally this will be of the form hw:\fIn\fP where \fIn\fP is the sound
+card number (zero\-based). This is only needed if you have more than one
+Envy24\-based card or if your Envy24 card is not configured as the first
+card in your ALSA driver setup.
+.TP 
+\fI\-o\fP outputs
+Limit number of analog line outputs to display.  Default is the number of
+DACs in the driver specification. Maximum is 8.
+The number of analog output lines can only be reduced from the available
+number of output lines.
+.TP 
+\fI\-i\fP inputs
+Limit number of analog line inputs to display.  Default is the number of
+ADCs in the driver specification. Maximum is 8.
+The number of analog input lines can only be reduced from the available
+number of input lines.
+.TP 
+\fI\-p\fP pcm outputs
+Limit number of PCM outputs to display.  Default is 8.
+.TP 
+\fI\-s\fP spdif inputs/outputs
+Limit number of SPDIF inputs/outputs to display.  Default is 2.
+.TP 
+\fI\-f\fP name and path of the profiles file name.
+From/to this file will envy24control read/write the alsactl settings.
+If is not given DEFAULT_PROFILERC or for restore if DEFAULT_PROFILERC
+doesn't exists SYS_PROFILERC will be used.
+.TP 
+\fI\-v\fP view spdif playback channels in the mixer.
+It is not possible to manage something (muting, volume levels).
+It is only to view the levelmeters.
+Default is no view of spdif playback channels in the mixer.
+.TP 
+\fI\-m\fP midi\-channel
+Use MIDI controller values to control the Faders in the mixer view.
+The application will react to controllers on channel midi\-channel and
+send controllers on this channel when the user moves the GUI sliders.
+.TP 
+\fI\-M\fP
+Use an enhanced mapping from midi controller values to db sliders.
+.TP
+\fI\-w\fP window\-width
+Specify the initial width of the envy24control window.
+Using window\-width in the range 0\-20 specifies approx number of mixer channels visible.
+Values >20 are interpreted as screen pixels.
+.TP
+\fI\-t\fP tall\-equal mixer heights
+Using \fI\-t\fP 1 enlarges the channel mixers to the same height as the digital mixer.
+With values >1 the height of all mixers is increased in stages.
+\fI\-t\fP 0 is the default, set for minimum window height.
+.SH "SEE ALSO"
+\fB
+alsamixer(1),
+amixer(1),
+gamix(1)
+\fP
+
+.SH "AUTHOR"
+\fBenvy24control\fP is  by Jaroslav Kysela <perex@perex.cz>
+This document is by James Tappin <james@xena.uklinux.net>.
+Updated by Dirk Kalis <dirk.kalis@t\-online.de>.
+Options\fI\-w\ and \fI\-t\fP added Alan Horstmann <gineera@aspect135.co.uk>

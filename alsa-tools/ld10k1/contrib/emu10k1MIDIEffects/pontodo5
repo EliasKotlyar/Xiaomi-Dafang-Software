@@ -1,0 +1,64 @@
+#Reset DSP
+lo10k1 -s
+
+#load MASTER L,R
+lo10k1 -n -a volLR.emu10k1
+
+#load Bus L and BUS R
+lo10k1 -n -a 3volBUS1.emu10k1
+lo10k1 -n -a 3volBUS2.emu10k1
+
+#load Chorus Effect
+lo10k1 -n -a michorusL.emu10k1
+lo10k1 -n -a michorusR.emu10k1
+
+#load gain
+lo10k1 -n -a gain_4.emu10k1
+
+#load reverb 
+lo10k1 -n -a freberv.emu10k1
+
+lo10k1 -q "PIN(5,0)=FX(4)"
+lo10k1 -q "PIN(5,1)=FX(5)"
+lo10k1 -q "PIN(5,2)=FX(13)"
+lo10k1 -q "PIN(5,3)=FX(13)"
+
+#Input Chorus with FX(13) MIDI_Chorus_FX
+lo10k1 -q "PIN(3)=POUT(5,2)"
+lo10k1 -q "PIN(4)=POUT(5,3)"
+
+#reverb
+
+lo10k1 -q "PIN(6,0)=FX(12)"
+lo10k1 -q "PIN(6,1)=FX(12)"
+
+
+
+#Mix in BUS L FX_MIDI_Left + Chorus Effect
+lo10k1 -q "PIN(1,1)=POUT(5,0)"
+lo10k1 -q "PIN(1,0)=POUT(3)"
+lo10k1 -q "PIN(1,2)=POUT(6,0)"
+
+#Mix in BUS R FX:MIDI_Right + Chorus Effect
+lo10k1 -q "PIN(2,1)=POUT(5,1)"
+lo10k1 -q "PIN(2,0)=POUT(4)"
+lo10k1 -q "PIN(2,2)=POUT(6,1)"
+
+
+
+#BUS L to Master L
+lo10k1 -q "PIN(0,0)=POUT(1,0)"
+
+#BUS R to Master R
+lo10k1 -q "PIN(0,1)=POUT(2,0)"
+
+
+
+
+
+#Master to Ouputs
+lo10k1 -q "POUT(0,0)=OUT(0)"
+lo10k1 -q "POUT(0,1)=OUT(1)"
+
+
+

@@ -1,0 +1,432 @@
+
+AS10k1 Assembler version A0.99
+------------------------------
+
+This is an assembler for the emu10k1 DSP chip present in the creative SB
+live, PCI 512, and emu APS sound cards. It is used to make audio effects such 
+as a flanger, chorus or reverb.
+
+
+Author: Daniel Bertrand <d.bertrand@ieee.ca>
+
+
+This version of the assembler was modified for the ALSA driver by
+Jaroslav Kysela <perex@perex.cz>.
+
+
+Usage: as10k1 <asm file> [bin output file] 
+------
+
+Making binary DSP programs:
+
+example, type:
+
+./as10k1 chorus.asm
+
+(it creates chorus.bin)
+
+--
+Loading Binary DSP files
+
+
+<..TODO..>
+
+
+Description of files included
+------------------------------
+
+Chorus.asm	-- chorus effect
+Flanger.asm	-- flanger effect
+Delay.asm	-- generates Echos, this is _not_ a reverb
+eq5.asm		-- A 5 band Equalizer (needs a bit more work)
+fir.asm		-- A low pass filter (A demo of a fir filter implementation)
+sine.asm	-- A sinewave generator (can be useful for debuging)
+vibrato.asm	-- A vibrato effect (or is it a tremolo?)
+vol_ctrl.asm	-- provides support for the hardware volume control
+emu_constants.asm -- not an effect, just contains handy constants and macros
+
+
+
+
+===============================================================================
+
+
+Programming Usage:
+=================
+
+Assembly Syntax
+---------------
+
+Assembly lines generally have four fields seperated by spaces or tabs:
+
+
+Name_Field   Opcode_field    Operand_Field   Comment_Field
+----------   ------------    -------------   -------------
+[symbol]      [mnemonic]      [operands]       [text]
+
+
+With this assembler, each line can have a maximum of 256 characters and each
+symbol can be a maximum of 32 characters. Symbols ARE case sensitive, opcodes
+ARE NOT.
+
+OPCODES
+--------
+
+
+All instructions require 4 operands, they have the format
+
+	<opcode> R,A,X,Y
+	
+(note some documentation out there the call the R operand as Z and the A
+operand as W).
+
+Here are 16 opcodes.
+
+   0x0 (MACS) : R = A + (X * Y >> 31)   ; saturation
+   0x1 (MACS1) : R = A + (-X * Y >> 31)  ; saturation
+   0x2 (MACW) : R = A + (X * Y >> 31)   ; wraparound
+   0x3 (MACW1) : R = A + (-X * Y >> 31)  ; wraparound
+   0x4 (MACINTS) : R = A + X * Y  ; saturation
+   0x5 (MACINTW) : R = A + X * Y  ; wraparound (31-bit)
+   0x6 (ACC3) : R = A + X + Y  ; saturation
+   0x7 (MACMV) : R = A, acc += X * Y >> 31
+   0x8 (ANDXOR) : R = (A & X) ^ Y
+   0x9 (TSTNEG) : R = (A >= Y) ? X : ~X
+   0xa (LIMIT) : R = (A >= Y) ? X : Y
+   0xb (LIMIT1): R = (A < Y) ? X : Y
+   0xc (LOG) : ...
+   0xd (EXP) : ...
+   0xe (INTERP) : R = A + (X * (Y - A) >> 31)  ; saturation
+   0xf (SKIP) : R,CCR,CC_TEST,COUNT  
+
+
+Special note on the accumulator: 
+mac* instruction with ACCUM as A operand     => uses Most significant 32 bits.
+macint* instruction with ACCUM as A operand  => uses Least significant 32 bits.
+
+
+For more details on the emu10k1 see the dsp.txt file distributed with the
+linux driver.
+
+
+
+Operands
+--------
+
+Operands can be specified as either a symbol or a value. hex values are
+prefixed by $, octal by @, and binary by %.
+
+e.g.:
+
+123 decimal value
+$123 hex value
+@123 octal value
+%01101 binary value
+
+The operands for emu10k1 instructions are always addresses of registers, there
+are no instruction which take immediate values.
+
+Operands currently support basic arithmetic, It does not support bedmas (or is it bodmas)
+so don't try to use (). Infact don't put spaces either (for now, until I fix this).
+
+Summary of assembler directives
+-------------------------------
+
+	  NAME "string"			;give a name to the patch
+
+<symbol>  IO				;defines an Input/output pair	
+<symbol>  CONTROL <symbol>		;defines a controlable GPR	
+<symbol>  DYNamic <number of storage spaces>	;defines a temporary GPR
+<symbol>  STAtic <initial value>		;defines a constant GPR /w initial value
+<symbol>  EQU <Value equated>		;assembly time constant
+<symbol>  CONstant <value>		;defines a read-only GPR	
+
+<symbol>  DELAY  <value>		;defines a Delay line
+<symbol>  TABLE  <value>		;defines a lookup table
+
+<symbol>  TREAD  <tram id>,<value>	;defines a tram read 
+<symbol>  TWRITE <tram id>,<value>	;defines a tram write
+
+
+	  INCLUDE <"file name">		;includes an external file
+
+	  FOR <variable>=<start>:<finish> ;Assembly-time 'for' statement
+	  ENDFOR			;ends a for loop
+
+
+<symbol>  MACRO	arg1,arg2,arg3....	;used for define a macro
+	  ENDM				;end a macro definition
+
+	  END				;ends the code
+
+
+Detailed description of directives:
+----------------------------------
+
+( <> brackets indicate required fields, [] brackets indicate optional fields)
+
+DYNamic  directive (replaces DS):
+
+Defines a storage space from the gpr pool on the emu10k1. The
+assembler maintains a pointer to the gpr registers (starting at $100). The
+symbol is assigned the value of the address of the gpr pointer. The pointer is
+increment by the number following the dynamic directive.
+
+syntax:
+<symbol> dynamic <number of storage spaces
+
+or
+
+<symbol> dyn <number of storage spaces>
+
+--
+STAtic directive (replaces DC):
+
+Similar to dynamic, but places an initial value in the memory location.
+
+The values specified are slightly different from operands for instructions. 
+The values are 32 bit signed intergers so that a maximum magnitude of 2^31 can
+be stored. values can be in signed decimal, unsigned octal, binary and hex, 
+and in fractional decimal (values between -1 to 1) for filter coefficients.
+
+A fractional decimal is specified using the '#' prefix and can include an 
+exponent. These values should be used with the fractional "mac" instructions.
+
+NEW! fractional numbers are now handle automatically, a value between 1 and 
+-1 will be converted into fractional form. The old # form still works though.
+(BUG:confusion occurs at 1 and -1 however, should 1 be represented as $1
+ or $7ffffff?, currently defaults to $1, so #1 still has some importance)
+
+examples:
+	.03412
+	123E-3
+	#-0.1236
+
+syntax:
+
+<symbol> static <initial value>
+
+or
+
+<symbol> sta <initial value>
+
+--
+CONTROL
+
+Control registers are similar to DC, but they also include a min and max value. The control register is used
+by a mixer app to change values in a GPR (a volume control, for example). 
+
+syntax:
+
+<symbol> CONTROL <initial value>,<min>,<max>
+
+--
+IO
+
+Defines an input and an output register.
+
+<symbol> IO
+
+It defines two register, but they both use the symbol. The assembler handles it automagically
+depending on whether you're performing a read (X, Y or Z operand) or a write (R operand) to the GPR.
+
+-
+If you insist on having two different symbols for read/write (for readability or whatever), use an EQU, 
+
+i.e.:
+
+IN   IO
+OUT  EQU  IN
+
+-
+To force a read from the output (for whatever reason) use <symbol>.o (i.e. OUT.o)
+
+Writing to an input is not allowed.
+--
+CONSTANT
+
+defines a read-only constant GPR
+
+When the assembler encounters a CONSTANT define, it'll try three things. First 
+it'll check to see if the defined constant is a hardware constant, if so 
+substitutes that instead. Next the assembler check to see if another constant 
+has alrady been declared with the same value, if so it'll substitute it. Else
+it'll declare a new GPR for holding the value of the constant.  
+
+syntax:
+
+<symbol> constant  <value>
+
+or
+
+<symbol> con  <value>
+
+
+--
+
+DELAY LINES
+
+Delay lines are defined via three directives:
+
+--
+DELAY Directive	
+
+Define Delay, used for allocating an amount of TRAM for a delay line.
+
+<symbol>  DELAY  <value>
+
+The symbol is used to identify this delay line.The value is the amount of TRAM 
+allocated, it may be specified as a decimal,hex, octal, binary or time value. 
+
+The time value is prefixed with '&' and represents seconds of time.
+
+e.g.
+
+foo DELAY &100e-3  ;;a 100msec delay line
+bar DELAY 1000	;;a 1000 sample delay line
+
+--
+TABLE directive
+
+Define lookup Table
+
+same as DELAY but for lookup tables. 
+
+--
+TREAD Directive
+
+Define read: used for defining a TRAM read point
+
+<symbol1>  TREAD <symbol2>,<value>
+
+The value represents the read point within the delay line. symbol2 defines 
+which delay line this read belongs to.
+
+Symbol1 is a pointer to TRAM data register associated with this TRAM read 
+operation. The assembler will create <symbol1>.a which points to the TRAM
+address register.
+
+example:
+
+fooread TREAD 100e-3,foo
+	macs  fooread.a,one,two,three   ; writes a new tram read address 
+	macs  temp,fooread,one,two	; reads the data from the delay line 
+
+--
+WRITE Direcive
+
+Define write: same as TREAD but used for writing data to a delay line.
+<symbol1>  TWRITE <symbol2>,<value>
+
+--
+EQU directive:
+
+Equates a symbol to a be constant which is substituted at assembly time:
+
+syntax:
+
+<symbol> EQU <Value equated>
+
+--
+END directive
+
+The END directive should be placed at the end of the assembly source file. If
+the END directive is not found, a warning will be generated. All text located
+after the END directive is ignored.
+
+Syntax:
+
+[symbol]  END
+
+--
+INCLUDE Directive
+
+The include directive is used to include external asm files into the current 
+asm file.
+
+Syntax:
+
+	INCLUDE <"file name">
+
+The file name Must be enclosed in "" or '' .
+
+examples:
+
+	include 'qwerty.asm'
+	include "foobar.asm"
+	
+
+--	
+
+MACRO directive 
+
+Used for defining a macro
+
+Defining Macro:
+
+<symbol> macro arg1,arg2,arg3....
+	....
+	<opcode>  arg4,arg1,arg2...  ;;for example
+	....	
+	....
+	endm
+
+were the <symbol> used is the nmeumonic representing the macro. 
+
+arg1,arg2,arg3... can be any symbols (auto-defining and local to a macro)
+as long as the symbol is not already in use outside the macro (i.e. as 
+a DC, DS, etc.).
+
+There's no limit to how many arguments can be used.
+
+
+Using Macro:
+
+	<macro nmeumonic> arg1,arg2,arg3....
+
+where arg1,arg2,arg3,... are values or symbols.
+
+--
+Assembly-time For loop
+
+
+usage:
+
+	For <symbol>=<start>:<stop>
+		...
+		...
+		macs <symbol>,....
+		...
+	endfor
+	
+<start> and <stop> must be integers
+
+
+--
+Handling Skips
+
+the as10k1 assembler handles skips in a special way explained best by an example:
+
+	skip CRR,CRR,CC_test,.foo
+	...
+	...
+	...
+.foo	...
+
+the "." tell the assembler that the symbol is for skipping purposes, it will
+automatically define a GPR when parsing the skip instruction, and when the second
+.foo is encountered it will insert the number of instructions to skip. (the skip
+instruction needs a GPR by design, so don't blame me for the half-assness of it). 
+
+
+
+Features NOT YET Supported
+==========================
+
+any ideas?
+
+
+
+
+
+

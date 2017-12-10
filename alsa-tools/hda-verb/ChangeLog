@@ -1,0 +1,12 @@
+version 0.3:
+ - Add -l and -L option to show defined verbs and parameters
+
+version 0.3:
+ - Add a brief description about hwdep in README
+ - Add COPYING before someone blaming me
+
+version 0.2
+ - public release
+
+version 0.1
+ - embryo
