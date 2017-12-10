@@ -1,0 +1,23 @@
+NAME
+oss_als4k - ALS4000 audio driver.
+
+DESCRIPTION
+Open Sound System driver for Avance Logic ALS4000 based soundcards.
+ALS4000 characteristics:
+	o 8/16 bit 
+	o mono/stereo
+	o 8Khz - 48Khz sampling rates
+	o FM Synthesis
+	o MIDI UART401
+
+The ALS4000 has a Sound Blaster compatible mixer device.
+
+OPTIONS
+None
+
+FILES
+CONFIGFILEPATH/oss_als4k.conf
+
+AUTHOR
+4Front Technologies
+

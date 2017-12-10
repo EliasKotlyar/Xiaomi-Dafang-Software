@@ -1,0 +1,64 @@
+NAME
+osspartysh - reverse "telnet" utility for OSs technical support 
+
+SYNOPSIS
+osspartysh -d -p <port>  (by the support engineer)
+osspartysh -h <support_host> -p <support_port>  (by the customer)
+
+DESCRIPTION
+
+The osspartysh is an utility that makes it possible to a remote suport
+engineer to share the session with a customer. The session runs in customer's
+computer but both the customer and the support engineer can type comands
+and see the output. It is possible to run commands like vi to edit files.
+
+There is limited chat mechanism based on the comments of the shell (bash)
+command language. Both peers can send messages by typing the comment character
+(#) in the beginning of the line.
+
+SECURITY
+
+The osspartysh sessions are established in reverse way when compared to usual 
+remote terminal programs like ssh or telnet. This gives improved security
+for both sides. The actual internet connection is not crypted so it
+cannot be used for editing confidential files, etc. However there is no need to
+send passwords over internet since the protocol doesn't rely on them.
+
+ SECURITY FOR THE CUSTOMER
+
+There is no need to open any incoming TCP ports in the firewall or NAT. In 
+addition there is no need to reset any passwords to give the support engineer an
+access to the system. In addition the customer can see whatever commands are
+typed and there is good time to hit ^C or ^Z to abort the commands.
+
+Connections opened to the remote terminal server are verified to ensure that
+using wrong port number doesn't feed invalid commands to the local shell.
+Otherwise it would be possible that connecting to a wrong port (say http 
+server) sends bad strings to the command interpreter (bash).
+
+ SECURITY FOR THE SUPPORT ENGINEER
+
+The system used as the support terminal needs to have the TCP port opened in
+the firewall and NAT settings. However this doesn't cause any security risks.
+If a possible attacker manages to connect to this port then all he can do is
+sending characters that are (only) shown on the terminal screen.
+
+OPTIONS
+-d		Launch the utility in terminal server mode (by default
+		connect to a remote terminal.
+-h <host>	Give the IP address or host name of the remote terminal
+		server.
+-p <port>	Give the TCP port to use. Must be the same in both sides.
+
+KNOWN BUGS
+
+o	Sometimes it's necessary to hit ^L after running vi or some other
+	curses based program. Without this the keyboard will be locked and
+	typed characters will not be shown on the screen
+o	When the session is ended (by typing ^D or exit) the terminal (support)
+	side will be hanging until enter is hit twice. After this the
+	terminal server will be ready for a new connection by any client. It is
+	also possible to stop the terminal server by hitting ^C.
+
+AUTHOR
+4Front Technologies

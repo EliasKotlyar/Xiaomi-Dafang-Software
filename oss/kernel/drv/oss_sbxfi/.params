@@ -1,0 +1,15 @@
+int sbxfi_type=0;
+/* 
+ * Override sbxfi autodetection.
+ * Values: 0-4. Default: 0
+ * 0 - Autodetect
+ * 1 - Sound Blaster X-Fi (SB046x/067x/076x)
+ * 2 - Sound Blaster X-Fi (SB073x)
+ * 3 - Sound Blaster X-Fi (SB055x)
+ * 4 - Sound Blaster X-Fi (UAA)
+ * 5 - Sound Blaster X-Fi (SB0760)
+ * 6 - Sound Blaster X-Fi (SB0880-1)
+ * 7 - Sound Blaster X-Fi (SB0880-2)
+ * 8 - Sound Blaster X-Fi (SB0880-3)
+ */
+

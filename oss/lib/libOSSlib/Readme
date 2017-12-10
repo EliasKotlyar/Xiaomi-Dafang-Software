@@ -1,0 +1,120 @@
+About OSSlib
+============
+
+This version of OSSlib which supports patch caching for cards like GUS, OPL3
+and SoftOSS. This part of the library is only used by some older synthesizer
+chips that are no longer available. Also the SoftOSS virtual synth is
+compatible with it.
+
+Another part is the midiparser library. It's a simple callback based
+system that translates a stream of MIDI bytes (for example from MIDI 
+keyboard) to events.
+
+This library is compatible with all OSS implementations including the freeware
+implementations.
+
+Copying conditions
+------------------
+
+This library can be freely used in ANY applications that is compatible
+with the OSS API. No parts of the code can be borroved to other purposes
+without written permission by 4Front Technologies.
+
+Installing OSSlib
+-----------------
+
+Execute make. If your operating system is recognized you will get
+libOSSlib.so or libOSSlib.a depending on operating system.
+If make complains about unknown operating system you should use
+make libOSSlib.so or make libOSSlib.a to build it. 
+
+Finally copy libOSSlib.* to /usr/lib
+
+Using OSSlib in programs
+------------------------
+
+OSSlib is intended to be used in programs using /dev/music but
+it also works with /dev/sequencer too. This version of the library
+contains only some basic patch caching functions to be used with
+OPL3 and GUS (and SoftOSS as well). Support for other cards is still 
+missing.
+
+There are steps to be done when using OSSlib in a program:
+
+1) Change Makefile to use -DOSSLIB and -lOSSlib
+
+Version 3.8 of <sys/soundcard.h> has been designed to be compatible
+with OSSlib when this OSSLIB is defined. You can also use 
+#ifdef OSSLIB in programs to cover the minor differences between
+the OSSlib and non OSSlib versions.
+
+2) If the program defines segbuf_dump() routine, put it inside
+#ifndef OSSLIB/#endif pair. This routine is included in OSSlib
+and having the same routine inside the program conflicts with it.
+
+3) Add the following call to the program after /dev/music is opened.
+
+#ifdef OSSLIB
+	OSS_init(seqfd, 1024);
+#endif
+
+In the above seqfd is the file descriptor of /dev/music and 1024
+is the size of the local buffer used for output events (1024 is
+a good value).
+
+4) Add patch caching calls to the program. Patch caching should
+be called as early as possible. It's recommended to load all
+_required_ patches before starting the actual playback since
+loading large patches from disk may introduce significant delays
+to playback.
+
+There are two macros (in soundcard.h) to be used when loading 
+instruments:
+
+SEQ_LOAD_GMINSTR(dev#, instr#) loads an instrument (melodic) patch.
+The first parameter is the synthesizer/device number (0 to N) and
+the second parameter is the General MIDI instrument number (0 to 127).
+Note that the numbering starts from #0 while many GM instrument
+tables start from #1.
+
+SEQ_LOAD_GMDRUM(dev#, drum#) is similar than the above but it loads
+an General MIDI percussive instrument.
+
+5) After the above steps your program is ready to start playing.
+
+Examples for using OSSlib and for playing MIDI data can be found
+in ../mplay/* and ../gustest/midithru.c
+
+GUS support in OSSlib
+---------------------
+
+You will need the full GM patch set distributed with the Ultrasound
+drivers for DOS. The default location where the library tries to
+find the patches is /dos/ultrasnd/midi but you can change it by
+editing guslib.c (the second line). Alternative patch sets
+(such as midia) are available from the net. Another source is the MIDIA
+library.
+
+Since non PnP GUS has only 1M of
+RAM (at most) it's not possible to load the full patch set. When playing
+lot of MIDI files in sequence it's possible that the menory becomes
+full if the program doesn't reset the samples between files.
+
+OPL3 support in OSSlib
+----------------------
+
+OSSlib supports patch loading to OPL3 FM synth cards (older OPL2 cards
+are not supported). The patch set is included in the std.o3 and drums.o3
+files distributed with this package. These files should be copied to /etc
+(will be done by "make install"). These patch files are the same ones
+included in Adagio/glib package by Greg Lee. They are also distributed
+with playmidi.
+
+Using OSSlib with SoftOSS
+-------------------------
+
+For instructions about using OSSLib with SoftOSS see the instructions
+for GUS (above).
+
+
+For more info about using OSSlib contact hannu@opensound.com

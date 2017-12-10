@@ -1,0 +1,7 @@
+20080111 by Hannu: Fixed problem of several jack widgets getting named as "lineout"
+
+20080205 by Hannu: Improved support for systems with multiple codecs.
+
+20080221 by Hannu: Changed default volumes in hdaudio_generic.c to be louder. Earlier the volumes were 80% now 90%.
+
+

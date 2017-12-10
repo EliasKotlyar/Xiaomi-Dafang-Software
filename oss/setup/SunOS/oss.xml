@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!DOCTYPE service_bundle SYSTEM "/usr/share/lib/xml/dtd/service_bundle.dtd.1">
+<service_bundle type='manifest' name='opensoundsvc'>
+<service
+	name='system/opensound'
+	type='service'
+	version='1'>
+
+	<create_default_instance enabled='false' />
+	<single_instance/>
+
+	<!-- No idea what sysconfig is good for, but it's in all examples -->
+	<dependency
+		name='sysconfig'
+		grouping='require_all'
+		restart_on='none'
+		type='service'>
+		<service_fmri value='svc:/milestone/sysconfig' />
+	</dependency>
+
+	<!-- Require local filesystems to be present  -->
+	<dependency
+		name='fslocal'
+		grouping='require_all'
+		restart_on='none'
+		type='service'>
+		<service_fmri value='svc:/system/filesystem/local:default' />
+	</dependency>
+
+	<exec_method
+		type='method'
+		name='start'
+		exec='/lib/svc/method/svc-oss start'
+		timeout_seconds='60'>
+	</exec_method>
+
+	<exec_method
+		type='method'
+		name='stop'
+		exec='/lib/svc/method/svc-oss stop'
+		timeout_seconds='60'>
+	</exec_method>
+
+	<!-- soundon and ossdevlinks exit, so it's a transient service -->
+	<property_group name='startd' type='framework'>
+		<propval name='duration' type='astring' value='transient' />
+	</property_group>
+
+	<stability value='Evolving' />
+	<template>
+		<common_name>
+			<loctext xml:lang='C'>Open Sound System control service</loctext>
+		</common_name>
+	</template>
+</service>
+
+</service_bundle>

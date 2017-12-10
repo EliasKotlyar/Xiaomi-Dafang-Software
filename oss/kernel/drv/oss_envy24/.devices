@@ -1,0 +1,13 @@
+oss_envy24	pci1412,1712	Generic ENVY24 based device
+oss_envy24	pcs1412,d630	M Audio Delta 1010
+oss_envy24	pcs1412,d631	M Audio Delta DiO 2496
+oss_envy24	pcs1412,d632	M Audio Delta 66
+oss_envy24	pcs1412,d633	M Audio Delta 44
+oss_envy24	pcs1412,d634	M Audio Audiophile 2496
+oss_envy24	pcs1412,d635	M Audio Delta TDIF
+oss_envy24	pcs1412,d638	M Audio Delta 410
+oss_envy24	pcs1412,d63b	M Audio Delta 1010LT
+oss_envy24	pcs153b,1115	Terratec EWS88MT
+oss_envy24	pcs153b,112b	Terratec EWS88D
+oss_envy24	pcs153b,1130	Terratec EWX 24/96
+oss_envy24	pcs153b,1138	Terratec DMX 6Fire

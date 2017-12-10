@@ -1,0 +1,26 @@
+NAME
+oss_sadasupport - Open Sound System to Sun "devaudio" converter driver.
+
+DESCRIPTION
+Open Sound System driver Solaris "devaudio" or "SADA" compatibility.
+This driver is a shim driver between SADA's audio core and amsrc2 (mixer)
+and the OSS audio core. Currently playback, recording and mixer controls
+of SADA/devaudio are supported by this driver. This driver essentially
+translates between SADA audio and OSS audio. It relies on SADA to keep
+track of complete audio information and then takes that information and
+translates it into OSS API. This way, OSS drivers can achieve a 99.9%
+emulation of SADA APIs.
+
+OPTIONS
+No configuration options defined for the current version.
+
+KNOWN PROBLEMS
+Mixer volume control (/dev/audioctl) emulation is very limited. It is only
+possible to change the playback volume. Use native OSS mixers such as
+ossxmix(1) for volume control and control panel functions.
+
+FILES
+CONFIGFILEPATH/oss_sadasupport.conf Device configuration file
+
+AUTHOR
+4Front Technologies

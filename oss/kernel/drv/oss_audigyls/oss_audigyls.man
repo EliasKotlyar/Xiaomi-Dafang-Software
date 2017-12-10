@@ -1,0 +1,45 @@
+NAME
+oss_audigyls - Creative Labs CA106 (AudigyLS/SBLive 24bit) driver.
+
+DESCRIPTION
+Open Sound System driver for Creative Labs Audigy2-LS and SBLive 24bit 7.1 
+soundcards.
+
+Audigy-LS device characteristics:
+        o 8/16/24 bit playback/record
+        o mono/stereo/4/5.1 playback
+        o 8KHz to 192Khz sample rate.
+
+ AUDIGYLS MODELS
+
+There are 2 models of the AudigyLS device: one with an AC97 codec called the
+AudigyLS and the one without called the SBLive 7.1. Essentially they are
+the same chip but behave a bit differently. 
+
+When playing AC3 on the AudigyLS (the one with the AC97 mixer) - you
+need to ensure that the igain slider is set to 0. 
+
+ AUDIGYLS MIXER
+
+o The AudigyLS has 4 mixer controls for each channel.
+o The "spread" button will simply duplicate the front audio on the other 3 
+  channels so that every speaker is playing what the front L/R is playing.
+o LoopBack recording allows you to capture any channel that's playing audio.
+o Record Volume slider just adjusts the input gain.
+o Record Source selector selects the input.
+o The "recmon" button enables a passthrough of the analog input signal.
+o Monitor Volume slider sets the passthrough gain if recmon is enabled.
+
+OPTIONS
+o audigyls_spdif_enable=0|1
+The Audigy LS has a versa-jack (orange) that can be set as SPDIF output
+or the Side-Surround left/right speakers in a 7.1 setup.
+When set as SPDIF, you can get play PCM/AC3 audio to a Dolby(R) capable 
+receiver.
+
+FILES
+CONFIGFILEPATH/oss_audigyls.conf Device configuration file
+
+AUTHOR
+4Front Technologies
+

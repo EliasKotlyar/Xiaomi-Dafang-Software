@@ -1,0 +1,161 @@
+#!/bin/sh
+
+case `/usr/bin/isainfo -k` in
+
+i386)
+	DRVPATH=/kernel/drv/
+	;;
+
+amd64)
+	DRVPATH=/kernel/drv/amd64/
+	;;
+
+sparcv9)
+	DRVPATH=/kernel/drv/sparcv9/
+	;;
+
+*)
+	echo Unknown architecture in soundon `isainfo -k`
+esac
+
+if test "`modinfo|grep OSS` " != " "
+then
+  echo One or more OSS modules already loaded
+  modinfo|grep OSS
+  exit 1
+fi
+
+LOG=/var/log/soundon.log
+
+rm -f /dev/sndstat # Just in case Boomer is installed in the system
+
+echo "Open Sound System starting" `date` > $LOG
+echo "OSS version: " `cat /etc/oss/version.dat` >> $LOG 2>&1
+echo Solaris version: `uname -a` >> $LOG
+echo CPU: `isainfo -k` >> $LOG
+
+if test "`/usr/sbin/modinfo|grep OSS` " != " "
+then
+	echo Warning: Some of the OSS modules were already loaded >> $LOG
+	/usr/sbin/modinfo|grep OSS >> $LOG
+fi
+
+if test -f /etc/oss/license.asc
+then
+   /usr/sbin/ossdetect -l >> $LOG
+fi
+
+# Load osscore since it's not listed in installed_drivers file
+/usr/sbin/modload $DRVPATH/osscore >> $LOG 2>&1
+/usr/sbin/modinfo|grep " osscore " >> $LOG
+
+if test -f /etc/oss/installed_drivers
+then
+
+   echo "Loading driver modules" >> $LOG
+   for n in `cat /etc/oss/installed_drivers | sed 's/ .*//'`
+   do
+	/usr/sbin/modload $DRVPATH/$n >> $LOG 2>&1
+	/usr/sbin/modinfo|grep " $n " >> $LOG
+	/usr/sbin/devfsadm -i $n
+   done
+else
+	echo /etc/oss/installed_drivers not found. >> $LOG
+	echo /etc/oss/installed_drivers not found.
+	exit 1
+fi
+
+sleep 5
+echo "=========" >> $LOG
+find /devices -name *_mix* > /dev/null
+find /devices -name *_pcm* > /dev/null
+find /devices -name *_mid* > /dev/null
+/usr/sbin/devlinks
+
+# Restore the legacy device links.
+if test -f /etc/oss/legacy_devices
+then
+	sh /etc/oss/legacy_devices >> $LOG 2>&1
+fi
+
+echo "=========" >> $LOG
+/usr/sbin/ossdevlinks -v >> $LOG 2>&1
+ls -l /dev/*dsp* /dev/*_pcm* /dev/*mixer* /dev/*_mix* /dev/*midi* /dev/*_mid* >> $LOG 2>&1
+echo "=========" >> $LOG
+echo "OSS configuration" >> $LOG
+/usr/bin/ossinfo -v3 >> $LOG 2>&1
+echo "=========" >> $LOG
+cat /dev/sndstat >> $LOG
+
+if test -f /etc/oss/mixer.save  || test -f /etc/oss/dspdevs.map || test -f /etc/oss/applist.conf
+then
+	/usr/sbin/savemixer -L
+fi
+
+echo "=========" >> $LOG
+dmesg >> $LOG
+
+if grep "This OSS version has expired" /dev/sndstat > /dev/null
+then
+rm -f /tmp/ossmsg
+cat > /tmp/ossmsg << EOM
+From: "Open Sound System" <root>
+To: <root>
+Subject: Your Open Sound System copy has expired
+
+The unregistered version of Open Sound System installed in your system
+has expired. To continue using Open Sound System you need to upgrade to the
+latest OSS version which is available from http://www.opensound.com/download.cgi
+
+Alternatively ou can purchase the official OSS version from
+http://www.opensound.com/order.html . The registered version does not
+have any time limits.
+
+Best regards,
+
+Open Sound System Sales
+sales@opensound.com
+
+EOM
+
+echo
+echo
+echo '********** IMPORTANT! *************'
+echo
+cat /tmp/ossmsg
+
+mail root < /tmp/ossmsg
+
+rm -f /tmp/ossmsg
+
+fi
+
+if test -x /etc/oss/soundon.user
+then
+  echo Running /etc/oss/soundon.user >> $LOG
+  /etc/oss/soundon.user >> $LOG 2>&1
+fi
+
+if test "`ossinfo -g|grep TRIAL` " != " "
+then
+	echo
+	echo "************************************************************"
+	echo "* NOTE! You are using trial version of Open Sound System   *"
+	echo "************************************************************"
+	echo
+
+	sleep 1
+fi
+
+if test "`ossinfo -g|grep EXPIRED` " != " "
+then
+	echo
+	echo "****************************************************************"
+	echo "* NOTE! Your Open Sound System evaluation license has expired  *"
+	echo "****************************************************************"
+	echo
+
+	sleep 15
+fi
+
+exit 0

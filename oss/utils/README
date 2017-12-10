@@ -1,0 +1,60 @@
+This directory contains some utilities, diagnostic tools and helper
+scripts for developing, building and testing OSS.
+
+ossmkdep.c
+
+This is a simple utility that is used by "make dep". It lists the dependencies
+of each the source files given in the command line. This utility is used since
+GNU cpp is not available in all environments we support. It will be compiled 
+and used automatically when OSS is built.
+
+readtimings.c
+
+This is an internal diagnostic tool that can be used to extract run-time tracing
+information produced by OSS. To use this feature you need to use
+the --enable-timings option when configuring OSS.
+Don't define this flag in production environment since it will cause
+significant amount of CPU overhead.
+
+Compile this program using "make readtimings" and then copy it to (say)
+/usr/local/bin.
+
+Then start readtimings>some_file.txt in one terminal window (or in backround).
+Run the program you would like to debug in another window. Kill the readtimings
+program as soon as the problem shows up (the listing may be very long).
+
+Now the produced file (say some_file.txt) will contain a trace of what
+happened. Don't ask what all this means?
+
+snoopy.c
+
+An utility program for displaying information about a HD audio codec chip.
+You need to edit hdaudio.conf and set the hdaudio_snoopy option to 1. The 
+program tries to open /dev/oss/hdaudio0/pcm0 and to obtain the codec information
+from the driver. If the codec has some other codec number than 0 then you will
+need to edit the source and to change the "int cad=0;" line to match the
+codec number. This utility must be run as root.
+
+vif
+vib
+vil
+vis
+viu
+
+These are helper scripts for editing OSS files. Copy them to /usr/local.
+
+vif <file_mask> finds all files that match the given mask in the
+current directory and it's source trees. For example vif os_*.h will launch
+"vi" command for os.h files.
+
+vib, vil, vis, viu are similar commands for editing OS dependent files
+for Freebsd, Linux, Solaris and SCO UnixWare/OpenServer (respectively). These
+commands are usefull if you like to edit the build.sh file only for Linux (vil).
+The fif buils.sh script will open them for all operating systems.
+
+mixgen.c
+
+This is a tool to generate dedicated mixer modules for HDAudio based laptops
+and motherboards. Actually this program will generate just a template that
+needs to be edited and fine tuned manually. Full instructions are available
+at "http://developer.opensound.com/hdaudio_mixers.html".

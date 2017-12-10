@@ -1,0 +1,11 @@
+/*
+ * The initial comment is optional and gives information common to all config
+ * options.
+ */
+int myossdev_verbose = 0;
+/*
+ * Setting myossdev0_verbose to 1 enables various debugging messages
+ * displayed by the driver. This option can be used when debugging problems
+ * with the device.
+ */
+ 

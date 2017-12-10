@@ -1,0 +1,122 @@
+#!/bin/sh
+
+if test -f /etc/oss.conf
+then
+  . /etc/oss.conf
+else
+  OSSLIBDIR=/usr/lib/oss
+fi
+
+LOG=/var/log/soundon.log
+echo "Open Sound System starting" `date` > $LOG
+echo "OSS version: " `cat $OSSLIBDIR/version.dat` >> $LOG 2>&1
+echo "Kernel version: " `uname -a` >> $LOG
+
+if ! test -f $OSSLIBDIR/etc/installed_drivers
+then
+	echo No $OSSLIBDIR/etc/installed_drivers >> $LOG
+	echo No $OSSLIBDIR/etc/installed_drivers
+	echo Please run ossdetect to create it.
+	exit 1
+fi
+
+if ! test -f $OSSLIBDIR/modules/osscore.ko
+then
+	echo No $OSSLIBDIR/modules/osscore.ko module >> $LOG
+	echo No $OSSLIBDIR/modules/osscore.ko module
+	exit 2
+fi
+
+if test -f $OSSLIBDIR/etc/license.asc
+then
+   /usr/sbin/ossdetect -l >> $LOG
+fi
+
+OPTIONS=
+if test -f $OSSLIBDIR/conf/osscore.conf
+then
+	OPTIONS=`grep -v -h '^#' $OSSLIBDIR/conf/osscore.conf | sed 's/[ ]//g'`
+	if test "$OPTIONS " != " "
+	then
+		 echo $OPTIONS | xargs -I % kenv osscore.%
+	fi
+fi
+
+if ! /sbin/kldload $OSSLIBDIR/modules/osscore.ko
+then
+	echo Loading the osscore module failed
+	echo Loading the osscore module failed >> $LOG
+	dmesg >> $LOG
+	exit 4
+fi
+
+for n in `cat $OSSLIBDIR/etc/installed_drivers | sed 's/#.*//'`
+do
+	OPTIONS=
+	if test -f $OSSLIBDIR/conf/$n.conf
+	then
+		OPTIONS=`grep -v -h '^#' $OSSLIBDIR/conf/$n.conf | sed 's/[ ]//g'`
+		if test "$OPTIONS " != " "
+		then
+			 echo $OPTIONS | xargs -I % kenv $n.%
+		fi
+	fi
+
+	if ! /sbin/kldload $OSSLIBDIR/modules/$n.ko
+	then
+		echo Loading module $n failed '-' ignored >> $LOG
+		echo Loading module $n failed '-' ignored
+	fi
+done
+
+echo "+++ ossinfo -v3 +++" >> $LOG
+/usr/bin/ossinfo -v3 >> $LOG 2>&1
+echo "+++ /dev/sndstat +++" >> $LOG
+cat /dev/sndstat >> $LOG 2>&1
+echo "+++ dmesg +++" >> $LOG
+dmesg >> $LOG
+echo "+++ pciconf +++" >> $LOG
+/usr/sbin/pciconf -l -v >> $LOG 2>&1
+echo "+++ OSS devices +++" >> $LOG
+
+# Restore the previous legacy device links
+if test -f $OSSLIBDIR/etc/legacy_devices
+then
+	sh $OSSLIBDIR/etc/legacy_devices >> $LOG 2>&1
+fi
+
+/usr/sbin/ossdevlinks -v >> $LOG 2>&1
+
+ls -l /dev/dsp* /dev/sndstat /dev/mixer* /dev/oss/*/* >> $LOG 2>&1
+
+/usr/sbin/savemixer -L -v >> $LOG 2>&1
+
+if test -x $OSSLIBDIR/soundon.user
+then
+  echo Running $OSSLIBDIR/soundon.user >> $LOG
+  $OSSLIBDIR/soundon.user >> $LOG 2>&1
+fi
+
+if test "`ossinfo -g|grep TRIAL` " != " "
+then
+	echo
+	echo "************************************************************"
+	echo "* NOTE! You are using trial version of Open Sound System   *"
+	echo "************************************************************"
+	echo
+
+	sleep 1
+fi
+
+if test "`ossinfo -g|grep EXPIRED` " != " "
+then
+	echo
+	echo "****************************************************************"
+	echo "* NOTE! Your Open Sound System evaluation license has expired  *"
+	echo "****************************************************************"
+	echo
+
+	sleep 15
+fi
+
+exit 0

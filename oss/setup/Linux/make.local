@@ -1,0 +1,21 @@
+build: 	kernel/framework/include/buildid.h all
+	sh build.sh
+
+copy:	build
+	#rm -f ${OSSLIBDIR}/modules/*.o
+	(cd prototype; find -L . -type d | xargs -i{} mkdir -p ${DESTDIR}/{})
+	(cd prototype; find -L . -type f | xargs -i{} cp {} ${DESTDIR}/{})
+
+package:	build
+		sh setup/Linux/mkpkg.sh
+
+tarball:	build
+		sh setup/Linux/mktarball.sh
+
+deb:		build
+		sh setup/Linux/mkdeb.sh
+
+install:	copy
+	cd ${OSSLIBDIR}/build && sh install.sh
+	sync
+	soundoff && sync && soundon && echo "OSS has started OK"

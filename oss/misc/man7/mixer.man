@@ -1,0 +1,20 @@
+NAME
+mixer - Open Sound System mixer (control panel) device
+
+DESCRIPTION
+Mixer devices are used by control panel and mixer programs (such as ossxmix(1))
+to change volumes and other settings of the sound cards in the system.
+
+PROGRAMMING INFORMATION
+See the OSS Mixer Programming section of the OSS Programmer's Guide (MIXER(2))
+for more info.
+
+OPTIONS
+None
+
+FILES
+/dev/mixer is the default mixer device file in the system.
+
+AUTHOR
+4Front Technologies
+

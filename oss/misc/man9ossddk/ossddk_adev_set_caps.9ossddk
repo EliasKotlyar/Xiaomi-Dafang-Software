@@ -1,0 +1,56 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_adev_set_caps 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_adev_set_caps \- Set device capabilities
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_adev_set_caps(\fBint \fIdev\fP, \fBunsigned int \fIcaps\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS audio device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIcaps\fR
+.in +16n
+.rt
+A bit mask containing the device capabilities.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+This function sets the initial values for the device capabilities to be returned by
+\fISNDCTL_AUDIOINFO(2oss)\fR ioctl call. While most of the capability bits will be
+set automatically by the OSS audio core the driver can set some of them itself.
+At this moment the driver can only set the preferred channel configuration
+(DSP_CH_ANY, DSP_CH_MONO, DSP_CH_STEREO or DSP_CH_MULTI). Other capability
+bits should not be set.
+.PP
+The driver can call this function whenever it wants.
+.PP
+.SH "SEE ALSO"
+.PP
+\fISNDCTL_AUDIOINFO(2oss)\fR
+.LP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

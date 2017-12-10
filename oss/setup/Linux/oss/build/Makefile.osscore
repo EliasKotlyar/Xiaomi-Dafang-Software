@@ -1,0 +1,32 @@
+include /etc/oss.conf
+
+EXTRA_CFLAGS += -I${OSSLIBDIR}/include/internals -I${OSSLIBDIR}/include/sys
+
+ifneq ($(KERNELRELEASE),)
+
+	obj-m := osscore.o
+
+else
+
+	KERNELDIR ?= /lib/modules/$(shell uname -r)/build
+	PWD := $(shell pwd)
+endif
+
+default:
+	@echo "static const char __oss_compile_vermagic[]" > ubuntu_version_hack.inc
+#The kernel build system saves kernel version (obtained via "utsrelease.h")
+#used during compile in a "vermagic" symbol. soundon compares this with
+#current version of running kernel to know when to relink modules.
+#Some Ubuntu kernels have  'uname -r' output different from "utsrelease.h"
+#contents, so we save the previous uname as a fallback check.
+# https://bugs.launchpad.net/ubuntu/+source/linux/+bug/247055
+	@echo "__attribute__((used))" >> ubuntu_version_hack.inc
+	@echo "__attribute__((section(\".modinfo\")))" >> ubuntu_version_hack.inc
+	@echo "= \"$(shell /usr/sbin/ossvermagic -z -s)\";" >> ubuntu_version_hack.inc
+
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules
+	@rm -f ubuntu_version_hack.inc
+
+clean:
+	rm -f *.o *.ko *.mod.c *.mod.o .*.cmd core core.* x y z ubuntu_version_hack.inc
+	rm -rf .tmp_versions

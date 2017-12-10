@@ -1,0 +1,17 @@
+
+ifneq ($(KERNELRELEASE),)
+
+	obj-m := osscore.o
+
+else
+
+	PWD := $(shell pwd)
+endif
+
+default:
+	@echo "static const char __oss_compile_vermagic[];" > ubuntu_version_hack.inc
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules
+
+clean:
+	rm -f *.o *.ko *.mod.c *.mod.o .*.cmd core core.* x y z
+	rm -rf .tmp_versions

@@ -1,0 +1,232 @@
+OSS Mixer extension API sample program
+======================================
+
+This program (mixext.c) is a simple program that demonstrates how to
+read and write certain parameters using the mixer extension API of OSS.
+
+This API will be released officially in OSS v4.0 and until that we
+reserve all rights to do changes to it without notice. However such
+changes should not require more than recompile of the application.
+
+It should be pointed out that the mixer extension API is fully dynamic
+in nature. It's possible that structure of the mixer changes on fly if some
+"master setting" gets changed by some other application or user. For this 
+reason the information obtained using the SNDCTL_MIX_EXTINFO ioctl is
+not "cacheable". In particular the controls are identified by name. The ID
+numbers assigned to them are only valid immediately after they have been read
+with SNDCTL_MIX_EXTINFO. After that they may change without notice
+(the time stamp feature used by the API prevents applications from setting
+wrong controls if this happens).
+
+Another important point is that there is no naming standard for the controls.
+This means that any application using this API will only work with low level
+devices it's written for. Different devices may have similar settings but they
+are under different names. Also the names used by the ossmix and ossxmix
+applications included in OSS are created from the names returned by 
+SNDCTL_MIX_EXTINFO using some algorithm.
+
+Writing mixer applications that can handle the above problems is beyond the 
+scope of this file and the mixext.c program. Full document for doing 
+programs like ossxmix will be released later (no known dates yet).
+
+
+So the purpose of this program is to demonstrate how to:
+
+- Find out the control names that are used by the current device.
+- Set a value of a mixer control with given mame.
+
+The program intentionally skips all controls before special MIXT_MARKER
+entry. Such controls are aliases created automatically for the "ordinary"
+mixer controls. You should use the original SOUND_MIXER_* API to
+access such controls instead of using this program (major modifications
+will be required).
+
+Compiling the program
+---------------------
+
+cc     mixext.c   -o mixext
+
+Listing the controls
+--------------------
+
+Execute the mixext program as
+
+./mixext <mixerdev>
+
+This shows a list of control names, their types and their values. The
+usefull mixer control types will be listed at the end of this document.
+The <mixerdev> argument is an integer between 0 and N. See the printout
+produced by cat /dev/sndstat for the list of available mixers.
+
+Changing a control 
+------------------
+
+Execute the program as:
+
+./mixext <mixerdev> <name> <value>
+
+The <name> is one of the mixer control names shown by the mixext program in
+the "list mode". Node that with some devices there may be several entries
+with exactly the same name. This program can access only the first of them.
+To make this program to work with such devices you need to do some hacking
+(see the Theory section below).
+
+The <value> is a decimal value (some controls require hex value).
+
+Theory behind mixer extensions
+------------------------------
+
+Take a look at the printout produced by the ossmix program in list mode.
+Also take a look at the mixext.c program since otherwise the following
+description is not understandable.
+
+As you may notice the entries listed form a tree like structure. The entry
+number 0 is always the device root (type=MIXT_DEVROOT). For all
+control entries the parent field shows the parent node. In addition to 
+MIXT_DEVROOT also MIXT_GROUP can work as a parent node (other controls can't
+be parents of any other control). The parent node has always smaller entry 
+number than any of the daughter controls that belong to them.
+
+Some of the extensions are just aliases for the "normal" mixer controls that
+are accessible by the ordinary OSS mixer API (SOUND_MIXER_*). These
+aliases are listed first and the "real" extensions come after the MIXT_MARKER
+entry. There are many tricky parts in handling those aliases so it's
+highly recommended to ignore everything before MIXT_MARKER.
+
+Most of the mixer controls have a name but not all of them (in particular
+the ones before MIXT_MARKER). The ossmix program shipped with OSS uses
+a special algorithm to convert the names provided by  the SNDCTL_MIX_EXTINFO
+ioctl to the "external" names. This algorithm use "." as the separator between
+the parts of the name (the names may contain most other special characters
+including (but not limiting to) /@,:). Names may not contain spaces.
+
+For example if a control is "ENVY24_RATELOCK" and it's parent is "ENVY24"
+the name used by ossmix will become envy24.ratelock. There are many rules
+ane exceptions so the required algorithm will later be published as a library
+routine.
+
+The application should skip all records whose type is not known.
+
+The following kind of mixer extension types are available:
+
+MIXT_DEVROOT
+MIXT_GROUP
+
+These are group entries that don't have any readable/writeable value. They
+are just used to group other entries together. MIXT_DEVROOT is just
+a special group that always has entry number 0.
+
+MIXT_MARKER is another special entry. It's used as a separator between the
+"alias" controls and the controls that are only accessible with the
+mixer extension API. To make your life easier you should always ignore
+MIXT_MARKER and everything before it (except the root entry of course).
+
+MIXT_ONOFF
+MIXT_MUTE
+MIXT_ENUM
+
+These controls are quite similar. MIXT_ONOFF and MIXT_MUTE have only two
+possible values that are 0 (OFF) and 1 (ON). MIXT_ENUM has more
+alternatives (the available values are 0 to maxvalue (returned by 
+the SNDCTL_MIX_EXTINFO ioctl call.
+
+However there is still one more thing. Some of the enum values are not always
+available. For this the application should check the enum_present field to see
+which values are actually permitted (Note! the following is just pseudocode):
+
+#define enum_check(ix) (enum_present[ix/8] & (1<<(ix%8))))
+
+if (enum_check(0)) printf("FRONT is permitted\n");
+if (enum_check(1)) printf("REAR is permitted\n");
+
+Note! In some earlier OSS versions the field was called enum_mask and it had
+      different usage.
+
+
+MIXT_MONOSLIDER
+MIXT_STEREOSLIDER
+
+These are sliders used to control volumes and other similar things. The value
+field has separate fields for left and right channels:
+
+	left = value & 0xff;
+	right = (value >> 8) & 0xff;
+
+The maximum value for both fields is given in the maxvalue field. Both channel
+fields are used also by MIXT_MONOSLIDER but only the left channel value
+is valid (the right channel field is assumed to be set to the same value).
+
+
+MIXT_MONOSLIDER16
+MIXT_STEREOSLIDER16
+
+These are replacementsof MIXT_MONOSLIDER and MIXT_STEREOSLIDER. The only
+difference is that their value range has been expanded to 0-32767.
+
+	left = value & 0xffff;
+	right = (value >> 16) & 0xffff;
+
+
+MIXT_SLIDER is yet another slider but at this time the whole int field is
+allocated for a single value (there are no separate left and right fields).
+The maxvalue field shows the maximum permitted value.
+
+MIXT_MONOPEAK
+MIXT_STEREOPEAK
+
+These are peak meters (usually read only). These meters hold the maximum
+signal values since the control was previously read. Reading the value
+resets it to 0. This kind of controls can be used to implement LED bar
+displays and similar things. MIXT_MONOPEAK is 1 channel
+controls while MIXT_STEREOPEAK is stereo one (the channel
+values are returned using the same value format than with MIXT_STEREOSLIDER).
+
+MIXT_MONODB
+MIXT_STEREODB
+
+These are obsolete control types and will not be used by any OSS drivers.
+
+MIXT_VALUE
+MIXT_HEXVALUE
+
+These types are used for controls that are integer values. The difference is
+the radix that should be sued when presenting the value to the user.
+
+
+The following control types are reserved for future use (if any). They should
+not be used by any applications since they may be removed from future OSS
+versions:
+
+MIXT_RADIOGROUP
+MIXT_3D
+MIXT_MESSAGE
+MIXT_MONOVU
+MIXT_STEREOVU
+
+Reading and writing the controls
+--------------------------------
+
+The SNDCTL_MIX_READ and SNDCTL_MIX_WRITE controls can be used to read or 
+write the controls (respectively). The following fields of the argument
+structure should be set prior the call:
+
+	dev is the mixer device to use (0 to N).
+
+	ctrl is the controller number.
+
+	timestamp should be copied from the structure returned by the
+		  SNDCTL_MIX_EXTINFO call.
+
+The application should check the flags field returned by SNDCTL_MIX_EXTINFO
+before trying to read or change the value. The MIXF_WRITEABLE and MIXF_READABLE
+bits tell if the value is writeable or readable.
+
+OSS will compare the timestamp field against it's internal list of
+currently available controls. If the timestamp doesn't match the ioctl 
+call will return -1 with errno=EIDRM. This happens if the mixer structure
+has changed between SNDCTL_MIX_EXTINFO and the SNDCTL_MIX_READ/SNDCTL_MIX_WRITE
+calls. The only way to recover is re-loading the SNDCTL_MIX_EXTINFO info
+and trying again.
+
+In case of problems please don't hesitate to contact
+hannu@opensound.com for info.

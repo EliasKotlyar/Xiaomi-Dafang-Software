@@ -1,0 +1,16 @@
+#
+# Creative Labs Voice file
+#
+0	string		Creative\ Voice\ File	Creative Labs Voice File
+>19	byte		0x1A
+>23	byte	 	>0			- version %d
+>22	byte		>0			\b.%d	
+#
+# Microsoft WAVE format
+0	string		RIFF		Microsoft RIFF
+>8	string		WAVE		- WAVE format
+>34	short		>0		%d bit
+>22	short		=1		Mono
+>22	short		=2		Stereo
+>22	short		>2		%d Channels
+>24	long		>0		%d Hz

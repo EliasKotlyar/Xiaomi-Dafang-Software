@@ -1,0 +1,5 @@
+oss_trident	pci1023,2000	Trident 4DWave-DX
+oss_trident	pci1023,2001	Trident 4DWave-NX
+oss_trident	pci1023,2002	Trident 4DWave-CX
+oss_trident	pci1039,7018	SiS 7018 
+oss_trident	pci10b9,5451	ALI M5451

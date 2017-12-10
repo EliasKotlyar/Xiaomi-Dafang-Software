@@ -1,0 +1,56 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_dmap_set_dmabuf 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_dmap_set_dmabuf \- Set the DMA buffer virtual address
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_dmap_set_dmabuf(\fBdmap_t *\fIdmap\fP, \fBunsigned char *\fIbuf\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdmap\fR
+.in +16n
+.rt
+Audio buffer handle.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIbuf\fR
+.in +16n
+.rt
+Kernel virtual address of the DMA buffer.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+If an audio driver manages the DMA buffer itself (it has the alloc_buffer and
+free_buffer methods in it's callback table) it can set the DMA buffer address
+using \fIossddk_dmap_set_dmabuf\fR. The buffer size can be set using
+\fIossddk_dmap_set_buffsize(9ossddk)\fR.
+.PP
+In addition to the virtual address the driver should usually set the physical
+memory/bus address too using \fIossddk_dmap_set_phys(9ossddk)\fR.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIossddk_dmap_set_phys(9ossddk)\fR.
+\fIossddk_dmap_set_buffsize(9ossddk)\fR.
+.LP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

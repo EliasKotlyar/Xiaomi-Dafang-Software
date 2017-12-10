@@ -1,0 +1,133 @@
+int detect_trace=0;
+/*
+ * Detect Trace will trace the audio device detection and operation. However
+ * this feature should only be enabled when requested by the technical support
+ * personnell.
+ */
+int max_intrate=100;
+/*
+ * Max intrate sets up the maximum number of interrupts/second. This
+ * in turn sets up the minimum buffer fragment size. The default value is 100
+ * It equals to about 50 fps frame rate which should be good for most 
+ * applications (including games). However some special applications
+ * may require lower latencies. In such cases a higher value such as 500 or 1000
+ * may be needed. The minimum latency will be roughly 2/max_intrate
+ * seconds. However the exactl latency depends on what the application has
+ * requested using ioctl(SNDCTL_DSP_SETFRAGMENT). A value of zero means
+ * OSS doesn't try to limit interrupt rate.
+ *
+ * Lower latencies require higher interrupt rates which in turn causes higher
+ * system overhead. In addition using max_intrate values higher than system's
+ * internal clock rate (HZ) may not make any actual improvement.
+ *
+ * Some devices use fixed fragment size and this parameter will not have any
+ * effect with them. For example the Digi32 and Digi96 devices work in this way.
+ */
+int src_quality=3;
+/*
+ * The src_quality setting defines the precision of the software based sample
+ * rate conversion algorithm used by OSS. This setting doesn't affect possible
+ * hardware level conversions done by the devices themselves. Using higher
+ * quality setting gives better quality while lower settings consume less
+ * CPU time.
+ *
+ * Possible values are:
+ *    0 - D lowest quality (normally equals to 1=low quality)
+ *    1 - L  low quality    (spline interpolation)
+ *    2 - M  medium quality (lagrange interpolation)
+ *    3 - H  high quality   (DEFAULT)
+ *    4 - HX high quality   (high quality with extra precision)
+ *    5 - P  production quality
+ *    6 - PX production quality (prod quality with extra precision)
+ */
+int ac97_amplifier=-1;
+/*
+ * When set to 1 this option enables the speaker power amplifier feature of
+ * AC97 codec (if available). Some boards have this inverted, so if necessary
+ * this feature can be disabled by setting this option to 0.
+ * Affects all AC97 based audio devices in the system.
+ * Default: -1=autodetect correct setting.
+ */
+int ac97_recselect=0;
+/*
+ * When set to 1 this option enables independent recording source
+ * selection for the left and the right channel on AC97 devices. In this way
+ * it's possible to record audio streams so that (for example) the left
+ * channel signal comes from the microphone and the right channel signal from
+ * line-in. However when this option is enabled it's only possible to
+ * select the recording source by using a fully OSS 4.0 compatible mixer
+ * program such as ossxmix.
+ */
+int cooked_enable=1;
+/*
+ * By default OSS will let applications to use sampling rates and formats
+ * that are not supported by the hardware. Instead OSS performs the necessary
+ * format conversions in software. Applications that don't tolerate this kind
+ * of conversions usually disable them by using features of the OSS API
+ * (SNDCTL_DSP_COOKEDMODE). If this option is set to 0 then the format
+ * conversions will be disabled for all applications and devices unless the
+ * application explicitly enables them. This option should not be changed
+ * without wery strong reason.
+ */
+int dma_buffsize=0;
+/*
+ * By default OSS will allocate audio DMA buffers with some system dependent
+ * default size (usually 64k but sometimes smaller). It is possible to change
+ * this default allocation by setting this option. Value of 0 means that the
+ * default size will be used. Value between 16 and 128 (kilobytes) can be used
+ * if the default size is not suitable for some reason. This option must not be
+ * changed unless it's absolutely necessary.
+ */
+int flat_device_model=0;
+/*
+ * OSS version 4.0 and later use two level device model where multiple audio
+ * engines supported by the device (hardware mixing or vmix) are hidden behind
+ * the same device file. When this device file is opened OSS will connect the
+ * application to the first available subdevice. In this way multiple 
+ * applications can use the same device file at the same time.
+ *
+ * If this option is set to 0 OSS will use the earlier (OSS 3.x) device scheme
+ * where all devices are directly visible to the applications. This may be
+ * necessary with some custom applications that depend on the old
+ * behaviour.
+ */
+int vmix_disabled=0;
+/*
+ * The virtual mixer subsystem can be disabled by setting this configuration
+ * option to 1.  By default the value is 0 which enables virtual mixer.
+ */
+int vmix_loopdevs=0;
+/*
+ * Optionally the virtual mixer subsystem can create special loopback audio
+ * devices that can be used to record the output mix sent to the device.
+ * This option tells how many loopback devices will be created (0, 1 or 2).
+ * If there are multiple audio devices in the system the all of them will have
+ * the same number of loopback devices. This setting should be left to 0 unless
+ * there are specific reasons to enable the loopback devices.
+ */
+int vmix_no_autoattach=0;
+/*
+ * By default (0) the low level drivers for most sound cards will automatically
+ * attach virtual mixer (vmix) to the primary audio devices of the cards.
+ * In some situations it may be necessary to attach virtual mixer using 
+ * nonstandard parameters. If vmix_no_autoattach is set to 1 then user
+ * can use vmixctl attach command to attach virtual mixer manually to
+ * the device(s).
+ */
+int excl_policy=0;
+/*
+ * By default the O_EXCL open() flag can be used to bypass the virtual mixer.
+ * Setting excl_policy to 1 or 2 makes OSS ignore O_EXCL. A setting of 1
+ * ignores O_EXCL from all but root processes, while a setting of 2 always
+ * ignores O_EXCL. 
+ */
+int mixer_muted=0;
+/*
+ * By default mixer volume controls will be set to audible levels
+ * when OSS drivers are loaded. However in some systems it may
+ * be necessary to default to lower levels to avoid feedback or 
+ * noise. Set mixer_muted to 1 to use low default levels and to
+ * 0 to select audible levels.
+ *
+ * Note that just few OSS drivers support this option.
+ */

@@ -1,0 +1,13 @@
+srec and splay utilities (recplay.c)
+====================================
+
+Run "make install" to install "splay" and "srec" into /usr/local/bin.
+
+These programs support recording and playback of digitized
+voice. There is several possible parameters to these programs. 
+Try "srec -h" and "splay -h" for further information.
+
+The vplay -program in the vplay directory is a improved version of
+the recplay.c.
+
+NOTE!	The str program has been moved to the subdirectory ./str

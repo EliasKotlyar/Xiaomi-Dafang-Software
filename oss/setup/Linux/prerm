@@ -1,0 +1,4 @@
+#!/bin/sh
+OSSLIBDIR=/usr/lib/oss
+if [ -e /etc/oss.conf ]; then . /etc/oss.conf; fi
+sh "$OSSLIBDIR"/scripts/restore_drv.sh || true

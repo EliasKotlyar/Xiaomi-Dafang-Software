@@ -1,0 +1,55 @@
+#!/sbin/sh
+#
+
+. /lib/svc/share/smf_include.sh
+
+# Generic runtime checks
+OSS_SERVICE=`echo $SMF_FMRI | sed 's/.*:\(.*\)/\1/'`
+
+if [ -z "$SMF_FMRI" ]; then
+	echo "Open Sound System service can only be started/stopped via the SMF framework"
+        exit $SMF_EXIT_ERR_NOSMF
+fi
+
+if [ -z "$OSS_SERVICE" ]; then
+        echo "Unable to parse service name from SMF FRMI $SMF_FRMI" 
+        exit $SMF_EXIT_ERR_NOSMF
+fi
+
+#
+# Original script, refactored
+#
+
+if test -f /etc/oss.conf
+then
+  . /etc/oss.conf
+else
+  OSSLIBDIR=/usr/lib/oss
+fi
+
+oss_start() {
+	/usr/sbin/soundon > /dev/null 2>&1
+	# Somehow this is required overhere to prevent skipping
+	/usr/sbin/ossdevlinks
+}
+
+oss_stop() {
+	# Save mixer settings automatically if requested
+	if test -f $OSSLIBDIR/etc/userdefs && /usr/xpg4/bin/grep -q "autosave_mixer yes" $OSSLIBDIR/etc/userdefs
+	then
+          /usr/sbin/savemixer 
+	fi
+}
+
+case $1 in
+'start')
+	oss_start
+        ;;
+'stop')
+	oss_stop
+        ;;
+*)
+	echo "Usage: $0 { start | stop }"
+	exit 1
+	;;
+esac

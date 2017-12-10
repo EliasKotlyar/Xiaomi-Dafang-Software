@@ -1,0 +1,9 @@
+#!/bin/sh
+
+TOP=.
+if test -d origdir
+then
+  TOP=origdir
+fi
+
+vi `find $TOP/kernel/OS/Linux $TOP/setup/Linux $TOP/os_cmd/Linux -name $1`

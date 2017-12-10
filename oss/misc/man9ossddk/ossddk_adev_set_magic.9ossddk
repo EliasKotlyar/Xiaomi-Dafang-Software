@@ -1,0 +1,57 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_adev_set_magic 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_adev_set_magic \- Set the device magic number
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_adev_set_magic(\fBint \fIdev\fP, \fBint \fImagic\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS audio device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fImagic\fR
+.in +16n
+.rt
+The magic number.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+Some devices may require use of dedicated configuration or setup tools. In such cases
+the driver must provide some kind of magic number which the utilities can use
+to find out the right device (using \fISNDCTL_AUDIOINFO(2oss)\fR).
+.PP
+If an magic number is needed for some device driver you must contact support@opensound.com to get a free number. Drivers developers must not use self geterated magic numbers 
+because they may conflict with other devices.
+.PP
+Using device specific utilities is not recommended but that method can be used if there
+is no other choice.
+.PP
+.SH "SEE ALSO"
+.PP
+\fISNDCTL_AUDIOINFO(2oss)\fR
+.LP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

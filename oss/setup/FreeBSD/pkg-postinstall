@@ -1,0 +1,18 @@
+#!/bin/sh
+if test -f /etc/oss.conf
+then
+  . /etc/oss.conf
+else
+  OSSLIBDIR=/usr/lib/oss
+fi
+
+cd $OSSLIBDIR/build
+echo "Build Open Sound System for FreeBSD-`uname -m` `uname -r`"
+sh install.sh
+
+chmod 744 /etc/rc.d/oss
+
+echo "Starting Open Sound System"
+rm -f /dev/dsp; ln -s /dev/dsp0 /dev/dsp
+/usr/sbin/soundoff > /dev/null 2>&1
+/usr/sbin/soundon

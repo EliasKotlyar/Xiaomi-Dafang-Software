@@ -1,0 +1,11 @@
+int als4000_mpu_ioaddr=0;
+/*
+ * MPU 401 I/O Address
+ * Values: 0x300, 0x310, 0x320, 0x330, 0x340, 0x350, 0x360, 0x370 Default: 0x330
+ */
+
+int als4000_mpu_irq=0;
+/*
+ * MPU 401 IRQ
+ * Values: 5, 7, 9, 10, 11       Default: 0
+ */

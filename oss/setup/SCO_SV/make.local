@@ -1,0 +1,15 @@
+build: 	kernel/framework/include/buildid.h all
+	sh build.sh
+
+copy:	build
+	cp -R prototype/* /
+
+package:	build
+		sh setup/SCO_SV/mkpkg.sh
+
+tarball:	build
+		sh setup/SCO_SV/mktarball.sh
+
+install:	copy
+		cd ${OSSLIBDIR}/build && sh install.sh
+		sync && soundoff && sync && soundon && echo "OSS has started OK"

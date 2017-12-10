@@ -1,0 +1,358 @@
+#!/bin/sh
+if test -f /etc/oss.conf
+then
+  . /etc/oss.conf
+else
+  OSSLIBDIR=/usr/lib/oss
+fi
+
+if ! test -d /proc
+then
+	echo soundon script requires procfs to be mounted at /proc!
+	exit 200
+fi
+
+if test -f /proc/opensound/devfiles
+then
+	echo OSS is already loaded.
+	exit 0
+fi
+
+if test -f $OSSLIBDIR/starting
+then
+	echo Previous start of OSS crashed the system
+	echo Please resolve the situation and remove file
+	echo \"$OSSLIBDIR/starting\". Then start OSS by
+	echo running soundon again.
+	exit 1
+fi
+
+NOTIFY=0
+
+LOG=/var/log/soundon.log
+echo "Open Sound System starting" `date` > $LOG
+echo "OSS version: " `cat $OSSLIBDIR/version.dat` >> $LOG 2>&1
+KERNEL_VERSION=`uname -r`
+echo "Kernel version: " $KERNEL_VERSION >> $LOG
+KERNEL_VERMAGIC=`/usr/sbin/ossvermagic -z -s`
+echo "Kernel vermagic: " $KERNEL_VERMAGIC >> $LOG 2>&1
+
+if ! test -f $OSSLIBDIR/etc/installed_drivers
+then
+	echo No $OSSLIBDIR/etc/installed_drivers - running ossdetect >> $LOG
+	/usr/sbin/ossdetect -v >> $LOG
+fi
+
+if ! test -f $OSSLIBDIR/etc/installed_drivers
+then
+	echo Still no $OSSLIBDIR/etc/installed_drivers - cannot continue >> $LOG
+	echo No $OSSLIBDIR/etc/installed_drivers - cannot continue
+	exit 10
+fi
+
+UBUNTU_OVERRIDE=
+POS_UBUNTU_OVERRIDE=
+if  test -f /lib/modules/$KERNEL_VERSION/kernel/oss/osscore.ko
+then
+# Verify that vermagic of OSS matches the kernel vermagic
+
+	OSS_VERMAGIC=`/usr/sbin/ossvermagic -z -q /lib/modules/$KERNEL_VERSION/kernel/oss/osscore.ko`
+
+	if ! test "$OSS_VERMAGIC " = "$KERNEL_VERMAGIC "
+	then
+		OSS_ORIG_VERMAGIC="$OSS_VERMAGIC"
+		OSS_VERMAGIC=`/usr/sbin/ossvermagic -z -u -q /lib/modules/$KERNEL_VERSION/kernel/oss/osscore.ko`
+		POS_UBUNTU_OVERRIDE=1
+	fi
+
+	if ! test "$OSS_VERMAGIC " = "$KERNEL_VERMAGIC "
+	then
+		echo "Old    vermagic: " $OSS_VERMAGIC >> $LOG
+		rm -rf /lib/modules/$KERNEL_VERSION/kernel/oss
+		echo Previous OSS modules were for a different kernel version - removed
+		echo Previous OSS modules were for a different kernel version - removed >> $LOG
+	elif test "$POS_UBUNTU_OVERRIDE " = "1 "
+	then
+		echo "Vermagic backup check activated for Ubuntu. Backup vermagic: $OSS_VERMAGIC. OSS stored vermagic $OSS_ORIG_VERMAGIC" >> $LOG
+		UBUNTU_OVERRIDE="-u"
+	fi
+fi
+
+if ! test -f /lib/modules/$KERNEL_VERSION/kernel/oss/osscore.ko
+then
+	NOTIFY=1
+	echo Relinking OSS kernel modules for \"$KERNEL_VERMAGIC\"
+	echo This may take few moments - please stand by...
+	echo Relinking OSS kernel modules for $KERNEL_VERMAGIC >> $LOG
+
+	rm -f /var/log/relink.log
+	if ! (cd $OSSLIBDIR/build && sh install.sh > /var/log/relink.log 2>&1)
+	then
+		cat /var/log/relink.log >> $LOG 2>&1
+		cat /var/log/relink.log
+		echo
+		echo Relinking the OSS kernel modules failed
+		rm -f /var/log/relink.log
+		exit 20
+	fi
+	
+	cat /var/log/relink.log >> $LOG 2>&1
+	echo Relinking OSS kernel modules finished
+	rm -f /var/log/relink.log
+fi
+
+if ! test -f /lib/modules/$KERNEL_VERSION/kernel/oss/osscore.ko
+then
+	echo
+	echo No /lib/modules/$KERNEL_VERSION/kernel/oss/osscore.ko module >> $LOG
+	echo No /lib/modules/$KERNEL_VERSION/kernel/oss/osscore.ko module in the system
+	exit 30
+fi
+
+OSS_VERMAGIC=`/usr/sbin/ossvermagic -z $UBUNTU_OVERRIDE -q /lib/modules/$KERNEL_VERSION/kernel/oss/osscore.ko`
+echo "OSS    vermagic: " $OSS_VERMAGIC >> $LOG
+
+if ! test "$OSS_VERMAGIC " = "$KERNEL_VERMAGIC "
+then
+	echo OSS driver modules do not match the current kernel >> $LOG
+	echo
+	echo Error: OSS driver modules do not match the current kernel
+	echo
+	echo "Kernel vermagic: " $KERNEL_VERMAGIC
+	echo "OSS    vermagic: " $OSS_VERMAGIC
+	echo
+	echo The most likely reason is that the kernel development package
+        echo installed in the system is wrong. Please refer to the documentation
+	echo of your Linux distribution for more info about setting up the
+	echo kernel/driver development environment properly.
+	echo
+	exit 40
+fi
+
+if test -f $OSSLIBDIR/etc/license.asc
+then
+   /usr/sbin/ossdetect -l >> $LOG
+fi
+
+if test -d /proc/asound || grep -q '^ *14 ' < /proc/devices
+then
+	if ! sh $OSSLIBDIR/scripts/remove_drv.sh>> $LOG
+	then
+		echo Failed to disable conflicting sound drivers >> $LOG
+		echo Failed to disable conflicting sound drivers 
+		echo Reboot and try running soundon again
+		echo
+		echo Also check that you have not compiled sound support statically
+		echo into the kernel.
+		exit 50
+	fi
+fi
+
+echo >> $LOG
+echo '*** Loading OSS kernel modules ***' >> $LOG
+echo >> $LOG
+
+touch $OSSLIBDIR/starting
+sync
+
+OPTIONS=
+if test -f $OSSLIBDIR/conf/osscore.conf
+then
+  OPTIONS="`grep -v -h '^#' $OSSLIBDIR/conf/osscore.conf|sed 's/[ \t]//g'`"
+fi
+
+if ! /sbin/modprobe osscore $OPTIONS
+then
+	echo Loading the osscore module failed
+	echo Loading the osscore module failed >> $LOG
+	dmesg >> $LOG
+	exit 60
+fi
+
+echo "osscore module loaded OK" >> $LOG
+
+for n in `cat $OSSLIBDIR/etc/installed_drivers | sed 's/#.*//'`
+do
+	OPTIONS=
+
+	if test -f $OSSLIBDIR/conf/$n.conf
+	then
+	  OPTIONS="`grep -v -h '^#' $OSSLIBDIR/conf/$n.conf|sed 's/[ \t]//g'`"
+	fi
+
+	if ! /sbin/modprobe $n $OPTIONS
+	then
+		echo Loading module $n failed '-' ignored >> $LOG
+		echo Loading module $n failed '-' ignored
+	else
+		echo $n module loaded OK >> $LOG
+	fi
+done
+echo >> $LOG
+echo '*** Finished loading OSS kernel modules ***' >> $LOG
+echo >> $LOG
+
+if ! test -f /proc/opensound/devfiles
+then
+	echo OSS Core module refused to start >> $LOG
+	echo OSS Core module refused to start
+	dmesg >> $LOG
+	exit 70
+fi
+
+/usr/sbin/ossdetect -d >> $LOG 2>&1
+
+# Restore the legacy device links. This is necessary because in some
+# Linux distributions they get lost when the system is booted.
+if test -f $OSSLIBDIR/etc/legacy_devices
+then
+	sh $OSSLIBDIR/etc/legacy_devices >> $LOG 2>&1
+fi
+
+/usr/sbin/ossdevlinks -v >> $LOG 2>&1
+
+echo "+++ ossinfo -v3 +++" >> $LOG
+ossinfo -v3 >> $LOG 2>&1
+echo "+++ /dev/sndstat +++" >> $LOG
+cat /dev/sndstat >> $LOG 2>&1
+echo "+++ dmesg +++" >> $LOG
+dmesg >> $LOG
+echo "+++ lspci +++" >> $LOG
+lspci -vnn >> $LOG 2>&1
+echo "+++ /proc/interrupts +++" >> $LOG
+cat /proc/interrupts >> $LOG 2>&1
+echo "+++ /proc/cpuinfo +++" >> $LOG
+cat /proc/cpuinfo >> $LOG 2>&1
+echo "+++ /proc/opensound/devfiles +++" >> $LOG
+cat /proc/opensound/devfiles >> $LOG 2>&1
+ls -l /dev/dsp* /dev/mixer* /dev/midi* /dev/oss/*/* >> $LOG 2>&1
+
+echo >> $LOG
+/usr/sbin/savemixer -L -v >> $LOG 2>&1
+
+# Setup ALSA emulation
+
+if test -f $OSSLIBDIR/.cuckoo_installed
+then
+# Use kernel based ALSA compatibility
+
+  if ! test -f /lib/modules/$KERNEL_VERSION/kernel/sound/core/snd.ko
+  then
+	sh $OSSLIBDIR/scripts/setup-alsa.sh >> $LOG 2>&1
+  	depmod -a
+  fi
+
+  echo "*** Setting up ALSA compatibility ****" >> $LOG
+  modprobe cuckoo >> $LOG 2>&1
+  head -10 /proc/asound/version >> $LOG 2>&1
+  lsmod|grep snd >> $LOG
+  echo "**************************************" >> $LOG
+elif test -f $OSSLIBDIR/.libsalsa_installed
+then
+# Use library based ALSA compatibility
+
+  if test -f $OSSLIBDIR/lib/libsalsa.so.2.0.0
+  then
+     if test "`uname -m` " = "x86_64 "
+     then
+       ln -sf $OSSLIBDIR/lib/libsalsa.so.2.0.0 /usr/lib64/libasound.so.2
+       #ln -sf $OSSLIBDIR/lib/libOSSlib.so /usr/lib64
+     else
+       if test -s /lib/libasound.so.2
+       then
+         ln -sf $OSSLIBDIR/lib/libsalsa.so.2.0.0 /lib/libasound.so.2
+         #ln -sf $OSSLIBDIR/lib/libOSSlib.so /lib
+       fi
+  
+       if test -s /usr/lib/libasound.so.2
+       then
+         ln -sf $OSSLIBDIR/lib/libsalsa.so.2.0.0 /usr/lib/libasound.so.2
+         #ln -sf $OSSLIBDIR/lib/libOSSlib.so /usr/lib
+       fi
+     fi
+  fi
+fi
+
+# Setup libOSSlib.so
+if test -f $OSSLIBDIR/lib/libOSSlib.so
+then
+   if test "`uname -m` " = "x86_64 "
+   then
+     ln -sf $OSSLIBDIR/lib/libOSSlib.so /usr/lib64
+     ln -sf $OSSLIBDIR/lib/libossmix.so /usr/lib64
+   else
+     if test -s /lib/libasound.so.2
+     then
+       ln -sf $OSSLIBDIR/lib/libOSSlib.so /lib
+       ln -sf $OSSLIBDIR/lib/libossmix.so /lib
+     fi
+
+     if test -s /usr/lib/libasound.so.2
+     then
+       ln -sf $OSSLIBDIR/lib/libOSSlib.so /usr/lib
+       ln -sf $OSSLIBDIR/lib/libossmix.so /usr/lib
+     fi
+   fi
+fi
+
+# Setup Flash 9 audio support plugin for OSS
+
+if test -d /usr/lib64 && test -f $OSSLIBDIR/lib/libflashsupport_64.so
+then
+  ln -sf $OSSLIBDIR/lib/libflashsupport_64.so /usr/lib64/libflashsupport.so
+fi
+
+if test -d /usr/lib32 && test -f $OSSLIBDIR/lib/libflashsupport_32.so
+then
+  ln -sf $OSSLIBDIR/lib/libflashsupport_32.so /usr/lib32/libflashsupport.so
+fi
+
+if ! test -f /usr/lib/libflashsupport.so && test -f $OSSLIBDIR/lib/libflashsupport_32.so
+then
+  ln -sf $OSSLIBDIR/lib/libflashsupport_32.so /usr/lib/libflashsupport.so
+fi
+
+if test -x $OSSLIBDIR/soundon.user
+then
+  echo Running $OSSLIBDIR/soundon.user >> $LOG
+  $OSSLIBDIR/soundon.user >> $LOG 2>&1
+fi
+
+# Use alternative place for soundon.user
+if test -x /etc/oss/soundon.user
+then
+  echo Running /etc/oss/soundon.user >> $LOG
+  /etc/oss/soundon.user >> $LOG 2>&1
+fi
+
+if test "`ossinfo -g|grep TRIAL` " != " "
+then
+	echo
+	echo "************************************************************"
+	echo "* NOTE! You are using trial version of Open Sound System   *"
+	echo "************************************************************"
+	echo
+
+	sleep 1
+fi
+
+if test "`ossinfo -g|grep EXPIRED` " != " "
+then
+	echo
+	echo "****************************************************************"
+	echo "* NOTE! Your Open Sound System evaluation license has expired  *"
+	echo "****************************************************************"
+	echo
+
+	sleep 15
+fi
+
+if test "$NOTIFY " = "1 "
+then
+  echo
+  echo OSS started OK
+fi
+
+rm -f $OSSLIBDIR/starting
+
+exit 0

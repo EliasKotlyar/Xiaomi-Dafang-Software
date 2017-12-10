@@ -1,0 +1,19 @@
+NAME
+oss_s3vibes - S3 Sonic Vibes audio driver
+
+DESCRIPTION
+Open Sound System driver for S3 Sonic Vibes audio controller.
+S3Vibes device characteristics:
+        o 8/16 bit playback/record
+        o mono/stereo playback/recording
+        o 8KHz to 44.1Khz sample rate.
+
+OPTIONS
+None
+
+FILES
+CONFIGFILEPATH/oss_s3vibes.conf Device configuration file
+
+AUTHOR
+4Front Technologies
+

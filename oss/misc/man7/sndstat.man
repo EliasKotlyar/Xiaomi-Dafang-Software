@@ -1,0 +1,68 @@
+NAME
+sndstat - Open Sound System status device
+
+DESCRIPTION
+/dev/sndstat is a text formatted device special file that returns information
+about available (OSS) sound devices. This device file is obsolete and the
+ossinfo(1) utility should be used instead.
+
+Notice that the device numbering used in this file is different that the
+official numbering used by ossinfo(1) and some other utilities. /dev/sndstat
+uses device numbers that match the "legacy" /dev/dspN, /dev/midiN and
+/dev/mixerN device files.
+
+Application programs should not use /dev/sndstat to obtain information about the
+sound devices. The format of this file may change in the future and /dev/sndstat
+may even be removed from OSS in distant future. OSS 4.0 and later has an
+ioctl interface for getting detailed and reliable information about the
+devices.
+
+AUDIO USAGE HISTORY
+
+/dev/sndstat reports some history information about previously run audio
+applications. This section is a debugging aid for application developers and
+it will be moved to the ossinfo program in the future.
+
+For example:
+
+	History:
+	/dev/oss/hdaudio0/pcm0.10: pid 6326 cmd 'error_test' OUT Play events:01009:2 Rec events:01002:0
+	/dev/oss/hdaudio0/pcm0.10: pid 6329 cmd 'mpg123' OUT
+	/dev/oss/hdaudio0/pcm0.10: pid 6329 cmd 'mpg123' OUT
+	/dev/oss/hdaudio0/pcm0.10: pid 6329 cmd 'mpg123' OUT
+
+Each line will show the the device name, PID and name of the application
+(if known) and access mode (IN and/or OUT). There may also be additional
+info about buffer underruns/overruns and other recording and playback
+related events.
+
+Each Play and rec events consist of 5-6 digit event code and a parameter
+separated by a colon. A list of defined event codes and their explanations 
+can be found from http://manuals.opensound.com/developer/oss_error_codes.html.
+Purpose of these events is to inform application developers by potential
+problems in their code.
+
+COMPATIBILITY
+/dev/sndstat has been available in all OSS versions. However in OSS 4.0 and 
+later this device file should only be used by applications written for earlier
+OSS versions.
+
+OPTIONS
+None
+
+PROGRAMMING INFORMATION
+Some applications use /dev/sndstat to find the audio devices available
+in the system. This method is no longer recommended. Applications should use
+the SNDCTL_AUDIOINFO(2) ioctl call to find the devices.
+
+SEE ALSO
+o dsp(7) - Audio device files
+o mixer(7) - Mixer (control panel) device files
+o midi(7) - MIDI device files
+
+FILES
+/dev/sndstat
+
+AUTHOR
+4Front Technologies
+

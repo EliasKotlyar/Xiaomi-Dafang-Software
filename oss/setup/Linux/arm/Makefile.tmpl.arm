@@ -1,0 +1,21 @@
+include /etc/oss.conf
+
+EXTRA_CFLAGS += -I${OSSLIBDIR}/include/internals -I${OSSLIBDIR}/include/sys
+
+ifneq ($(KERNELRELEASE),)
+
+	obj-m := MODNAME.o
+
+else
+
+	#KERNELDIR ?= /lib/modules/$(shell uname -r)/build
+	PWD := $(shell pwd)
+
+default:
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules
+
+endif
+
+clean:
+	@rm -f *.o *.ko *.mod.c *.mod.o .*.cmd core core.* x y z
+	@rm -rf .tmp_versions

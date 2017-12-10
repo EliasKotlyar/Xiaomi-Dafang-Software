@@ -1,0 +1,7 @@
+oss_sblive	pci1102,2	Creative Sound Blaster Live 
+oss_sblive	pcs1102,8040	Creative Sound Blaster Live 1024/Platinum
+oss_sblive	pcs1102,8061	Creative Sound Blaster Live 5.1/Platinum IR
+oss_sblive	pci1102,4	Creative Sound Blaster Audigy/Audigy2
+oss_sblive	pcs1102,51	Creative Sound Blaster Audigy Platinum
+oss_sblive	pci1102,8	Creative Sound Blaster Audigy2 Value/Audigy4
+oss_sblive	pci1102,2001	Creative Sound Blaster Audigy2 ZS PCMCIA

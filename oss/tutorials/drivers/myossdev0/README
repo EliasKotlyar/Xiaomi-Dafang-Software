@@ -1,0 +1,8 @@
+This is the step 0 of the sample OSS driver project. This driver
+has support for loading/unloading (attach/detach) and nothing else.
+More features will be added in the subsequent steps.
+
+To compile this driver it must be copied to a directory with
+proper name. So you need to create kernel/drv/myossdev (inside the OSS
+source tree) and copy contents of this directory to it. Then follow the
+instructions for compiling and installing OSS.

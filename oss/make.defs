@@ -1,0 +1,64 @@
+#
+# Common definitions for all Makefiles of this project
+#
+
+INCLUDES=-I$(TOPDIR)/include -I$(TOPDIR)/kernel/framework/include \
+	 -I$(TOPDIR)/$(THISOS) \
+	 -I$(TOPDIR)/kernel/nonfree/include -I$(TOPDIR)
+#-I/usr/src/uts/${ARCH}
+
+subdirs:
+	for n in $(SUBDIRS);do (echo $$n && cd $$n && $(MAKE) ARCH=$(ARCH)) || eval 'exit 1'; done
+
+objects:	$(OBJECTS)
+
+lint_subdirs:
+	for n in $(SUBDIRS);do (cd $$n && $(MAKE) lint) || eval 'exit 1'; done
+
+lint_sources:
+	for n in $(CSOURCES);do echo;echo;echo '****' $$n '****';lint $$n $(LINTTAGS) $(INCLUDES) $(CFLAGS) $(OSFLAGS); done
+
+clean_local:
+	rm -f *.o core core.* *.core *~ x y z $(OBJECTS) $(TARGETS)
+
+clean_subdirs:
+	for n in $(SUBDIRS);do (cd $$n && $(MAKE) clean) || eval 'exit 1'; done
+
+purge:
+	-$(MAKE) clean
+	find . -name 'Makefile*' -exec rm {} ';'
+	find . -name '.depend' -exec rm {} ';'
+	touch .depend
+	echo "all:	config" > Makefile
+	echo "		make all" >> Makefile
+	echo "include make.defs" >> Makefile
+
+config:
+	$(HOSTCC) setup/srcconf.c -o srcconf
+	./srcconf $(CONFIG_FLAGS)
+	rm -f srcconf
+	#make dirs
+
+#kernel/framework/include/buildid.h: origdir/buildid.dat
+#	echo '#define 'OSS_BUILD_ID \"`cat origdir/buildid.dat`\" > kernel/framework/include/buildid.h
+
+dirs:
+	-mkdir $(OBJDIR)
+	-mkdir $(BINDIR)
+	-mkdir $(LIBDIR)
+	-mkdir $(SBINDIR)
+	-mkdir $(TMPDIR)
+	-mkdir $(MODDIR)
+
+$(TOPDIR)/ossmkdep:	$(TOPDIR)/utils/ossmkdep.c
+	$(HOSTCC) -g $(TOPDIR)/utils/ossmkdep.c -o $(TOPDIR)/ossmkdep
+
+dep_local: $(TOPDIR)/ossmkdep
+	rm -f .depend
+	touch .depend
+	for n in *.c; do $(TOPDIR)/ossmkdep -M $(INCLUDES) $$n | sed 's/\(.*\)\.o:/$$(DEPDIR)\/\1.o:/' >> .depend; done
+
+dep_subdirs: 
+	for n in $(SUBDIRS);do (cd $$n && $(MAKE) dep) || eval 'exit 1'; done
+
+include .depend

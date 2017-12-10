@@ -1,0 +1,6 @@
+int cs461x_clkrun_fix=0;
+/*
+ * Some IBM Thinkpads require a workaround for the CLKRUN protocol. 
+ * Values: 1=Enable 0=Disable  Default: 0
+ */
+

@@ -1,0 +1,66 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_adev_get_portc 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_adev_get_portc, ossddk_adev_get_portc_play, ossddk_adev_get_portc_record, ossddk_adev_set_portc, ossddk_adev_set_portc_play, ossddk_adev_set_portc_record \- Get/set the portc pointers of an audio device
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid*\fR ossddk_adev_get_portc(\fBint \fIdev\fP);
+.LP
+\fBvoid*\fR ossddk_adev_get_portc_play(\fBint \fIdev\fP);
+.LP
+\fBvoid*\fR ossddk_adev_get_portc_record(\fBint \fIdev\fP);
+.LP
+\fBvoid\fR ossddk_adev_set_portc(\fBint \fIdev\fP, \fBvoid *\fIportc\fP);
+.LP
+\fBvoid\fR ossddk_adev_set_portc_play(\fBint \fIdev\fP, \fBvoid *\fIportc\fP);
+.LP
+\fBvoid\fR ossddk_adev_set_portc_record(\fBint \fIdev\fP, \fBvoid *\fIportc\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIportc\fR
+.in +16n
+.rt
+Pointer to the portc structure created by the driver.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+OSS audio drivers can have three per-audiodevice pointers that the low level
+driver can use as it likes. Most drivers use only the common portc structure. However
+spme drivers may need to use separate portc structures for recording and playback.
+.PP
+The driver allocates the port structures when initializing the device and registers them
+after installing the audio device. Later the driver can obtain the portc pointer(s) from
+OSS.
+.PP
+.SH "RETURN VALUES"
+The get functions return the portc pointer or NULL if no portc pointer has been set.
+There are no error returns.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

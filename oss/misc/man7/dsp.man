@@ -1,0 +1,66 @@
+NAME
+dsp - Open Sound System audio devices
+
+DESCRIPTION
+/dev/dsp is the default audio device in the system. It's connected to the
+main speakers and the primary recording source (such as microphone). The system
+administrator can set /dev/dsp to be a symbolic link to the desired default
+device. The ossinfo utility can be used to list the available audio devices
+in the system.
+
+/dev/dsp_mmap, /dev/dsp_ac3, /dev/dsp_multich and /dev/dsp_spdifout are
+default audio devices for specific applications such as games or media (DVD)
+players.
+
+DIRECT ACCESS AUDIO DEVICE FILES
+OSS 4.0 (and later) will create audio devices under /dev/oss/<device> directory.
+For example /dev/oss/sblive0/pcm0 is the first audio device that belongs to the
+first Sound Blaster Live! or Audigy card in the system. These direct devices
+are used when an application needs to access specific audio device (instead of
+the default one).
+
+You can use the ossinfo(1) utility with the -a option to get a list of the
+available audio devices in the system.
+
+LEGACY AUDIO DEVICE FILES
+Traditionally OSS has created device files like /dev/dsp0 to /dev/dspN for
+each audio device in the system. OSS 4.0 still supports this legacy naming.
+These files are symbolic links to the actual device files located under
+/dev/oss. The ossdevlinks(8) utility is used to manage these links and it
+will be automatically invoked when OSS is started.
+
+COMPATIBILITY
+o The /dev/dsp (default() audio device file will be supported by all OSS
+implementations and versions.
+o The special purpose audio default devices (such as /dev/dsp_mmap) are only
+supported by OSS 4.0 and later.
+o The legacy audio device files (such as /dev/dsp1) are supported by all OSS
+versions and implementations.
+o New style audio device files (under /dev/oss) are only supported by OSS 4.0
+and later. However some independent OSS implementations may only support
+the legacy naming even they are otherwise OSS 4.0 compatible.
+o /dev/dsp0 doesn't exist in all Linux systems which use /dev/dsp for the same
+purpose. In such systems /dev/dsp points to the first audio device and 
+/dev/dsp1 to the second.
+
+PROGRAMMING INFORMATION
+See the Audio Programming section of the OSS Programmer's Guide (DSP(2)) for
+more info.
+
+OPTIONS
+None
+
+FILES
+o /dev/dsp 		Default audio device
+o /dev/dsp_mmap 		Default audio device for applications using mmap(2)
+o /dev/dsp_ac3 		Default audio device for applications sending Dolby
+			Digital (AC3) audio to an external receiver.
+o /dev/dsp_multich 	Default multichannel (4.0-7.1) audio output device
+o /dev/dsp_spdifout	Default digital audio (S/PDIF) output device
+o /dev/oss/<driver>/pcmN 	Direct access device files for individual audio
+			devices.
+o /dev/dsp0 to /dev/dspN 	Legacy style direct access audio device files.
+
+AUTHOR
+4Front Technologies
+

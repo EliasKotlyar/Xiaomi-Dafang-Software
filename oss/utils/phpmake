@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if test ! -f Makefile.php
+then
+	echo No Makefile.php in this directory
+	exit 0
+fi
+
+if ! php Makefile.php > Makefile
+then
+	exit 1
+fi
+
+for n in */Makefile.php
+do
+	N=`dirname $n`
+
+	if test "$N " != '* '
+	then
+		if ! (cd $N && phpmake $*)
+		then
+		  exit 1
+		fi
+	fi
+done
+
+exit 0

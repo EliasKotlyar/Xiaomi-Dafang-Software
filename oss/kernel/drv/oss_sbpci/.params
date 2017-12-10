@@ -1,0 +1,12 @@
+int apci_latency=0;
+/*
+ * Set the latency to 32, 64, 96, 128 clocks - some APCI97 devices exhibit 
+ * garbled audio in some cases and setting the latency to higer values fixes it
+ * Values: 32, 64, 96, 128 - Default: 64 (or defined by bios)
+ */
+
+int apci_spdif=0;
+/*
+ * Enable SPDIF port on SoundBlaster 128D or Sound Blaster Digital-4.1 models
+ * Values: 1=Enable 0=Disable Default: 0
+ */

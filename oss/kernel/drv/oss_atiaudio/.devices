@@ -1,0 +1,3 @@
+oss_atiaudio	pci1002,4341	ATI IXP200
+oss_atiaudio	pci1002,4361	ATI IXP300
+oss_atiaudio	pci1002,4370	ATI IXP400

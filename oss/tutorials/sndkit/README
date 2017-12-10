@@ -1,0 +1,62 @@
+Release notes for the sndkit collection
+=======================================
+
+This directory contains the sources for a set of utilities
+included in the OSS package. In addition there is an unsorted collection
+of many kind of programming experiments. Some of them don't even work.
+
+We have released these sources just because there is no reason to not to
+release them. We hope that somebody finds them interesting.
+
+There is no documentation available for these sources at this moment. They
+will be officially released at the some time with OSS 4.0. Most of the files
+are created to test recent OSS versions os they will not work with older
+implementations such as the kernel freeware OSS drivers (OSS/Free) or
+ALSA.
+
+Some of these programs do things that are not necessary in majority of
+OSS applications. Please refers to the OSS Programmer's Guide for
+proper usage of the API (http://www.opensound.com/pguide).
+
+Most programs have been written by 4Front Technologies but some of the
+oldest ones have different origins.
+
+Please contact hannu@opensound.com if you have any questions.
+
+**********************************************************************
+All these programs are released under GNU Public License (GPL) version
+2.0 or CDDL (if you prefer it). However there are few files that have
+a different license. In that case the copying conditions will be
+mentioned in the beginning of the files.
+**********************************************************************
+
+Brief description of the directories
+------------------------------------
+
+To compile most of the programs just go to the directory ane execute "make"
+or "make install". Some of the programs need to be compiled by hand. Use
+"make install" in the main directory to compile and install all of them.
+
+dsp	Very very old utilities. Many of them are still functional.
+
+ossmixer.c	The "reference implementation" of an OSS mixer program. This
+program uses the traditional OSS mixer API which is very limited.
+Superseded by the ossmix/ and ossxmix/ programs.
+
+ossmplay	A MIDI player that uses the /dev/music API.
+
+The ossmix and ossxmix programs use the OSS mixer extension API that is to
+be officially released in OSS 4.0. Some minor changes are still planned to
+this API so please keep this in mind if using these sources.
+
+ossmix		A command line OSS mixer.
+ossxmix		A GTK+ based mixer/control panel program.
+ossrec		A simple command line .wav file recording applet.
+ossplay		A command line audio file player (for most file formats)
+samples		Few OSS programming sample programs.
+awesfx		SB AWE SoundFont Loader for EMU8000 synth.
+sblive		DSP compiler/loader and .DSP file sources for the SB Live/Audigy
+		driver of OSS. May be very impossible to understand without
+		documentation. Sorry for the time being.
+tests		Various test programs used to test this and that during
+		development of OSS. Can be used as programming examples.

@@ -1,0 +1,8 @@
+SRCS=MODNAME.c
+KMOD=MODNAME
+OBJS += MODNAME_mainline.o
+SRCS += device_if.h bus_if.h pci_if.h
+CFLAGS += -I../include/internals
+
+.include <bsd.kmod.mk>
+

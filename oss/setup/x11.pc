@@ -1,0 +1,16 @@
+prefix=/usr/openwin
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+xthreadlib=
+
+Name: X11
+Description: X Library
+Version: 0.0
+Requires: xproto kbproto inputproto
+Requires.private: xau xdmcp
+Cflags: -I${includedir} -D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS -DXTHREADS -DXUSE_MTSAFE_API
+Libs: -L${libdir} -R${libdir} -lX11
+Libs.private:
+

@@ -1,0 +1,24 @@
+/*
+ * IMUX supports multiple instances, please consult the man page
+ */
+
+int imux_devices=5;
+/*
+ * Number of IMUX client side devices to configure. 
+ * Values: 2-48    Default: 5.
+ */
+
+int imux_masterdev=-1;
+/*
+ * Master physical device to use (ie attach IMUX to a specific soundcard)
+ * -1 means automatically detect the device. Use the device index numbers
+ * reported by ossinfo -a.
+ * Values: 0-N 	Default: -1 (autodetec)
+ */
+
+int imux_rate=48000;
+/*
+ * Select the base sampling rate for the IMUX device. The base rate must be
+ * one supported by the actual physical device (as reported by audioinfo -a -v2).
+ * Values: 8000-192000	Default: 48000
+ */

@@ -1,0 +1,6 @@
+int fmedia_mpu_irq=0;
+/* 
+ * FM801 MPU IRQ
+ * Values: 5,7,9,10,11 	Default: 0
+ */
+

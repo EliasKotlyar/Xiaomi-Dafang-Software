@@ -1,0 +1,20 @@
+NAME
+oss_ali5455 - ALIM5455 audio driver.
+
+DESCRIPTION
+Open Sound System driver for onboard audio on ALI M5455 motherboards. This
+driver is very similar to the Intel ICH driver.
+
+ALI 5455 device characteristics:
+        o 8/16 bit playback/record
+        o mono/stereo/4/5.1 channel playback/recording
+        o 8KHz to 48Khz sample rate.
+
+OPTIONS
+None
+
+FILES
+CONFIGFILEPATH/oss_ali5455.conf Device configuration file
+
+AUTHOR
+4Front Technologies

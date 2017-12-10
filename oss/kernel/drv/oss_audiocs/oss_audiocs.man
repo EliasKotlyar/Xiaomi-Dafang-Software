@@ -1,0 +1,21 @@
+NAME
+oss_audiocs - Cirrus Logic CS4231 driver for Sun Sparc Workstations
+
+DESCRIPTION
+Open Sound System driver for Cirrus Logic (Crystal Semicoductor) CS4231 audio
+controller onboard the Sun Sparc workstatiosn
+
+CS4231 device characteristics:
+        o 8/16 bit playback/record
+        o mono/stereo playback/recording
+        o 8KHz to 48Khz sample rate.
+
+OPTIONS
+None
+
+FILES
+CONFIGFILEPATH/oss_audiocs.conf Device configuration file
+
+AUTHOR
+4Front Technologies
+

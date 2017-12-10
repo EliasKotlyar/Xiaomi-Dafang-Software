@@ -1,0 +1,25 @@
+int sblive_memlimit = 8;
+/*
+ * Amount of memory allocated to SBLive Synth.
+ * Values: 4-4096 (in megabytes).  Default: 8MB
+ */
+
+int sblive_devices = 0;
+/*
+ * Specifies number of audio output engines for SBLive/Audigy.
+ * Changing this setting is not recommanded. 
+ * Values: 0, 5-32    
+ * Default: 0 (Use device dependent optimum value).
+ */
+
+int sblive_digital_din = 0;
+/*
+ * Sets the SPDIF/Analog combo output to audio or spdif mode
+ * Values: 1 = Digital, 0=Analog Default: 0
+ */
+
+int audigy_digital_din = 1;
+/*
+ * Sets the SPDIF/Analog combo output to analog or spdif mode
+ * Values: 1 = Digital, 0 = Analog Default: 1
+ */

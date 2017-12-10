@@ -1,0 +1,10 @@
+build: 	kernel/framework/include/buildid.h all
+	sh build.sh
+
+copy:	build
+	cp -R prototype/* /boot/
+
+package:	build
+		sh setup/BeOS/mkpkg.sh
+
+install:	copy

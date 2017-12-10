@@ -1,0 +1,117 @@
+//
+// Equalizer macros.
+//
+/*
+ *
+ * This file is part of Open Sound System.
+ *
+ * Copyright (C) 4Front Technologies 1996-2008.
+ *
+ * This this source file is released under GPL v2 license (no other versions).
+ * See the COPYING file included in the main directory of this source
+ * distribution for the license terms and conditions.
+ *
+ */
+
+#if 0
+// Constant 50% (128) gain tables
+#define INCLUDE_EQPARMS \
+.const EQb1_CST_0 0x10000000;\
+.const EQb1_CST_1 0xE042DE20;\
+.const EQb1_CST_2 0x1FBD21E0;\
+.const EQb1_CST_3 0x0FBD8640;\
+.const EQb1_CST_4 0xF04279C0;\
+.const EQb2_CST_0 0x10000000;\
+.const EQb2_CST_1 0xE2E5DDC0;\
+.const EQb2_CST_2 0x1D1A2240;\
+.const EQb2_CST_3 0x0D48B550;\
+.const EQb2_CST_4 0xF2B74AB0;\
+.const EQb3_CST_0 0x10000000;\
+.const EQb3_CST_1 0xEC7021C0;\
+.const EQb3_CST_2 0x138FDE40;\
+.const EQb3_CST_3 0x069696A0;\
+.const EQb3_CST_4 0xF9696960;\
+.const EQb4_CST_0 0x10000000;\
+.const EQb4_CST_1 0x094B0F90;\
+.const EQb4_CST_2 0xF6B4F070;\
+.const EQb4_CST_3 0x02961F24;\
+.const EQb4_CST_4 0xFD69E0DC;\
+.parm BYPASS		0		onoff ;
+#else
+#define INCLUDE_EQPARMS \
+.parm EQ_GAIN		100		mono PRESCALE;\
+.parm EQb1             128              eq1 LO;\
+.parm EQb2             128              eq2 MID;\
+.parm EQb3             128              eq3 HI;\
+.parm EQb4             128              eq4 XHI;\
+.parm BYPASS		0		onoff ;
+#endif
+
+#define INCLUDE_EQVARS \
+.gpr eq_save;\
+.gpr eq_value;\
+.const 0x1000 0x1000;\
+.const 44 I44;\
+.const EQ_ADJUST I8;\
+.const EQ_AFTERSCALE I32;\
+.const EQ_PRESCALE 0.03125	/* 1/32 */
+
+#define INCLUDE_DELAYS(PREFIX) \
+.gpr PREFIX##b1_x0;\
+.gpr PREFIX##b1_x1;\
+.gpr PREFIX##b1_x2;\
+.gpr PREFIX##b1_y0;\
+.gpr PREFIX##b1_y1;\
+.gpr PREFIX##b1_y2;\
+.gpr PREFIX##b2_x0;\
+.gpr PREFIX##b2_x1;\
+.gpr PREFIX##b2_x2;\
+.gpr PREFIX##b2_y0;\
+.gpr PREFIX##b2_y1;\
+.gpr PREFIX##b2_y2;\
+.gpr PREFIX##b3_x0;\
+.gpr PREFIX##b3_x1;\
+.gpr PREFIX##b3_x2;\
+.gpr PREFIX##b3_y0;\
+.gpr PREFIX##b3_y1;\
+.gpr PREFIX##b3_y2;\
+.gpr PREFIX##b4_x0;\
+.gpr PREFIX##b4_x1;\
+.gpr PREFIX##b4_x2;\
+.gpr PREFIX##b4_y0;\
+.gpr PREFIX##b4_y1;\
+.gpr PREFIX##b4_y2
+
+#define MOVE(a,b) ACC3(b, a, 0, 0)
+
+#define PASS_BAND(N, BAND)\
+\
+    MOVE(N##_x1,N##_x2);\
+    MOVE(N##_x0,N##_x1);\
+    MOVE(eq_value, N##_x0);\
+\
+    MOVE(N##_y1,N##_y2);\
+    MOVE(N##_y0,N##_y1);\
+    MOVE(0,N##_y0);\
+\
+    MACS(N##_y0, 0,      N##_x0,EQ##BAND##_CST_0);\
+    MACS(N##_y0, N##_y0, N##_x1,EQ##BAND##_CST_1);\
+    MACS(N##_y0, N##_y0, N##_y1,EQ##BAND##_CST_2);\
+    MACS(N##_y0, N##_y0, N##_x2,EQ##BAND##_CST_3);\
+    MACS(N##_y0, N##_y0, N##_y2,EQ##BAND##_CST_4);\
+\
+	MACINTS(N##_y0, 0, N##_y0, EQ_ADJUST);\
+	ACC3(eq_value, N##_y0, 0, 0)
+
+#define EQUALIZER(SUFFIX, PREFIX, INOUT) \
+    ACC3(eq_value, INOUT, 0, 0); \
+    ACC3(eq_save, INOUT, 0, 0); \
+    MACS(eq_value, 0, eq_value, EQ_GAIN);\
+    MACS(eq_value, 0, eq_value, EQ_PRESCALE);\
+    PASS_BAND(PREFIX##b4, b4); \
+    PASS_BAND(PREFIX##b3, b3); \
+    PASS_BAND(PREFIX##b2, b2); \
+    PASS_BAND(PREFIX##b1, b1); \
+    MACINTS(eq_value, 44, eq_value, EQ_AFTERSCALE);\
+    MACINTS(INOUT, 0, eq_value, BYPASS_OFF);\
+    MACINTS(INOUT, INOUT, eq_save, BYPASS_ON)

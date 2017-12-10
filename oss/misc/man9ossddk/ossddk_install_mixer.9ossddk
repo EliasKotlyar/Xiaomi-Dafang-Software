@@ -1,0 +1,95 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_install_mixer 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_install_mixer \- Creates an mixer device.
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBint\fR ossddk_install_mixer(\fBint \fIvers\fP, \fBoss_device_t * \fIosdev\fP, \fBoss_device_t * \fImaster_osdev\fP, \fBconst char *\fIname\fP, \fBmixer_driver_t *\fIdriver\fP, \fBint \fIdriver_size\fP, \fBvoid *\fIdevc\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIvers\fR
+.in +16n
+.rt
+The OSSDDK mixer interface version. Pass OSS_MIXER_DRIVER_VERSION in this parameter.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIosdev\fR
+.in +16n
+.rt
+OSS device handle from ossddk_register_device(9ossddk).
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fImaster_osdev\fR
+.in +16n
+.rt
+OSS device handle for the master device. Usually same as \fIosdev\fR but
+virtual drivers have to give the osdev handle of the master/physical device here.
+OSS uses this parameter for example to get the right iblock_cookie.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIname\fR
+.in +16n
+.rt
+Name of the mixer device to be shown in /dev/sndstat. Also returned by the 
+SNDCTL_MIXERINFO(2oss) ioctl call.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIdriver\fR
+.in +16n
+.rt
+Pointer to the mixer driver callback table (mixer_driver_t).
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIdriver_size\fR
+.in +16n
+.rt
+Set to sizeof(mixer_driver_t).
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIdevc\fR
+.in +16n
+.rt
+Pointer to driver defined device instance data.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+This call creates a mixer device file (/dev/mixer#) and returns the mixer
+device number.
+.PP
+.SH "RETURN VALUES"
+.PP
+Negative value is an error code (-errno). Zero or positive is the mixer device
+number created.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

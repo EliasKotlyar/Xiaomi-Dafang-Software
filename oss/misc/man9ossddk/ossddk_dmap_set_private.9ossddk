@@ -1,0 +1,53 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_dmap_set_private 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_dmap_set_private, ossddk_dmap_get_private, ossddk_dmap_set_playerror, ossddk_dmap_set_recerror, ossddk_dmap_set_callback \- Misc helper functions
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_dmap_set_private(\fBdmap_t *\fIdmap\fP, \fBvoid *\fIptr\fP);
+\fBvoid*\fR ossddk_dmap_get_private(\fBdmap_t *\fIdmap\fP);
+\fBvoid\fR ossddk_dmap_set_playerror(\fBdmap_t *\fIdmap\fP, \fBint \fIerr\fP, \fBint \fIparm\fP);
+\fBvoid\fR ossddk_dmap_set_recerror(\fBdmap_t *\fIdmap\fP, \fBint \fIerr\fP, \fBint \fIparm\fP);
+\fBvoid\fR ossddk_dmap_set_callback(\fBdmap_t *\fIdmap\fP, \fBoss_audio_callback_t \fIcb\fP, \fBint \fIarg\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdmap\fR
+.in +16n
+.rt
+Audio buffer handle.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIptr\fR
+.in +16n
+.rt
+TODO ptr
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+These functions are included in the current OSS DDK version just for
+future compatibility. They don't exist in current versions and must not
+be used by drivers written for this version of OSS DDK.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

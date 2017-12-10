@@ -1,0 +1,42 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_osdev_get_devc 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_osdev_get_devc \- Get the devc pointer registered for the osdev handle.
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid*\fR ossddk_osdev_get_devc(\fBoss_device_t *\fIosdev\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIosdev\fR
+.in +16n
+.rt
+OSS device handle.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+Driver can use this function to get the devc structure it used when calling
+ossddk_register_device(9ossddk).
+.PP
+.SH "RETURN VALUES"
+This function always returns the devc pointer. There are no error codes.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

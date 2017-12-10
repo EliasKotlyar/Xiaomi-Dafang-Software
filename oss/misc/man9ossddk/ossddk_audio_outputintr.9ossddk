@@ -1,0 +1,48 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_audio_outputintr 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_audio_outputintr \- Audio output interrupt callback
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_audio_outputintr(\fBint \fIdev\fP, \fBint \fIintr_flags\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS audio device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIintr_flags\fR
+.in +16n
+.rt
+Currently not used. Should always be set to 0.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+This function should be called by the interrupt handler of an audio driver on fragment
+boundaries (for a playback device). The OSS audio core will the update it's internal
+pointers and wake up the application if necessary.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

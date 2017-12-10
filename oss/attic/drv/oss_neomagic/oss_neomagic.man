@@ -1,0 +1,19 @@
+NAME
+oss_neomagic - Neomagic audio driver.
+
+DESCRIPTION
+Open Sound System driver for Neomagic NM2200/NM2200-ZX audio controllers
+Neomagic device characteristics:
+        o 8/16 bit playback/record
+        o mono/stereo playback/recording
+        o 8KHz to 48Khz sample rate.
+
+OPTIONS
+None
+
+FILES
+CONFIGFILEPATH/oss_neomagic.conf Device configuration file
+
+AUTHOR
+4Front Technologies
+

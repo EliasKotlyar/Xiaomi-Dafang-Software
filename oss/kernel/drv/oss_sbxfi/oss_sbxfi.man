@@ -1,0 +1,20 @@
+NAME
+oss_sbxfi - SoundBlaster X-Fi audio driver
+
+DESCRIPTION
+Open Sound System driver for the SoundBlaster X-Fi cards.
+
+OPTIONS
+o sbxfi_type	Override X-Fi type autodetection. Values:
+		0 - Autodetect type
+		1 - Sound Blaster X-Fi (SB046x/067x/076x)
+		2 - Sound Blaster X-Fi (SB073x)
+		3 - Sound Blaster X-Fi (SB055x)
+		4 - Sound Blaster X-Fi (UAA)
+		Default : 0.
+
+FILES
+CONFIGFILEPATH/oss_sbxfi.conf Device configuration file.
+
+AUTHOR
+4Front Technologies

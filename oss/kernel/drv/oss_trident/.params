@@ -1,0 +1,6 @@
+int trident_mpu_ioaddr=0;
+/*
+ * Trident MPU 401 I/O Address
+ * Values: 0x300, 0x330 Default: 0x330
+ */
+

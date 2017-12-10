@@ -1,0 +1,76 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_adev_set_buflimits 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_adev_set_buflimits \- Set fragment size constraints
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_adev_set_buflimits(\fBint \fIdev\fP, \fBint \fImin_fragment\fP, \fBint \fImax_fragment\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS audio device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fImin_fragment\fR
+.in +16n
+.rt
+Minimum fragment size (in bytes) supported by the device. Value of 0 means no limit.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fImax_fragment\fR
+.in +16n
+.rt
+Maximum fragment size (in bytes) supported by the device. Value of 0 means no limit.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+Fragment size of an audio stream is the number of bytes (not samples) to be played
+or recorded between interrupts genererated by the device. In other words the device
+will generate an interrupt exactly at the fragment boundaries. The audio core of OSS
+will select the fragment size. However if the device has any size restrictions it can
+inform the audio core about them. In most cases there are no restrictions and the driver
+should not call this function at all.
+The minimum fragment size must be smaller or equal to the maximum.
+.PP
+For example many devices can not support fragment sizes larger than one 4k page. In
+this case the driver can call \fIossddk_adev_set_buflimits(device_num, 0, 4096)\fR.
+.PP
+This function can be called immediately after installing the audio device using
+\fIossddk_install_audiodev(9ossddk)\fR. Alternatively it can be called in driver's open,
+set_speed, set_channels and/or set_format entry points. If the latter method is used 
+then the open entry point must restore the default value.
+.PP
+Changing the fragment size limits when (or after) the prepare_for_output/prepare_for_input
+entry point is called doesn't have any effect. If the fragment size depends on the
+sampling rate or the other parameters then the set_speed, set_channels and set_format
+driver entgry points must update the fragment size limits depending on the situation.
+.PP
+The limits should preferably be powers of 2 but this is not an absolute requirement.
+Both limits can be the same if the device supports fixed fragment size.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

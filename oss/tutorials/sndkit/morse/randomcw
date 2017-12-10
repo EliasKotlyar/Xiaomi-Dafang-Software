@@ -1,0 +1,2 @@
+#!/bin/sh
+loadcw|tee x|morse $*;tr 'a-zåäö' 'A-ZÅÄÖ' < x

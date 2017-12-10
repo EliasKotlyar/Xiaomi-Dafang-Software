@@ -1,0 +1,16 @@
+What is this?
+=============
+
+This directory contains a very simple software MIDI organ which is
+based on playback of sine waves at various frequencies and amplitudes. Please
+see the softsynth.c file for better explanation. This is probably the simpliest
+software synthesizer application one can write.
+
+The softsynth.c file contains the original version of this program
+(no GUI). It's compatible also with any of the earlier OSS versions if you
+use an OSSlib version that contains the MIDI parser library (shipped with
+OSS 3.99.1j and later).
+
+The softsynth_gtk.c contains another version of the original program. It
+has GTK+ GUI. In addition it uses several services that are only
+available in OSS 4.0 and later.

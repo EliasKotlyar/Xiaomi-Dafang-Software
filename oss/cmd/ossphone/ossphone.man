@@ -1,0 +1,33 @@
+NAME
+ossphone - Open Sound System phone call program.
+
+SYNOPSIS
+ossphone [ -d devname ] [ -s rate ] [ -t duration ] [ -l duration ]
+         mdmin-dev mdmout-dev [phone-number]
+
+DESCRIPTION
+ossphone connects your modem device to your audio device, allowing you to make
+phone calls using your computer. If a phone number is provided, ossphone will
+dial it using tone dialing (DTMF).
+
+NOTICE
+This utility only works in limited number of Laptops that have si3055 and
+compatible HDaudio modem chips.
+
+OPTIONS
+-d<devname>	Select <devname> as the audio device (eg -d/dev/dsp2).
+-s<rate>	Select the audio sampling rate (eg -s9600).
+-t<duration>	Select <duration> as the DTMF digit duration in
+		seconds (eg -t0.1).
+-l<duration>	Select <duration> as the DTMF silence (between digits)
+		duration in seconds (eg -t0.05).
+
+INTERRUPT
+Sending a SIGINT (Ctrl-C in most terminals) will make ossphone end the
+current phone call by setting the modem device on-hook.
+
+FILES
+/usr/bin/ossphone
+
+AUTHOR
+Paulo Matias 

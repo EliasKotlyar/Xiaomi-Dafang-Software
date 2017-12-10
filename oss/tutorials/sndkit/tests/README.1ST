@@ -1,0 +1,11 @@
+Important warning
+=================
+
+Many prongrams in this directory are in no way sample programs. Most of them
+intentionally misuse the OSS API to force the drivers to fail if there are
+any bugs in them. Using this kind of stupid methods in ordinary applications
+is asking for troubles.
+
+However some of the programs demonstrate how to use certain new features 
+of OSS. In such cases the program name is mentioned somewhere else in the
+OSS documentation.

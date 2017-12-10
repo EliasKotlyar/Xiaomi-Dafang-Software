@@ -1,0 +1,19 @@
+NAME
+oss_solo - ESS Solo-1 audio driver
+
+DESCRIPTION
+Open Sound System driver for ESS Solo1/1938/1968 audio controllers.
+ESS Solo1 device characteristics:
+        o 8/16 bit playback/record
+        o mono/stereo playback/recording
+        o 8KHz to 48Khz sample rate.
+
+OPTIONS
+None
+
+FILES
+CONFIGFILEPATH/oss_solo.conf Device configuration file
+
+AUTHOR
+4Front Technologies
+

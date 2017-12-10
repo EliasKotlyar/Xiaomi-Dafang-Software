@@ -1,0 +1,6 @@
+int audigyls_spdif_enable=0;
+/*
+ * Set the Orange Jack to SPDIF or Analog output
+ * Values 1=SPDIF  0=Analog (side-surround) 	Default=0
+ */
+

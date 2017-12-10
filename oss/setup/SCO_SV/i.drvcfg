@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# Copyright (c) 2005-2006 4Front Technologies
+#
+
+while read src dest
+do
+	if [ ! -f $dest ] ; then
+		cp $src $dest
+	fi
+done
+exit 0

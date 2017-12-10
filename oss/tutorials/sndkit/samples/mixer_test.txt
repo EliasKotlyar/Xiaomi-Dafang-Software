@@ -1,0 +1,108 @@
+#ifdef DOCUMENT
+Short guide for using the OSS mixer extension API
+=================================================
+
+The mixer extension API is fully dynamic. It doesn't use fixexed
+controller numbering. Instead the controllers are identified by their name
+(which is different from the names displayed by ossmix). You need to read
+the complete controller list and pick the controller numbers from it based
+on the name (the numbers may change between OSS versions if new
+controllers are added or some existing ones removed).
+
+You can read the controller list using the following code fragment. Look
+at the names and pick the numbers of the controllers you need to use. You
+will also need the possible range of the controller.
+
+You can ignore all other information.
+#endif
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/soundcard.h>
+
+#define MIXER_DEVICE_NUMBER=0
+
+int
+main(void)
+{
+    int i, n, dev;
+    int mixerfd=open("/dev/mixer", O_RDWR, 0);
+
+    oss_mixext desc;
+
+    dev=n=MIXER_DEVICE_NUMBER;
+ 
+    if (ioctl(mixerfd, SNDCTL_MIX_NREXT, &n)==-1)
+    {
+        perror("SNDCTL_MIX_NREXT");
+        if (errno == EINVAL)
+           fprintf(stderr, "Error: OSS version 3.9 or later is required\n");
+        exit(-1);
+    }
+
+
+ for (i=0;i<n;i++)
+    {
+        desc.dev = dev;
+        desc.dctrl = i;
+ 
+        if (ioctl(mixerfd, SNDCTL_MIX_EXTINFO, &desc)==-1)
+        {
+            perror("SNDCTL_MIX_EXTINFO");
+            exit(-1);
+        }
+
+	printf("Name %s, number %s, range %d-%d\n",
+		desc.id, i, desc.minvalue, desc.maxvalue);
+	/*
+	 * desc.type gives the type of the controller if you need it.
+	 * Possible types are defined in soundcard.h
+     */
+     }
+
+
+/*
+ * After you have collected the controller numbers you can write the value in
+ * the following way:
+ */
+
+    oss_mixer_value val;
+    
+    val.dev = MIXER_DEVICE_NUMBER;
+    val.ctrl = CONTROLLER_NUMBER;
+    val.value = NEW_VALUE_TO SET;
+	val.timestamp = THE_TIMESTAMP_FIELD_FROM_THE DESCRIPTOR_RECORD;
+
+    if (ioctl(mixerfd, SNDCTL_MIX_WRITE, &val)==-1)
+    {
+       perror("SNDCTL_MIX_WRITE");
+       exit(-1);
+    }             
+
+	exit(0);
+}
+/*
+Reading the current value can be done using SNDCTL_MIX_READ instead of
+SNDCTL_MIX_WRITE.
+
+Implement first just a program that prints the descriptor records. In this
+way you can examine the controller names that are available.
+
+I'm not 100% sure if the controller names are unique. The list returned by 
+SNDCTL_MIX_EXTINFO is actually tree. Every entry is actually a node and
+it's 'parent' field contains the number of the parent (group) node. You
+may need to concatenate the names of the controller and it's parent to
+get a unique name (something like ENVY24_GAIN.ENVY24_OUT1/2).
+
+I'm still planning to make few changes to the structs used by this API
+(that's the reason why we have not documented the API yet). When or if
+this happens you may have to recompile your application (hopefully not).
+It's also possible that I make the controller names unique in which case
+you will have to change the names you use. So make your program to check
+that it finds names for all controllers it needs and give an error message
+if something is missing. In this way you now when to modify your program
+to use the new names.
+*/

@@ -1,0 +1,43 @@
+NAME
+ossdevlinks - Open Sound System legacy device management utility.
+
+SYNOPSIS
+ossdevlinks [-vr]
+
+DESCRIPTION
+The ossdevlinks utility creates and manages old style (legacy) device files
+for OSS audio, MIDI and mixer devices.
+
+In previous versioms OSS used "flat" device numbering for the device files
+(for example /dev/dsp0 to /dev/dspN). OSS version 4.0 and later uses different
+naming scheme. The ossdevlinks utility is used to manage the legacy device
+names as symbolic links to the new style devices.
+
+OPTIONS
+Normally ossdevlinks is used without command line arguments. However
+there are a few command line options.
+
+-f<name>	Write legacydev file to <fname>. 
+-N		Do not actually modify device files
+-r		Reset the legacy device numbering (do not use).
+-v		Verbose output
+
+The -r option may invalidate audio device selections in the setup files
+of various applications. This is considered highly undesirable. Applications
+using wrong audio devices may cause serious security and privacy problems.
+For this reason the -r option should never be used unless there are no other
+ways to recover from serious audio/sound related problems. After that users
+should review the audio settings of all the audio applications they are using.
+                
+SEE ALSO
+ossinfo(1)
+
+FILES
+/usr/sbin/ossdevlinks
+/usr/lib/oss/etc/legacy_devices
+/dev/dspN
+/dev/midiNN
+/dev/mixerN
+
+AUTHOR
+4Front Technologies

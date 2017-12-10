@@ -1,0 +1,60 @@
+#!/bin/sh
+
+if test -f /etc/oss.conf
+then
+  . /etc/oss.conf
+else
+  OSSLIBDIR=/usr/lib/oss
+fi
+
+if ! /sbin/kldstat | grep -q osscore.ko
+then
+  echo OSS not loaded.
+  exit 0
+fi
+
+if ! test -f $OSSLIBDIR/etc/installed_drivers
+then
+	echo $OSSLIBDIR/etc/installed_drivers is missing.
+	exit 1
+fi
+
+# Save mixer settings automatically if requested
+if test -f $OSSLIBDIR/etc/userdefs && grep -q "autosave_mixer yes" $OSSLIBDIR/etc/userdefs
+then
+	/usr/sbin/savemixer 
+fi
+
+# Save legacy devices
+/usr/sbin/ossdevlinks -N
+
+PROGRAMS="`fstat /dev/mixer* /dev/dsp* /dev/midi* /dev/oss/*/* 2>/dev/null | sed '1 D'`"
+
+if test "$PROGRAMS " != " "
+then
+  echo
+  echo Some applications are still using OSS - cannot unload
+  echo
+
+  fstat /dev/mixer* /dev/dsp* /dev/midi* /dev/oss/*/* 2>/dev/null
+
+  echo
+  echo Please stop these applications and run soundoff again
+  exit 2
+fi
+
+for n in `cat $OSSLIBDIR/etc/installed_drivers | sed 's/#.*//'`
+do
+    /sbin/kldunload $n > /dev/null 2>&1
+done
+
+/sbin/kldunload osscore
+
+if ! /sbin/kldstat | grep -q osscore.ko # OSS gone?
+then
+  exit 0
+fi
+
+echo Cannot unload the OSS driver modules
+
+exit 0

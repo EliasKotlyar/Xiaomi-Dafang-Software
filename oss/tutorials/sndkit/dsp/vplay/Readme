@@ -1,0 +1,69 @@
+Digitized Audio Utility for Linux ver. 0.3
+============================================
+
+This directory contains vplay.c, a modified version of recplay.c.
+
+vrec and vplay
+--------------
+
+These programs can be used for recording and playing:
+  CREATIVE LABS VOICE files
+  MICROSOFT WAVE file (old format only (new format is handled as raw data))
+  NeXT sound files (similar to Sun's .au format)
+  raw audio data. 
+
+Both programs accept the same options:
+
+	vrec	[-qvwrS] [-s speed] [-t seconds] -b bits [filename1 ...]
+	vplay	[-qvwrS] [-s speed] [-t seconds] -b bits [filename1 ...]
+
+	-S		Stereo (default is mono).
+	-s speed	Sets the speed (default is 8 kHz). If the speed is
+			less than 300, it will be multiplied by 1000.
+	-t seconds	Sets the recording (or playback) time in seconds.
+			(Default is no time limit).
+	-t bits		Sets sample size (bits/sample). Possible values are
+			8 and 16 (default 8).
+        -v              record a CREATIVE LABS VOICE file (default)
+        -w              record a MICROSOFT WAVE file
+        -r              record raw data without header
+        -a              record a NeXT sound file
+        -q              quiet mode
+
+        The options for speed, time etc. take only effect if you playing
+        raw data files (or recording). VOC and WAVE-files include this
+        information in their headers/internal structure.
+	If no filenames are given, stdout (vrec) or stdin (vplay) is used. 
+        The -t parameter applies to each files. For example
+
+		vrec -r -t 1 a b c
+
+	records one second of audio data to each of the files a, b, and c and
+
+		vplay -t 1 a b c
+
+	plays the first second of each of the files a, b and c (if its
+        raw audio).
+
+Don't use higher recording speeds than your card supports. This error is not
+always detected by the driver.
+
+vplay supports:
+  - the full CREATIVE LABS VOICE structure:
+    Silence, Repeat loops (on seekable input), Stereo, ASCII blocks,
+    blocks with different sampling rate 
+  - on non-stereo cards (SB 1.0 - 2.0) 8 bit stereo files will be
+    played as mono (the first channel is used)
+  - on non-16-bit cards, 16 bit WAVE files will be played as 8 bit
+    (you can really play on a SB 1.0 a 16 bit stereo WAVE file, or
+    buy ...)
+
+unsupported:
+  - packed VOC files (because /dev/dsp can't it (yet ?))
+  - multi block WAVE files (if there exists like VOC files, my specs
+    says no but RIFF definition yes ???)
+  - not PCM coded WAVE files (because I don't know other methods)
+  - more channel WAVE files (somebody has a quadrophonic sample?)
+  - alaw- or mulaw-encoded NeXt sound files
+
+Michael Beck			beck@informatik.hu-berlin.de

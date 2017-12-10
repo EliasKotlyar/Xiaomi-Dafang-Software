@@ -1,0 +1,13 @@
+ossddk_create_stringlist.9ossddk # For rec/play src/target names
+
+ossddk_mixer_create_control.9ossddk
+ossddk_mixer_set_strings.9ossddk
+ossddk_mixer_touch.9ossddk
+ossddk_mixer_truncate.9ossddk
+
+ossddk_ac97_install.9ossddk
+ossddk_ac97_is_varrate.9ossddk
+ossddk_ac97_remove.9ossddk
+ossddk_ac97_set_ext_init.9ossddk
+ossddk_ac97_set_playrate.9ossddk
+ossddk_ac97_set_recrate.9ossddk

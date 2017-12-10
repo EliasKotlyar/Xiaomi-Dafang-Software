@@ -1,0 +1,12 @@
+int allegro_amp=0;
+/* 
+ * Allegro Amp is needed for ESS 198X AC97 codecs 
+ * Values: 1=Enable 0=Disable    Default: 0
+ */
+
+int allegro_mpu_ioaddr=0;
+/*
+ * Allegro MPU 401 UART I/O Base 
+ * Values: 0x300, 0x320, 0x33, 0x340     Default: 0
+ */
+

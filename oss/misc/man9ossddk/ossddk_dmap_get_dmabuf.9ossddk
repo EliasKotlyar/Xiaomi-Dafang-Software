@@ -1,0 +1,46 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_dmap_get_dmabuf 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_dmap_get_dmabuf \- Get (kernel) address of the DMA buffer
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBunsigned char*\fR ossddk_dmap_get_dmabuf(\fBdmap_t *\fIdmap\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdmap\fR
+.in +16n
+.rt
+Audio buffer handle.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+This function returns the kernel virtual address of the DMA buffer allocated
+for this dmap, However in most drivers this value has no use. Instead they 
+should use \fIossddk_dmap_set_phys(9ossddk)\fR to get the memory/bus address
+of the buffer.
+.PP
+.SH "RETURN VALUES"
+Kernel virtual address of the DMA buffer (first byte) or NULL if no buffer
+is currently allocated.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

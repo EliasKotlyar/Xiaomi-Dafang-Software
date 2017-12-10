@@ -1,0 +1,46 @@
+#!/bin/sh
+if test -f /etc/oss.conf
+then
+  . /etc/oss.conf
+else
+  OSSLIBDIR=/usr/lib/oss
+fi
+
+##########
+#
+# The first argument tells what to do.
+##########
+
+state=$1
+
+case $state in
+
+'start')
+	# Signal the osscore module to forceload all the low level
+	# drivers (in the right order).
+
+	if test -f $OSSLIBDIR/starting
+	then
+	   echo Previous start failed. Remove $OSSLIBDIR/starting
+	   echo and run soundon manually to start OSS.
+	   exit 1
+	fi
+
+	echo "Starting Open Sound System"
+	/usr/sbin/soundoff > /dev/null 2>&1
+	/usr/sbin/soundon
+	rm -f $OSSLIBDIR/starting
+        exit 0
+        ;;
+'stop')
+	# Save mixer settings automatically if requested
+	if test -f $OSSLIBDIR/etc/userdefs && grep -q "autosave_mixer yes" $OSSLIBDIR/etc/userdefs
+	then
+          /usr/sbin/savemixer 
+	fi
+	exit 0
+        ;;
+esac
+
+exit 1
+

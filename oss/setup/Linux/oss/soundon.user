@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# This script can be used to run programs every time OSS is started.
+# By default, this script is disabled, and contains no commands.
+# To enable, add executable permissions to this file, and edit below
+# commands to be run. 
+exit 0

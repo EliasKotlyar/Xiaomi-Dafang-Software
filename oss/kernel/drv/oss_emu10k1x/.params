@@ -1,0 +1,5 @@
+int emu10k1x_spdif_enable=0;
+/*
+ * Enable SPDIF on Combo Jack
+ * Values: 1=Enable 0=Disable 	Default: 0
+ */

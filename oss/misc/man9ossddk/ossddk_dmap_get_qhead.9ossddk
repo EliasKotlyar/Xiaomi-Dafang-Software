@@ -1,0 +1,50 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_dmap_get_qhead 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_dmap_get_qhead, ossddk_dmap_get_qtail \- Return the DMA buffer head/tail fragment numbers.
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBint\fR ossddk_dmap_get_qhead(\fBdmap_t *\fIdmap\fP);
+\fBint\fR ossddk_dmap_get_qtail(\fBdmap_t *\fIdmap\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdmap\fR
+.in +16n
+.rt
+Audio buffer handle.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+Some drivers need to know which fragment it should copy to/from the device. 
+The \fIossddk_dmap_get_qhead\fR function can be used to get the current
+fragment number during playback. The \fIossddk_dmap_get_qtail\fR function
+returns the current fragment the device is expected to fill in next during
+recording. The fragment number will be in range 0 to num_fragments-1.
+.PP
+Pointer to the current fragment can be computed using formula
+\fptr =d mabuf_address + Ifragment_number*fragment_size\fR.
+.PP
+.SH "RETURN VALUES"
+These functions return the current fragment number.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

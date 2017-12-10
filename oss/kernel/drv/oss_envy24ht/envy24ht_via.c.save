@@ -1,0 +1,324 @@
+/*
+ * Purpose: Low level routines for VIA's Envy24HT reference board (AKM codec)
+ *
+ * Notice:
+ *
+ * This driver is currently disabled because no known real world device
+ * is based on this design. To enable this driver againa just rename it to
+ * envy24ht_via.c and edit the models[] table in envy24ht.c.
+ */
+/*
+ *
+ * This file is part of Open Sound System.
+ *
+ * Copyright (C) 4Front Technologies 1996-2008.
+ *
+ * This this source file is released under GPL v2 license (no other versions).
+ * See the COPYING file included in the main directory of this source
+ * distribution for the license terms and conditions.
+ *
+ */
+
+#include "oss_envy24ht_cfg.h"
+
+#include "spdif.h"
+#include "envy24ht.h"
+
+#define AKM_ADDRESS 0x10
+
+static unsigned char
+i2c_read (envy24ht_devc * devc, unsigned char addr, unsigned char pos)
+{
+  int i;
+  unsigned char data;
+  oss_native_word flags;
+
+  MUTEX_ENTER_IRQDISABLE (devc->low_mutex, flags);
+  OUTB (devc->osdev, pos, devc->ccs_base + 0x11);	/* Offset */
+  OUTB (devc->osdev, addr << 1, devc->ccs_base + 0x10);	/* Read address  */
+
+  for (i = 0; i < 2000; i++)
+    {
+      unsigned char status = INB (devc->osdev, devc->ccs_base + 0x13);
+      if (!(status & 1))
+	break;
+
+    }
+
+  oss_udelay (1);
+  data = INB (devc->osdev, devc->ccs_base + 0x12);
+  MUTEX_EXIT_IRQRESTORE (devc->low_mutex, flags);
+
+  return data;
+}
+
+static void
+i2c_write (envy24ht_devc * devc, unsigned char addr, unsigned char pos,
+	   unsigned char data)
+{
+  int i;
+  oss_native_word flags;
+
+  MUTEX_ENTER_IRQDISABLE (devc->low_mutex, flags);
+  OUTB (devc->osdev, pos, devc->ccs_base + 0x11);	/* Offset */
+  OUTB (devc->osdev, data, devc->ccs_base + 0x12);	/* Data */
+  OUTB (devc->osdev, (addr << 1) | 1, devc->ccs_base + 0x10);	/* Write address  */
+
+  for (i = 0; i < 2000; i++)
+    {
+      unsigned char status = INB (devc->osdev, devc->ccs_base + 0x13);
+      if (!(status & 1))
+	break;
+
+    }
+  MUTEX_EXIT_IRQRESTORE (devc->low_mutex, flags);
+}
+
+static void
+viaref_card_init (envy24ht_devc * devc)
+{
+  int addr = AKM_ADDRESS;
+
+  if (devc->codec_type != CODEC_I2S)
+    return;
+
+  OUTW (devc->osdev, 0x000f, devc->ccs_base + 0x14);	/* GPIO */
+
+  oss_udelay (1000);
+
+  i2c_write (devc, addr, 0, 0x00);
+  i2c_write (devc, addr, 0, 0x0f);
+  i2c_write (devc, addr, 1, 0x00);
+  i2c_write (devc, addr, 2, 0x01);
+  i2c_write (devc, addr, 5, 0x07);
+  i2c_write (devc, addr, 6, 0x00);
+  i2c_write (devc, addr, 7, 0x00);
+
+  i2c_write (devc, addr, 6, 0x00);
+  i2c_write (devc, addr, 7, 0x00);
+  i2c_write (devc, addr, 8, 0x00);
+  i2c_write (devc, addr, 9, 0x00);
+  i2c_write (devc, addr, 10, 0x00);
+  i2c_write (devc, addr, 11, 0x00);
+
+  devc->recsrc = 0;
+
+#if 0
+  cmn_err(CE_CONT, "Regs=");
+  for (i = 0; i < 0x18; i++)
+    {
+      cmn_err(CE_CONT, "%02x ", i2c_read (devc, addr, i));
+    }
+  cmn_err(CE_CONT, "\n");
+#endif
+}
+
+static int
+viaref_set_akm (int dev, int ctrl, unsigned int cmd, int value)
+{
+  envy24ht_devc *devc = mixer_devs[dev]->hw_devc;
+  int left, right, val;
+  unsigned char tmp, tmp2, old, old2;
+
+  if (cmd == SNDCTL_MIX_READ)
+    {
+      switch (ctrl)
+	{
+	  /* Output gain controls */
+	case 0:
+	case 1:
+	case 2:
+	case 3:
+	  return devc->gains[ctrl];
+
+	case 10:		/* Loopback enable */
+	  return !!(i2c_read (devc, AKM_ADDRESS, 0x01) & 0x30);
+
+	case 11:		/* codec.recsrc (ANALOG OPTICAL COAX CD AUX) */
+	  return devc->recsrc;
+	  break;
+
+	default:
+	  return OSS_EINVAL;
+	}
+    }
+
+  if (cmd == SNDCTL_MIX_WRITE)
+    {
+      oss_native_word flags;
+      left = value & 0xff;
+      right = (value >> 8) & 0xff;
+      val = left | (right << 8);
+
+      switch (ctrl)
+	{
+	case 0:
+	  left = 0xff - left;
+	  right = 0xff - right;
+	  i2c_write (devc, AKM_ADDRESS, 0x06, left);
+	  i2c_write (devc, AKM_ADDRESS, 0x07, right);
+	  return devc->gains[ctrl] = val;
+
+	case 1:
+	  left = 0xff - left;
+	  right = 0xff - right;
+	  i2c_write (devc, AKM_ADDRESS, 0x08, left);
+	  i2c_write (devc, AKM_ADDRESS, 0x09, right);
+	  return devc->gains[ctrl] = val;
+
+	case 2:
+	  val = left | (left << 8);
+	  left = 0xff - left;
+	  i2c_write (devc, AKM_ADDRESS, 0x0a, left);
+	  return devc->gains[ctrl] = val;
+
+	case 3:
+	  val = left | (left << 8);
+	  left = 0xff - left;
+	  i2c_write (devc, AKM_ADDRESS, 0x0b, left);
+	  return devc->gains[ctrl] = val;
+
+	case 10:		/* Loopback enable */
+	  MUTEX_ENTER_IRQDISABLE (devc->mutex, flags);
+	  old = tmp = i2c_read (devc, AKM_ADDRESS, 0x01);
+	  value = !!value;
+	  if (value)
+	    tmp |= 0x10;
+	  else
+	    tmp &= ~0x30;
+
+	  if (tmp != old)
+	    {
+	      i2c_write (devc, AKM_ADDRESS, 0x01, tmp);
+	    }
+	  MUTEX_EXIT_IRQRESTORE (devc->mutex, flags);
+	  return value;
+
+	case 11:		/* codec.recsrc (ANALOG OPTICAL COAX CD AUX) */
+	  if (value < 0 || value > 4)
+	    return devc->recsrc;
+	  MUTEX_ENTER_IRQDISABLE (devc->mutex, flags);
+	  old = tmp = i2c_read (devc, AKM_ADDRESS, 0x01);
+	  old2 = tmp2 = i2c_read (devc, AKM_ADDRESS, 0x02);
+
+	  tmp &= ~0x0c;
+	  tmp2 &= ~0x03;
+
+	  switch (value)
+	    {
+	    case 0:		/* Analog */
+	      tmp2 |= 0x01;
+	      break;
+
+	    case 1:		/* Optical (RX2) */
+	      tmp |= 0x04;
+	      tmp2 |= 0x00;
+	      break;
+
+	    case 2:		/* Coax (RX1) */
+	      tmp |= 0x00;
+	      tmp2 |= 0x00;
+	      break;
+
+	    case 3:		/* CD digital input (RX3) */
+	      tmp |= 0x08;
+	      tmp2 |= 0x00;
+	      break;
+
+	    case 4:		/* Unused digital input (RX4) */
+	      tmp |= 0x08;
+	      tmp2 |= 0x00;
+	      break;
+	    }
+
+	  if (tmp != old)
+	    i2c_write (devc, AKM_ADDRESS, 0x01, tmp);
+	  if (tmp2 != old2)
+	    i2c_write (devc, AKM_ADDRESS, 0x02, tmp2);
+
+	  devc->recsrc = value;
+	  MUTEX_EXIT_IRQRESTORE (devc->mutex, flags);
+	  return devc->recsrc;
+	  break;
+
+	}
+      return OSS_EIO;
+    }
+
+  return OSS_EIO;
+}
+
+static int
+viaref_mixer_init (envy24ht_devc * devc, int dev, int group)
+{
+  int i, err;
+  if (devc->codec_type != CODEC_I2S)
+    return 0;
+
+  for (i = 0; i < 4; i++)
+    devc->gains[i] = 0xffff;
+
+  if ((group = mixer_ext_create_group (dev, 0, "ENVY24HT_GAIN")) < 0)
+    return group;
+
+  if ((err = mixer_ext_create_control (dev, group,
+				       0, viaref_set_akm,
+				       MIXT_STEREOSLIDER,
+				       "GAIN_FRONT", 255,
+				       MIXF_READABLE | MIXF_WRITEABLE)) < 0)
+    return err;
+
+  if ((err = mixer_ext_create_control (dev, group,
+				       1, viaref_set_akm,
+				       MIXT_STEREOSLIDER,
+				       "GAIN_REAR", 255,
+				       MIXF_READABLE | MIXF_WRITEABLE)) < 0)
+    return err;
+
+  if ((err = mixer_ext_create_control (dev, group,
+				       2, viaref_set_akm,
+				       MIXT_MONOSLIDER,
+				       "GAIN_CENTER", 255,
+				       MIXF_READABLE | MIXF_WRITEABLE)) < 0)
+    return err;
+
+  if ((err = mixer_ext_create_control (dev, group,
+				       3, viaref_set_akm,
+				       MIXT_MONOSLIDER,
+				       "GAIN_LFE", 255,
+				       MIXF_READABLE | MIXF_WRITEABLE)) < 0)
+    return err;
+
+  if ((group = mixer_ext_create_group (dev, 0, "ENVY24HT_CODEC")) < 0)
+    return group;
+
+  if ((err = mixer_ext_create_control (dev, group,
+				       11, viaref_set_akm,
+				       MIXT_ENUM,
+				       "CODEC_RECSRC", 5,
+				       MIXF_READABLE | MIXF_WRITEABLE)) < 0)
+    return err;
+
+  if ((err = mixer_ext_create_control (dev, group,
+				       10, viaref_set_akm,
+				       MIXT_ONOFF,
+				       "CODEC_LOOPBACK", 2,
+				       MIXF_READABLE | MIXF_WRITEABLE)) < 0)
+    return err;
+
+  return 0;
+}
+
+#if 0
+static int
+viaref_private1 (envy24ht_devc * devc, int value)
+{
+  i2c_write (devc, AKM_ADDRESS, (value >> 8) & 0xff, value & 0xff);
+  return 0;
+}
+#endif
+
+envy24ht_auxdrv_t envy24ht_viaref_auxdrv = {
+  viaref_card_init,
+  viaref_mixer_init
+};

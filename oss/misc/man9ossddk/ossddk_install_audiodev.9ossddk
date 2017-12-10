@@ -1,0 +1,242 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_install_audiodev 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_install_audiodev \- Install an audio device
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBint\fR ossddk_install_audiodev(\fBint \fIvers\fP, \fBoss_device_t * \fIosdev\fP, \fBoss_device_t * \fImaster_osdev\fP, \fBchar *\fIname\fP, \fBconst audiodrv_t *\fIdriver\fP, \fBint \fIdriver_size\fP, \fBint \fIflags\fP, \fBunsigned int \fIformat_mask\fP, \fBvoid *\fIdevc\fP, \fBint \fIparent\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIvers\fR
+.in +16n
+.rt
+Audio driver interface version. Must be set to OSS_AUDIO_DRIVER_VERSION.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIosdev\fR
+.in +16n
+.rt
+OSS device handle. Returned by ossddk_register_device.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fImaster_osdev\fR
+.in +16n
+.rt
+OSS device handle for the master device. Usually same as \fIosdev\fR but
+virtual drivers have to give the osdev handle of the master/physical device here.
+OSS uses this parameter for example to get the right iblock_cookie.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIname\fR
+.in +16n
+.rt
+Name of the device. This name will be reported in /dev/sndstat as well as to
+the applications using SNDCTL_AUDIOINFO(2oss) ioctl (such as ossinfo).
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIdriver\fR
+.in +16n
+.rt
+Pointer to the audio_driver structure that defines the entry points for
+this low level audio driver.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIdriver_size\fR
+.in +16n
+.rt
+Size of the driver structure. Pass sizeof(audiodrv_t) in this parameter.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIflags\fR
+.in +16n
+.rt
+Audio device flags (see the description below).
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIformat_mask\fR
+.in +16n
+.rt
+Bit mask describing the sample formats supported by the device. See the \fISupported Audio Formats\fR section of OSS v4.0 API reference for more info. For example 
+\fBAFMT_S16_LE|AFMT_U8\fR tells that the driver supports the industry standard 8 and 16
+bit audio formats.
+.PP
+If the device supports different formats for recording and playback the driver should use the \fIossddk_adev_set_formats(9ossddk)\fR routine to set the masks.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIdevc\fR
+.in +16n
+.rt
+Pointer to driver defined device instance data.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIparent\fR
+.in +16n
+.rt
+Reserved for future use. Set to -1.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+\fIossddk_install_audiodev\fR creates an audio device file (/dev/dsp0 to /dev/dspN) and installs its driver callbacks. By default the device will be input/output capable.
+
+Behaviour of the driver can be modified using the \fIflags\fR parameter in the following way:
+.PP
+.sp
+.ne 2
+.mk
+\fBADEV_DUPLEX\fR
+.in +30n
+.rt
+Give this flag if this device supports full duplex (simultaneous recording and playback).
+.in -30n
+.sp
+.ne 2
+.mk
+\fBADEV_NOINPUT\fR
+.in +30n
+.rt
+Set this flag if the device doesn't do recording (ie it's playback only).
+.in -30n
+.sp
+.ne 2
+.mk
+\fBADEV_NOOUTPUT\fR
+.in +30n
+.rt
+Set this flag if the device doesn't do playback (ie it's recording only).
+.in -30n
+.sp
+All new OSS drivers should create separate device files for input and output. Earlier OSS versions created just a single input/output device file with \fBADEV_DUPLEX\fR flag.
+However this approach doesn't work with all device so it should not be used any more.
+.sp
+.ne 2
+.mk
+\fBADEV_VIRTUAL\fR
+.in +30n
+.rt
+This flag tells that this device is virtual which means that it doesn't drive any
+real hardware device. Instead it performs some software-only processing or works on
+top of some other device. This flag is used to prevent chaining multiple virtual
+drivers. Also some applications using SNDCTL_AUDIOINFO(2oss) may use this flag 
+for some purposes.
+.in -30n
+.sp
+.ne 2
+.mk
+\fBADEV_NOCONVERT\fR
+.in +30n
+.rt
+This flag prevents the audio core from doing any automatic sample rate or format
+conversions with this device. This flag should be set only if there is some strong 
+reason to prevent the conversions.
+.in -30n
+.sp
+.ne 2
+.mk
+\fBADEV_HIDDEN\fR
+.in +30n
+.rt
+This flag means that the device serves some very special purpose and it should
+be hidden from ordinary audio applications. It will not be visible in
+device selection lists shown by applications. Instead the user/administrator
+should know the device file to use.
+.in -30n
+.sp
+.ne 2
+.mk
+\fBADEV_SHADOW\fR
+.in +30n
+.rt
+Some devices have multiple audio playback engines that are functionally identical
+(in theory this kind of input devices are possible too but). An OSS audio driver
+is supposed to create one audio device file for each of the available engines. All but 
+the first one should have this flag set.
+.in -30n
+.sp
+.ne 2
+.mk
+\fBADEV_NOSRC\fR
+.in +30n
+.rt
+This flag disables automatic sample rate conversions performed by the audio core of OSS.
+It's similar than the \fBADEV_NOCONVERT\fR flag but doesn't disable other kind of
+format conversions. Usually used with rofessional audio devices (digital ones in
+particular) to prevent lossy sample rate conversions.
+
+.in -30n
+.sp
+.ne 2
+.mk
+\fBADEV_SPECIAL\fR
+.in +30n
+.rt
+Use this flag with devices that should not be used to play system sounds (warning beeps,
+etc). For example multi channel only or digital (AES/EBU or S/PDIF) devices should
+specify this flag.
+.in -30n
+.sp
+.ne 2
+.mk
+\fBADEV_NOMMAP\fR
+.in +30n
+.rt
+Use this flag if the device doesn't support mmap (direct access to the DMA buffer) for
+some reason.
+.in -30n
+.sp
+.ne 2
+.mk
+\fBADEV_DISABLE_VIRTUAL\fR
+.in +30n
+.rt
+Use this flag if the device is not suitable to be used as a master device of some
+virtual driver. This flag should be set for example when the interrupt routine of
+this device uses large amounts of stack (which may cause a stack overflow when
+the virtual driver gets invoked).
+.in -30n
+.sp
+.ne 2
+.mk
+.PP
+.SH "RETURN VALUES"
+.PP
+Negative value is an error code (-errno). Zero or positive is the audio device
+number created.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

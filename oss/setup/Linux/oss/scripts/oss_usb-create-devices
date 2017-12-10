@@ -1,0 +1,4 @@
+#!/bin/sh
+
+/usr/sbin/ossdetect -d
+/usr/sbin/ossdevlinks

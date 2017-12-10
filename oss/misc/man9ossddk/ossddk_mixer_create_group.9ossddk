@@ -1,0 +1,56 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_mixer_create_group 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_mixer_create_group \- Create a new mixer group (window frame).
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBint\fR ossddk_mixer_create_group(\fBint \fIdev\fP, \fBint \fIparent\fP, \fBconst char *\fIid\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS mixer device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIparent\fR
+.in +16n
+.rt
+Control number of the parent group. 0 means the device root group.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIid\fR
+.in +16n
+.rt
+Short name for the group (at most 15 characters).
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+This function creates a new mixer group under the given parent group. 
+See the mixer extension programming section of OSS 4.0 API Specification
+for more info about mixer groups.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

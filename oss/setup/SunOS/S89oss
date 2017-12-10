@@ -1,0 +1,37 @@
+#!/bin/sh
+if test -f /etc/oss.conf
+then
+  . /etc/oss.conf
+else
+  OSSLIBDIR=/usr/lib/oss
+fi
+
+##########
+#
+# The first argument tells what to do.
+##########
+
+state=$1
+
+if test -f /etc/oss.conf
+then
+. /etc/oss.conf
+else
+   OSSLIBDIR=$OSSLIBDIR
+fi
+
+case $state in
+
+'start')
+	soundoff
+	soundon
+        exit 0
+        ;;
+'stop')
+	/usr/sbin/savemixer > /dev/null 2>&1
+	exit 0
+        ;;
+esac
+
+exit 1
+

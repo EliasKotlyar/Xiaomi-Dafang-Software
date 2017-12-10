@@ -1,0 +1,5 @@
+This simple program demonstrates how to use the libossmix library
+to access mixer settings (instead of making ioctl calls directly).
+
+Use the -h <host> and -p <port> command line arguments of libossmix_demo to
+connect to a remote ossmixd server running in a remote host.

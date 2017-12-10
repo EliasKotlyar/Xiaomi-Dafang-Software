@@ -1,0 +1,22 @@
+NAME
+lynxone - OSS driver for LynxONE professional audio controller.
+
+DESCRIPTION
+Open Sound System driver for Lynx Studio LynxONE professional audio controller.
+It's based on the same HAL as the MacOS and Windows drivers and hence the
+mixer panel for this device is very similar to the Windows version. Kindly
+refer to the device manual information.
+
+        o 8/16/32 bit playback/record
+        o mono/stereo/4ch/5.1ch playback
+        o 8KHz to 200Khz sample rate.
+
+OPTIONS
+none
+
+FILES
+CONFIGFILEPATH/lynxone.conf Device configuration file
+
+AUTHOR
+4Front Technologies
+

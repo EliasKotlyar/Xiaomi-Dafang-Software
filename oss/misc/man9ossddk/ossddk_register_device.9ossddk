@@ -1,0 +1,104 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_register_device 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_register_device \- Registers a driver with OSS
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBoss_device_t*\fR ossddk_register_device(\fBint \fIddkvers\fP, \fBdev_info_t *\fIdip\fP, \fBint \fIdrvtype\fP, \fBint \fIinstance\fP, \fBconst char *\fInick\fP, \fBddi_iblock_cookie_t \fIiblock_cookie\fP, \fBvoid *\fIdevc\fP, \fBconst char *\fIlongname\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIddkvers\fR
+.in +16n
+.rt
+OSS DDK version. Set to OSSDDK_VERSION. Registering the driver will fail if the
+version numbers are incompatible.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIdip\fR
+.in +16n
+.rt
+This is the \fIdip\fR parameter given by Solaris as the argument of driver's
+attach routine.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIdrvtype\fR
+.in +16n
+.rt
+Bus type of the device. OSS DDK needs this parameter for some internal purposes.
+Possible values are: DRV_PCI, DRV_USB and DRV_VIRTUAL. Some other values may be defined
+in ossddk.h but they are not supported by the current version of OSS DDK.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIinstance\fR
+.in +16n
+.rt
+This is the instance number of this driver (see ddi_get_instance(9F)).
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fInick\fR
+.in +16n
+.rt
+Nick is a short name of the driver. Usually same as the name of the driver module.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIiblock_cookie\fR
+.in +16n
+.rt
+The iblock cookie for the device. Should be set to NULL if the driver is a pseudo
+one or if there is no iblock cookie for some other reason.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIdevc\fR
+.in +16n
+.rt
+Pointer to driver defined device instance data. The driver can use this memory area
+to store whatever information it wants.
+.sp
+.ne 2
+.mk
+\fB\fIlongname\fR
+.in +16n
+.rt
+Full name of the device. For example manufacturer and model. Keep as short as possible
+since too long names will be truncated.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+This routine registers the device with OSS and returns the \fIosdev\fR handle. The call
+must be made omce in driver's attach routine before any other OSS DDK calls are made.
+.PP
+.SH "RETURN VALUES"
+This routine returns the osdev handle or NULL if the call failed.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

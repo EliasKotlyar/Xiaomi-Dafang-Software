@@ -1,0 +1,24 @@
+int hdaudio_snoopy=0;
+/*
+ * hdaudio_snopy is reserved for diagnostic purposes and it must be 0
+ * in all situations. Other values may make the driver vulnerable to
+ * DoS attacks. For security reasons only root can use this diagnostic
+ * interface.
+ */
+int hdaudio_jacksense=0;
+/*
+ * Setting hdaudio_jacksense=1 enables jack sensing mode when the
+ * hdaudio driver is loaded. In this mode all I/O pin's that are not
+ * in use will be disabled as well as the mixer controls that are related
+ * with them. In this way the mixer/control panel will become more intuitive.
+ * However OSS will need to be restarted with soundoff;soundon every time
+ * new inputs or outputs are attached to the audio jacks.
+ *
+ * NOTE! hdaudio_jacksense=1 works only in some systems. Many laptops and
+ *       motherboards don't support jack sensing.
+ */
+int hdaudio_noskip=0;
+/*
+ * Disable checks to skip unconnected jack. Values: 0-7, where value is a
+ * bitmask - every bit disables another check. Can override hdaudio_jacksense.
+ */

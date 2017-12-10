@@ -1,0 +1,7 @@
+The attic/drv directory contains drivers that are no longer maintained and/or
+supported. If necessary they can be compiled by doing the following operation
+in the OSS (source) directory before running the ./configre script:
+
+	ln -s attic/drv/<the_driver_I_need> kernel/drv/
+
+

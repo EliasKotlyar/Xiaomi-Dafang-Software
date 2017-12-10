@@ -1,0 +1,3 @@
+#!/bin/sh
+
+vi `find ./kernel/OS/Linux24 setup/Linux24 os_cmd/Linux24 -name $1`

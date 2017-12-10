@@ -1,0 +1,144 @@
+ali5455	pci10b9,5455	ALI M5455
+allegro	pci125d,1988	ESS Allegro ES1988
+allegro	pci125d,1990	ESS Canyon 3D ES1990
+allegro	pci125d,1992	ESS Canyon 3D-2 ES1992
+allegro	pci125d,1998	ESS Maestro3 ES1998
+allegro	pci125d,199a	ESS Maestro3 ES199A
+als300	pci4005,300	Avance Logic ALS300
+als300	pci4005,308	Avance Logic ALS300+
+als4000	pci4005,4000	Avance Logic ALS4000
+apci97	pci1102,8938	Creative Ectiva EV1938
+apci97	pci1274,1371	Creative AudioPCI97 (ES1371/ES1373)
+apci97	pci1274,5880	Creative Sound Blaster PCI128 (5880B)
+apci97	pci1274,8001	Creative Sound Blaster PCI128 (CT5880)
+apci97	pci1274,8002	Creative Sound Blaster PCI128 (5880A)
+atiaudio	pci1002,4341	ATI IXP200
+atiaudio	pci1002,4361	ATI IXP300
+atiaudio	pci1002,4370	ATI IXP400
+audigyls	pci1102,7	Sound Blaster Audigy LS / Live7.1
+audioloop	AUDIOLOOP	OSS loopback audio driver (BETA)
+audiopci	pci1274,5000	Creative AudioPCI (ES1370)
+cmi8788	pci13f6,8788	CMedia CMI8788
+cmpci	pci13f6,100	CMedia CM8338A
+cmpci	pci13f6,100	MIDIMan DiO 2448
+cmpci	pci13f6,101	CMedia CM8338B
+cmpci	pci13f6,111	CMedia CM8738/CM8768
+cmpci	pci14af,20	Guillemot Maxi Sound MUSE
+cs4280	pci1013,6001	Crystal CS4610
+cs4280	pci1013,6003	Crystal CS4280 
+cs4280	pci1013,6004	Crystal CS4615
+cs4280	pcs153b,112e	Terratec DMX Xfire 1024
+cs4280	pcs1681,50	Hercules Game Theater XP
+cs4280	pcs1681,51	Hercules Game Theater XP+
+cs4280	pcs5053,3357	TurtleBeach SantaCruz / VideoLogic SonicFury
+cs4281	pci1013,6005	Crystal CS4281
+digi32	pciea60,9896	RME Digi32
+digi32	pciea60,9897	RME Digi32 Pro
+digi32	pciea60,9898	RME Digi32/8
+digi96	pci10ee,3fc0	RME Digi96
+digi96	pci10ee,3fc1	RME Digi96/8
+digi96	pci10ee,3fc2	RME Digi96/8 PRO
+digi96	pci10ee,3fc3	RME Digi96/8 PAD
+emu10k1x	pci1102,6	Creative Sound Blaster 5.1 (Dell)
+envy24	pci1412,1712	Generic ENVY24 based device
+envy24	pcs1412,d630	M Audio Delta 1010
+envy24	pcs1412,d631	M Audio Delta DiO 2496
+envy24	pcs1412,d632	M Audio Delta 66
+envy24	pcs1412,d633	M Audio Delta 44
+envy24	pcs1412,d634	M Audio Audiophile 2496
+envy24	pcs1412,d635	M Audio Delta TDIF
+envy24	pcs1412,d638	M Audio Delta 410
+envy24	pcs1412,d63b	M Audio Delta 1010LT
+envy24	pcs153b,1115	Terratec EWS88MT
+envy24	pcs153b,112b	Terratec EWS88D
+envy24	pcs153b,1130	Terratec EWX 24/96
+envy24	pcs153b,1138	Terratec DMX 6Fire
+envy24ht	pci1412,1724	Generic ENVY24HT based sound card
+envy24ht	pcs1412,3630	M Audio Revolution 7.1
+envy24ht	pcs1412,3631	M Audio Revolution 5.1
+envy24ht	pcs1412,6321	M Audio Audiophile 192
+envy24ht	pcs153b,1145	Terratec Aureon 7.1 Space
+envy24ht	pcs153b,1147	Terratec Aureon 7.1 Sky
+envy24ht	pcs153b,1149	Terratec PHASE 28
+envy24ht	pcs153b,1153	Terratec Aureon 7.1 Universe
+envy24ht	ZZZpcs3031,4553	Ego Systems Juli@ (NOT SUPPORTED YET)
+envy24ht	pcs4933,4553	Audiotrak Prodigy 7.1
+fm801	pci1319,801	ForteMedia FM 801
+fm801	pcs1489,7008	Genius Sound Maker Live
+geode	pci100b,503	National Semiconductor Geode SC1200
+geode	pci1078,103	National Semiconductor Geode CS5530
+hdaudio	pci8086,2668	Intel High Definition Audio (ICH6)
+hdaudio	pci8086,27d8	Intel High Definition Audio (ICH7)
+hdaudio	pci8086,269a	Intel High Definition Audio (ESB2)
+hdaudio	pci8086,284b	Intel High Definition Audio (ICH8)
+hdaudio	pci8086,293f	Intel High Definition Audio (ICH9)
+hdaudio	pci10de,26c	Nvidia High Definition Audio (MCP51)
+hdaudio	pci10de,371	Nvidia High Definition Audio (MCP55)
+hdaudio	pci10de,3e4	Nvidia High Definition Audio (MCP61)
+hdaudio	pci10de,44a	Nvidia High Definition Audio (MCP65)
+hdaudio	pci10de,55c	Nvidia High Definition Audio (MCP67)
+hdaudio	pci1002,437b	ATI High Definition Audio (SB450)
+hdaudio	pci1002,4383	ATI High Definition Audio (SB600)
+hdaudio	pci1106,3288	VIA High Definition Audio
+hdaudio	pci1039,7502	SiS High Definition Audio
+hdaudio	pci10b9,5461	ULI High Definition Audio
+ich	pci1022,7445	AMD 786
+ich	pci1022,746d	AMD 8111 
+ich	pci1039,7012	SiS 7012 
+ich	pci10de,1b1	Nvidia nForce
+ich	pci10de,6a	Nvidia nForce2
+ich	pci10de,8a	Nvidia CK8
+ich	pci10de,da	Nvidia nForce3
+ich	pci10de,ea	Nvidia CK8S
+ich	pci10de,59	Nvidia nForce4
+ich	pci8086,2415	Intel AC97 (ICH)
+ich	pci8086,2425	Intel AC97 (ICH1)
+ich	pci8086,2445	Intel AC97 (ICH2)
+ich	pci8086,2485	Intel AC97 (ICH3)
+ich	pci8086,24c5	Intel AC97 (ICH4)
+ich	pci8086,24d5	Intel AC97 (ICH5)
+ich	pci8086,25a6	Intel AC97 (ESB)
+ich	pci8086,266e	Intel AC97 (ICH6)
+ich	pci8086,27de	Intel AC97 (ICH7)
+ich	pci8086,7195	Intel 440MX (440MX)
+imux	IMUX	OSS Input Multiplexer 
+lynxone	pci10b5,1142	LynxONE Studio Interface
+maestro	pci125d,1968	ESS Maestro-2 
+maestro	pci125d,1978	ESS Maestro-2E 
+maestro	pci1285,100	ESS Maestro-1 
+neomagic	pci10c8,8005	Neomagic NM2200AV
+riptide	pci127a,4310	Conexant Riptide 
+riptide	pci127a,4320	Conexant Riptide
+s3vibes	pci5333,ca00	S3 Sonic Vibes
+sblive	pcs1102,21	Creative Sound Blaster Live
+sblive	pci1102,2	Creative Sound Blaster Live family
+sblive	pcs1102,8040	Creative Sound Blaster Live 1024/Platinum
+sblive	pcs1102,8061	Creative Sound Blaster Live 5.1/Platinum IR
+sblive	pci1102,4	Creative Sound Blaster Audigy/Audigy2
+sblive	pcs1102,51	Creative Sound Blaster Audigy Platinum
+sblive	pci1102,8	Creative Sound Blaster Audigy2 Value/Audigy4
+sblive	pci1102,2001	Creative Sound Blaster Audigy2 ZS Notebook
+solo	pci125d,1969	ESS Solo-1 
+sonorus	pci1057,1801	Sonorus STUDI/O
+trident	pci1023,2000	Trident 4DWave-DX
+trident	pci1023,2001	Trident 4DWave-NX
+trident	pci1023,2002	Trident 4DWave-CX
+trident	pci1039,7018	SiS 7018 
+trident	pci10b9,5451	ALI M5451
+via8233	pci1106,3059	VIA VT8233/8235/8237 
+via8233	pci1106,4551	VIA VT5432B 
+via8233	pci1106,7059	VIA VT8233A 
+via8233	pcs1462,3800	MSI K7T266
+via8233	pcs1462,4720	MSI KT3 Ultra 
+via97	pci1106,3058	VIA VT82C686 
+vmix	VMIX	OSS Transparent Virtual Mixing Architecture
+vortex	pci12eb,1	Aureal Vortex (AU8820)
+vortex	pci12eb,2	Aureal Vortex2 (AU8830)
+vortex	AU8810		Aureal Vortex Advantage (AU8810)  *** NOT SUPPORTED ***
+ymf7xx	pci1073,10	Yamaha DS-XG YMF744 
+ymf7xx	pci1073,12	Yamaha DS-XG YMF754
+ymf7xx	pci1073,4	Yamaha DS-XG YMF724
+ymf7xx	pci1073,5	Yamaha DS-XG YMF734
+ymf7xx	pci1073,a	Yamaha DS-XG YMF740
+ymf7xx	pci1073,c	Yamaha DS-XG YMF740C
+ymf7xx	pci1073,d	Yamaha DS-XG YMF724F

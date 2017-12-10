@@ -1,0 +1,21 @@
+NAME
+oss_vortex - Aureal Vortex audio driver
+
+DESCRIPTION
+Open Sound System driver for old Aureal Semiconductor AU8820 (Vortex1) and
+AU8830 (Vortex2) audio controllers.
+
+Vortex device characteristics:
+        o 8/16 bit playback/record
+        o mono/stereo playback/recording
+        o 8KHz to 48Khz sample rate.
+
+OPTIONS
+None
+
+FILES
+CONFIGFILEPATH/oss_vortex.conf Device configuration file
+
+AUTHOR
+4Front Technologies
+

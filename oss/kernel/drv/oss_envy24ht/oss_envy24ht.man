@@ -1,0 +1,24 @@
+NAME
+oss_envy24ht - VIA Envy24HT/PT audio driver.
+
+DESCRIPTION
+Open Sound System driver for Envy24HT, Envy24HT-S, Envy24PT based sound
+cards.
+
+Envy24HT device characteristics:
+        o 8/16 bit playback/record
+        o mono/stereo/4ch/5.1ch/7.1ch playback
+	o mono/sterero recording 
+        o 8KHz to 192Khz sample rate.
+
+OPTIONS
+ o envy24ht_model = -1|0|1
+ Select the Model number if the card isn't autodetected
+ Values: 0 = Envy24ht 1=Envy24PT/HT-s compatible -1=Autodetect Default: -1
+
+FILES
+CONFIGFILEPATH/oss_envy24ht.conf Device configuration file
+
+AUTHOR
+4Front Technologies
+

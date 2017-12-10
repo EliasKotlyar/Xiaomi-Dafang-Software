@@ -1,0 +1,69 @@
+#!/bin/sh
+if test -f /etc/oss.conf
+then
+  . /etc/oss.conf
+else
+  OSSLIBDIR=/usr/lib/oss
+fi
+
+if ! test -f /proc/opensound/devfiles
+then
+  echo OSS not loaded.
+  exit 0
+fi
+
+if ! test -f $OSSLIBDIR/etc/installed_drivers
+then
+	echo $OSSLIBDIR/etc/installed_drivers is missing.
+	exit 1
+fi
+
+
+# Save mixer settings automatically if requested
+if test -f $OSSLIBDIR/etc/userdefs && grep -q "autosave_mixer yes" $OSSLIBDIR/etc/userdefs
+then
+	/usr/sbin/savemixer
+fi
+
+# Save legacy devices
+/usr/sbin/ossdevlinks -N
+
+PROGRAMS="`fuser /dev/mixer* /dev/dsp* /dev/midi* /dev/oss/*/* 2>/dev/null`"
+  
+if test "$PROGRAMS " != " "
+then
+  echo
+  echo Some applications are still using OSS - cannot unload
+  echo
+
+  for n in $PROGRAMS
+  do
+    if test -f /proc/$n/cmdline
+    then
+      echo $n `cat /proc/$n/cmdline | sed 's/\x00/ /g'`
+    else
+      echo $n Unknown
+    fi
+  done
+
+  echo
+  echo Please stop these applications and run soundoff again
+  exit 2
+fi
+
+for i in 1 2 3
+do
+  for n in `egrep "^osscore" /proc/modules 2>/dev/null | cut -d ' ' -f 4 | sed 's/,/ /g'` `cat $OSSLIBDIR/etc/installed_drivers | sed 's/#.*//'` osscore
+  do
+    /sbin/modprobe -r $n > /dev/null 2>&1
+  done
+done
+
+if ! test -f /proc/opensound/devfiles # OSS gone?
+then
+  exit 0
+fi
+
+echo Cannot unload the OSS driver modules
+
+exit 3

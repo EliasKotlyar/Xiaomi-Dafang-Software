@@ -1,0 +1,6 @@
+#!/bin/sh
+if [ -x /etc/init.d/alsa-utils ]; then /etc/init.d/alsa-utils stop || true; fi
+if [ -x /usr/sbin/alsa ]; then /usr/sbin/alsa force-unload || true; fi
+if [ -x /etc/init.d/alsa ]; then /etc/init.d/alsa force-unload || true; fi
+touch /tmp/OSS_UPGRADE
+exit 0

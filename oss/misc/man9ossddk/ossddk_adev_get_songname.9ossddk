@@ -1,0 +1,49 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_adev_get_songname 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_adev_get_songname \- Get the song name assigned to an audio stream
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBchar*\fR ossddk_adev_get_songname(\fBint \fIdev\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS audio device number.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+Song name is free formatted string describing the content of the audio stream. Source 
+of the stream (for example the application playing to the device) can assign the name.
+The driver can obtain this string and forward it to the device. For example if the 
+device has a LCD display the driver can show the song name in it.
+.PP
+.SH "RETURN VALUES"
+This function returns a pointer to a string containing 0 to 63 characters. An empty
+string means there is no song name assigned to the stream. The driver must not
+modify the string.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIossddk_adev_set_songname(9ossddk)\fR
+.LP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

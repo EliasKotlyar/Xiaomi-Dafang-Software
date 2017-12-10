@@ -1,0 +1,37 @@
+NAME
+oss_userdev - OSS client/server audio pseudo device.
+
+NOTICE
+This audio device is not designed to be used as-is by the users. It requires
+a specially designed server application that implements the actual service
+(please see the OSS programming documentation for more info). The server 
+application will then create the audio devices that can be used to record
+and/or play audio.
+
+DESCRIPTION
+The oss_userdev driver is a special purpose loop back audio device that can be
+used when implementing OSS audio devices based on a server running in the
+background.
+
+OPTIONS
+
+o userdev_visible_clientnodes=0|1
+By default (0) common client device node (/dev/oss/oss_userdev0/client) will
+be created for all server instances. The clients will then get directed to the
+right instance based on some search criteria (for example UID). This 
+alternative is best when using single server application that can serve large
+number of different sesions.
+
+If this option
+is set to 1 then OSS will create separate client device nodes for each 
+instance. Applications will have to open the right device nodes. This 
+alternative is best when oss_userdev is used to create different kind of
+services in one system. In this way for example a VoIP link can be accessed
+by opening a different device node than when opening some other service.
+
+FILES
+CONFIGFILEPATH/oss_userdev.conf  Device configuration file.
+
+AUTHOR
+4Front Technologies
+

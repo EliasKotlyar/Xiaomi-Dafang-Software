@@ -1,0 +1,82 @@
+NAME
+oss_digi32 - RME Digi32 professional audio driver.
+
+DESCRIPTION
+RME Digi32 is a family of digital audio cards. The base model Digi32 has 
+digital input and output (both optical and RCA connectors). It supports
+16/20/24 bit full duplex recording and playback with standard S/PDIF
+devices. Digi32 Pro has added 20 bit analog output and it supports up to
+96 kHz sampling rates. It also has XLR connectors for AES/EBU unput and output.
+Digi32/8 is Digi32 with added support for ADAT compatible 8 channel optical
+digital link.
+
+The Digi32 family is also sold as the PRODIF family by SEK'D. However some 
+SEK'D PRODIF models are not made by RME and they will _not_ work with OSS. 
+In particular "Prodif32 Plus" is _NOT_ supported by OSS.
+
+More information about these cards can be found from 
+http://www.rme-audio.com/english/ and http://www.sekd.com.
+
+ RECORDING AND PLAYBACK
+
+Basic recording and playback functions will work like with any other
+soundcard. However there are few things to note due to digital nature of
+the cards:
+
+o Only 16 and 24/32 bit audio formats are supported. 
+o Only few sampling rates are possible. All Digi32 family members support
+  32kHz, 44.1kHz and 48kHz sampling rates. In addition Digi32 Pro supports
+  64kHz, 88.2kHz and 96kHz.
+o When the device is opened for input or input/output access the sampling rate
+  will be locked to the input signal in the selected port. Opening the device
+  will fail if there is no valid signal connected to the input port.
+
+ MEMORY USAGE
+
+By default the Digi32 driver will allocate 64k of buffer both for recording and
+playback functions. This should be sufficient in most cases. If necessary
+the buffer sizes can be increased by defining digi32_buffsize in the 
+oss_digi32.cfg file (in the directory you installed OSS). For example
+digi32_buffsize=128 setw the buffer size to 128k.
+
+ MIXER PANEL
+
+There are few settings that can be changed using the ossmix program
+shipped with OSS. Note that these settings should not be changed
+while recording and/or playback is active (otherwise results may be
+inpredictable). The changes will take effect when playback/recording
+is started next time.
+
+The following settings are available:
+
+o digi32.deemph ON|OFF (currently OFF)
+Enables digital de-emphasis. Only available with Digi32 Pro.
+
+o digi32.sync <EXTERNAL|INTERNAL> (currently EXTERNAL)
+  This setting can be used to select between internal and external sync
+  source during playback. External sync will always be used when the device
+  is opened for recording.
+
+o digi32.aesmode <CONSUMER|PRO> (currently CONSUMER)
+  This setting can be used to switch between the consumer and the pro modes
+  on the S/PDIF port. Not available with Digi32/8.
+
+o digi32.mute ON|OFF (currently OFF)
+  This setting can be used to mute the card.
+
+o digi32.input <OPTICAL|RCA|INTERNAL|XLR> (XLR only on Digi 32/PRO)
+  This setting is used to select the active input. Note that XLR is supported
+  only by Digi32 Pro.
+
+OPTIONS
+o digi32_buffer_size=<64..128> 
+By default the Digi32 driver will allocate 64k of buffer both for recording 
+and playback functions. This should be sufficient in most cases. If necessary
+the buffer sizes can be increased.
+
+FILES
+CONFIGFILEPATH/oss_digi32.conf Device configuration file
+
+AUTHOR
+4Front Technologies
+

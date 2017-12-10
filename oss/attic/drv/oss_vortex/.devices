@@ -1,0 +1,3 @@
+oss_vortex	pci12eb,1	Aureal Vortex (AU8820)
+oss_vortex	pci12eb,2	Aureal Vortex2 (AU8830)
+oss_vortex	AU8810		Aureal Vortex Advantage (AU8810)  *** NOT SUPPORTED ***

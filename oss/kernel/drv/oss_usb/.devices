@@ -1,0 +1,28 @@
+oss_usb	usbif,class1	Generic USB audio/MIDI device (BETA)
+oss_usb	usbif41e,3000	Creative Sound Blaster Extigy (BETA)
+oss_usb	usbif41e,3010	Creative Sound Blaster MP3+ USB
+oss_usb	usbif41e,3020	Creative Audigy2 NX USB (BETA)
+oss_usb	usbif46d,8b2	Logitec Quickcam Pro 4000 (mic) (BETA)
+oss_usb	usbif46d,a01	Logitec USB Headset
+oss_usb	usbif471,311	Philips ToUcam Pro (mic) (BETA)
+oss_usb	usbif672,1041	Labtec LCS1040 Speaker System (BETA)
+oss_usb	usbifd8c,c	C-Media USB audio adapter - model1
+oss_usb	usbifd8c,103	C-Media USB audio adapter - model2
+oss_usb	usbifd8c,102	C-Media USB 2/4/6/8ch audio adapter
+oss_usb	usbif6f8,c000	Hercules Gamesurround MUSE Pocket (BETA)
+oss_usb	usb763,1010	M Audio USB MIDISPORT 1x1 (BETA)
+oss_usb	usb763,1011	M Audio USB MIDISPORT 1x1 (BETA)
+oss_usb	usb763,1001	M Audio USB MIDISPORT 2x2 (BETA)
+oss_usb	usb763,1002	M Audio USB MIDISPORT 2x2 (BETA)
+oss_usb	usb763,1031	M Audio USB MIDISPORT 8x8 (BETA)
+oss_usb	usbif763,2001	M Audio USB AudioSport Quatro (BETA)
+oss_usb	usbif763,2002	M Audio USB AudioSport Duo (BETA)
+oss_usb	usbif763,classff	Generic M Audio USB MIDI interface (BETA)
+oss_usb	usbif763,2007	M Audio Sonica Theater USB (BETA)
+oss_usb	usbif763,200d	M Audio OmniStudio USB (BETA)
+oss_usb	usbif763,2805	M Audio Sonica USB (BETA)
+oss_usb	usb763,1014	M Audio Oygen8 MIDI keyboard
+oss_usb	usb763,1015	M Audio Oygen8 MIDI keyboard
+oss_usb	usbifa92,1010	EGO SYStems RoMI/O USB MIDI interface (BETA)
+oss_usb	usb499,1009	Yamaha UX16 USB MIDI interface (BETA)
+oss_usb	usb499,101e	Yamaha PSR-1K USB MIDI Keyboard (BETA)

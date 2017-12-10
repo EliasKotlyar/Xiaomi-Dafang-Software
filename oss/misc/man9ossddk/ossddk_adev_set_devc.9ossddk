@@ -1,0 +1,50 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_adev_set_devc 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_adev_set_devc \- Set the devc pointer of an audio device
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_adev_set_devc(\fBint \fIdev\fP, \fBvoid *\fIdevc\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS audio device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIdevc\fR
+.in +16n
+.rt
+Pointer to driver defined device instance data.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+The devc pointer of an audio device points to the data structure where the driver
+stores it's per-card information. The driver can store a pointer to this structure
+in the audio device and obtain it later in the callback functions.
+Usually the driver sets the devc pointer when calling ossddk_install_audiodev. However
+it is possible to change this pointer later with this function.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

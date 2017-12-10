@@ -1,0 +1,70 @@
+NAME
+oss_madi - RME HDSP MADI and AES32 audio driver
+
+DESCRIPTION
+Open Sound System driver for RME HDSP MADI and AES32 audio interfaces.
+
+This driver has been developed for RME HDSP MADI but it also supports
+HDSP AES32. The driver has been tested under Linux and Solaris under x86
+and Sparc.
+
+The internal engine of the card supports 64 playback channels and 64 recording
+channels. Only the first channels are connected to the actual input and
+output ports of the card.
+
+The mixer section of the card has recording level settings for all inputs.
+There is also an output mixer. Each output channel has mixer sliders for
+corresponding input channel and corresponding audio playback channel.
+
+There is a full 64x(64+64) mixing matrix supported by the hardware. For
+the time being this mixer matrix cannot be accessed directly by the
+applications. However support for the SNDCTL_MIX_MATRIX_WRITE and
+SNDCTL_MIX_MATRIX_READ ioctl calls can be added in the future.
+
+DEVICE FILES
+
+By default the driver will create input and output device files for
+each 32 stereo pairs. This can be changed by editing the settings in
+oss_madi.conf (see below).
+
+The application can set the devices to use 1, 2, 4, 8, 16, 32 or 64 channels.
+The device file being used selects the first channel slot within the available
+channels. For example pcm0 and pcmin0 sill select channel 0. Equally well
+pcm1 and pcmin1 will select channel slot 2 (assuming that madi_devsize option
+is set to 2). The first device (pcm0 and pcmin0) can be set to use up to 64
+channels. The last devices (pcm31 and pcmin31) only support 1 or 2 channel mode.
+The other device files support channel configurations where the last channel
+doesn't exceed the number of total channels (madi_maxchannels). Also the driver
+will not let two device files to share any of the channels with some other
+open device file.
+
+This channel allocation mechanism gives maximum flexibility to the user. It is
+possible to use some output channels by multi channel application while the
+others are available for other applications. This works as long the channel
+allocations by different applications don't overlap.
+
+OPTIONS
+
+o madi_maxchannels	Number of channels supported by the driver. The default
+			is 64 which is also the maximum. This parameter can
+			be set to a lower value if full 64 channels are not
+			required. With less channels the mixer/control panel
+			interface will require less space on screen.
+o madi_devsize		By default this parameter is set to 2 which means that
+			a device file will be created for each stereo channel
+			pair. Possible values are 1, 2, 4, 8, 16, 32 or 64.
+
+LIMITATIONS
+
+o The current driver doesn't support all control panel features of the card.
+For example sampling rate is fixed to 48 kHz. More features will be added
+on contract.
+
+o Use of mmap() is and will not be supported.
+o Virtual mixer is not supported (yet).
+
+FILES
+CONFIGFILEPATH/oss_madi.conf Device configuration file.
+
+AUTHOR
+4Front Technologies

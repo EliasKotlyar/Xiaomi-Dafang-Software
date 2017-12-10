@@ -1,0 +1,71 @@
+// Constants for EMU 10k2 (SB Audigy)
+// Sends
+
+.send SEND_L		0
+.send SEND_R		1
+.send SEND_SL		2
+.send SEND_SR		3
+.send SEND_C		4
+.send SEND_W		5
+.send SEND_RL		6
+.send SEND_RR		7
+
+// Raw S/PDIF output stream
+
+.send SPDIF_L		20
+.send SPDIF_R		21
+
+// Inputs
+
+.input AC97IN_L		0
+.input AC97IN_R		1
+.input CDSPDIFIN_L	2
+.input CDSPDIFIN_R	3
+.input GPSPDIFIN_L	4	// TOSLink
+.input GPSPDIFIN_R	5
+.input CXSPDIFIN_L	6	// LiveDrive (Coax S/PDIF input)
+.input CXSPDIFIN_R	7
+.input MICIN_L		8	// LiveDrive (Line/Mic In 1)
+.input MICIN_R		9
+.input ANACD_L		10	// Analog CD input?
+.input ANACD_R		11
+.input AUXIN_L		12	// LiveDrive (Line/Mic 2)
+.input AUXIN_R		13
+
+// Outputs
+/*
+audigy's Mic In is not connected to AC97;
+known Audigy output map:
+[digital/analog]:
+0x60, 0x68 - front left
+0x61, 0x69 - front right
+0x66, 0x6e - rear left
+0x67, 0x6f - rear right
+0x62, 0x6a - center
+0x63, 0x6b - subwoofer
+
+0x7c,0x7d - in Creative DSP code this is the same as Digital Front; can be
+LiveDrive SPDIF out
+*/
+
+.output SPDOUT1_L	0
+.output SPDOUT1_R	1
+.output DCENTER		2	// Digital Center channel
+.output DLFE		3	// Digital LFE
+.output HEADPH_L	4	// LiveDrive headphone out
+.output HEADPH_R	5
+.output DSURR_L		6	// Surround output
+.output DSURR_R		7
+.output FRONT_L		8
+.output FRONT_R		9
+.output ACENTER		10	// Analog center channel
+.output ALFE		11	// Analog LFE output
+.output SURR_L		14	// Surround output
+.output SURR_R		15
+.output AC97_L		16	// Send to the AC97 front channel
+.output AC97_R		17
+.output ADC_L		22	// Send to the ADC recording channel
+.output ADC_R		23
+.output MICREC_L	24	// Send to the microphone recording buffer
+.output MICREC_R	25  // ??????? (maybe not in use at all)
+

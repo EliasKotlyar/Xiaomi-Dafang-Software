@@ -1,0 +1,67 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_adev_set_formats 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_adev_set_formats \- report the supported sample formats
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_adev_set_formats(\fBint \fIdev\fP, \fBunsigned int \fIoformats\fP, \fBunsigned int \fIiformats\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS audio device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIoformats\fR
+.in +16n
+.rt
+Bit mask containing the formats the device supports in playback direction.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIiformats\fR
+.in +16n
+.rt
+Bit mask containing the formats the device supports in recording direction.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+Applications using audio can ask what formats the device supports using various
+ioctl calls. The driver must provide this information. Usually it sets the format mask
+when installing the device using \fIossddk_install_audiodev(9ossddk)\fR. However it
+may be necessary to change this information later if a change in device's mode of
+operation also changes the formats it currently supports. Another situation when
+this function should be called is when the device supports different formats
+for recording and playback.
+.PP
+.SH "SEE ALSO"
+.PP
+\fISNDCTL_AUDIOINFO(2oss)\fR
+.LP
+\fISNDCTL_DSP_GETFMTS(2oss)\fR
+.LP
+\fISNDCTL_DSP_SETFMT(2oss)\fR
+.LP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

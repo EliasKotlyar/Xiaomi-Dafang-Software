@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo "Killing all active audio applications"
+
+/usr/sbin/fuser -k /dev/mixer* /dev/dsp* /dev/audio* /dev/sequencer /dev/music /dev/midi* > /dev/null 2>&1
+
+sleep 2
+
+/usr/sbin/soundoff
+exit 0

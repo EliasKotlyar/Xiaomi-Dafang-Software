@@ -1,0 +1,62 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_mixer_set_strings 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_mixer_set_strings \- TODO
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBint\fR ossddk_mixer_set_strings(\fBint \fIdev\fP, \fBint \fIctl\fP, \fBconst char *\fIs\fP, \fBint \fIversion\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIctl\fR
+.in +16n
+.rt
+TODO ctl
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIs\fR
+.in +16n
+.rt
+TODO s
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIversion\fR
+.in +16n
+.rt
+TODO version
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+TODO
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

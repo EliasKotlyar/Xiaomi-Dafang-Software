@@ -1,0 +1,66 @@
+#! /bin/sh
+
+PATH="/usr/bin:/usr/sbin:${PATH}"
+export PATH
+
+ISA_TYPE_I386="i386"
+ISA_TYPE_SPARC="sparc"
+ISA_TYPE="$ARCH"
+
+if test -f ${PKG_INSTALL_ROOT}/tmp/installed_drivers
+then
+   for i in `cat ${PKG_INSTALL_ROOT}/tmp/installed_drivers | sed 's/ .*//'`
+     do
+    	  rem_drv $i
+     done
+fi
+rm -f ${PKG_INSTALL_ROOT}/tmp/installed_drivers
+
+#
+# Unload the osscommon misc/module 
+#
+MODULEID=`/usr/sbin/modinfo|grep " osscommon "|sed "s/^ *//"|sed "s/ .*//"`
+if test " $MODULEID" != " "
+then
+   /usr/sbin/modunload -i $MODULEID
+fi
+
+# Remove the device files
+rm -f ${PKG_INSTALL_ROOT}/dev/dsp*
+rm -f ${PKG_INSTALL_ROOT}/dev/mixer*
+rm -f ${PKG_INSTALL_ROOT}/dev/midi*
+rm -rf ${PKG_INSTALL_ROOT}/dev/oss
+rm -f ${PKG_INSTALL_ROOT}/dev/sndstat 
+rm -f ${PKG_INSTALL_ROOT}/dev/sequencer 
+rm -f ${PKG_INSTALL_ROOT}/dev/music
+rm -f ${PKG_INSTALL_ROOT}/dev/sound/*
+rm -f ${PKG_INSTALL_ROOT}/dev/audio 
+rm -f ${PKG_INSTALL_ROOT}/dev/audioctl
+rm -f ${PKG_INSTALL_ROOT}/etc/rc3.d/S89oss ${PKG_INSTALL_ROOT}/etc/rc3.d/K89oss ${PKG_INSTALL_ROOT}/etc/rc3.d/S99oss ${PKG_INSTALL_ROOT}/etc/init.d/oss
+
+# Remove OSS related entries from /etc/devlink.tab
+rm -f ${PKG_INSTALL_ROOT}/tmp/osspkg.tmp
+grep -v type=oss_ ${PKG_INSTALL_ROOT}/etc/devlink.tab > ${PKG_INSTALL_ROOT}/tmp/osspkg.tmp
+cat ${PKG_INSTALL_ROOT}/tmp/osspkg.tmp > ${PKG_INSTALL_ROOT}/etc/devlink.tab
+
+if [ "${ISA_TYPE}" = "${ISA_TYPE_I386}" ]; then
+  # Restore SADA drivers
+  for PKG in SUNWaudd SUNWvia823x SUNWaudiohd SUNWad810 SUNWadixp SUNWusb
+  do
+	echo $PKG 
+ 	sh ${PKG_INSTALL_ROOT}/var/sadm/pkg/$PKG/save/pspool/$PKG/install/postinstall
+  done
+elif [ "${ISA_TYPE}" = "${ISA_TYPE_SPARC}" ]; then
+  # Restore SADA drivers
+  for PKG in SUNWaudd
+  do
+	echo $PKG 
+ 	sh ${PKG_INSTALL_ROOT}/var/sadm/pkg/$PKG/save/pspool/$PKG/install/postinstall
+  done
+fi
+
+# finally  remove /etc/oss directory.
+
+rm -rf /etc/oss
+
+exit 0

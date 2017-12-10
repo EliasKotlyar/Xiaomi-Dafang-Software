@@ -1,0 +1,283 @@
+#!/bin/sh
+
+CONFIGURE=YES
+COPY_OPTIONS=
+OSSLIBDIR="/usr/lib/oss"
+TARGETOS=
+
+unset USE_PHPMAKE
+
+OSS_CONFIG_OPTIONS="$*"
+export OSS_CONFIG_OPTIONS
+
+#
+# Set GRC3 min/max conversion quality setting to 3 to conserve space.
+# TODO: Add support for configurable quality settings.
+GRC_MIN_QUALITY=3
+GRC_MAX_QUALITY=3
+export GRC_MIN_QUALITY GRC_MAX_QUALITY
+
+# MIDI support is enabled by default. Use --config-midi=NO to disable
+CONFIG_MIDI=ENABLED
+
+export CONFIGURE CONFIG_MIDI
+
+unset CDPATH >/dev/null 2>&1
+
+if test -f /usr/include/vorbis/vorbisfile.h || test -f /usr/local/include/vorbisfile.h
+then
+	OGG_SUPPORT=YES
+	export OGG_SUPPORT
+fi
+
+DIR=`pwd`
+SRCDIR=`dirname $0`
+SRCDIR=`cd $SRCDIR && pwd`
+
+if test "$DIR " = " " || test "$DIR " = ". "
+then
+	echo
+	echo
+	echo
+	echo
+	echo
+	echo
+	echo
+	echo
+	echo "**** USAGE ERROR ****"
+	echo
+	echo You need to create an empty build directory and
+	echo then execute sh `pwd`/configure inside it.
+	echo
+	echo Configure script aborted
+	exit 2
+fi
+
+while test  "$# " != "0 "
+do
+	case "$1" in
+
+   	"--regparm")
+		if test "`uname -s` " != "Linux "
+		then
+			echo $0: --regparm is only valid under Linux
+			exit 1
+		fi
+		echo Will prepare for REGPARM kernels
+		export USE_REGPARM=1
+		;;
+
+   	"--no-regparm")
+		if test "`uname -s` " != "Linux "
+		then
+			echo $0: --no-regparm is only valid under Linux
+			exit 1
+		fi
+		echo Will prepare for non-REGPARM kernels
+		export NO_REGPARM=1
+		;;
+
+   	"--target=uclinux-blackfin")
+		CROSSCOMPILE=uclinux-blackfin
+		uOSS=1
+		export CROSSCOMPILE uOSS
+		;;
+
+   	"--target=vxworks-x86")
+		CROSSCOMPILE=vxworks-x86
+		uOSS=1
+		CONFIGSCRIPT=$SRCDIR/setup/setupdir.sh
+		TARGETOS=VxWorks
+		export CROSSCOMPILE uOSS
+		;;
+
+	"--config-vmix=NO")
+		VMIX_MODE=DISABLED
+		export VMIX_MODE
+		;;
+
+	"--config-vmix=FLOAT")
+		VMIX_MODE=FLOAT
+		export VMIX_MODE
+		;;
+
+	"--config-vmix=FIXEDPOINT")
+		VMIX_MODE=FIXEDPOINT
+		export VMIX_MODE
+		;;
+
+	"--config-midi=NO")
+		CONFIG_MIDI=DISABLED
+		export CONFIG_MIDI
+		;;
+
+	"--config-midi=YES")
+		CONFIG_MIDI=ENABLED
+		export CONFIG_MIDI
+		;;
+
+	"--copy-files")
+		COPY_OPTIONS="-c"
+		;;
+
+	"--include-closed-source")
+		CLOSED_SOURCE=YES
+		NO_WARNING_CHECKS=YES
+		PORTABLE_BUILD=YES	# Produce binaries that work under generic CPU arch
+		export CLOSED_SOURCE NO_WARNING_CHECKS PORTABLE_BUILD
+		;;
+
+	"--portable-build")
+		PORTABLE_BUILD=YES	# Produce binaries that work under generic CPU arch
+		export PORTABLE_BUILD
+		;;
+		
+
+	"--enable-libsalsa=NO")
+		NOALSA=1
+		;;
+
+	"--enable-timings")
+		# This is option is undocumented and unsupported. It is only
+		# for internal testing by 4Front Technologies and not useful
+		# to anybody else.
+		DO_TIMINGS="1"
+		export DO_TIMINGS
+		;;
+
+	"--only-drv="*)
+		ONLY_DRVS=`echo $1 | sed 's/--only-drv=/,/'`,osscore
+		export ONLY_DRVS
+		;;
+
+	"--use-phpmake")
+		USE_PHPMAKE=YES
+		export USE_PHPMAKE
+		;;
+	*)
+
+		echo $0: Unrecognized command line option $1
+
+		echo
+		echo Permitted command line arguments are:
+		echo
+		
+		case `uname -s` in
+
+		Linux)
+			echo "   --enable-libsalsa=YES|NO	- Enable/Disable libsalsa."
+			echo "   --target=uclinux-blackfin	- Configure for uClinux/Blackfin target (EXPERIMENTAL)"
+			echo "   --regparm			- Configure for CONFIG_REGPARM kernels"
+			echo "   --no-regparm			- Configure for kernels without CONFIG_REGPARM option."
+			echo "NOTE! --regparm/--no-regparm is normally detected"
+			echo "      automatically and these switches should NOT be used."
+			echo
+			;;
+
+		*)
+			echo
+		esac
+
+		echo "   --config-vmix=NO|FLOAT|FIXEDPOINT	- Configure vmix to use float/int arithmetic or disable it."
+		echo "     (Check possible limitations caused by the OS or the CPU/arch)."
+		echo "   --config-midi=NO|YES		- Enable/disable MIDI support."
+		echo "   --only-drv=[list]		- Only compile the drivers named in the comma delimited list."
+		echo "   --enable-timings		- Enable internal timings (for the readtimings utility)."
+		echo "   --portable-build               - Produce portable binaries for generic CPU architecture."
+		exit 1
+	esac
+
+	shift
+done
+
+export SRCDIR COPY_OPTIONS OSSLIBDIR TARGETOS
+
+# Run the OS dependent setup script
+
+if test "$CONFIGSCRIPT " != " "
+then
+	exec sh $CONFIGSCRIPT
+fi
+
+case `uname` in
+
+"SunOS")
+	case `uname -r` in
+	"5.9")
+		echo Setting up for Solaris 9
+		SOL9=1
+		GTK1=1
+		export SOL9 GTK1
+		;;
+
+	"5.8")
+		echo Setting up for Solaris 8
+		SOL9=1
+		GTK1=1
+		export SOL9 GTK1
+		;;
+	*)
+		echo Using Solaris10 specific script
+		;;
+	esac
+	exec sh $SRCDIR/setup/SunOS/solsetup.sh
+	;;
+
+"Linux")
+
+	if test "$NOALSA" != "1"
+	then
+		if test -d /usr/include/alsa || test -d /usr/local/include/alsa
+		then
+			echo Compiling libsalsa library
+			export HAVE_ALSA=1
+		fi
+	fi
+
+  	if grep -q Ubuntu /etc/issue # Ubuntu?
+  	then
+		MISSING=
+		for n in build-essential libgtk2.0-dev gawk
+		do
+		  if ! apt-cache show $n > /dev/null 2>&1
+		  then
+			MISSING="$MISSING $n"
+		  fi
+		done
+
+		if test "$MISSING " != " "
+		then
+			echo Missing one or more required install packages are missing
+			echo
+			echo You can install them by doing
+			echo
+
+			for n in $MISSING
+			do
+			   echo apt-get install $n
+			done
+
+			exit 1
+		fi
+	fi
+	
+	if test "$USE_REGPARM " != "1 " && test "$NO_REGPARM " != "1 "
+	then
+	  # REGPARM/NOTREGPARM not set so compile a version for both of them
+	        echo Using the Linux specific script
+		exec sh $SRCDIR/setup/Linux/linsetup.sh
+	else
+		echo Using the default script
+		exec sh $SRCDIR/setup/setupdir.sh
+	fi
+	;;
+
+*)
+	echo Using the default script
+	exec sh $SRCDIR/setup/setupdir.sh
+
+esac
+
+echo internal error in configure
+
+exit 3

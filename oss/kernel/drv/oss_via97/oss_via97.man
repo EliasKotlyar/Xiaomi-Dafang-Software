@@ -1,0 +1,19 @@
+NAME
+oss_via97 - VIA 82C686 audio driver
+
+DESCRIPTION
+Open Sound System driver for VIA 82C686A and 82C686B audio controllers.
+
+VIA97 device characteristics:
+        o 8/16 bit playback/record
+        o mono/stereo playback/recording
+        o 8KHz to 48Khz sample rate.
+
+OPTIONS
+None
+
+FILES
+CONFIGFILEPATH/oss_via97.conf Device configuration file.
+
+AUTHOR
+4Front Technologies

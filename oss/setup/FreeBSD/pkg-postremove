@@ -1,0 +1,10 @@
+#!/bin/sh
+if test -f /etc/oss.conf
+then
+  . /etc/oss.conf
+else
+  OSSLIBDIR=/usr/lib/oss
+fi
+
+rm -rf $OSSLIBDIR
+rm -f /dev/dsp* /dev/audio* /dev/mixer* /dev/midi* /dev/sndstat /dev/sequencer /dev/music

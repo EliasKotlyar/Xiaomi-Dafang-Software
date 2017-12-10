@@ -1,0 +1,17 @@
+#!/bin/sh
+# Remove the device instances from /dev
+for i in `cat /tmp/installed_drivers`
+do
+rm -f /dev/$i[0-9]*
+done
+rm -f /tmp/installed_drivers
+
+# Remove the device files
+rm -f /dev/dsp /dev/dsp_* /dev/midi /dev/mixer
+rm -f /dev/dsp[0-9]* /dev/dsp_*
+rm -f /dev/mixer[0-9]*
+rm -f /dev/midi[0-9][0-9]* 
+rm -f /dev/sndstat
+rm -f /etc/rc2.d/S89oss /etc/init.d/oss  
+rm -rf /dev/oss
+exit 0

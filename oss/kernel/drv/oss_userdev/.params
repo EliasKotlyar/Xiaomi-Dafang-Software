@@ -1,0 +1,11 @@
+int userdev_visible_clientnodes=0;
+/* 
+ * By default the oss_userdev driver will not create private device nodes
+ * for the client side devices. Instead all client devices will share
+ * the same device node (/dev/oss/oss_userdev/client).
+ *
+ * If userdev_visible_clientnodes is set to 1 then each oss_userdev instance 
+ * will have private device node (/dev/oss/oss_userdev0/pcmN) that can be
+ * opened directly. This mode can be used when the oss_userdev driver is used
+ * for multiple purposes in the same system.
+ */

@@ -1,0 +1,25 @@
+NAME
+oss_allegro - ESS Allegro/Maestro3 audio driver
+
+DESCRIPTION
+Open Sound System driver for ESS Allegro/Maestro3 sound cards.
+Allegro device characteristics:
+        - 8/16 bit playback/record
+        - mono/stereo playback/recording
+        - 8KHz to 48Khz sample rate.
+
+OPTIONS
+o allegro_amp=0|1
+Some ES1988 devices have the ESS19XX ac97 device that needs to be turned on.
+
+
+o allegro_mpu_ioaddr=<xxx>
+The ESS allegro device supports the UART401 device (not usually found in
+laptop models but only on certain PCI cards). Check the allegro.conf
+file (see below) for valid addresses.
+
+FILES
+CONFIGFILEPATH/oss_allegro.conf Device configuration file
+
+AUTHOR
+4Front Technologies

@@ -1,0 +1,46 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_dmap_get_buffused 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_dmap_get_buffused \- Returns the size of buffer that is actually in use
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBint\fR ossddk_dmap_get_buffused(\fBdmap_t *\fIdmap\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdmap\fR
+.in +16n
+.rt
+Audio buffer handle.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+OSS audio devices have a DMA buffer with the maximum size returned by 
+\fIossddk_dmap_get_buffsize\fR. However in most cases just part of the available
+buffer is actually in use. The driver can call \fIossddk_dmap_get_buffused\fR
+to find out the transfer count to be programmed in the device registers.
+.PP
+.SH "RETURN VALUES"
+Amount of buffer currently in use (in bytes). This value equals to
+fragment_size*num_fragments.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

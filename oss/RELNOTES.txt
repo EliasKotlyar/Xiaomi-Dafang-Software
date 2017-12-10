@@ -1,0 +1,369 @@
+Release notes for Open Source OSS version v4.2-build2017
+==================================================
+
+
+What is the open sourced version
+--------------------------------
+
+It is an open source version of the Open Sound System (OSS) sound subsystem 
+software released under the GPL license. The only difference between the 
+"commercial" version  and the open source version of OSS is the commercial 
+version contains certain drivers that contain code encumbered under NDA.
+
+There are three source packages released by 4Front Technologies:
+
+  * GPL version contains the source code for Linux 
+  * CDDL version contains the source code for Solaris 
+  * BSD version contains the source code for FreeBSD (and other BSD OSs)
+
+See www.opensound.com for more information about OSS. Our developer web site
+(http://developer.opensound.com) will give additional information for 
+application developers and OSS contributors.
+
+NOTICE! In general it is not possible to mix binary modules from the commercial
+OSS package with rest of the software compiled from open source OSS sources
+because certain header files and core data structures are incompatible. If you
+need to use one of the drivers missing from the open source version you will
+have to use the retail version of OSS instead.
+
+Build system requirements
+-------------------------
+
+To be able to extract the source files from the tarball you will
+need the bunzip2 command in the system. It's usually available by default
+but otherwise you will need to download the sources from the net and compile it.
+
+OSS is currently compatible with the following operating systems and processor 
+architectures. Other environments may be supported later.
+
+Operating system	Version			Processor architecture
+
+Solaris/OpenSolaris	10 or later		x86, amd64, Sparc (64 bit)
+Linux			2.6 or later		x86, x86_64
+FreeBSD			6 or later		x86, x86_64
+SCO UnixWare		7 or later		x86
+SCO OpenServer		6 or later		x86
+
+Note that the very latest kernel versions may not be supported out of box.
+Changes may be needed to OSS before it supports them.
+
+The system used to build OSS should have full kernel/driver development
+environment installed (C/C++ compiler, linker, make, kernel headers, etc).
+Please refer to the documentation of the operating system you are using
+
+Under Linux and FreeBSD the C compiler to use is GCC (_MUST_ be v3.0 or later).
+With the other operating systems you need to use the C compiler provided by
+the operating system vendor.
+
+In addition GNU awk needs to be available in the system as gwak. Otherwise the
+manual pages will not be created correctly (otherwise OSS will compile and
+work OK).
+
+The stock make command shipped with some operating systems (SCO UnixWare and
+OpenServer) is not capable to compile OSS. In such systems you will have to 
+install GNU make and use it instead. The make utilities shipped with Linux,
+Solaris and FreeBSD are OK.
+
+
+GTK 1.2 or GTK 2.0 development libraries must also be installed for the
+GUI apps like ossxmix. GTK 2.0 must be installed and registered via pkgconfig
+or GTK-1.2 must be installed and gtk-config must be there in the path.
+
+
+Target system requirements
+--------------------------
+
+OSS can be installed in a different computer system than where the
+software was compiled (OTOH in many cases these systems are the same machine).
+
+Under Linux and FreeBSD some parts of the software need to be compiled in
+the target system to handle differences between different kernel versions. For
+this reason it's necessary to have a functional kernel development system
+installed in the target machine too. In FreeBSD this is the default. 
+
+Under Linux systems the target machine should have the following packages
+installed (unfortunatgely they are not installed by default.
+
+- Kernel sources and/or headers for the currently active kernel. 
+- C compiler (gcc or cc)
+- make (gmake or make)
+- GNU binutils (ld, as)
+- GNU awk (gawk)
+- Standard C library (libc/glibc) headers.
+- GTK+ (either v1.2 or v2.0)
+
+Source directory structure
+--------------------------
+
+The directory scheme of OSS is different from most other software packages. 
+Instead of storing source files in the "build" tree we have separated
+the build (object) directory from the source directory. In this way the sources
+can be located in a common directory on a (NFS) server and shared between
+several "build" machines possibly running different operating systems. Any
+number of build machines can be used to compile OSS at the same time without
+disturbing each other. However nothing prevents from having the source 
+directory located in the local machine or even on CD-ROM or some other 
+read-only media.
+
+There is nothing special in the source directory. Its contents are distributed
+in the source tarball (oss-v4.2-build2017-src-gpl.tar.bz2).
+
+The build directory is a special directory that contains symbolic links to
+the corresponding files in the source directory. Files in the build directory
+can be edited and the changes will be directed to the original file in the
+source directory (provided that it is writeable). However the object files will
+only be created in the local build directory only.
+
+Note that there is also some C code (.c and .inc) files that are not built in 
+the source system but in the target. These files are located in the 
+setup/`uname`/oss directory. This is necessary because certain kernel data
+structures depend on the kernel version being installed in the target system.
+The goal of this mechanism is that majority of the code can be compiled in
+any system. Only the kernel version dependent parts (wrappers) need to be
+compiled in the target system (this mechanism will become unnecessary in the
+future when these operating systems (Linux in particular) get a proper
+device driver interface.
+
+
+Installing the sources
+----------------------
+
+Save the tarball containing the source files in /tmp (or some other
+directory in the development system). In this document we will assume
+that you have stored the sources in /tmp/oss-v4.2-build2017-src-gpl.tar.bz2.
+
+Go to the directory where you would like to create the source directory.
+For example:
+
+	cd /usr/src
+
+Next restore the files in the tarball by executing the following command:
+
+	bunzip2 -c /tmp/oss-v4.2-build2017-src-gpl.tar.bz2 | tar xvf -
+
+(Or if you have GNU make (Linux, FreeBSD) you simply use 
+tar xvfj /tmp/oss-v4.2-build2017-src-gpl.tar.bz2).
+
+After restoring the files they will appear in the oss-v4.2-build2017-src-gpl 
+subdirectory under the current directory.
+
+Note! bunzip2 command is part of the bzip2 package.
+
+Compiling obsolete drivers
+--------------------------
+
+Drivers for few sound cards are no longer actively maintained and they will
+not be compiled by default. These devices have been out of production for
+about 10 years and we don't expect that anybody has them any more:
+
+	oss_allegro
+	oss_als3xx
+	oss_als4k
+	oss_digi32
+	oss_maestro
+	oss_neomagic
+	oss_s3vibes
+	oss_vortex
+
+The above drivers are located in the attic/drv subdirectory and they will not
+get compiled by default. However you can compile any of them after creating
+a symbolic link (this needs to be done in the source directory before running
+the configure script. For example if you would like to compile the oss_digi32
+driver then you can do the following:
+
+	cd kernel/drv
+	ln -s ../../attic/drv/oss_digi32 .
+
+Creating the build environment
+------------------------------
+
+If you have an earlier OSS build directory in the system it's recommended that
+you remove it before creating the build directory for v4.2-build2017
+alternatively you may create separate build directories for different 
+OSS versions.
+
+Before you can build OSS you will need to create an empty "build" directory
+and run the configure script. This as well as the actual compile/build step can
+be done by any user (ie super user capabilities are not required).
+
+NOTE! THE BUILD DIRECTORY MUST BE OUTSIDE THE SOURCE DIRECTORY. Otherwise
+      the configure script will go to endless loop and fail. You need to give
+      absolute path to the source directory when running configure. Relative
+      paths (such as ../$TARGETDIR/configure) will not work properly.
+
+The build directory can be located anywhere (say in your home directory).
+However the directory must be completely empty (no files in it). For example
+you can create and initialize the build directory in the following way
+(assuming that the source directory is /usr/src/$TARGETDIR):
+
+	mkdir oss
+        cd oss
+        /usr/src/$TARGETDIR/configure
+
+The configure script will perform slightly different steps depending on the
+current operating system.
+
+SCO OpenServer and SCO UnixWare are regarded as the same plattform and the
+same OSS package will work under both of them.
+
+Solaris environment differs from the other operating systems because the 
+same build will compile both 32 and 64 bit drivers. So there will be two
+almost identical subdirectory trees (i386 and amd64) under Solaris.
+
+Some drivers only work under x86 or certain operating systems. For this reason
+not all drivers will get compiled in some environments.
+
+Command line arguments of the configure script
+----------------------------------------------
+
+In most cases you should execute the configure script without any command
+line arguments. The following switches are available but they are mostly
+untested and should only be used in special situations.
+
+
+--regparm
+--no-regparm
+
+These switches are only defined for Linux. They control if OSS is to be built
+for a kernel compiled with or without the CONFIG_REGPARM setting. By default 
+OSS drivers will be compiled for both alternatives and the right one will be
+selected automatically when OSS is installed.
+
+--target=uclinux-blackfin
+
+Experimental an incompletely implemented hack for cross compiling OSS for
+uClinux/Blackfin. Do not use.
+
+--copy-files
+
+By default the configure script will create symbolic links from the build
+directory to the original files in the source directory. This switch can be 
+used to force copying of files instead of linking. This will result in multiple
+copies of the same file in the source tree (under Linux and Solaris/x86).
+For this reason this switch should not be used.
+
+--config-vmix=FLOAT | FIXEDPOINT | NO
+
+By default the virtual mixer (vmix) subsystem will be enabled. Depending on the target operating system
+it will use floating point (Linux) or fixed point arithmetic. This command line switch can be used
+to disable vmix (NO) or to enforce fixed point (FIXEDPOINT). Note that floating point is not supported
+under other that x86/x86_64 processors. Also some operating systems don't support it.
+
+--config-midi=NO|YES
+
+By default (in OSS v4.1) MIDI support is disabled. If you like to do hacking with MIDI you can enable it
+by using --config-midi=YES.
+
+Compiling OSS
+-------------
+
+You can compile OSS by running make under the build directory. This will
+only compile the C source files to binary objects but doesn't actually build 
+the installable files. There are few make targets that are used to 
+build the software in different ways:
+
+make build:
+
+This command compiles the binaries and runs the ./build.sh script
+(OS dependent) to create the full prototype tree (./prototype). This directory
+contains a copy of the files to be installed in the target system (relative
+to the / directory).
+
+make install:
+
+This command does "make build" and then copies the files/directories located
+in the ./prototype subdirectory to their proper places (under /). After that
+the script performs the (OS dependent) steps required to install the drivers
+in the local system. It may be necessary to run soundoff and soundon to reload
+the drivers in the kernel after running "make install".
+
+This method is a fast way to recompile and install OSS in the system
+when hacking with the drivers. However it's necessary to create the proper
+installation package and install it when installing a new OSS version
+for the first time.
+
+make package:
+
+This command will compile the OSS software and buil a proper installation 
+package (.rpm, .pkg or something else depending on the operating system).
+This package (from the local directory) can then be installed in the target
+system (local computer or somewhere else) using the usual software installation
+and management tools (pkgadd/pkgrm, rpm) provided by the operating system.
+
+Notice that this command may not work properly in all Linux systems because
+most Linux distributions are incompatible with each other. So the
+files/scripts used to create the RPM package may need to be edited if you are
+using any other distribution than SuSE or Redhat/Fedora. In particular Debian
+style package management is not supported. If you are installing OSS in a
+noncompatible system you will have to use "make install" (or to move the
+files using a tar package and then run the install script 
+(cd /usr/lib/oss/build;sh install.sh).
+
+Summary: (This is how we build OSS at 4front)
+---------------------------------------------
+1) cd /usr/src; tar -jxvf oss-v4.2-build2017-src-gpl.tar.bz2
+2) mkdir /usr/src/oss; cd /usr/src/oss
+3) /usr/src/$TARGETDIR/configure
+4) make install
+   This step compiles the software and copies the files to their right
+   places. Finally it starts the drivers using the soundon script.
+
+Installing the compiled (binary) package in the target system
+-------------------------------------------------------------
+
+After running make package the install package (.pkg/.rpm) will be created in
+the build directory. This package can be moved to the target system and
+installed using the pkgadd or rpm commands.
+
+Managing OSS installation
+-------------------------
+
+OSS can be started and stopped by using the soundon and soundoff commands
+(respectively). Soundon will create a log file (/usr/lib/oss/logs/soundon.log)
+that contains debugging information that helps in solving problems with OSS.
+
+Installing the OSS package will also install a startup script (usually
+/etc/rc3.d/S89oss) that will start OSS automatically when the system gets
+rebooted. So running soundoff or soundon is manually is rarely necessary.
+
+Information about the devices in the system can be printed using
+the ossinfo command (ossinfo -v3 for most detailed output).
+
+When new hardware is installed in ths system it is usually necessary to
+run the ossdetect utility (ossdetect -v for verbose output) to find the new
+devices in the system. After running ossdetect you will need to run soundoff
+and soundon to reload the drivers (not necessary under Solaris).
+
+Configuration options
+---------------------
+
+The /usr/lib/oss/conf directory will contain various configuration
+files (or actually symbolic links to the actual files in system dependent
+directories). These files can be edited using any text editor to change the
+settings. However there is rarely need to change these settings.
+
+You need to run soundoff and soundon to make the config option changes
+to take effect. Under SCO OpenServer and UnixWare you will also need to run
+the following commands _before_ doing soundoff;soundon:
+
+	cd /usr/lib/oss/build
+	sh install.sh
+
+Developing OSS compatible applications
+--------------------------------------
+
+The OSS API is documented in the OSS Programmer's Guide
+(http://manuals.opensound.com/developer).
+
+Making modifications to Open Sound System
+-----------------------------------------
+
+If you plan to make modifications to Open Sound System, please check
+our developer web site (http://developer.opensound.com) before doing anything.
+Also it's recommended that you join the oss-devel mailing list and describe
+the changes you are planning to do. We will accept contributions to the code.
+However there are certain rules the contributions must follow before they can
+be accepted. First of all the contributions must not cause any compatibility
+problems between different OSS versions. Also changes that may increase 
+complexity of the OSS API or could cause incompatibilities between devices will
+probably not be accepted.

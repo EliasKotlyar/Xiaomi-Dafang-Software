@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# Copyright (c) 2005 by 4Front Technologies
+# All rights reserved.
+#
+#
+
+if test "`uname -s`" = "UnixWare"
+then
+PKGCHK=/usr/sbin/pkgchk
+else
+PKGCHK=/bin/pkgchk
+fi
+
+while read src
+do
+	if [ -f $src ]
+	then
+		if  $PKGCHK -p $src
+		then
+			rm -f $src
+		else
+			echo "not removing $src"
+		fi
+	fi
+done
+exit 0

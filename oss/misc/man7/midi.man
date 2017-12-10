@@ -1,0 +1,20 @@
+NAME
+midi - Open Sound System MIDI devices
+
+DESCRIPTION
+MIDI support is not included in OSS 4.0. It will be introduced in the future OSS
+versions.
+
+PROGRAMMING INFORMATION
+See the OSS MIDI Programming section of the OSS Programmer's Guide (MIDI(2))
+for more info.
+
+OPTIONS
+None
+
+FILES
+/dev/midi is the default MIDI device file in the system.
+
+AUTHOR
+4Front Technologies
+

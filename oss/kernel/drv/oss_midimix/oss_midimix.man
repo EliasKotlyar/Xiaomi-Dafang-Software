@@ -1,0 +1,40 @@
+NAME
+oss_midimix - Driver for controlling OSS mixer devices using MIDI messages
+
+DESCRIPTION
+The MIDI mixer device can be used by MIDI sequencer programs to control
+OSS mixer devices (volumes) in real time. A list of mixer devices available
+in the system can be found using the ossinfo(1) program with the -x option.
+
+ INTRODUCTION
+This driver uses MIDI channel numbers to select the mixer device. The first MIDI
+channel (#0) connects to the first mixer device in the system and so on. When
+any of the mixer controls (such as volume sliders) change their value the
+MIDI mixer device delivers a control change message to the application
+listening it. An application (such as a MIDI sequencer program) can record
+these mixer changes during recording and play them back during playback. In
+this way it's possible to repeat mixer changes with precise timing during 
+playback.
+
+OPTIONS
+None
+
+KNOWN PROBLEMS
+o MIDI support is not included in OSS v4.0. It will be re-introduced in
+some future version of OSS.
+o The way how MIDI channel numbers are mapped to the mixer device numbers
+is system dependednt and may change depending on the order of devices are
+loaded in the system. The same is true with the MIDI controller numbers. For
+this reason recorded mixer changes may become obsolete if new devices are
+installed in the system or if the mixer layout changes in future OSS
+versions.
+o For the time being the MIDI controller numbers are mapped directly to
+the mixer control numbers. This means that only the first 128 controls in large
+mixers can be supported. This may change in future OSS versions.
+
+FILES
+None
+
+AUTHOR
+4Front Technologies
+

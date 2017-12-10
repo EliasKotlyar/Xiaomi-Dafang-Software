@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cp -f ${PKG_INSTALL_ROOT}/etc/oss/installed_drivers ${PKG_INSTALL_ROOT}/tmp/installed_drivers
+
+rm -f ${PKG_INSTALL_ROOT}/usr/sfw/lib/libflashsupport.so

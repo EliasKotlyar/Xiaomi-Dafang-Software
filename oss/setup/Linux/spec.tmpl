@@ -1,0 +1,39 @@
+Summary: Open Sound System sound drivers for Linux
+License: Open Sound System
+Group: System/sound
+Source: oss
+URL: http://www.opensound.com
+Distribution: Open Sound System
+Vendor: 4Front Technologies
+Packager: 4Front Technologies
+BuildRoot: /tmp/prototype
+Requires: gcc, make
+%if 0%{?suse_version}
+Requires: kernel-default-devel
+%else
+Requires: kernel-devel
+%endif
+
+%description
+Open Sound System for Linux (OSS/Linux) is a commercial quality sound driver
+distributed by 4Front Technologies (http://www.opensound.com). OSS provides
+support for practically all sound cards on the market including PnP and
+many PCI ones. Installation and configuration is higly automated and easy to
+perform. To obtain technical support and additional features, you will need to
+order a license key from http://www.opensound.com/order.html
+%prep
+%setup
+%pre
+%post
+echo "Building OSS Modules for Linux-`uname -p` `uname -r`"
+cd OSSLIBDIR/build
+sh install.sh
+echo "Starting Open Sound System"
+/usr/sbin/soundoff >> /dev/null 2>&1
+/usr/sbin/soundon
+exit 0
+%preun
+sh OSSLIBDIR/scripts/restore_drv.sh
+%postun
+rm -rf OSSLIBDIR/*
+rm -f /usr/lib/libflashsupport.so

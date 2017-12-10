@@ -1,0 +1,12 @@
+This directory contains undocumented and unsupported utilities to compile
+DSP code for SB Live! and Audigy/2/4. The sblive driver has used precompiled
+embedded versions of this code (emu10k1_dsp.h and emu10k2_dsp.h) so these tools
+have not been tested for years. However it should still be possible to modify, 
+compile and load the code to the card.
+
+Undocumented and unsupported really means that. If you want to use these tools
+then you have to obtain the knowledge about the Live!/audigy DSP architecture
+yourself. Also you need to figure out how these tools work.
+
+Note! The Makefile required to compile this stuff is included in the "source"
+directory of OSS. However this file may not appear in the "build" tree.

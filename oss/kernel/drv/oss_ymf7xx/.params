@@ -1,0 +1,17 @@
+int yamaha_mpu_ioaddr=0;
+/*
+ * Yamaha DSXG MPU I/O Address
+ * Values: 0x300, 0x330, 0x332, 0x334  Default: 0
+ */
+
+int yamaha_mpu_irq=0;
+/*
+ * Yamaha DSXG MPU IRQ 
+ * Values: 5, 7, 9, 10, 11   Default: 0
+ */
+
+int yamaha_fm_ioaddr=0;
+/*
+ * Yamaha DSXG FM IO Address
+ * Values: 0x388, 0x398, 0x3a0, 0x3a8  Default: 0
+ */

@@ -1,0 +1,18 @@
+#
+# Devices supported by the myossdev driver
+#
+# The lines beginning with '#' in column 1 are comments. Using '#' in any
+# other column is not permitted. Also empty lines are illegal.
+#
+# The pci666,777 entry refers to the primary PCI vendor/device ID with 
+# vendor=0x666 and device=0x777. All devices with this ID will be mapped
+# to this driver.
+myossdev	pci666,777	Generic Acme Laboratories Evil Audio device
+#
+# PCI subdevice IDs can be used to identify specific models of given device.
+# In most cases this is unnecessary but it makes it possible to show more
+# meaningful device names in possible configuration utilities. For example
+# pcs666,111 means PCI device with subvendor ID of 0x666 and subdevice ID
+# of 111.
+myossdev	pcs666,111	Acme Laboratories Evil Audio basic
+myossdev	pcs666,999	Acme Laboratories Evil Audio Super Deluxe Turbo

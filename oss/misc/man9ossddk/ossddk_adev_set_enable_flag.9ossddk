@@ -1,0 +1,52 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_adev_set_enable_flag 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_adev_set_enable_flag \- Set or reset the device enabled flag.
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_adev_set_enable_flag(\fBint \fIdev\fP, \fBint \fIstate\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS audio device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIstate\fR
+.in +16n
+.rt
+Device enabled flag (1=available and 0=unavailable).
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+Drivers for hot pluggable/unpluggable devices (such as USB or Firewire) can set this
+flag at the moment when the device gets unplugged and turn it of when it becomes
+available again. By defalt the device is available. Drivers for noh-pluggable devices 
+(PCI, ISA) must not care about this flag.
+.PP
+This information is used to prevent OSS from opening a device when it's not present. However this doesn't guarantee that no driver calls are made. The driver must check itself
+if the device is really present before doing any operations.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

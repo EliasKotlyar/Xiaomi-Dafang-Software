@@ -1,0 +1,61 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_dmap_set_buffsize 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_dmap_get_buffsize, ossddk_dmap_set_buffsize \- Get/set the DMA buffer size
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBint\fR ossddk_dmap_get_buffsize(\fBdmap_t *\fIdmap\fP);
+\fBvoid\fR ossddk_dmap_set_buffsize(\fBdmap_t *\fIdmap\fP, \fBint \fIsize\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdmap\fR
+.in +16n
+.rt
+Audio buffer handle.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIsize\fR
+.in +16n
+.rt
+Buffer size in bytes.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+If the deriver allocates the DMA buffer itself it can set the buffer size
+by calling \fIossddk_dmap_set_buffsize\fR. However if the buffer is allocated
+by OSS (the driver has no alloc_buffer/free_buffer entry points) the size
+will be set automatically by OSS.
+.PP
+The \fIossddk_dmap_get_buffsize\fR function can be used to get the size of
+the allocated DMA buffer. However drivers rarely have any use of this, Instead
+they should use \fIossddk_dmap_get_buffused\fR which returns the number of bytes
+of the buffer that are actually in use.
+.PP
+.SH "RETURN VALUES"
+The \fIossddk_dmap_get_buffsize\fR function returns the size of the audio
+buffer (in bytes). Value of 0 will be returned if no buffer is allocated for
+this dmap.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

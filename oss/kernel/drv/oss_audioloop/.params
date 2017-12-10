@@ -1,0 +1,4 @@
+int audioloop_instances=1;
+/*
+ * audioloop_instances: Number of instances (client/server pairs) to create.
+ */

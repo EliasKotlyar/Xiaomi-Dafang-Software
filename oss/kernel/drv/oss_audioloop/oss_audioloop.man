@@ -1,0 +1,80 @@
+NAME
+oss_audioloop - Loopback audio driver.
+
+DESCRIPTION
+The loopback audio driver makes it possible to create special purpose
+virtual audio devices based on user land server processes.
+
+Loopback devices are driven by a timer interrupt and no real audio
+hardware is required.
+
+ INTRODUCTION
+Audio loopback devices are like named pipes or pseudo terminals. They are 
+grouped in client and server device pairs. The server side device must be open
+before the client side device can be opened.
+
+Loopback devices are typically used to implement server based special purpose
+audio devices. This kind of server can for example transfer the audio data
+played by the client application to some remote system using some VoIP
+protocol. However the server application doesn't need to be any dedicated
+server. Practically any audio application can be used as the server.
+
+ SERVER SIDE DEVICE
+The server side applications sets up the native sampling rate and sample format
+(number of bits and channels). The server side device can be opened for input
+(O_RDONLY) pr output (O_WRONLY). Opening for simultaneous input and output
+(O_RDWR) is not permitted.
+
+The server application will automatically be paused at the moment it tries to
+read or write audio data for the first time. It will be kept in sleep until the
+client side application starts writing or reading data. This sleep period may
+last forever and in some cases the first write/read call never returns. For
+this reason it's not recommended to use GUI based audio applications as the
+server. Note that this wait will occur even in the non-blocking 
+(O_NONBLOCK) mode (this is intentional feature and not a bug).
+
+ CLIENT SIDE DEVICE
+The client side device is typically used by any ordinary audio application.
+There is nothing special in loopback devices.
+
+Since the loop is unidirectional the client side will be forced to be write
+only if the server side device is open for recording and vice versa.
+
+The loop will use the sample rate and sample format (number of bits and
+channels) set by the server side application. If the client uses different 
+settings then OSS will perform the required sampling rate and format conversions
+automatically.
+
+COMPATIBILITY ISSUES
+Audio loopback devices differ from "normal" audio devices because an
+application is needed at the both ends of the loop. The loop device
+will return a "Connection reset by peer" error (ECONNRESET) error. Applications
+designed to be used as loopback based server applications can/should use this
+error (returned by read or write) as an end-of-stream indication.
+
+OPTIONS
+
+o audioloop_instances:  Specifies how many loopback client/server audio device
+                        pairs to be created.
+                                Values: 1-16     Default: 1
+
+KNOWN PROBLEMS
+o There is no mixer (volume control) related with loopback audio devices. This
+may prevent poorly designed audio applications (that expect/require a mixer)
+from working. There is no workaround available.
+
+o The server side application will wait until the client side application 
+starts using it. This wait may last forever which in turn may cause 
+unrecoverable (network) problems with some applications.
+
+o Loopback devices may return "Connection reset by peer" error when the
+reote side of the loop disconnects the device. Some recording applications
+may fail to save the recorded data properly because of this. Use some
+other application (such as ossrecord) if this happens.
+
+FILES
+CONFIGFILEPATH/oss_audioloop.conf Device configuration file
+
+AUTHOR
+4Front Technologies
+

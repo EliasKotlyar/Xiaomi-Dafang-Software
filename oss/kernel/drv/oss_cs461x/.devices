@@ -1,0 +1,7 @@
+oss_cs461x	pci1013,6001	Crystal CS4610
+oss_cs461x	pci1013,6003	Crystal CS4280 
+oss_cs461x	pci1013,6004	Crystal CS4615
+oss_cs461x	pcs153b,112e	Terratec DMX Xfire 1024
+oss_cs461x	pcs1681,50	Hercules Game Theater XP
+oss_cs461x	pcs1681,51	Hercules Game Theater XP+
+oss_cs461x	pcs5053,3357	TurtleBeach SantaCruz / VideoLogic SonicFury

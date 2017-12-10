@@ -1,0 +1,50 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_adev_get_dmapin 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_adev_get_dmapin \- Returns the input (recording) dmap handle
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBdmap_t*\fR ossddk_adev_get_dmapin(\fBint \fIdev\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS audio device number.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+This funmction returns the dmap handle used for recording with this device. The dmap
+object contains recording and/or playback related parameters. Use the ossddk_dmap_get_* 
+and ossddk_dmap_set_* methods to access the fields of this object.
+.PP
+Note that the dmap objects are only valid when the device is open. There are separate
+dmap objects for recording and playback directions if the device was created with 
+ADEV_DUPLEX. However with all other audio devices both dmaps may point to the
+same actual dmap object. Unused dmap objects may be NULL too. Drivers should make
+sure they access the right dmap object.
+.PP
+.SH "RETURN VALUES"
+The dmap object or NULL if no dmap object is allocated. Getting NULL from this
+call means that the driver did the call at wrong moment. Another possible reason is
+that it tried to access wrong dmap object (input instead of output or vice versa).
+.PP
+.SH "SEE ALSO"
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

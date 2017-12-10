@@ -1,0 +1,12 @@
+int madi_maxchannels=64;
+/*
+ * By default OSS will create device files for all 64 channels (32 stereo
+ * pairs). Number of channels can be decreased by changing this parameter.
+ */
+int madi_devsize=2;
+/*
+ * This parameter tells how the device files should be created for MADI 
+ * channels. By default (2) a device file will be created for each stereo
+ * channel pair. Value of 1 means that separate device file will be 
+ * created for each channel.
+ */

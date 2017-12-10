@@ -1,0 +1,9 @@
+#!/bin/sh
+
+TOP=.
+if test -d origdir
+then
+  TOP=origdir
+fi
+
+vi `find $TOP/kernel/OS/SunOS $TOP/setup/SunOS $TOP/os_cmd/SunOS -name $1`

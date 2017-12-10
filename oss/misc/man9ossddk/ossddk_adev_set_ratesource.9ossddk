@@ -1,0 +1,71 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_adev_set_ratesource 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_adev_set_ratesource \- Sets the rate source
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_adev_set_ratesource(\fBint \fIdev\fP, \fBint \fIrate_source\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS audio device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIrate_source\fR
+.in +16n
+.rt
+Audio device number of the rate source.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+In some cases the sampling rate of an audio device is locked with some other device.
+This information may be usefull to some applications that support multiple 
+simultaneous devices. Knowing that the devices are rate locked together makes it 
+possible to bypass any synchronization mechanisms that are normally required.
+.PP
+The driver can set this parameter in the followinng cases:
+.PP
+1) The device is a virtual device that works on top of some other (real) device.
+In that case the master device should be reported as the rate source.
+.LP
+2) If a sound card has multiple audio engines (recording or playback) then the
+subsequent ones should report the first one as their rate source. However this should
+only be done if all the engines use the same sample rate clock.
+.LP
+3) There may be multiple devices (cards) of the same type which are connected together
+using some kind of sync cable. If the driver knows this it can use the first audio device
+of the first card (or the mown master card) as the rate source for the other audio devices.
+.PP
+Sometimes several cards of different type may be syncronized together using
+word clock or some other methods. In such cases the drivers should not try to
+set the rate sources based on that. This situation will be handled by the upper
+layers of OSS (in some future OSS versions).
+
+.PP
+.SH "SEE ALSO"
+.PP
+\fISNDCTL_AUDIOINFO(2oss)\fR
+.LP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

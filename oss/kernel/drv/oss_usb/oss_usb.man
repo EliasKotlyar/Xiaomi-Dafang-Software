@@ -1,0 +1,56 @@
+NAME
+ oss_usb - USB Audio/MIDI/Mixer driver
+
+DESCRIPTION
+  The Open Sound System driver for USB Audio and MIDI devices.
+
+ AUDIO
+  The Audio driver supports:
+
+  o 8-96Khz Playback/Recording
+  o 8 or 16 or 32 bits
+  o 2, 4, 6 or 8 channel audio.
+  o SPDIF digital output and Input
+  o AC3 passthrough 
+  o Volume control and device input mixer
+
+ MIDI
+The oss_usb driver supports all MIDI devices that are compatible with the
+official USB MIDI specification. In addition the driver supports few devices
+that use their own private protocol (including some Yamaha and Midiman models).
+
+ USB MIXER
+  The USB Audio mixer is a new type of mixer that doesn't have
+  the normal volume controls found on AC97 or Legacy SB devices.
+  The USB audio mixer provides control for selecting the Alternate
+  device setting - this usually allows the device to be switched 
+  into a Professional audio mode (eg 24bit or 96Khz mode)
+
+ ALTERNATIVE SETTINGS
+  Some USB audio devices use a feature called as alternative settings for
+  bandwidth management. Typically such devices have multiple high speed
+  inputs and outputs that may require more bandwidth than provided by the USB
+  bus. The alternative settings feature is used to select between multiple
+  low speed devices or just few high speed devices.
+
+  When the device has multiple alternative settings an "altsetting" selector
+  will be visible in the control panel for the device (use ossmix(1) or
+  ossxmix(1) to change it). Alternative setting OFF means that all
+  audio devices are disabled. The other settings provide different combinations
+  of high/medium speed devices. You can use the ossinfo(1) command
+  (ossinfo -a -v3) to find out the devices supported by the currently selected
+  alternative settings and the capabilities of them.
+
+KNOWN BUGS
+  Under Linux it is necessary to run the ossdetect -d and ossdevlinks commands
+  after an USB device has been hot-plugged. Alternatively you can execute
+  soundoff and soundon to reload OSS.
+
+OPTIONS
+None
+
+FILES
+CONFIGFILEPATH/oss_usb.conf Device configuration file
+
+AUTHOR
+4Front Technologies

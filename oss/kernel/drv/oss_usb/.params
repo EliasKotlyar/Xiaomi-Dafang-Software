@@ -1,0 +1,2 @@
+int usb_trace=0;
+int usb_mixerstyle=1;

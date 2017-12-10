@@ -1,0 +1,54 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_adev_set_mixer 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_adev_set_mixer \- Set the mixer device related with an audio device
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_adev_set_mixer(\fBint \fIdev\fP, \fBint \fImixer_dev\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS ausio device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fImixer_dev\fR
+.in +16n
+.rt
+Mixer device number of the mixer related with this audio device.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+Some audio applications want to perform certain mixer operations. Audio drivers can
+use this functuon to assign the right mixer device to an audio device.
+.PP
+Older audio applications written for previous OSS versions still use the mixer interface
+to do certain operations such as playback/recording volume control or recording
+source selection. OSS 4.0 and later has some new aidio ioctl calls such as
+SNDCTL_DSP_SETRECVOL and SNDCTL_DSP_GETRECVOL which do the same more reliably.
+New audio drivers should implement these functions in their ioctl entry points.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

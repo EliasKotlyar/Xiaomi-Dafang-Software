@@ -1,0 +1,40 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_unregister_device 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_unregister_device \- Disconnects the driver from OSS DDK
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_unregister_device(\fBoss_device_t *\fIosdev\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIosdev\fR
+.in +16n
+.rt
+OSS device handle.
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+This routine disconnects the driver from OSS DDK and disables all the services
+(device files) created by the driver. This call must be made once in driver's detach
+routine. No subsequent OSS DDK calls can be made after this moment.
+.PP
+.SH "SEE ALSO"
+.PP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+\fIOpen Sound System Programmer's Guide\fR

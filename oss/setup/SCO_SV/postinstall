@@ -1,0 +1,63 @@
+#!/bin/sh
+
+. /etc/oss.conf
+
+echo "Setting up Open Sound System....please wait"
+
+#first remove the SCO ich driver from the system
+/etc/conf/bin/idinstall -d ich > /dev/null 2>&1
+
+#Remove oprhaned files left from earlier OSS installations
+rm -f /dev/sequencer /dev/music
+rm -f /dev/*_mixer[0-9]*
+rm -f /dev/*_midi[0-9]*
+rm -f /dev/*_dsp[0-9]*
+rm -f /dev/dsp*
+rm -f /dev/mixer*
+rm -f /dev/midi*
+rm -f /etc/rc3.d/S99oss
+
+# Unload previous modules
+for n in `ls $OSSLIBDIR/modules|grep -v osscore`
+do
+  modadmin -U $n > /dev/null 2>&1
+done
+
+modadmin -U osscore > /dev/null 2>&1
+
+# Remove previous OSS startup files
+rm -f /etc/rc3.d/S99oss /etc/init.d/oss
+
+# (re)install osscore
+
+rm -f $OSSLIBDIR/modules/*/install.log
+
+cd $OSSLIBDIR/modules/osscore
+
+cd $OSSLIBDIR/build && sh install.sh
+
+if test ! -f $OSSLIBDIR/etc/userdefs
+then
+  echo "autosave_mixer yes" > $OSSLIBDIR/etc/userdefs
+fi
+
+/usr/sbin/soundon
+
+echo "Adding OSS startup scripts to /etc/rc2.d and /etc/init.d"
+rm -f /etc/rc2.d/S89oss /etc/init.d/oss
+
+cp $OSSLIBDIR/etc/S89oss /etc/init.d/oss
+chmod 744 /etc/init.d/oss
+
+ln -s /etc/init.d/oss /etc/rc2.d/S89oss
+echo ""
+echo ""
+echo ""
+echo ""
+echo Thank you for installing Open Sound System
+echo You can run the osstest command to test audio playback in your system.
+echo
+echo It may be necessary to reboot the system before all devices get properly
+echo detected by the system.
+
+exit 0

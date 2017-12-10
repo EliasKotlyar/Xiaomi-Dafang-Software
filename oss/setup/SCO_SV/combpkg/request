@@ -1,0 +1,21 @@
+#!/bin/sh
+
+
+uver=`uname -v`
+if [ "$uver" = 7.1.4 ] ; then
+    CLASSES="$CLASSES uw7"
+else
+    if [ $uver = "6.0.0" ] ; then
+        CLASSES="$CLASSES osr6"
+    else
+        echo "invalid CLASS"
+        exit 2
+    fi
+fi
+
+# and so to any other packaging scripts
+cat >$1 <<!
+CLASSES='$CLASSES'
+!
+ 
+exit 0

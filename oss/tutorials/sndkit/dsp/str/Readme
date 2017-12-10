@@ -1,0 +1,142 @@
+SparcTracker ver. 1.2 by Liam Corner and Marc Espie
+===================================================
+
+NOTE! This is an old and obsolete version. The latest version is
+      called tracker-3.19.
+
+#ifdef linux
+This version contains some minor modifications for Linux by Hannu Savolainen
+(hannu@voxware.pp.fi) and Leif Kornstaedt (l_kornst@informatik.uni-kl.de).
+
+Have a look at the options in the Makefile (e.g. the -m486 option) and at
+the str.h header file, in which you may configure some things.
+
+Please edit DSP_SPEED in the file str.h before compiling. The default
+setting for output frequency is 23 kHz, which may be too fast for 386/386sx
+machines. At least you have to change it if there happens to be short
+pauses in playback.
+#endif
+
+Well, here they are the first tracker module players for the Sun
+Sparcstations.  There are 2 players, one for the 15 sample modules and one for
+the 32 sample ones (or should that be 31 :-).  The code is not that different,
+but I could not be bothered to write an auto detection routine that worked on
+standard input.
+
+
+Usage
+-----
+
+Usage is very simple, either give the player the filename of the module, or if
+the module is compressed(frozen) you can zcat(fcat) and pipe the result into
+the player thus :
+
+		str32 -h
+		str32 [options] module ...
+		zcat module.z | str32 [options]
+		fcat module.F | str32 [options]
+
+If you have a new module and are unsure of which player (str15 or str32) to
+use then try both.  If you choose the wrong one then you may get an error
+message or nothing at all will happen (except maybe a core dump :-).  For
+this reason I keep my trackers in separate directories so that I know which
+player to use.
+
+Not many effects are implemented, so the result may not be exactly the same as
+an Amiga player, but it is usually OK.  The sound quality of the /dev/audio is
+not too hot, so some sounds are lost, usually the bass.
+
+Options
+-------
+
+This version acceps several command line options:
+
+	-s kHz		Sets the playback speed. For example
+			str32 -s 20 plays the module with
+			22 kHz sampling frequency.
+	-S		Plays the module in stereo.
+	-c		Non-stop mode.
+	-q		Quiet.
+	-b bits		Sets the sample size (8 or 16 bits).
+	-o file		Redirects output to a file or
+			another device.
+
+Errors
+------
+
+The only error not totally self-explanatory is the 'corrupt input file' one.
+This sometimes indicates that you have used the wrong player, but
+occassionally it may be that the module is too short by a few bytes.  I have
+only come accross this in a couple of cases and just appending a few null
+bytes to the end usually cures this.
+
+
+The Future
+----------
+
+I may get around to combining the players into a single program and enhancing
+the error detection a bit, but then again I might not :-).  If anyone else
+wants to add these functions, add more effects or correct any errors there may
+be in the current programs then please go ahead - I hope the code is
+understandable enough for you.
+
+
+Copyright Stuff
+---------------
+
+Most of the code is copyright me.  The convert routine is copyright Rich
+Gopstein and was borrowed from the iff2ulaw utility.  The code is freely
+distributable as long as this message and the copyright messages in the source
+are included.  You are welcome to update the source code.
+
+
+		Liam Corner - University of Warwick - 1st November 1991
+
+		csubt@csv.warwick.ac.uk
+		zenith@dcs.warwick.ac.uk
+
+
+
+Version 1.2 - 3rd November 1991
+-------------------------------
+
+Thanks to Marc Espie for doing most of the first update.  There is now only
+one player str15 and a link from str32 to str15, so you will still have to
+choose the correct player for a given module.  There is now output showing
+module name, sample names and progress through the module as it plays.  More
+effects are implemented and a bug with the sample repeat loop has been fixed.
+
+
+Patch 08/27/92 by Hannu Savolainen
+----------------------------------
+
+Modified to use integer arithmetic.
+
+
+Version 1.5 - 31st January 1993 by Leif Kornstaedt
+--------------------------------------------------
+
+- Now all standard NoiseTracker 1.0 effects should be implemented correctly,
+  as well as some bugs fixed (and the step_table calculations more accurate).
+
+- Some command line options have been added, namely:
+
+	-v		verbose: the score is shown while playing
+	-z		zcat is applied to the files before playing
+
+- You can now give a default path to search modules when they are not found
+  in the current working directory.  E. g. using /bin/bash do
+
+$ export MODPATH=/usr/local/lib/mod/tracks15:/usr/local/lib/mod/tracks32
+
+
+TODO:
+
+- automatically determine the number of instruments instead of having
+  str15 and str32 (by testing 'M.K.' sig)
+- insert a shuffle mode: let the player play all songs in the module
+  path, but shuffled like a CD player does.
+
+
+Please let me know if you find something to ameliorate. -- L. K.
+l_kornst@informatik.uni-kl.de

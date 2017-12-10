@@ -1,0 +1,5 @@
+oss_sbpci	pci1102,8938	Creative Ectiva EV1938
+oss_sbpci	pci1274,1371	Creative AudioPCI97 (ES1371/ES1373)
+oss_sbpci	pci1274,5880	Creative Sound Blaster PCI128 (5880B)
+oss_sbpci	pci1274,8001	Creative Sound Blaster PCI128 (CT5880)
+oss_sbpci	pci1274,8002	Creative Sound Blaster PCI128 (5880A)

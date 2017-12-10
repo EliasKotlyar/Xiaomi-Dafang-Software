@@ -1,0 +1,34 @@
+SALSA - Simple ALSA emulation library for OSS
+=============================================
+
+The sole purpose of this library is to make certain key ALSA applications
+to work with OSS. This is necessary just because some Linux distributions
+don't ship utilities like esd or xmss with OSS support compiled in.
+
+This library has been programmed using brute force methods and it's
+not designed to be any programming example. We didn't make any attempt to get
+all ALSA applications to work with it. Most applications support the OSS
+API directly so there is no need for doing this.
+
+We do not have any specific plans to develop this library any further. However
+some changes will be made occasionally.
+
+Copying
+-------
+
+The seqmid.c, alsakernel.h, alsa-symbols.h and output.c files have been
+copied more or less from stock alsa-lib and they have been copyrighted by the
+ALSA team members. All parts of this package are distributed under GNU GPL
+version 2.1.
+
+Installing and compiling the library
+------------------------------------
+
+The precompiled library is already shipped as a part of the OSS package
+for Linux 2.6.x and later kernels so there should be no reason to recompile 
+it. This library is not applicable under any other operating systems or Linux
+versions.
+
+To compile the library you can execute "make". "make install" will install
+the library (libsalsa.so.2.0.0) to /usr/lib and then change the required
+libasound.so.* symbolic links to point to it.

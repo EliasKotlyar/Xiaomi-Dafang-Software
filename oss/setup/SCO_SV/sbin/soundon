@@ -1,0 +1,133 @@
+#!/bin/sh
+
+. /etc/oss.conf
+
+if test -f $OSSLIBDIR/starting
+then
+	echo Previous start of OSS crashed the system
+	echo Please resolve the situation and remove file
+	echo \"$OSSLIBDIR/starting\". Then start OSS by
+	echo running soundon again.
+	exit 1
+fi
+
+if /sbin/modadmin -Q osscore >> /dev/null 2>&1
+then
+	echo Open Sound System is already running
+	exit 0
+fi
+
+LOG=$OSSLIBDIR/logs/soundon.log
+
+touch $OSSLIBDIR/starting
+sync
+
+echo "Open Sound System starting" `date` > $LOG
+echo "OSS version: " `cat $OSSLIBDIR/version.dat` >> $LOG 2>&1
+echo "Kernel version: " `uname -a` >> $LOG
+
+if test ! -f $OSSLIBDIR/etc/installed_drivers
+then
+	echo No $OSSLIBDIR/etc/installed_drivers >> $LOG
+	echo No $OSSLIBDIR/etc/installed_drivers
+	echo Please run ossdetect to create it.
+	exit 1
+fi
+
+if test ! -f /etc/conf/mod.d/osscore
+then
+	echo No $OSSLIBDIR/modules/osscore module >> $LOG
+	echo No $OSSLIBDIR/modules/osscore module
+	exit 2
+fi
+
+if test -f $OSSLIBDIR/etc/license.asc
+then
+   /usr/sbin/ossdetect -l >> $LOG
+fi
+
+if /sbin/modadmin -l osscore >> $LOG 2>&1
+then
+  OK=1
+else
+	echo Loading the osscore module failed
+	echo Loading the osscore module failed >> $LOG
+
+	echo "+++ Kernel messages +++" >> $LOG
+	# This may look fatal but in fact it's not. The panic command
+	# of the crash utility just prints the panic buffer (latest kernel messages).
+	echo panic|/usr/sbin/crash >> $LOG
+
+	exit 4
+fi
+
+for n in `cat $OSSLIBDIR/etc/installed_drivers | sed 's/#.*//'`
+do
+	if /sbin/modadmin -l $n >> $LOG 2>&1
+	then
+		OK=1
+	else
+		echo Loading module $n failed '-' ignored >> $LOG
+		echo Loading module $n failed '-' ignored
+	fi
+done
+
+echo "+++ Kernel messages +++" >> $LOG
+# This may look fatal but in fact it's not. The panic command
+# of the crash utility just prints the panic buffer (latest kernel messages).
+echo panic|/usr/sbin/crash >> $LOG
+
+/usr/sbin/ossdetect -d >> $LOG 2>&1
+
+# Restore the previous legacy device links
+if test -f $OSSLIBDIR/etc/legacy_devices
+then
+	sh $OSSLIBDIR/etc/legacy_devices >> $LOG 2>&1
+fi
+
+/usr/sbin/ossdevlinks -v >> $LOG 2>&1
+
+echo "+++ ossinfo -v3 +++" >> $LOG
+ossinfo -v3 >> $LOG 2>&1
+
+echo "+++ /dev/sndstat +++" >> $LOG
+cat /dev/sndstat >> $LOG 2>&1
+
+echo "+++ pciconf +++" >> $LOG
+echo pcilong|/usr/sbin/ndcfg -q >> $LOG 2>&1
+echo "+++ OSS devices +++" >> $LOG
+ls -l /dev/*dsp* /dev/*_pcm* /dev/*mixer* /dev/*_mix* /dev/*midi* /dev/*_mid* >> $LOG 2>&1
+
+/usr/sbin/savemixer -L >> $LOG 2>&1
+
+if test -x $OSSLIBDIR/soundon.user
+then
+  echo Running $OSSLIBDIR/soundon.user >> $LOG
+  $OSSLIBDIR/soundon.user >> $LOG 2>&1
+fi
+
+if test "`ossinfo -g|grep TRIAL` " != " "
+then
+	echo
+	echo "************************************************************"
+	echo "* NOTE! You are using trial version of Open Sound System   *"
+	echo "************************************************************"
+	echo
+
+	sleep 1
+fi
+
+if test "`ossinfo -g|grep EXPIRED` " != " "
+then
+	echo
+	echo "****************************************************************"
+	echo "* NOTE! Your Open Sound System evaluation license has expired  *"
+	echo "****************************************************************"
+	echo
+
+	sleep 15
+fi
+
+rm -f $OSSLIBDIR/starting
+
+exit 0

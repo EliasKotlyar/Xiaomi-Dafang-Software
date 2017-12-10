@@ -1,0 +1,15 @@
+#!/bin/sh
+. /etc/oss.conf
+
+/usr/sbin/soundoff
+cp -f $OSSLIBDIR/etc/installed_drivers /tmp/installed_drivers
+(cd $OSSLIBDIR;rm -rf etc/installed_drivers etc/legacy_devices logs conf)
+
+# Remove the drivers - preremove will copy installed_drivers to /tmp
+for n in `ls $OSSLIBDIR/modules`
+do
+ if [ -d /etc/conf/pack.d/$n ]; then
+    /etc/conf/bin/idinstall -P oss -d $n > /dev/null 2>&1
+    rm -f $OSSLIBDIR/modules/$n/install.log
+ fi
+done

@@ -1,0 +1,44 @@
+NAME
+oss_midiloop - Loopback MIDI driver.
+
+DESCRIPTION
+The loopback midi driver makes it possible to create special purpose
+virtual midi devices based on user land server processes.
+
+INTRODUCTION
+MIDI loopback devices are like named pipes or pseudo terminals. They are 
+grouped in client and server device pairs. The server side device must be open
+before the client side device can be opened.
+
+ SERVER SIDE DEVICE
+The server side device is used by some special application (such as a
+software based MIDI synthesizer) to receice MIDI events from the applications
+that want to play MIDI.
+
+ CLIENT SIDE DEVICE
+Client applications such as MIDI players open the client side device when they
+need to play some MIDI stream (file). The client side device behaves like any
+"ordinary" MIDI device. However it cannot be opened when there is no program
+connected to the server side.
+
+COMPATIBILITY ISSUES
+MIDI loopback devices differ from "normal" MIDI devices because an
+application is needed at the both ends of the loop. The loop device
+will return a "Connection reset by peer" error (ECONNRESET) error. Applications
+designed to be used as loopback based server applications can/should use this
+error (returned by read or write) as an end-of-stream indication.
+
+OPTIONS
+o midiloop_instances:  Specifies how many loopback client/server MIDI device
+                        pairs to be created.
+                                Values: 1-16     Default: 1
+
+KNOWN PROBLEMS
+None
+
+FILES
+CONFIGFILEPATH/oss_midiloop.conf Device configuration file
+
+AUTHOR
+4Front Technologies
+

@@ -1,0 +1,87 @@
+'\" te
+.\"  Copyright (c) 2005, 4Front Technologies 2005\&.
+.TH ossddk_adev_set_rates 9ossddk "12 Sep 2005" "SunOS 5.10" "OSS DDK Services"
+.SH "NAME"
+ossddk_adev_set_rates \- Set the supported sampling rates
+.PP
+.SH "SYNOPSIS"
+.nf
+#include <sys/soundcard.h>
+.LP
+#include <sys/ossddk/ossddk.h>
+.fi
+.LP
+\fBvoid\fR ossddk_adev_set_rates(\fBint \fIdev\fP, \fBint \fImin_rate\fP, \fBint \fImax_rate\fP, \fBint \fInrates\fP, \fBint \fIrates[20]\fP);
+.PP
+.SH "INTERFACE LEVEL"
+.PP
+Open Sound System specific (OSS 4.0 DDK)\&.
+.PP
+.SH "ARGUMENTS"
+.PP
+.sp
+.ne 2
+.mk
+\fB\fIdev\fR
+.in +16n
+.rt
+OSS audio device number.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fImin_rate\fR
+.in +16n
+.rt
+The minimum sampling rate supported by the device.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fImax_rate\fR
+.in +16n
+.rt
+The maximum sampling rate supported by the device.
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fInrates\fR
+.in +16n
+.rt
+Number of discrete rates (0 to 20).
+.in -16n
+.sp
+.ne 2
+.mk
+\fB\fIrates[20]\fR
+.in +16n
+.rt
+Pointer to an array containing up to 20 sampling rates (in ascending order).
+.in -16n
+.PP
+.SH "DESCRIPTION"
+.PP
+This function sets meta information that applications may obtain using the
+\fISNDCTL_AUDIOINFO(2oss)\fR ioctl call. There are three ways how this function can be
+called. In both cases the min_rate and max_rate parameters must be set properly.
+.PP
+1) If the device supports any rates between the minimum and maximum the nrates parameter
+must be set to 0. The rates parameter can be null.
+.LP
+2) If the device supports just few rates (up to 20) you should pass the number of 
+supported rates in \fInrates\fR and pointer to an array (of int) in the \fIrates\fR
+parameter. Rates stoored in the array must be in increasing order.
+.LP
+3) If there are more than 20 possible rates you should set nrates=0 and rates=NULL.
+.PP
+The driver can change the supported rate information whenever necessary. For example if
+a change in device's operating mode changes the supported rates too.
+.PP
+.SH "SEE ALSO"
+.PP
+\fISNDCTL_AUDIOINFO(2oss)\fR
+.LP
+\fIWriting Sound Device Drivers with OSS DDK\fR
+.LP
+\fIOpen Sound System Programmer's Guide\fR

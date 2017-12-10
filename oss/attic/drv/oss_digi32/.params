@@ -1,0 +1,7 @@
+int digi32_buffsize=64;
+/*
+ * By default the Digi32 driver will allocate 64k of buffer both for 
+ * recording and playback functions. This should be sufficient in most cases. 
+ * If necessary the buffer sizes can be increased.
+ * Values: 64-128  Default: 64
+ */

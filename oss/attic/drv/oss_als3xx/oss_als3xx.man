@@ -1,0 +1,19 @@
+NAME
+oss_als3xx - Avance Logic ALS300 audio driver.
+
+DESCRIPTION
+Open Sound System driver for Avance Logic ALS300 based soundcards.
+
+OPTIONS
+o als300_mpu_base=<xxx> - set the ALS MPU 401 base I/O adress to one of
+  the legal values as described in the /plaform/i86pc/kernel/drv/als300.conf 
+  file. This I/O address must not conflict with any other MIDI devices or
+  any other I/O adapters. 
+
+	eg: als3xx_mpu_base=0x300
+FILES
+CONFIGFILEPATH/oss_als3xx.conf
+
+AUTHOR
+4Front Technologies
+

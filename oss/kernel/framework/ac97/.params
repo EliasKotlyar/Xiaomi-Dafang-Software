@@ -1,0 +1,20 @@
+int ac97_amplifier=-1;
+/*
+ * AC97 codecs have a control output for an external audio output amplifier 
+ * (necessary in some situations such as laptops). In some cases there may be
+ * need to turn this amplifier off.
+ *
+ * ac97_amplifier=-1 enables autodetection (default).
+ * ac97_amplifier=1 always enables the output amplifier stage.
+ * ac97_amplifier=0 disables it.
+ */
+
+int ac97_recselect=0;
+/*
+ * AC97 codecs support separate recording source selections for left and 
+ * right channels. This feature can be enabled but that may cause some
+ * compatibility problems with certain applications.
+ * 
+ * ac97_recselect=0 (default) selects common source selection for both channels.
+ * ac97_recselect=1 enables independent source selections.
+ */
