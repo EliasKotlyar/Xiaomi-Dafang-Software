@@ -53,6 +53,16 @@ ImpJpegVideoDeviceSource::createNew(UsageEnvironment &env,
 #ifndef JPEG_TEST
 
 int ImpJpegVideoDeviceSource::initDevice(UsageEnvironment &env, int fd) {
+
+    impParams params;
+    params.width = 640;
+    params.height = 480;
+    params.mode = IMP_MODE_JPEG;
+    params.nightvision = false;
+
+    impEncoder = new ImpEncoder(params);
+
+
     //impEncoder = new ImpEncoder(IMP_MODE_JPEG,320,240);
 
 
