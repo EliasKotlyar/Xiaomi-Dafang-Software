@@ -1,6 +1,6 @@
 # Makefile for Open Sound System module savemixer
 
-CC=cc
+
 HOSTCC=cc
 CPLUSPLUS=g++ -fno-rtti -fno-exceptions -I.
 OSFLAGS=-Wall -DOSS_LITTLE_ENDIAN

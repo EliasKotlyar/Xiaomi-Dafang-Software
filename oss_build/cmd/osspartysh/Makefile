@@ -1,6 +1,6 @@
 # Makefile for Open Sound System module osspartysh
 
-CC=cc
+
 HOSTCC=cc
 CPLUSPLUS=g++ -fno-rtti -fno-exceptions -I.
 LDFLAGS=-lutil
