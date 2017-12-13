@@ -1,0 +1,13 @@
+$(DEPDIR)/oss_usb.o: oss_usb.c \
+  ./ossusb.h  
+$(DEPDIR)/ossusb_audio.o: ossusb_audio.c \
+  ./ossusb.h  
+$(DEPDIR)/ossusb_midi.o: ossusb_midi.c \
+  ./ossusb.h  
+$(DEPDIR)/ossusb_midisport.o: ossusb_midisport.c \
+  ./ossusb.h  \
+  ./midisport2x2_fw.h  \
+  ./midisport1x1_fw.h  \
+  ./oxygen8_fw.h  
+$(DEPDIR)/ossusb_ymhmidi.o: ossusb_ymhmidi.c \
+  ./ossusb.h  

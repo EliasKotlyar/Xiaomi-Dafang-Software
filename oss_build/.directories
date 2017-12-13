@@ -1,0 +1,3 @@
+BLDDIR=/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/oss_build
+SRCDIR=/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/oss
+OSSLIBDIR=/usr/lib/oss

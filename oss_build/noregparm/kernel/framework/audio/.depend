@@ -1,0 +1,22 @@
+$(DEPDIR)/oss_audio_core.o: oss_audio_core.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  
+$(DEPDIR)/oss_audiofmt.o: oss_audiofmt.c \
+  ./ulaw.h  \
+  ./audiocnv.inc  
+$(DEPDIR)/oss_grc3.o: oss_grc3.c \
+  /usr/include/inttypes.h /usr/include/features.h /usr/include/stdc-predef.h /usr/include/stdint.h \
+  ./fltdata3_l.inc  \
+  ./fltdata1_m.inc  \
+  ./fltdata2_h.inc  \
+  ./fltdata4_p.inc  \
+  ./grc3inc.inc  \
+  ./grc3code.inc  \
+  /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h /usr/include/gconv.h 
+$(DEPDIR)/oss_spdif.o: oss_spdif.c 

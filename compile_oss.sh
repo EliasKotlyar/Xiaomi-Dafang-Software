@@ -1,17 +1,14 @@
 #!/usr/bin/env bash
+
 TOOLCHAIN=$(pwd)/mips-gcc472-glibc216-64bit/bin
 CROSS_COMPILE=$TOOLCHAIN/mips-linux-gnu-
 export CC=${CROSS_COMPILE}gcc
 export LD=${CROSS_COMPILE}ld
-export CFLAGS=""
+export CFLAGS="-muclibc -O2 -fomit-frame-pointer -DL_ENDIAN "
 export CPPFLAGS="-muclibc -O2"
 export LDFLAGS="-muclibc -O2"
 
-cd oss/
-OSSPARAM=$(pwd)/configure
 
-cd ..
-rm -r oss_build
-mkdir oss_build
-cd oss_build
-$OSSPARAM
+cd oss_build/cmd/ossplay
+make clean
+make

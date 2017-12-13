@@ -86,7 +86,7 @@ echo BLDDIR=$BLDDIR > .directories
 echo SRCDIR=$SRCDIR >> .directories
 echo OSSLIBDIR=$OSSLIBDIR >> .directories
 
-$CC $LDFLAGS -o dirsetup $SRCDIR/setup/dirsetup.c
+gcc -o dirsetup $SRCDIR/setup/dirsetup.c
 
 # Make sure the latest soundcard.h version is installed in the system
 #rm /usr/include/sys/soundcard.h
@@ -144,7 +144,7 @@ then
   DTARGETOS="-D$TARGETOS"
 fi
 
-$CC $LDFLAGS -D`uname -s` $DTARGETOS -o srcconf $SRCDIR/setup/srcconf.c
+gcc $LDFLAGS -D`uname -s` $DTARGETOS -o srcconf $SRCDIR/setup/srcconf.c
 
 if ./srcconf $*
 then

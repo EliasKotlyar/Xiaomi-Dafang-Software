@@ -1,0 +1,22 @@
+$(DEPDIR)/madi_mixer.o: madi_mixer.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_madi_cfg.h  \
+  ./madi.h  
+$(DEPDIR)/oss_madi.o: oss_madi.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_madi_cfg.h  \
+  ./madi.h  

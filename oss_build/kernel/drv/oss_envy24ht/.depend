@@ -1,0 +1,78 @@
+$(DEPDIR)/envy24ht_ac97.o: envy24ht_ac97.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_envy24ht_cfg.h  \
+  ./envy24ht.h  
+$(DEPDIR)/envy24ht_ap192.o: envy24ht_ap192.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_envy24ht_cfg.h  \
+  ./envy24ht.h  
+$(DEPDIR)/envy24ht_aureon.o: envy24ht_aureon.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_envy24ht_cfg.h  \
+  ./envy24ht.h  
+$(DEPDIR)/envy24ht_julia.o: envy24ht_julia.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_envy24ht_cfg.h  \
+  ./envy24ht.h  
+$(DEPDIR)/envy24ht_revo51.o: envy24ht_revo51.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_envy24ht_cfg.h  \
+  ./envy24ht.h  
+$(DEPDIR)/envy24ht_revo71.o: envy24ht_revo71.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_envy24ht_cfg.h  \
+  ./envy24ht.h  
+$(DEPDIR)/oss_envy24ht.o: oss_envy24ht.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_envy24ht_cfg.h  \
+  ../../../kernel/framework/include/spdif.h \
+  ./envy24ht.h  

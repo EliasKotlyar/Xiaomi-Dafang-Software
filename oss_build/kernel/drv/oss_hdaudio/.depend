@@ -1,0 +1,180 @@
+$(DEPDIR)/hdaudio_abit_AA8.o: hdaudio_abit_AA8.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  \
+  ./hdaudio_dedicated.h  
+$(DEPDIR)/hdaudio_asus_P4B_E.o: hdaudio_asus_P4B_E.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  \
+  ./hdaudio_dedicated.h  
+$(DEPDIR)/hdaudio_asus_m9.o: hdaudio_asus_m9.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  \
+  ./hdaudio_dedicated.h  
+$(DEPDIR)/hdaudio_codec.o: hdaudio_codec.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  \
+  ./hdaudio_codecids.h  
+$(DEPDIR)/hdaudio_eeepc.o: hdaudio_eeepc.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  \
+  ./hdaudio_dedicated.h  
+$(DEPDIR)/hdaudio_ferrari5k.o: hdaudio_ferrari5k.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  \
+  ./hdaudio_dedicated.h  
+$(DEPDIR)/hdaudio_generic.o: hdaudio_generic.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  
+$(DEPDIR)/hdaudio_gpio_handlers.o: hdaudio_gpio_handlers.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  \
+  ./hdaudio_codecids.h  
+$(DEPDIR)/hdaudio_scaleoP.o: hdaudio_scaleoP.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  \
+  ./hdaudio_dedicated.h  
+$(DEPDIR)/hdaudio_si3055.o: hdaudio_si3055.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  \
+  ./hdaudio_dedicated.h  
+$(DEPDIR)/hdaudio_thinkpad_r61.o: hdaudio_thinkpad_r61.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  \
+  ./hdaudio_dedicated.h  
+$(DEPDIR)/hdaudio_vaio_vgn.o: hdaudio_vaio_vgn.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  \
+  ./hdaudio_dedicated.h  
+$(DEPDIR)/oss_hdaudio.o: oss_hdaudio.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_hdaudio_cfg.h  \
+  ./hdaudio.h  \
+  ./hdaudio_mixers.h  \
+  ./hdaudio_codec.h  

@@ -1,0 +1,24 @@
+$(DEPDIR)/oss_userdev.o: oss_userdev.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_userdev_cfg.h  \
+  ../../../include/oss_userdev_exports.h \
+  ./userdev.h  
+$(DEPDIR)/oss_userdev_devicepair.o: oss_userdev_devicepair.c \
+  ../../../kernel/framework/include/oss_config.h ../../../kernel/framework/include/ossddk/oss_exports.h \
+  /usr/include/stdint.h ../../../kernel/framework/include/local_config.h ../../../kernel/framework/include/os.h ../../../kernel/framework/include/oss_errno.h \
+  ../../../kernel/framework/include/oss_pci.h  ../../../kernel/framework/include/ossddk/ossddk.h ../../../kernel/framework/include/oss_memblk.h ../../../kernel/framework/include/buildid.h ../../../kernel/framework/include/timestamp.h \
+  ../../../kernel/framework/include/oss_version.h  \
+  ../../../kernel/framework/include/audio_core.h  \
+  ../../../kernel/framework/include/mixer_core.h  \
+  ../../../kernel/framework/include/oss_calls.h  \
+  ../../../kernel/framework/include/internal.h  \
+  ./oss_userdev_cfg.h  \
+  ../../../include/oss_userdev_exports.h \
+  ./userdev.h  

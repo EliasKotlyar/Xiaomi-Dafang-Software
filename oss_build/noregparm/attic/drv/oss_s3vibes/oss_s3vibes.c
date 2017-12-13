@@ -1,0 +1,1 @@
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/oss/attic/drv/oss_s3vibes/oss_s3vibes.c

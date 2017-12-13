@@ -1,0 +1,6 @@
+$(DEPDIR)/oss_default_timer.o: oss_default_timer.c 
+$(DEPDIR)/oss_midi_core.o: oss_midi_core.c 
+$(DEPDIR)/oss_midi_mapper.o: oss_midi_mapper.c 
+$(DEPDIR)/oss_midi_parser.o: oss_midi_parser.c 
+$(DEPDIR)/oss_midi_queue.o: oss_midi_queue.c 
+$(DEPDIR)/oss_midi_timers.o: oss_midi_timers.c 
