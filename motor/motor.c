@@ -27,14 +27,14 @@ typedef struct {
     int motor_move_speed;
 } motor_move_st;
 
-struct motor_status_st {
+typedef struct  {
     int y_max;
     int y_min;
     int x_max;
     int x_min;
     int x_steps;
     int y_steps;
-};
+} motor_status_st;
 
 
 void sendCommand(int cmd, void *buffer) {
@@ -50,14 +50,13 @@ void setSpeed(int speed) {
 
 void setMovement(int direction, int steps) {
 
-    int i;
-    //for (i = 0; i < steps; i++) {
-        motor_move_st motor_move;
-        motor_move.motor_directional = direction;
-        motor_move.motor_move_speed = 1000;
-        motor_move.motor_move_steps = steps;
-        sendCommand(MOTOR_MOVE, &motor_move);
-    //}
+
+    motor_move_st motor_move;
+    motor_move.motor_directional = direction;
+    motor_move.motor_move_speed = 1000;
+    motor_move.motor_move_steps = steps;
+    sendCommand(MOTOR_MOVE, &motor_move);
+
 
 }
 
@@ -74,15 +73,13 @@ void getStatus() {
     motor_status_st status;
     sendCommand(MOTOR_GET_STATUS, &status);
 
-    printf("directional_attr: %d\n", status.directional_attr);
-    printf("total_steps: %d\n", status.total_steps);
-    printf("current_steps: %d\n", status.current_steps);
-    printf("min_speed: %d\n", status.min_speed);
-    printf("cur_speed: %d\n", status.cur_speed);
-    printf("max_speed: %d\n", status.max_speed);
-    printf("move_is_min: %d\n", status.move_is_min);
-    printf("move_is_max: %d\n", status.move_is_max);
-    printf("sizeof int: %d\n", sizeof(int));
+
+    printf("y_max: %d\n", status.y_max);
+    printf("y_min: %d\n", status.y_min);
+    printf("x_max: %d\n", status.x_max);
+    printf("x_min: %d\n", status.x_min);
+    printf("x_steps: %d\n", status.x_steps);
+    printf("y_steps: %d\n", status.y_steps);
 
 
 }
