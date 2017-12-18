@@ -30,8 +30,8 @@
 
 //#define MOTOR1_MIN_GPIO		41
 //#define MOTOR1_MAX_GPIO		60
-#define MOTOR1_MIN_GPIO		-1
-#define MOTOR1_MAX_GPIO		-1
+#define MOTOR1_MIN_GPIO		41
+#define MOTOR1_MAX_GPIO		60
 #define MOTOR1_GPIO_LEVEL	0
 
 
