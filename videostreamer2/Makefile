@@ -29,24 +29,22 @@ EXTRA_LDFLAGS	=
 EXTRA_CFLAGS	+= -I$(AUTOCONF_DIR)
 
 CFLAGS      := -Wall -O2 $(EXTRA_CFLAGS) $(INC) -DSOCKLEN_T=socklen_t -DNO_SSTREAM=1 -D_LARGEFILE_SOURCE=1  -D_FILE_OFFSET_BITS=64 -static
-CFLAGS		+= -DBSD=1 -DLOCALE_NOT_USED
-CFLAGS		+= -DAUDIO_STREAM=1
+#CFLAGS		+= -DBSD=1 -DLOCALE_NOT_USED
+#CFLAGS		+= -DAUDIO_STREAM=1
 #CFLAGS		+= -DDEBUG
 
-LDFLAGS     := $(EXTRA_LDFLAGS) -Wl,--as-needed -lpthread
+LDFLAGS     := $(EXTRA_LDFLAGS) -Wl,--as-needed -lpthread -lm -lrt
 
-LIVE_LIB 	= live/UsageEnvironment/libUsageEnvironment.a
-LIVE_LIB 	+= live/groupsock/libgroupsock.a
-LIVE_LIB 	+= live/BasicUsageEnvironment/libBasicUsageEnvironment.a
-LIVE_LIB 	+= live/liveMedia/libliveMedia.a
+LIVE_LIB 	= $(MIDDLEWARE_INS_DIR)/UsageEnvironment/libUsageEnvironment.a
+LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/groupsock/libgroupsock.a
+LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/BasicUsageEnvironment/libBasicUsageEnvironment.a
+LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/liveMedia/libliveMedia.a
 
 
 SRC_OBJ	= main.o 
 SRC_OBJ	+=ServerMediaSubsession.o
 SRC_OBJ	+=H264_V4l2DeviceSource.o V4l2DeviceSource.o
 SRC_OBJ	+=AlsaDeviceSource.o
-SRC_OBJ	+= sn98600_v4l2.o 
-SRC_OBJ	+= sn98600_record_audio.o
 
 #targets =
 targets = rtsp_server
@@ -62,8 +60,8 @@ targets = rtsp_server
 all: $(targets)
 
 
-rtsp_server:  $(SRC_OBJ) $(LIVE_LIB) $(SNX_VC_LIB) $(SNX_RC_LIB) $(SNX_AUDIO_LIB)
-	$(CPP) -o $@ $^  $(LDFLAGS)
+rtsp_server:  $(SRC_OBJ)
+	$(CPP) -o $@ $^  $(LDFLAGS) $(LIVE_LIB)
 	$(STRIP) $@
 
 
@@ -77,7 +75,7 @@ install:
 
 clean:
 	rm -f *.o *.yuv *.bak *.a *.out *.so snx_rtsp_server
-	$(MAKE) -C live $@  INSTALL_DIR=$(abspath $(BIN_INS_DIR))
+	#$(MAKE) -C live $@  INSTALL_DIR=$(abspath $(BIN_INS_DIR))
 
 distclean : clean
 	rm -f $(targets)

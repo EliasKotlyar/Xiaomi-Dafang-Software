@@ -22,7 +22,7 @@
 #include "ServerMediaSubsession.h"
 #include "V4l2DeviceSource.h"
 #include "MJPEGVideoSource.h"
-
+#define SAMPLE_RATE 8000 // 8K
 
 // ---------------------------------
 //   BaseServerMediaSubsession
