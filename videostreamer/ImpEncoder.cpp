@@ -809,13 +809,16 @@ void ImpEncoder::geth264frames() {
 void ImpEncoder::setNightVision(bool state) {
     IMPISPRunningMode isprunningmode;
     IMPISPSceneMode sceneMode;
+    IMPISPColorfxMode colormode;
     int ret;
     if (state) {
         isprunningmode = IMPISP_RUNNING_MODE_NIGHT;
         sceneMode =  IMPISP_SCENE_MODE_NIGHT;
+        colormode = IMPISP_COLORFX_MODE_BW;
     } else {
         isprunningmode = IMPISP_RUNNING_MODE_DAY;
         sceneMode =  IMPISP_SCENE_MODE_AUTO;
+        colormode = IMPISP_COLORFX_MODE_AUTO;
     }
     ret = IMP_ISP_Tuning_SetISPRunningMode(isprunningmode);
     if (ret) {
@@ -825,6 +828,12 @@ void ImpEncoder::setNightVision(bool state) {
     if (ret) {
         IMP_LOG_ERR(TAG, "IMP_ISP_Tuning_SetSceneMode error !\n");
     }
+
+    ret = IMP_ISP_Tuning_SetColorfxMode(colormode);
+    if (ret) {
+        IMP_LOG_ERR(TAG, "IMP_ISP_Tuning_GetColorfxMode error !\n");
+    }
+
 
 
 }
