@@ -54,13 +54,13 @@ void setSpeed(int speed) {
 void setMovement(int direction, int steps) {
 
     int i;
-    for (i = 0; i < steps; i++) {
+    //for (i = 0; i < steps; i++) {
         motor_move_st motor_move;
         motor_move.motor_directional = direction;
         motor_move.motor_move_speed = 1000;
         motor_move.motor_move_steps = steps;
         sendCommand(MOTOR_MOVE, &motor_move);
-    }
+    //}
 
 }
 
@@ -130,6 +130,7 @@ int main(int argc, char *argv[]) {
             printf("Invalid Direction Argument %c\n", c);
             exit(EXIT_FAILURE);
     }
+    getStatus();
 
     return 0;
 
