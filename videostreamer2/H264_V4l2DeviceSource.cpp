@@ -20,7 +20,7 @@
 // ---------------------------------
 // H264 V4L2 FramedSource
 // ---------------------------------
-H264_V4L2DeviceSource* H264_V4L2DeviceSource::createNew(UsageEnvironment& env, V4L2DeviceParameters params, int outputFd, bool useThread) 
+H264_V4L2DeviceSource* H264_V4L2DeviceSource::createNew(UsageEnvironment& env, int outputFd, bool useThread)
 { 	
 	H264_V4L2DeviceSource* source = NULL;
 
@@ -29,7 +29,7 @@ H264_V4L2DeviceSource* H264_V4L2DeviceSource::createNew(UsageEnvironment& env, V
 }
 
 // Constructor
-H264_V4L2DeviceSource::H264_V4L2DeviceSource(UsageEnvironment& env, V4L2DeviceParameters params, int outputFd, bool useThread) 
+H264_V4L2DeviceSource::H264_V4L2DeviceSource(UsageEnvironment& env, int outputFd, bool useThread)
 	: V4L2DeviceSource(env, params, outputFd,useThread)
 {
 }

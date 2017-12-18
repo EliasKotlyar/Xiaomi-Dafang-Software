@@ -41,7 +41,7 @@ int  V4L2DeviceSource::Stats::notify(int tv_sec, int framesize)
 // ---------------------------------
 // V4L2 FramedSource
 // ---------------------------------
-V4L2DeviceSource* V4L2DeviceSource::createNew(UsageEnvironment& env, V4L2DeviceParameters params, int outputFd, bool useThread) 
+V4L2DeviceSource* V4L2DeviceSource::createNew(UsageEnvironment& env, int outputFd, bool useThread)
 { 	
 	V4L2DeviceSource* source = NULL;
 	source = new V4L2DeviceSource(env, params, outputFd, useThread);
@@ -49,9 +49,8 @@ V4L2DeviceSource* V4L2DeviceSource::createNew(UsageEnvironment& env, V4L2DeviceP
 }
 
 // Constructor
-V4L2DeviceSource::V4L2DeviceSource(UsageEnvironment& env, V4L2DeviceParameters params, int outputFd, bool useThread) 
-	: FramedSource(env), 
-	m_params(params), 
+V4L2DeviceSource::V4L2DeviceSource(UsageEnvironment& env, int outputFd, bool useThread)
+	: FramedSource(env),
 	m_in("in"), 
 	m_out("out") , 
 	m_outfd(outputFd),

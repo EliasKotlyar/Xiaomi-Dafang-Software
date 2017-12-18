@@ -23,7 +23,7 @@ class MJPEGVideoSource : public JPEGVideoSource
 {
 
         public:
-                static MJPEGVideoSource* createNew (UsageEnvironment& env, FramedSource* source,V4L2DeviceParameters params)
+                static MJPEGVideoSource* createNew (UsageEnvironment& env, FramedSource* source)
                 {
                         return new MJPEGVideoSource(env,source, params);
                 }
@@ -139,7 +139,7 @@ class MJPEGVideoSource : public JPEGVideoSource
                 FramedSource * m_inputSource;
 
         protected:
-                MJPEGVideoSource(UsageEnvironment& env, FramedSource* source, V4L2DeviceParameters params) : JPEGVideoSource(env),
+                MJPEGVideoSource(UsageEnvironment& env, FramedSource* source) : JPEGVideoSource(env),
                 m_inputSource( source),
                 m_width(params.m_width >> 3),
                 m_height(params.m_height >> 3),

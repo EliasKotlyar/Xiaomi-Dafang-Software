@@ -23,10 +23,10 @@ const char H264marker[] = {0,0,0,1};
 class H264_V4L2DeviceSource : public V4L2DeviceSource
 {
 	public:				
-		static H264_V4L2DeviceSource* createNew(UsageEnvironment& env, V4L2DeviceParameters params, int outputFd, bool useThread) ;
+		static H264_V4L2DeviceSource* createNew(UsageEnvironment& env, int outputFd, bool useThread) ;
 
 	protected:
-		H264_V4L2DeviceSource(UsageEnvironment& env, V4L2DeviceParameters params, int outputFd, bool useThread);
+		H264_V4L2DeviceSource(UsageEnvironment& env, int outputFd, bool useThread);
 		virtual ~H264_V4L2DeviceSource();
 
 		unsigned char* extractFrame(unsigned char* frame, size_t& size, size_t& outsize);

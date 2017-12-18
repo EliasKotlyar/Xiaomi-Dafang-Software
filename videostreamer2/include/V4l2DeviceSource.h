@@ -62,15 +62,14 @@ class V4L2DeviceSource: public FramedSource
 				const std::string m_msg;
 		};
 
-		V4L2DeviceParameters m_params;
 		
 	public:
-		static V4L2DeviceSource* createNew(UsageEnvironment& env, V4L2DeviceParameters params, int outputFd, bool useThread) ;
+		static V4L2DeviceSource* createNew(UsageEnvironment& env,  int outputFd, bool useThread) ;
 		std::string getAuxLine() { return m_auxLine; };	
 		void videocallback( const struct timeval *tv, void *data, size_t len, int keyFrame );
 
 	protected:
-		V4L2DeviceSource(UsageEnvironment& env, V4L2DeviceParameters params, int outputFd, bool useThread);
+		V4L2DeviceSource(UsageEnvironment& env,  int outputFd, bool useThread);
 		virtual ~V4L2DeviceSource();
 
 	protected:	

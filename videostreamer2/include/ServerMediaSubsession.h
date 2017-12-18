@@ -27,7 +27,7 @@ class BaseServerMediaSubsession
 		BaseServerMediaSubsession(StreamReplicator* replicator): m_replicator(replicator) {};
 	
 	public:
-		static FramedSource* createSource(UsageEnvironment& env, FramedSource * videoES, int format,V4L2DeviceParameters params);
+		static FramedSource* createSource(UsageEnvironment& env, FramedSource * videoES, int format);
 		static RTPSink* createSink(UsageEnvironment& env, Groupsock * rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, int format);
 		char const* getAuxLine(V4L2DeviceSource* source,unsigned char rtpPayloadType);
 		
@@ -48,7 +48,6 @@ class MulticastServerMediaSubsession : public PassiveServerMediaSubsession , pub
 								, int ttl
 								, StreamReplicator* replicator
 								, int format
-								, V4L2DeviceParameters params
 								);
 		
 	protected:
@@ -69,11 +68,11 @@ class MulticastServerMediaSubsession : public PassiveServerMediaSubsession , pub
 class UnicastServerMediaSubsession : public OnDemandServerMediaSubsession , public BaseServerMediaSubsession
 {
 	public:
-		static UnicastServerMediaSubsession* createNew(UsageEnvironment& env, StreamReplicator* replicator, int format, V4L2DeviceParameters params);
+		static UnicastServerMediaSubsession* createNew(UsageEnvironment& env, StreamReplicator* replicator, int format);
 		
 	protected:
-		UnicastServerMediaSubsession(UsageEnvironment& env, StreamReplicator* replicator, int format, V4L2DeviceParameters params) 
-				: OnDemandServerMediaSubsession(env, False), BaseServerMediaSubsession(replicator), m_format(format), m_params(params) {};
+		UnicastServerMediaSubsession(UsageEnvironment& env, StreamReplicator* replicator, int format)
+				: OnDemandServerMediaSubsession(env, False), BaseServerMediaSubsession(replicator), m_format(format) {};
 
 		virtual FramedSource* createNewStreamSource(unsigned clientSessionId, unsigned& estBitrate);
 		virtual RTPSink* createNewRTPSink(Groupsock* rtpGroupsock,  unsigned char rtpPayloadTypeIfDynamic, FramedSource* inputSource);		
@@ -81,7 +80,7 @@ class UnicastServerMediaSubsession : public OnDemandServerMediaSubsession , publ
 					
 	protected:
 		int m_format;
-		V4L2DeviceParameters m_params;
+
 };
 
 #endif

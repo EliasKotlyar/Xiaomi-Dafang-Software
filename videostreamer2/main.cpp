@@ -47,13 +47,11 @@ TaskScheduler* scheduler = NULL;
 
 // create RTSP server
 RTSPServer* rtspServer = NULL;
-snx_v4l2_video* videoCapture = NULL;
 V4L2DeviceSource* videoES = NULL;
 
 StreamReplicator*  replicator = NULL;
 
 #if AUDIO_STREAM
-	sonix_audio *audioCapture = NULL;
 
 	AlsaDeviceSource*  audioES = NULL;
 #endif
@@ -81,81 +79,7 @@ void addSession(RTSPServer* rtspServer, const char* sessionName, ServerMediaSubs
 	delete[] url;			
 }
 
-// -----------------------------------------
-//    create video capture interface
-// -----------------------------------------
-struct snx_v4l2_video* createVideoCapure(const V4L2DeviceParameters & param)
-{
 
-	struct snx_v4l2_video *m_fd = snx98600_video_new();
-
-	if (m_fd) {
-		//m_fd->resolution_type = RESOLUTION_HD;
-		m_fd->cb = NULL;
-
-		m_fd->m2m->codec_fmt = param.m_format;
-		m_fd->m2m->m2m = param.m_m2m_en;
-
-		m_fd->m2m->width = param.m_width;
-		m_fd->m2m->height = param.m_height;
-
-		m_fd->m2m->codec_fps = param.m_fps;
-		m_fd->m2m->isp_fps = param.m_isp_fps;
-		m_fd->m2m->gop = param.m_gop;
-
-		if (m_fd->m2m->codec_fmt  == V4L2_PIX_FMT_MJPEG)
-			m_fd->m2m->qp = param.m_mjpeg_qp;
-
-		m_fd->m2m->bit_rate = param.m_bitrate << 10; //(Kbps)
-
-		strcpy(m_fd->m2m->codec_dev, param.m_devName.c_str());
-
-		snx98600_video_open(m_fd, NULL );
-	} 
-
-	return m_fd;
-}
-
-void closeVideoCapure(struct snx_v4l2_video* m_fd)
-{
-	int rc;
-	if (m_fd) {
-		if ((rc = snx98600_video_free(m_fd))) {
-			fprintf(stderr, "failed to close video source: %s\n", strerror(rc));
-		}
-	}
-
-}
-
-#if 1
-struct sonix_audio* createAudioCapure(void)
-{
-	int rc;
-	struct sonix_audio *m_fd = snx98600_record_audio_new(AUDIO_RECORD_DEV, NULL, NULL);
-
-	if (!m_fd) {
-		rc = errno ? errno : -1;
-		fprintf(stderr, "failed to create audio source: %s\n", strerror(rc));
-	}
-
-	return m_fd;
-}
-
-void closeAudioCapure(struct sonix_audio* m_fd)
-{
-	int rc;
-	if (m_fd) {
-		if ((rc = snx98600_record_audio_stop(m_fd))) {
-			fprintf(stderr, "failed to start audio source: %s\n", strerror(rc));
-		}
-
-		if (m_fd) {
-			snx98600_record_audio_free(m_fd);
-			m_fd = NULL;
-		}
-	}
-
-}
 #endif
 
 // -----------------------------------------
@@ -180,8 +104,7 @@ void sighandler(int n)
 		Medium::close(videoES);
 
 #if AUDIO_STREAM
-	if (audioCapture) 
-		closeAudioCapure(audioCapture);	
+
 #endif
 
 	if (videoCapture)
@@ -398,14 +321,11 @@ int main(int argc, char** argv)
 		// Init capture
 		//LOG(NOTICE) << "Create V4L2 Source..." << dev_name;
 		fprintf(stderr, "create Video source = %s \n", dev_name);
-		
-		V4L2DeviceParameters param(dev_name,format,width,height,fps, isp_fps, verbose, bitrate, m2m_en, gop, mjpeg_qp, queueSize );
-		videoCapture = createVideoCapure(param);
+
+		videoCapture = createVideoCapure();
 
 #if AUDIO_STREAM
-		if (audio_en) {
-				audioCapture = createAudioCapure();
-		}
+
 #endif
 		if (videoCapture)
 		{
@@ -439,14 +359,7 @@ int main(int argc, char** argv)
 				Start Audio Device 
 
 			*/
-			if (audio_en) {
-				int rc;
-				if (audioCapture) {
-					if ((rc = snx98600_record_audio_start(audioCapture))) {
-						fprintf(stderr, "failed to start audio source: %s\n", strerror(rc));
-					}
-				}
-			}
+
 #endif
 			/* Determind which Class to use */
 			if (format == V4L2_PIX_FMT_H264)
@@ -480,25 +393,13 @@ int main(int argc, char** argv)
 				/* 
 					create Alsa Device source Class 
 				*/
-				if (audio_en && audioCapture) {
-					audioES =  AlsaDeviceSource::createNew(*env, -1, queueSize, useThread);
 
-					if (audioES == NULL) 
-					{
-						fprintf(stderr, "Unable to create audio devicesource \n");
-					}
-					else
-					{
-						audioCapture->devicesource = audioES;
-					}
-				}
 #endif
 
 				replicator = StreamReplicator::createNew(*env, videoES, false);
 
 #if AUDIO_STREAM
-				if (audio_en && audioCapture)
-					audio_replicator = StreamReplicator::createNew(*env, audioES, false);
+
 #endif
 				// Create Server Multicast Session
 				if (multicast)
@@ -513,8 +414,7 @@ int main(int argc, char** argv)
 
 					multicast_video_subSession = MulticastServerMediaSubsession::createNew(*env,destinationAddress, Port(rtpPortNum), Port(rtcpPortNum), ttl, replicator,format,param);
 #if AUDIO_STREAM
-					if (audio_en && audioCapture) 
-						multicast_audio_subSession =  MulticastServerMediaSubsession::createNew(*env,destinationAddress, Port(rtpPortNum), Port(rtcpPortNum), ttl, audio_replicator,WA_PCMA,param);
+
 #endif
 					addSession(rtspServer, murl.c_str(), multicast_video_subSession, multicast_audio_subSession);
 				
@@ -526,8 +426,7 @@ int main(int argc, char** argv)
 				video_subSession = UnicastServerMediaSubsession::createNew(*env,replicator,format, param);
 
 #if AUDIO_STREAM
-				if (audio_en && audioCapture) 
-					audio_subSession = UnicastServerMediaSubsession::createNew(*env,audio_replicator,WA_PCMA, param);
+
 #endif
 				// Create Server Unicast Session
 				addSession(rtspServer, url.c_str(), video_subSession, audio_subSession);
@@ -547,8 +446,7 @@ int main(int argc, char** argv)
 					Medium::close(videoES);
 			}
 #if AUDIO_STREAM
-			if (audio_en && audioCapture) 
-				closeAudioCapure(audioCapture);
+
 #endif
 			if (videoCapture)
 			closeVideoCapure(videoCapture);

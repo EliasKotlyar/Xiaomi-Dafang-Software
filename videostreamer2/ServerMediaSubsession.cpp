@@ -27,7 +27,7 @@
 // ---------------------------------
 //   BaseServerMediaSubsession
 // ---------------------------------
-FramedSource* BaseServerMediaSubsession::createSource(UsageEnvironment& env, FramedSource * videoES, int format, V4L2DeviceParameters params)
+FramedSource* BaseServerMediaSubsession::createSource(UsageEnvironment& env, FramedSource * videoES, int format)
 {
 	FramedSource* source = NULL;
 	switch (format)
@@ -124,7 +124,6 @@ MulticastServerMediaSubsession* MulticastServerMediaSubsession::createNew(UsageE
 									, int ttl
 									, StreamReplicator* replicator
 									, int format
-									, V4L2DeviceParameters params
 									) 
 { 
 	// Create a source
@@ -171,7 +170,7 @@ char const* MulticastServerMediaSubsession::getAuxSDPLine(RTPSink* rtpSink,Frame
 // -----------------------------------------
 //    ServerMediaSubsession for Unicast
 // -----------------------------------------
-UnicastServerMediaSubsession* UnicastServerMediaSubsession::createNew(UsageEnvironment& env, StreamReplicator* replicator, int format, V4L2DeviceParameters params) 
+UnicastServerMediaSubsession* UnicastServerMediaSubsession::createNew(UsageEnvironment& env, StreamReplicator* replicator, int format)
 { 
 	return new UnicastServerMediaSubsession(env,replicator,format,params);
 }
@@ -180,7 +179,7 @@ FramedSource* UnicastServerMediaSubsession::createNewStreamSource(unsigned clien
 {
 	FramedSource* source = m_replicator->createStreamReplica();
 	//printf("UnicastServerMediaSubsession::createNewStreamSource\n");
-	return createSource(envir(), source, m_format, m_params);
+	return createSource(envir(), source, m_format);
 }
 
 		
