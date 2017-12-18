@@ -156,44 +156,54 @@ static int motor_attr_init(struct motor_info *info) {
 }
 
 static irqreturn_t motor_min_gpio_interrupt(int irq, void *dev_id) {
-    /* TODO to be realized */
-#if 0
-    int i;
-    struct motor_info *info = (struct motor_info *)dev_id;
 
-    for(i = 0; i < 2; i++) {
-        if (irq == info->pdata[i]->motor_min_gpio) {
+    int i;
+    int gpioValue;
+    struct motor_info *info = (struct motor_info *) dev_id;
+
+    for (i = 0; i < 2; i++) {
+        if (irq == info->pdata[i]->motor_min_irq) {
             break;
         }
     }
 
-    info->move_is_min = 1;
-    info->move_is_max = 0;
-    info->status = MOTOR_MOVE_STOP;
-    info->current_steps[i] = 0;
-#endif
+    gpioValue = gpio_get_value(info->pdata[i]->motor_min_gpio);
+    dev_err(info->dev, "IRQ on PIN %d. Pin Value %d\n", irq, gpioValue);
+    if (gpioValue == 1) {
+        info->move_is_min = 0;
+    } else {
+        info->move_is_min = 1;
+    }
+
+
     return IRQ_HANDLED;
 }
 
 static irqreturn_t motor_max_gpio_interrupt(int irq, void *dev_id) {
-    /* TODO to be realized */
-#if 0
-    int i;
-    struct motor_info *info = (struct motor_info *)dev_id;
 
-    for(i = 0; i < 2; i++) {
-        if (irq == info->pdata[i]->motor_max_gpio) {
+    int i;
+    int gpioValue;
+    struct motor_info *info = (struct motor_info *) dev_id;
+
+    for (i = 0; i < 2; i++) {
+        if (irq == info->pdata[i]->motor_max_irq) {
             break;
         }
     }
 
-    info->move_is_min = 0;
-    info->move_is_max = 1;
-    info->status = MOTOR_MOVE_STOP;
-    info->current_steps[i] = info->total_steps[i];
-#endif
+
+    gpioValue = gpio_get_value(info->pdata[i]->motor_max_gpio);
+
+    dev_err(info->dev, "IRQ on PIN %d. Pin Value %d\n", irq, gpioValue);
+    if (gpioValue == 1) {
+        info->move_is_max = 0;
+    } else {
+        info->move_is_max = 1;
+    }
+
     return IRQ_HANDLED;
 }
+
 
 static int motor_move_thread(void *data) {
     struct motor_info *info = (struct motor_info *) data;
@@ -327,10 +337,7 @@ static int motor_probe(struct platform_device *pdev) {
             gpio_request(info->pdata[i]->motor_min_gpio, "motor_min_gpio");
             ret = request_irq(gpio_to_irq(info->pdata[i]->motor_min_gpio),
                               motor_min_gpio_interrupt,
-                              (info->pdata[i]->motor_gpio_level ?
-                               IRQF_TRIGGER_RISING :
-                               IRQF_TRIGGER_FALLING)
-                              | IRQF_DISABLED,
+                              IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_DISABLED,
                               "motor_min_gpio", info);
             if (ret) {
                 dev_err(&pdev->dev, "request motor_min_gpio error\n");
@@ -341,10 +348,7 @@ static int motor_probe(struct platform_device *pdev) {
             gpio_request(info->pdata[i]->motor_max_gpio, "motor_max_gpio");
             ret = request_irq(gpio_to_irq(info->pdata[i]->motor_max_gpio),
                               motor_max_gpio_interrupt,
-                              (info->pdata[i]->motor_gpio_level ?
-                               IRQF_TRIGGER_RISING :
-                               IRQF_TRIGGER_FALLING)
-                              | IRQF_DISABLED,
+                              IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_DISABLED,
                               "motor_max_gpio", info);
             if (ret) {
                 dev_err(&pdev->dev, "request motor_max_gpio error\n");
