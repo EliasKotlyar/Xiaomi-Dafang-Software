@@ -15,8 +15,6 @@
 
 // live555
 #include <liveMedia.hh>
-
-#include "snx_lib.h"
 // forward declaration
 class V4L2DeviceSource;
 

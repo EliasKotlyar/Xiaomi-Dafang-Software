@@ -22,7 +22,6 @@
 #include <liveMedia.hh>
 
 // project
-#include "snx_lib.h"
 //#include "V4l2Capture.h"
 //#include "sn98600_v4l2.h"
 

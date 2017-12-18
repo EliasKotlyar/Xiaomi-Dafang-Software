@@ -21,8 +21,6 @@
 // live555
 #include <liveMedia.hh>
 
-// project
-#include "snx_lib.h"
 
 
 

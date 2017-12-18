@@ -33,10 +33,9 @@
 #include <GroupsockHelper.hh>
 
 // project
-#include "sn98600_v4l2.h"
+
 #include "H264_V4l2DeviceSource.h"
 #include "ServerMediaSubsession.h"
-#include "sn98600_record_audio.h"
 #include "AlsaDeviceSource.h"
 
 
