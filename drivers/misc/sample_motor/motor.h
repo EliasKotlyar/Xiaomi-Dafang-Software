@@ -71,15 +71,14 @@ struct motor_move_st {
 };
 
 struct motor_status_st {
-	int directional_attr;
-	int total_steps;
-	int current_steps;
-	int min_speed;
-	int cur_speed;
-	int max_speed;
-	int move_is_min;
-	int move_is_max;
+	int y_max;
+	int y_min;
+    int x_max;
+    int x_min;
+    int x_steps;
+    int y_steps;
 };
+
 
 struct motor_platform_data {
 	const char *name;
@@ -87,6 +86,10 @@ struct motor_platform_data {
 
 	unsigned int motor_min_gpio;
 	unsigned int motor_max_gpio;
+
+    int motor_min_irq;
+    int motor_max_irq;
+
 	int motor_gpio_level;
 
 	unsigned int motor_st1_gpio;
@@ -119,12 +122,11 @@ struct motor_info {
 	int run_step;
 	int run_step_irq;
 	int speed;
-	int move_is_min;
-	int move_is_max;
 	int direction;
 	int id;
 	int cur_steps[4];
 	int set_steps[4];
+    struct motor_status_st motor_status;
 };
 
 #define DEF_MOTOR(NO) \

@@ -27,17 +27,14 @@ typedef struct {
     int motor_move_speed;
 } motor_move_st;
 
-
-typedef struct {
-    int directional_attr;
-    int total_steps;
-    int current_steps;
-    int min_speed;
-    int cur_speed;
-    int max_speed;
-    int move_is_min;
-    int move_is_max;
-} motor_status_st;
+struct motor_status_st {
+    int y_max;
+    int y_min;
+    int x_max;
+    int x_min;
+    int x_steps;
+    int y_steps;
+};
 
 
 void sendCommand(int cmd, void *buffer) {
