@@ -34,7 +34,7 @@ FramedSource* BaseServerMediaSubsession::createSource(UsageEnvironment& env, Fra
 	{
 		case V4L2_PIX_FMT_H264 : source = H264VideoStreamDiscreteFramer::createNew(env, videoES); break;
 
-		case V4L2_PIX_FMT_MJPEG: source = MJPEGVideoSource::createNew(env, videoES, params); break;
+		case V4L2_PIX_FMT_MJPEG: source = MJPEGVideoSource::createNew(env, videoES); break;
 
 #ifdef 	V4L2_PIX_FMT_VP8	
 		case V4L2_PIX_FMT_VP8  : source = videoES; break;
@@ -129,7 +129,7 @@ MulticastServerMediaSubsession* MulticastServerMediaSubsession::createNew(UsageE
 	// Create a source
 	FramedSource* source = replicator->createStreamReplica();
 
-	FramedSource* videoSource = createSource(env, source, format, params);
+	FramedSource* videoSource = createSource(env, source, format);
 
 	// Create RTP/RTCP groupsock
 	Groupsock* rtpGroupsock = new Groupsock(env, destinationAddress, rtpPortNum, ttl);
@@ -172,7 +172,7 @@ char const* MulticastServerMediaSubsession::getAuxSDPLine(RTPSink* rtpSink,Frame
 // -----------------------------------------
 UnicastServerMediaSubsession* UnicastServerMediaSubsession::createNew(UsageEnvironment& env, StreamReplicator* replicator, int format)
 { 
-	return new UnicastServerMediaSubsession(env,replicator,format,params);
+	return new UnicastServerMediaSubsession(env,replicator,format);
 }
 					
 FramedSource* UnicastServerMediaSubsession::createNewStreamSource(unsigned clientSessionId, unsigned& estBitrate)

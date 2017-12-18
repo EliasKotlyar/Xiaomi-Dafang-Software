@@ -24,13 +24,13 @@ H264_V4L2DeviceSource* H264_V4L2DeviceSource::createNew(UsageEnvironment& env, i
 { 	
 	H264_V4L2DeviceSource* source = NULL;
 
-	source = new H264_V4L2DeviceSource(env, params, outputFd, useThread);
+	source = new H264_V4L2DeviceSource(env, outputFd, useThread);
 	return source;
 }
 
 // Constructor
 H264_V4L2DeviceSource::H264_V4L2DeviceSource(UsageEnvironment& env, int outputFd, bool useThread)
-	: V4L2DeviceSource(env, params, outputFd,useThread)
+	: V4L2DeviceSource(env, outputFd,useThread)
 {
 }
 

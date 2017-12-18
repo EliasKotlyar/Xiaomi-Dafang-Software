@@ -44,7 +44,7 @@ int  V4L2DeviceSource::Stats::notify(int tv_sec, int framesize)
 V4L2DeviceSource* V4L2DeviceSource::createNew(UsageEnvironment& env, int outputFd, bool useThread)
 { 	
 	V4L2DeviceSource* source = NULL;
-	source = new V4L2DeviceSource(env, params, outputFd, useThread);
+	source = new V4L2DeviceSource(env, outputFd, useThread);
 	return source;
 }
 
@@ -53,8 +53,7 @@ V4L2DeviceSource::V4L2DeviceSource(UsageEnvironment& env, int outputFd, bool use
 	: FramedSource(env),
 	m_in("in"), 
 	m_out("out") , 
-	m_outfd(outputFd),
-	m_queueSize(params.m_queueSize)
+	m_outfd(outputFd)
 {
 
 	//m_device->cb = callback;

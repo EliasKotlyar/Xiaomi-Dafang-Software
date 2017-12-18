@@ -17,7 +17,6 @@
 #include <iomanip>
 
 #include "JPEGVideoSource.hh"
-#include "snx_lib.h"
 
 class MJPEGVideoSource : public JPEGVideoSource
 {
@@ -25,7 +24,7 @@ class MJPEGVideoSource : public JPEGVideoSource
         public:
                 static MJPEGVideoSource* createNew (UsageEnvironment& env, FramedSource* source)
                 {
-                        return new MJPEGVideoSource(env,source, params);
+                        return new MJPEGVideoSource(env,source);
                 }
                 virtual void doGetNextFrame()
                 {
@@ -141,8 +140,8 @@ class MJPEGVideoSource : public JPEGVideoSource
         protected:
                 MJPEGVideoSource(UsageEnvironment& env, FramedSource* source) : JPEGVideoSource(env),
                 m_inputSource( source),
-                m_width(params.m_width >> 3),
-                m_height(params.m_height >> 3),
+                //m_width(params.m_width >> 3),
+                //m_height(params.m_height >> 3),
                 m_qFactor(255),
                 m_qTable0Init(true),
                 m_qTable1Init(false)
