@@ -82,35 +82,62 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
 
     switch (info->direction) {
         case MOTOR_DIRECTIONAL_LEFT:
+            if(info->motor_status.x_min == 1){
+                info->set_steps[info->direction] = 0;
+                info->cur_steps[info->direction] = 0;
+            }
+
             if (info->cur_steps[info->direction] != info->set_steps[info->direction]) {
                 info->run_step = info->cur_steps[info->direction] % sizeof(step_8);
                 info->id = 0;
                 motor_step(info);
                 info->cur_steps[info->direction]++;
+                info->motor_status.x_steps--;
             }
             break;
         case MOTOR_DIRECTIONAL_RIGHT:
+
+            if(info->motor_status.x_max == 1){
+                info->set_steps[info->direction] = 0;
+                info->cur_steps[info->direction] = 0;
+            }
+
             if (info->cur_steps[info->direction] != info->set_steps[info->direction]) {
                 info->run_step = (sizeof(step_8) - 1) - info->cur_steps[info->direction] % sizeof(step_8);
                 info->id = 0;
                 motor_step(info);
                 info->cur_steps[info->direction]++;
+                info->motor_status.x_steps++;
             }
             break;
         case MOTOR_DIRECTIONAL_UP:
+            if(info->motor_status.y_max == 1){
+                info->set_steps[info->direction] = 0;
+                info->cur_steps[info->direction] = 0;
+            }
+
             if (info->cur_steps[info->direction] != info->set_steps[info->direction]) {
                 info->run_step = info->cur_steps[info->direction] % sizeof(step_8);
                 info->id = 1;
                 motor_step(info);
                 info->cur_steps[info->direction]++;
+                info->motor_status.y_steps++;
             }
             break;
         case MOTOR_DIRECTIONAL_DOWN:
+
+            if(info->motor_status.y_min == 1){
+                info->set_steps[info->direction] = 0;
+                info->cur_steps[info->direction] = 0;
+            }
+
+
             if (info->cur_steps[info->direction] != info->set_steps[info->direction]) {
                 info->run_step = (sizeof(step_8) - 1) - info->cur_steps[info->direction] % sizeof(step_8);
                 info->id = 1;
                 motor_step(info);
                 info->cur_steps[info->direction]++;
+                info->motor_status.y_steps--;
             }
             break;
         default:
@@ -160,27 +187,27 @@ static irqreturn_t motor_gpio_interrupt(int irq, void *dev_id) {
     int *value;
     struct motor_info *info = (struct motor_info *) dev_id;
     // Check which Pin the IRQ belongs to:
-    if (irq == info->pdata[0]->motor_max_irq) {
-        gpio = info->pdata[0]->motor_max_gpio;
-        value = &info->motor_status.x_max;
+    if (irq == info->pdata[0]->motor_min_irq) {
+        gpio = info->pdata[0]->motor_min_irq;
+        value = &info->motor_status.x_min;
     } else if (irq == info->pdata[0]->motor_max_irq) {
         gpio = info->pdata[0]->motor_max_gpio;
         value = &info->motor_status.x_max;
     } else if (irq == info->pdata[1]->motor_min_irq) {
-        gpio = info->pdata[1]->motor_max_gpio;
-        value = &info->motor_status.x_max;
+        gpio = info->pdata[1]->motor_min_gpio;
+        value = &info->motor_status.y_min;
     } else if (irq == info->pdata[1]->motor_max_irq) {
         gpio = info->pdata[1]->motor_max_gpio;
-        value = &info->motor_status.x_max;
+        value = &info->motor_status.y_max;
     }
 
 
     gpioValue = gpio_get_value(gpio);
     dev_err(info->dev, "Checking PIN %d. Pin Value %d\n", gpio, gpioValue);
     if (gpioValue == 1) {
-        *value = 1;
-    } else {
         *value = 0;
+    } else {
+        *value = 1;
     }
 
 
@@ -316,7 +343,7 @@ static int motor_probe(struct platform_device *pdev) {
         if (info->pdata[i]->motor_min_gpio != -1) {
             gpio_request(info->pdata[i]->motor_min_gpio, "motor_min_gpio");
             irq = gpio_to_irq(info->pdata[i]->motor_min_gpio);
-            info->pdata[i]->motor_max_irq = irq;
+            info->pdata[i]->motor_min_irq = irq;
             ret = request_irq(irq,
                               motor_gpio_interrupt,
                               IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_DISABLED,
@@ -335,7 +362,7 @@ static int motor_probe(struct platform_device *pdev) {
                               motor_gpio_interrupt,
                               IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_DISABLED,
                               "motor_max_gpio", info);
-            dev_err(&pdev->dev, "Number %d\n", info->pdata[i]->motor_max_gpio);
+            //dev_err(&pdev->dev, "Number %d\n", info->pdata[i]->motor_max_gpio);
 
             if (ret) {
                 dev_err(&pdev->dev, "request motor_max_gpio error\n");
