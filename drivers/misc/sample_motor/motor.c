@@ -190,7 +190,7 @@ static irqreturn_t motor_gpio_interrupt(int irq, void *dev_id) {
     struct motor_info *info = (struct motor_info *) dev_id;
     // Check which Pin the IRQ belongs to:
     if (irq == info->pdata[0]->motor_min_irq) {
-        gpio = info->pdata[0]->motor_min_irq;
+        gpio = info->pdata[0]->motor_min_gpio;
         value = &info->motor_status.x_min;
     } else if (irq == info->pdata[0]->motor_max_irq) {
         gpio = info->pdata[0]->motor_max_gpio;
