@@ -84,6 +84,48 @@ void getStatus() {
 
 }
 
+void centerUpDown(){
+    reset();
+    motor_status_st status;
+    sendCommand(MOTOR_GET_STATUS, &status);
+    int startSteps = status.y_steps;
+    // Go up:
+    setMovement(MOTOR_DIRECTIONAL_UP, 5000);
+    while(status.y_max != 1){
+        sendCommand(MOTOR_GET_STATUS, &status);
+    }
+    // Go Down
+    int maxSteps = status.y_steps;
+    setMovement(MOTOR_DIRECTIONAL_DOWN, 5000);
+    while(status.y_min != 1){
+        sendCommand(MOTOR_GET_STATUS, &status);
+    }
+    int minSteps = status.y_steps;
+
+    // Calculate center:
+    int center = ((maxSteps - minSteps) / 2) + minSteps;
+
+
+    printf("startSteps: %d\n", startSteps);
+    printf("minSteps: %d\n", minSteps);
+    printf("maxSteps: %d\n", maxSteps);
+    printf("center: %d\n", center);
+    sleep(1);
+    setMovement(MOTOR_DIRECTIONAL_UP, 5000);
+    while(status.y_steps <  center){
+        sendCommand(MOTOR_GET_STATUS, &status);
+    }
+    setStop();
+    printf("currentsteps: %d\n", status.y_steps);
+
+
+
+
+
+
+
+}
+
 
 int main(int argc, char *argv[]) {
 
@@ -120,11 +162,14 @@ int main(int argc, char *argv[]) {
         case 'r':
             setMovement(MOTOR_DIRECTIONAL_RIGHT, stepsize);
             break;
+        case 'c':
+            centerUpDown();
+            break;
         default:
             printf("Invalid Direction Argument %c\n", c);
             exit(EXIT_FAILURE);
     }
-    getStatus();
+    //getStatus();
 
     return 0;
 

@@ -170,10 +170,12 @@ static int motor_speed(struct motor_info *info, int speed) {
 
 static int motor_attr_init(struct motor_info *info) {
 
+    /*
     info->motor_status.y_min = 0;
     info->motor_status.y_max = 0;
     info->motor_status.x_min = 0;
     info->motor_status.x_min = 0;
+     */
     info->motor_status.x_steps = 0;
     info->motor_status.y_steps = 0;
 
