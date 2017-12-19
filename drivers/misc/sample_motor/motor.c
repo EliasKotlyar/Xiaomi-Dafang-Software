@@ -232,6 +232,7 @@ static int motor_open(struct inode *inode, struct file *file) {
 }
 
 static int motor_release(struct inode *inode, struct file *file) {
+
     return 0;
 }
 
@@ -239,11 +240,20 @@ static long motor_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) 
     struct miscdevice *dev = filp->private_data;
     struct motor_info *info = container_of(dev,
     struct motor_info, mdev);
-
+    int i;
     switch (cmd) {
         case MOTOR_STOP:
             jz_tcu_disable_counter(info->tcu);
             info->status = MOTOR_MOVE_STOP;
+
+            for (i = 0; i < 2; i++) {
+                gpio_direction_output(info->pdata[i]->motor_st1_gpio, 0);
+                gpio_direction_output(info->pdata[i]->motor_st2_gpio, 0);
+                gpio_direction_output(info->pdata[i]->motor_st3_gpio, 0);
+                gpio_direction_output(info->pdata[i]->motor_st4_gpio, 0);
+            }
+
+
             break;
         case MOTOR_RESET:
             motor_attr_init(info);

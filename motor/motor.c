@@ -194,6 +194,9 @@ int main(int argc, char *argv[]) {
         case 'h':
             calibrate(AXIS_HORIZONAL);
             break;
+        case 's':
+            setStop();
+            break;
         default:
             printf("Invalid Direction Argument %c\n", c);
             exit(EXIT_FAILURE);
