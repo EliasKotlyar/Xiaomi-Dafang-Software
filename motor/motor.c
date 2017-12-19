@@ -18,6 +18,9 @@
 #define MOTOR_DIRECTIONAL_RIGHT    0x3
 #define MOTOR_INIT_SPEED    1000    /* unit :ns */
 
+#define AXIS_HORIZONAL 1
+#define AXIS_VERTICAL 2
+
 #include <arpa/inet.h>
 #include <string.h>
 
@@ -27,7 +30,7 @@ typedef struct {
     int motor_move_speed;
 } motor_move_st;
 
-typedef struct  {
+typedef struct {
     int y_max;
     int y_min;
     int x_max;
@@ -84,39 +87,62 @@ void getStatus() {
 
 }
 
-void centerUpDown(){
+void calibrate(int axis) {
+
+
     reset();
     motor_status_st status;
     sendCommand(MOTOR_GET_STATUS, &status);
-    int startSteps = status.y_steps;
-    // Go up:
-    setMovement(MOTOR_DIRECTIONAL_UP, 5000);
-    while(status.y_max != 1){
+
+    int direction1;
+    int direction2;
+    int *minField;
+    int *maxField;
+    int *stepField;
+    if (axis == AXIS_VERTICAL) {
+        direction1 = MOTOR_DIRECTIONAL_UP;
+        direction2 = MOTOR_DIRECTIONAL_DOWN;
+        maxField = &status.y_max;
+        minField = &status.y_min;
+        stepField = &status.y_steps;
+    } else if (axis == AXIS_HORIZONAL) {
+        direction1 = MOTOR_DIRECTIONAL_RIGHT;
+        direction2 = MOTOR_DIRECTIONAL_LEFT;
+        maxField = &status.x_max;
+        minField = &status.x_min;
+        stepField = &status.x_steps;
+    } else{
+        exit(0);
+    }
+
+
+    setMovement(direction1, 5000);
+    while (*maxField != 1) {
         sendCommand(MOTOR_GET_STATUS, &status);
     }
     // Go Down
-    int maxSteps = status.y_steps;
-    setMovement(MOTOR_DIRECTIONAL_DOWN, 5000);
-    while(status.y_min != 1){
+    int maxSteps = *stepField;
+    setMovement(direction2, 5000);
+    while (*minField != 1) {
         sendCommand(MOTOR_GET_STATUS, &status);
     }
-    int minSteps = status.y_steps;
+    int minSteps = *stepField;
 
     // Calculate center:
     int center = ((maxSteps - minSteps) / 2) + minSteps;
 
-
-    printf("startSteps: %d\n", startSteps);
-    printf("minSteps: %d\n", minSteps);
-    printf("maxSteps: %d\n", maxSteps);
-    printf("center: %d\n", center);
-    sleep(1);
-    setMovement(MOTOR_DIRECTIONAL_UP, 5000);
-    while(status.y_steps <  center){
+    //sleep(1);
+    setMovement(direction1, 5000);
+    while (*stepField < center) {
         sendCommand(MOTOR_GET_STATUS, &status);
     }
     setStop();
-    printf("currentsteps: %d\n", status.y_steps);
+
+    //printf("startSteps: %d\n", startSteps);
+    //printf("minSteps: %d\n", minSteps);
+    //printf("maxSteps: %d\n", maxSteps);
+    //printf("center: %d\n", center);
+    //printf("currentsteps: %d\n", status.y_steps);
 
 
 
@@ -162,14 +188,17 @@ int main(int argc, char *argv[]) {
         case 'r':
             setMovement(MOTOR_DIRECTIONAL_RIGHT, stepsize);
             break;
-        case 'c':
-            centerUpDown();
+        case 'v':
+            calibrate(AXIS_VERTICAL);
+            break;
+        case 'h':
+            calibrate(AXIS_HORIZONAL);
             break;
         default:
             printf("Invalid Direction Argument %c\n", c);
             exit(EXIT_FAILURE);
     }
-    //getStatus();
+    getStatus();
 
     return 0;
 
