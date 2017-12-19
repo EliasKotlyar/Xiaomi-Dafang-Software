@@ -25,7 +25,7 @@
 #define MOTOR0_ST3_GPIO		GPIO_PB(21)	/**< Phase C */
 #define MOTOR0_ST4_GPIO		GPIO_PB(22)	/**< Phase D */
 
-#define MOTOR0_MAX_SPEED	1000		/**< unit : ns */
+#define MOTOR0_MAX_SPEED	10000		/**< unit : ns */
 #define MOTOR0_MIN_SPEED	10
 
 //#define MOTOR1_MIN_GPIO		41
@@ -40,7 +40,7 @@
 #define MOTOR1_ST3_GPIO		79
 #define MOTOR1_ST4_GPIO		80
 
-#define MOTOR1_MAX_SPEED	1000
+#define MOTOR1_MAX_SPEED	10000
 #define MOTOR1_MIN_SPEED	10
 
 /****************************** MOTOR END ************************************/

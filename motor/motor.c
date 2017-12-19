@@ -89,7 +89,7 @@ void getStatus() {
 
 void calibrate(int axis) {
 
-
+    setSpeed(1200);
     reset();
     motor_status_st status;
     sendCommand(MOTOR_GET_STATUS, &status);
