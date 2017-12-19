@@ -205,7 +205,7 @@ static irqreturn_t motor_gpio_interrupt(int irq, void *dev_id) {
 
 
     gpioValue = gpio_get_value(gpio);
-    dev_err(info->dev, "Checking PIN %d. Pin Value %d\n", gpio, gpioValue);
+    //dev_err(info->dev, "Checking PIN %d. Pin Value %d\n", gpio, gpioValue);
     if (gpioValue == 1) {
         *value = 0;
     } else {
