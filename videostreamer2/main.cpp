@@ -153,12 +153,13 @@ int main(int argc, char **argv) {
     std::string murl = "multicast";
     bool useThread = true;
     in_addr_t maddr = INADDR_NONE;
-    bool audio_en = false;
+
 
     // decode parameters
     int c = 0;
     //while ((c = getopt (argc, argv, "hW:H:Q:P:F:v::O:T:m:u:rsM:")) != -1)
 #if AUDIO_STREAM
+    bool audio_en = false;
     while ((c = getopt (argc, argv, "hb:W:H:g:Q:P:F:i:O:T:m:u:M:aj:")) != -1)
 #else
     while ((c = getopt(argc, argv, "hb:W:H:g:Q:P:F:i:O:T:m:u:M:j:")) != -1)
