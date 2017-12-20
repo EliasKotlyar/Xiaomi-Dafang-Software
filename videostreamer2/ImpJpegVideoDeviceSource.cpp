@@ -56,6 +56,8 @@ int ImpJpegVideoDeviceSource::initDevice(impParams params) {
     impEncoder = new ImpEncoder(params);
     unsigned timePerFrame = 1000000 / params.framerate;
     fTimePerFrame = timePerFrame;
+    fprintf(stderr,
+            "Init Device...\n");
     return 0;
 }
 
@@ -104,6 +106,9 @@ void ImpJpegVideoDeviceSource::doGetNextFrame() {
     fPresentationTime = fLastCaptureTime;
     fDurationInMicroseconds = fTimePerFrame;
 #else
+    fprintf(stderr,
+            "Got Frame...\n");
+
     gettimeofday(&fLastCaptureTime, &Idunno);
     if (framecount == 0)
         starttime = fLastCaptureTime;

@@ -307,11 +307,9 @@ int main(int argc, char **argv) {
             params.width = width;
             params.height = height;
             params.mode = IMP_MODE_JPEG;
+            params.framerate = fps;
             params.nightvision = false;
-
-
-
-            videoES = ImpJpegVideoDeviceSource::createNew(*env, params);
+            //videoES = ImpJpegVideoDeviceSource::createNew(*env, params);
 
 
             //videoES = V4L2DeviceSource::createNew(*env, 0, useThread);
@@ -319,7 +317,7 @@ int main(int argc, char **argv) {
         }
 
         /*  check if create a Device source success */
-        if (videoES == NULL) {
+        if (videoES != NULL) {
             //LOG(FATAL) << "Unable to create source for device " << dev_name;
             fprintf(stderr, "Unable to create source for device  %s \n", dev_name);
         } else {
