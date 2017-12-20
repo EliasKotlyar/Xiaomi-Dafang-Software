@@ -23,7 +23,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <fcntl.h>
-
+#include "ImpJpegVideoDeviceSource.h"
 
 // libv4l2
 #include <linux/videodev2.h>
@@ -47,7 +47,7 @@ TaskScheduler *scheduler = NULL;
 
 // create RTSP server
 RTSPServer *rtspServer = NULL;
-V4L2DeviceSource *videoES = NULL;
+FramedSource *videoES = NULL;
 
 StreamReplicator *replicator = NULL;
 
@@ -303,8 +303,15 @@ int main(int argc, char **argv) {
         if (format == V4L2_PIX_FMT_H264)
             videoES = H264_V4L2DeviceSource::createNew(*env, 0, useThread);
         else {
-            unsigned timePerFrame = 1000000 / fps; // microseconds
-            videoES = ImpJpegVideoDeviceSource::createNew(*env, timePerFrame);
+            impParams params;
+            params.width = width;
+            params.height = height;
+            params.mode = IMP_MODE_JPEG;
+            params.nightvision = false;
+
+
+
+            videoES = ImpJpegVideoDeviceSource::createNew(*env, params);
 
 
             //videoES = V4L2DeviceSource::createNew(*env, 0, useThread);

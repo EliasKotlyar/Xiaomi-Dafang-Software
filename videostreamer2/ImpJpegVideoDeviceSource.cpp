@@ -38,13 +38,13 @@
 
 ImpJpegVideoDeviceSource *
 ImpJpegVideoDeviceSource::createNew(UsageEnvironment &env,
-                                    unsigned timePerFrame) {
+                                    unsigned timePerFrame,int width,int height) {
     int fd = -1;
 #ifndef JPEG_TEST
 
 #endif
     try {
-        return new ImpJpegVideoDeviceSource(env, fd, timePerFrame);
+        return new ImpJpegVideoDeviceSource(env, fd, timePerFrame,width,height);
     } catch (DeviceException) {
         return NULL;
     }
@@ -52,27 +52,17 @@ ImpJpegVideoDeviceSource::createNew(UsageEnvironment &env,
 
 #ifndef JPEG_TEST
 
-int ImpJpegVideoDeviceSource::initDevice(UsageEnvironment &env, int fd) {
-
-    impParams params;
-    params.width = 640;
-    params.height = 480;
-    params.mode = IMP_MODE_JPEG;
-    params.nightvision = false;
-
+int ImpJpegVideoDeviceSource::initDevice(impParams params) {
     impEncoder = new ImpEncoder(params);
-
-
-    //impEncoder = new ImpEncoder(IMP_MODE_JPEG,320,240);
-
-
+    unsigned timePerFrame = 1000000 / params.framerate;
+    fTimePerFrame = timePerFrame;
     return 0;
 }
 
 #endif // JPEG_TEST
 
 ImpJpegVideoDeviceSource
-::ImpJpegVideoDeviceSource(UsageEnvironment &env, int fd, unsigned timePerFrame)
+::ImpJpegVideoDeviceSource(UsageEnvironment &env, int fd, unsigned timePerFrame, impParams params)
         : JPEGVideoSource(env), fFd(fd), fTimePerFrame(timePerFrame) {
 #ifdef JPEG_TEST
     jpeg_dat = new unsigned char [MAX_JPEG_FILE_SZ];
@@ -84,7 +74,7 @@ ImpJpegVideoDeviceSource
     jpeg_datlen = fread(jpeg_dat, 1, MAX_JPEG_FILE_SZ, fp);
     fclose(fp);
 #else
-    if (initDevice(env, fd)) {
+    if (initDevice(params)) {
         throw DeviceException();
     }
 #endif

@@ -37,12 +37,12 @@ class DeviceException : public std::exception {
 class ImpJpegVideoDeviceSource : public JPEGVideoSource {
 public:
     static ImpJpegVideoDeviceSource *createNew(UsageEnvironment &env,
-                                               unsigned timePerFrame);
+                                               impParams params);
     // "timePerFrame" is in microseconds
 
 protected:
     ImpJpegVideoDeviceSource(UsageEnvironment &env,
-                             int fd, unsigned timePerFrame);
+                             int fd, impParams params);
 
     // called only by createNew()
     virtual ~ImpJpegVideoDeviceSource();
