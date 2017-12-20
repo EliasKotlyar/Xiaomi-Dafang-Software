@@ -83,6 +83,7 @@ static void c_set_unity(char *v1, char *v2, void *t);
 static void c_add_mime_types_file(char *v1, char *v2, void *t);
 static void c_add_mime_type(char *v1, char *v2, void *t);
 static void c_add_alias(char *v1, char *v2, void *t);
+void c_add_auth(char *v1, char *v2, void *t);
 static void c_add_access(char *v1, char *v2, void *t);
 
 struct ccommand {
@@ -163,6 +164,9 @@ struct ccommand clist[] = {
     {"CGIRlimitCpu", S2A, c_set_int, &cgi_rlimit_cpu},
     {"CGIRlimitData", S2A, c_set_int, &cgi_rlimit_data},
     {"CGINice", S2A, c_set_int, &cgi_nice},
+#endif
+#ifdef USE_AUTH
+    { "Auth", S2A, c_add_auth, NULL },
 #endif
     {"CGIEnv", S2A, c_add_cgi_env, NULL},
 };
@@ -366,6 +370,24 @@ static void c_add_access(char *v1, char *v2, void *t)
             "This version of Boa doesn't support access controls.\n"
             "Please recompile with --enable-access-control.\n");
 #endif                          /* ACCESS_CONTROL */
+}
+
+void c_add_auth(char *arg1, char *arg2, void *t)
+{
+#ifdef USE_AUTH
+	// format is Auth PATH [TYPE:]FILE
+	char *file = strchr(arg2, ':');
+	if(file) {
+		*file = '\0';
+		file++;
+		if(file[0] == '\0') file = NULL;
+	}
+	else {
+		file = arg2;
+		arg2 = "Basic";
+	}
+	auth_add(arg1, file, arg2);
+#endif
 }
 
 struct ccommand *lookup_keyword(char *c)

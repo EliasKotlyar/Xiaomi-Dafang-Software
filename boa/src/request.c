@@ -853,6 +853,11 @@ int process_header_end(request * req)
         SQUASH_KA(req);
         return 0;               /* failure, close down */
     }
+#ifdef USE_AUTH
+				if (!auth_authorize(req)) {
+					return 0;
+				}
+#endif				
 
     if (req->method == M_POST) {
         req->post_data_fd = create_temporary_file(1, NULL, 0);
@@ -923,6 +928,10 @@ int process_option_line(request * req)
             add_accept_header(req, value);
 #endif
             return 1;
+#ifdef USE_AUTH
+	} else if (!memcmp(line,"AUTHORIZATION",14) && !req->authorization) {
+		req->authorization = value;
+#endif
         }
         break;
     case 'C':

@@ -189,6 +189,8 @@ int req_write_escape_html(request * req, const char *msg);
 int req_flush(request * req);
 char *escape_uri(const char *uri);
 char *escape_string(const char *inp, char *buf);
+int base64decode(void *dst,char *src,int maxlen);
+void base64encode(unsigned char *from, char *to, int len);
 
 /* timestamp */
 void timestamp(void);
@@ -225,5 +227,13 @@ void range_pool_empty(void);
 void range_pool_push(Range * r);
 int ranges_fixup(request * req);
 int range_parse(request * req, const char *str);
- 
+/* auth */
+#ifdef USE_AUTH
+void auth_add(char *directory,char *file, char *type);
+int auth_authorize(request * req);
+void auth_check();
+void nls_convert(unsigned char * buffer, unsigned char * table, long count);
+void dump_auth(void);
+#endif
+
 #endif

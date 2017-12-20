@@ -58,6 +58,12 @@
 #define ALIAS_HASHTABLE_SIZE                    17
 #define PASSWD_HASHTABLE_SIZE		        47
 
+#ifdef EMBED
+#define AUTH_HASHTABLE_SIZE 1
+#else
+#define AUTH_HASHTABLE_SIZE 47
+#endif
+
 #define REQUEST_TIMEOUT				60
 
 #define MIME_TYPES_DEFAULT                      "/etc/mime.types"

@@ -134,6 +134,9 @@ struct request {                /* pending requests */
     unsigned long filepos;      /* position in file */
     unsigned long bytes_written; /* total bytes written (sans header) */
     char *data_mem;             /* mmapped/malloced char array */
+#ifdef USE_AUTH
+	char *authorization;
+#endif
 
     char *logline;              /* line to log file */
 
@@ -182,6 +185,8 @@ struct request {                /* pending requests */
 
     unsigned int kacount;                /* keepalive count */
     int client_stream_pos;      /* how much have we read... */
+
+    char user[16];			/* user's login name */
 
     /* everything below this line is kept regardless */
     char buffer[BUFFER_SIZE + 1]; /* generic I/O buffer */

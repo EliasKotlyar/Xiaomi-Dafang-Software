@@ -15,15 +15,15 @@ GCC_FLAGS = -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual \
 srcdir = @srcdir@
 VPATH = @srcdir@:@srcdir@/../extras
 LDFLAGS = @LDFLAGS@
-LIBS = @LIBS@
-CFLAGS = @CFLAGS@
+LIBS = @LIBS@ -lcrypt
+CFLAGS = @CFLAGS@ -DUSE_AUTH
 CPPFLAGS = @CPPFLAGS@ -I@srcdir@ -I.
 @ifGNUmake@DEPEND = .depend
 
 CC = @CC@ 
 CPP = @CPP@
 
-SOURCES = alias.c boa.c buffer.c cgi.c cgi_header.c config.c escape.c \
+SOURCES = auth.c alias.c boa.c buffer.c cgi.c cgi_header.c config.c escape.c \
 	get.c hash.c ip.c log.c mmap_cache.c pipe.c queue.c range.c \
 	read.c request.c response.c signals.c util.c sublog.c \
 	@ASYNCIO_SOURCE@ @ACCESSCONTROL_SOURCE@
