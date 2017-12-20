@@ -1,0 +1,19 @@
+This file keeps track of ambiguities and just plain problems found in the
+V4L2 specification while writing and testing this compliance test tool.
+
+At some point in time these issues should be resolved, but by placing them
+here they won't be forgotten.
+
+- Duplicate controls: V4L2_CID_EXPOSURE (user class) and V4L2_CID_EXPOSURE_ABSOLUTE
+  (camera class).
+
+- Need an ENUMFMT flag to mark mplanar formats.
+
+- crop/compose impossible if ENUM_FRAMESIZES reports more than 1 discrete framesize.
+
+- continuous/stepwise framesizes: bounds of scaler? Should this be required if a
+  scaler is present?
+
+- Should calling s_std(g_std()) reset the format?
+
+- Latency checks: warn when ioctls take a very long time.

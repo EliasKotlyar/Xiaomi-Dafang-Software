@@ -1,0 +1,50 @@
+libv4l todo:
+------------
+
+-don't automatically enable the software effects (awb, gamma) on cameras
+ which need flipping, most of these only produce yuv data and software
+ effects are very expensive on yuv data
+
+-move pixart rotate 90 hack to v4lconvert_decode_jpeg_tinyjpeg, since it
+ is only needed on select pixart cameras, which use this function for
+ decoding, this will nicely cleanup the main conversion routine
+
+-move usb info gathering code from libv4lcontrol into a new
+ libv4l deviceinfo (devicequirks?) sublib, since it really does not have
+ all that much to do with the emulated controls
+
+-make dmi + usb matching more generic, with wildcards support, etc. To allow
+ for a more flexible upside down table where one entry can match multiple
+ models, hopefully lowering maintainance costs of the upside down device
+ list a bit
+
+-some sort of generic rotation framework (for tablets)?
+
+-rewrite video effects code to be even more plugin based
+
+-add code for software auto focus
+
+-libv4lconvert: v4lconvert_do_try_format should always prefer smaller then
+ requested resolutions over bigger then requested ones
+
+-add support for setting / getting the number of read buffers
+
+-add code to v4l2_read to not return frames more then say 5 seconds old
+
+-take the possibility of pitch != width into account everywhere
+
+-make updating of parameters happen based on time elapsed rather then
+ frames
+
+-get standardized CID for AUTOGAIN_TARGET upstream and switch to that
+
+Nice to have:
+
+-support packed yuv as output format so that we aren't forced to do
+ conversion on upside down uvc cams
+
+-add a software rotation control (0 / 90 / 180 / 270 degrees) for tablets.
+
+
+utils todo:
+-----------

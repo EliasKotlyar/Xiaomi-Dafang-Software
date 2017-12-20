@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/" >
+	<file>exit.png</file>
+	<file>fileopen.png</file>
+	<file>fileclose.png</file>
+	<file>start.png</file>
+	<file>step.png</file>
+	<file>snapshot.png</file>
+	<file>saveraw.png</file>
+	<file>video-television.png</file>
+	<file>qv4l2.png</file>
+	<file>enterbutt.png</file>
+	<file>fullscreen.png</file>
+	<file>fullscreenexit.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,184 @@
+Introduction
+------------
+
+libv4l is a collection of libraries which adds a thin abstraction layer on
+top of video4linux2 devices. The purpose of this (thin) layer is to make it
+easy for application writers to support a wide variety of devices without
+having to write separate code for different devices in the same class.
+
+All libv4l components are licensed under the GNU Lesser General Public
+License version 2 or (at your option) any later version.
+
+libv4l consists of 3 different libraries:
+
+
+libv4lconvert
+-------------
+
+libv4lconvert started as a library to convert from any (known) pixelformat to
+V4l2_PIX_FMT_BGR24, RGB24, YUV420 or YVU420.
+
+The list of know source formats is large and continually growing, so instead
+of keeping an (almost always outdated) list here in the README, I refer you
+to the source, see the list of defines at the top of
+libv4lconvert/libv4lconvert.c for the full list.
+For more details on the v4lconvert_ functions see libv4lconvert.h.
+
+Later on libv4lconvert was expanded to also be able to do various video
+processing functions to improve webcam video quality on a software basis. So
+the name no longer 100% covers the functionality. The video processing is
+split in to 2 parts, libv4lconvert/control and libv4lconvert/processing.
+
+The control part is used to offer video controls which can be used to control
+the video processing functions made available by libv4lconvert/processing.
+These controls are stored application wide (until reboot) by using a
+persistent shared memory object.
+
+libv4lconvert/processing offers the actual video processing functionality.
+
+
+libv4l1
+-------
+
+This offers functions like v4l1_open, v4l1_ioctl, etc. which can by used to
+quickly make v4l1 applications work with v4l2 devices. These functions work
+exactly like the normal open/close/etc, except that libv4l1 does full emulation
+of the v4l1 api on top of v4l2 drivers, in case of v4l1 drivers it will just
+pass calls through. For more details on the v4l1_ functions see libv4l1.h .
+
+
+libv4l2
+-------
+
+This offers functions like v4l2_open, v4l2_ioctl, etc. which can by used to
+quickly make v4l2 applications work with v4l2 devices with weird formats.
+libv4l2 mostly passes calls directly through to the v4l2 driver. When the
+app does a TRY_FMT / S_FMT with a not supported format libv4l2 will get in
+the middle and emulate the format (if an app wants to know which formats the
+hardware can _really_ do it should use ENUM_FMT, not randomly try a bunch of
+S_FMT's). For more details on the v4l2_ functions see libv4l2.h .
+
+
+libdvbv5
+--------
+
+This library provides the DVBv5 API to userspace programs. It can be used to
+open DVB adapters, tune transponders and read PES and other data streams.
+There are as well several parsers for DVB, ATSC, ISBT formats.
+
+The API is currently EXPERIMENTAL and likely to change.
+Run configure with --enable-libdvbv5 in order to build a shared lib and
+install the header files.
+
+
+wrappers
+--------
+
+The functionality provided by libv4l1 for v4l1 apps and libv4l2 for v4l2 apps
+can also be used by existing apps without modifying them. For this purpose
+2 wrapper libraries are provided which can be preloaded before starting the
+application using the LD_PRELOAD environment variable. These wrappers will
+then intercept calls to open/close/ioctl/etc. and if these calls directed
+towards a video device the wrapper will redirect the call to the libv4lX
+counterparts.
+
+The preloadable libv4l1 wrapper which adds v4l2 device compatibility to v4l1
+applications is called v4l1compat.so. The preloadable libv4l2 wrapper which
+adds support for various pixelformats to v4l2 applications is called
+v4l2convert.so.
+
+Example usage (after install in default location):
+$ export LD_PRELOAD=/usr/local/lib/libv4l/v4l1compat.so
+$ camorama
+
+
+Prerequisites
+-------------
+
+libv4l requires shmem file system support in the kernel (CONFIG_SHMEM).
+
+
+FAQ
+---
+
+Q: Why libv4l, whats wrong with directly accessing v4l2 devices ?
+Q: Do we really need yet another library ?
+A: Current webcam using applications like ekiga contain code to handle many
+different specific pixelformats webcam's use, but that code only supports a
+small subset of all native webcam (compressed) pixelformats. Other current
+v4l2 applications do not support anything but rgb pixelformats (xawtv for
+example) and this will not work with most webcams at all.
+
+With gspca being ported to v4l2 and thus decoding to normal formats being
+removed from the device driver as this really belongs in userspace, ekiga
+would need to be extended with many more often chip dependent formats, like
+the bayer compression used by the spca561 and the (different) compression used
+by the pac207 and the (again different) compression used by the sn9c102. Adding
+support for all these formats should not be done at the application level, as
+then it needs to be written for each application separately. Licensing issues
+with the decompressors will then also become a problem as just cut and pasting
+from one application to another is bound to hit license incompatibilities.
+
+So clearly this belongs in a library, and in a library with a license which
+allows this code to be used from as many different applications as possible.
+Hence libv4l was born.
+
+
+Q: Under which license may I use and distribute libv4l?
+A: The libv4l libraries are licensed under the GNU Library General Publishing
+License version 2 or (at your option) any later version. See the included
+COPYING.LIBV4L file. The decompression helpers are licensed under the GNU
+Library Publishing License version 2 (as they are derived from kernel code)
+
+
+Q: Okay so I get the use of having a libv4lconvert, but why libv4l1 ?
+A: Many v4l2 drivers do not offer full v4l1 compatibility. They often do not
+implemented the CGMBUF ioctl and v4l1 style mmap call. Adding support to all
+these drivers for this is a lot of work and more importantly unnecessary
+adds code to kernel space.
+
+Also even if the CGMBUF ioctl and v4l1 style mmap are supported, then most
+cams still deliver pixelformats which v4l1 applications do not understand.
+
+This libv4l1 was born as an easy way to get v4l1 applications to work with
+v4l2 devices without requiring full v4l1 emulation (including format
+conversion) in the kernel, and without requiring major changes to the
+applications.
+
+
+Q: Why should I use libv4l2 in my app instead of direct device access
+   combined with libv4lconvert?
+A: libv4l2 is mainly meant for quickly and easily adding support for more
+pixelformats to existing v4l2 applications. So if you feel better directly
+accessing the device in combination with libv4lconvert that's fine too.
+
+Notice that libv4l2 also does emulation of the read() call on devices which
+do not support it in the driver. In the background this uses mmap buffers
+(even on devices which do support the read call). This mmap gives libv4lconvert
+zero-copy access to the captured frame, and then it can write the converted
+data directly to the buffer the application provided to v4l2_read(). Thus
+another reason to use libv4l2 is to get the no memcpy advantage of the mmap
+capture method combined with the simplicity of making a simple read() call.
+
+
+Q: Where to send bugreports / questions?
+A: Please send libv4l questions / bugreports to the:
+   Linux Media Mailing List <linux-media@vger.kernel.org>
+   Subscription is not necessary to send mail to this list. If you're not
+   subscribed please put yourself in the CC of your original mail so you
+   will receive replies.
+
+Q: How do I port my application to libv4l1?
+A: Just replace the open call for your device by v4l1_open and all
+   following calls concerning this device file descriptor by their
+   counterpart v4l1_xxx (for a list see libv4l1.h).
+
+Q: How do I port my application to libv4l2?
+A: Just replace the open call for your device by v4l2_open and all
+   following calls concerning this device file descriptor by their
+   counterpart v4l2_xxx (for a list see libv4l2.h).
+
+Q: I still need an example how to convert my application!
+A: Check out the patches for the VLC media player:
+   https://trac.videolan.org/vlc/attachment/ticket/1804/vlc-0.8.6-libv4l1.patch
+   https://trac.videolan.org/vlc/attachment/ticket/1804/vlc-0.9.3-libv4l2.patch

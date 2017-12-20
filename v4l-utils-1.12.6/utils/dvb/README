@@ -1,0 +1,194 @@
+DVB TOOLS
+=========
+
+This is a series of tools written to help testing and working with DVB,
+using its latest V5 API. The tools can also work with the DVBv3 API.
+
+The current tools are:
+
+dvb-fe-tool - a simple test application, that reads from the frontend.
+	      it also allows one to change the default delivery system.
+	      In the future, it may be used to change any property
+	      via command line.
+
+dvb-format-convert - converts from zap and scan "initial-tuning-data-file"
+	      into the new format defined to work with DVBv5;
+
+dvbv5-scan - a DVBv5 scan tool;
+
+dvbv5-zap - a DVBv5 zap tool. It allow to tune into a DVB channel, and
+	    to watch to a DVB service (e. g. receiving the video and audio
+	    streams, via another application using the dvr device).
+
+Each application code is very small, as most of the code are on some
+generic code that will become a library in the future.
+
+CONTENTS OF THE TREE
+====================
+
+dvb-fe-tool.c, dvb-format-convert.c, dvbv5-zap.c, dvbv5-scan.c: tools code.
+
+Basically, parses the options from userspace and calls the other code
+to do what was requested by the user.
+
+CHANNEL/SERVICE FILE FORMAT
+===========================
+
+Instead of having two different files, one for services, and another for
+channels/transponders, I opted to use just one format for both. The
+format is:
+
+[channel]
+key1=value1
+key2=value2
+key3=value3
+...
+keyn=valuen
+
+
+lines with # are discarted by the parsers. Also, whitespaces/tabs before
+the keys and before/after the equal sign.
+
+Be careful: whitespace in the middle of the value are not discarded.
+
+A typical service would be like:
+
+[TV Brasil HD]
+	VCHANNEL = 2.2
+	SERVICE_ID = 16160
+	VIDEO_PID = 770
+	AUDIO_PID = 514 614
+	FREQUENCY = 479142857
+	MODULATION = QAM/AUTO
+	BANDWIDTH_HZ = 6000000
+	INVERSION = AUTO
+	CODE_RATE_HP = AUTO
+	CODE_RATE_LP = NONE
+	GUARD_INTERVAL = AUTO
+	TRANSMISSION_MODE = AUTO
+	HIERARCHY = NONE
+	ISDBT_LAYER_ENABLED = 7
+	ISDBT_PARTIAL_RECEPTION = 0
+	ISDBT_SOUND_BROADCASTING = 0
+	ISDBT_SB_SUBCHANNEL_ID = 0
+	ISDBT_SB_SEGMENT_IDX = 0
+	ISDBT_SB_SEGMENT_COUNT = 0
+	ISDBT_LAYERA_FEC = AUTO
+	ISDBT_LAYERA_MODULATION = QAM/AUTO
+	ISDBT_LAYERA_SEGMENT_COUNT = 0
+	ISDBT_LAYERA_TIME_INTERLEAVING = 0
+	ISDBT_LAYERB_FEC = AUTO
+	ISDBT_LAYERB_MODULATION = QAM/AUTO
+	ISDBT_LAYERB_SEGMENT_COUNT = 0
+	ISDBT_LAYERB_TIME_INTERLEAVING = 0
+	ISDBT_LAYERC_FEC = AUTO
+	ISDBT_LAYERC_MODULATION = QAM/AUTO
+	ISDBT_LAYERC_SEGMENT_COUNT = 0
+	ISDBT_LAYERC_TIME_INTERLEAVING = 0
+	DELIVERY_SYSTEM = ISDBT
+
+Just the channel description for it would be:
+
+[CHANNEL]
+	FREQUENCY = 479142857
+	MODULATION = QAM/AUTO
+	BANDWIDTH_HZ = 6000000
+	INVERSION = AUTO
+	CODE_RATE_HP = AUTO
+	CODE_RATE_LP = NONE
+	GUARD_INTERVAL = AUTO
+	TRANSMISSION_MODE = AUTO
+	HIERARCHY = NONE
+	ISDBT_LAYER_ENABLED = 7
+	ISDBT_PARTIAL_RECEPTION = 0
+	ISDBT_SOUND_BROADCASTING = 0
+	ISDBT_SB_SUBCHANNEL_ID = 0
+	ISDBT_SB_SEGMENT_IDX = 0
+	ISDBT_SB_SEGMENT_COUNT = 0
+	ISDBT_LAYERA_FEC = AUTO
+	ISDBT_LAYERA_MODULATION = QAM/AUTO
+	ISDBT_LAYERA_SEGMENT_COUNT = 0
+	ISDBT_LAYERA_TIME_INTERLEAVING = 0
+	ISDBT_LAYERB_FEC = AUTO
+	ISDBT_LAYERB_MODULATION = QAM/AUTO
+	ISDBT_LAYERB_SEGMENT_COUNT = 0
+	ISDBT_LAYERB_TIME_INTERLEAVING = 0
+	ISDBT_LAYERC_FEC = AUTO
+	ISDBT_LAYERC_MODULATION = QAM/AUTO
+	ISDBT_LAYERC_SEGMENT_COUNT = 0
+	ISDBT_LAYERC_TIME_INTERLEAVING = 0
+	DELIVERY_SYSTEM = ISDBT
+
+USAGE WITH SATELLITE DELIVERY SYSTEMS
+=====================================
+
+The dvbv5-zap and dvbv5-scan can now work with DVB-S/DVB-S2
+systems. A new code, yet to be tested, has the following
+features:
+	- support for common types of LNBf;
+	- DISEqC switching (SMATV);
+	- Bandstacking;
+	- Unicable/SRC.
+
+Additional parameters for satellite delivery systems are needed:
+
+	- l <lnbf>
+
+selects the LNBf type. Using an invalid value like "help" shows
+what's currently supported.
+
+	- S <sat_number>
+
+Selects satellite number, between 0 to 3, for SMATV, or between
+0 to 15 for SCR/Unicable. The highest bit is used to select between
+position A and position B.
+
+If not specified, disables DISEqC and Unicable/SCR.
+
+For SMATV, this actually changes the DISEqC "option"
+and "position" parameter. According with the specs, for
+position B, tone should be off, and tone burst should
+be miniA.
+
+	-U <freq_bpf>
+
+Selects the band-pass filter frequency used by the Unicable device. Currently,
+only the mandatory DISEqC commands were implemented. It means that
+the library is currently not able to use bi-directional DISEqC commands
+to detect the available frequencies.
+
+	-W <extra time in ms>
+
+The DISEqC logic will wait for 15 ms. If this parameter is
+specified, it will add  the extra time to the 15ms delay.
+
+For LNBf devices that use bandstacking (e. g. the ones that use
+different LO frequrencies for V and H polarization), the code will
+always use 13 Volts and will disable tone/tone burst.
+
+Currently, C-Band multi and DishPro bandstacking LNBf's are
+supported.
+
+Tests are welcome!
+
+Note: Currently, the implementation uses DISEqC only uses the
+command [E0 10 38 xx], where xx selects the DISEqC input.
+Additional support could be needed for more sophisticated
+arrangements.
+
+CURRENT ISSUES
+==============
+
+The dvb-fe-tool and the dvb-format-convert are generic enough to work
+with all delivery systems. However, the other two tools need to do
+some diferent things, depending on the delivery system, as other
+MPEG-TS tables and descriptors may be needed.
+
+Currently, the tools were tested with DVB-C, DVB-T, DVB-T2, DVB-S, DVB-S2,
+ATSC and ISDB-T.
+
+Patches are welcome!
+
+Regards,
+Mauro Carvalho Chehab
+2013-Nov-29

@@ -1,0 +1,51 @@
+--- freebsd/include/linux/input.h.orig	2012-12-05 10:18:56.000000000 +0100
++++ freebsd/include/linux/input.h	2012-12-05 10:22:11.228350200 +0100
+@@ -8,11 +8,47 @@
+ #ifndef _INPUT_H
+ #define _INPUT_H
+ 
+-
++#include <stdint.h>
+ #include <sys/time.h>
+ #include <sys/ioctl.h>
+ #include <sys/types.h>
++
++#ifndef HAVE_LINUX_INTEGER_TYPES
++/* XXX remove when depending software has been updated */
++#ifndef __u64
++typedef uint64_t __u64;
++#endif
++#ifndef __u32
++typedef uint32_t __u32;
++#endif
++#ifndef __u16
++typedef uint16_t __u16;
++#endif
++#ifndef __u8
++typedef uint8_t __u8;
++#endif
++
++#ifndef __s64
++typedef int64_t __s64;
++#endif
++#ifndef __s32
++typedef int32_t __s32;
++#endif
++#ifndef __s16
++typedef int16_t __s16;
++#endif
++#ifndef __s8
++typedef int8_t __s8;
++#endif
++#endif
++
++#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
++#define __user
++#define	_IOC_READ   IOC_OUT
++#define	_IOC_WRITE  IOC_IN
++#else
+ #include <linux/types.h>
++#endif
+ 
+ 
+ /*
