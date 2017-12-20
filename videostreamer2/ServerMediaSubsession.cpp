@@ -142,7 +142,7 @@ MulticastServerMediaSubsession* MulticastServerMediaSubsession::createNew(UsageE
 	const unsigned maxCNAMElen = 100;
 	unsigned char CNAME[maxCNAMElen+1];
 	gethostname((char*)CNAME, maxCNAMElen);
-	CNAME[maxCNAMElen] = 'SONiX Camera\0'; 
+	//CNAME[maxCNAMElen] = "SONiX Camera\0";
 	RTCPInstance* rtcpInstance = RTCPInstance::createNew(env, rtcpGroupsock,  500, CNAME, videoSink, NULL);
 
 	// Start Playing the Sink
