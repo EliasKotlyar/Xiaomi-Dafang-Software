@@ -28,17 +28,18 @@ INC			+= -I $(MIDDLEWARE_INS_DIR)/UsageEnvironment/include
 EXTRA_LDFLAGS	= 
 EXTRA_CFLAGS	+= -I$(AUTOCONF_DIR)
 
-CFLAGS      := -Wall -O2 $(EXTRA_CFLAGS) $(INC) -DSOCKLEN_T=socklen_t -DNO_SSTREAM=1 -D_LARGEFILE_SOURCE=1  -D_FILE_OFFSET_BITS=64 -static
+CFLAGS      += -Wall -O2 -I. $(INC) -DSOCKLEN_T=socklen_t -DNO_SSTREAM=1 -D_LARGEFILE_SOURCE=1  -D_FILE_OFFSET_BITS=64
 #CFLAGS		+= -DBSD=1 -DLOCALE_NOT_USED
 #CFLAGS		+= -DAUDIO_STREAM=1
 #CFLAGS		+= -DDEBUG
 
-LDFLAGS     := $(EXTRA_LDFLAGS) -Wl,--as-needed -lpthread -lm -lrt
+LDFLAGS     = -L. -muclibc -O2 -lpthread -lm -lrt
 
-LIVE_LIB 	= $(MIDDLEWARE_INS_DIR)/UsageEnvironment/libUsageEnvironment.a
-LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/groupsock/libgroupsock.a
-LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/BasicUsageEnvironment/libBasicUsageEnvironment.a
 LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/liveMedia/libliveMedia.a
+LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/groupsock/libgroupsock.a
+LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/UsageEnvironment/libUsageEnvironment.a
+LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/BasicUsageEnvironment/libBasicUsageEnvironment.a
+
 
 
 SRC_OBJ	= main.o 
@@ -61,7 +62,7 @@ all: $(targets)
 
 
 rtsp_server:  $(SRC_OBJ)
-	$(CPP) -o $@ $^  $(LDFLAGS) $(LIVE_LIB)
+	$(CPP) -o$@  $(LDFLAGS)  $^  $(LIVE_LIB)
 	$(STRIP) $@
 
 
