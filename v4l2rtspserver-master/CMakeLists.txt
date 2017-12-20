@@ -72,8 +72,11 @@ if (NOT LIBLIVE555_INCLUDE_DIR)
 endif (NOT LIBLIVE555_INCLUDE_DIR)
 
 find_path(LIBLIVE555_INCLUDE_DIR liveMedia/liveMedia.hh)
+include_directories(../live/liveMedia/include)
+#include_directories(../live/liveMedia/)
 foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnvironment)
-	include_directories(${LIBLIVE555_INCLUDE_DIR}/${LIBLIVE555_module}) 
+	include_directories(../live/${LIBLIVE555_module}/include)
+
 endforeach (LIBLIVE555_module)
 
 set(LIBLIVE555_LIBRARIES "")
@@ -83,7 +86,13 @@ foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnviro
 		set(LIBLIVE555_LIBRARIES ${LIBLIVE555_LIBRARIES} ${${LIBLIVE555_module}_LIBRARY})
 	endif ( ${LIBLIVE555_module}_LIBRARY )
 endforeach (LIBLIVE555_module)
-target_link_libraries(${PROJECT_NAME} ${LIBLIVE555_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/live/liveMedia/libliveMedia.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/live/groupsock/libgroupsock.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/live/UsageEnvironment/libUsageEnvironment.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/live/BasicUsageEnvironment/libBasicUsageEnvironment.a")
+
+
+
 
 #testing
 enable_testing()
