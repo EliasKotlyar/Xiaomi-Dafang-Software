@@ -246,7 +246,7 @@ void V4L2DeviceSource::videocallback( const struct timeval *tv,
 			int keyFrame )
 {
 
-	static unsigned long serialNum = 0;
+	//static unsigned long serialNum = 0;
 
 	
 	if(data == NULL || len == 0) {

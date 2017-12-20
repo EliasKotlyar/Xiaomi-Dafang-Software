@@ -303,6 +303,10 @@ int main(int argc, char **argv) {
         if (format == V4L2_PIX_FMT_H264)
             videoES = H264_V4L2DeviceSource::createNew(*env, 0, useThread);
         else {
+            unsigned timePerFrame = 1000000 / fps; // microseconds
+            videoES = ImpJpegVideoDeviceSource::createNew(*env, timePerFrame);
+
+
             //videoES = V4L2DeviceSource::createNew(*env, 0, useThread);
             //mjpeg_qp
         }

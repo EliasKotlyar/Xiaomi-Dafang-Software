@@ -42,7 +42,7 @@ class AlsaDeviceSource: public FramedSource
 			~Frame()  { delete m_buffer; };
 			
 			char* m_buffer;
-			int m_size;
+			unsigned int m_size;
 			timeval m_timestamp;
 		};
 		
