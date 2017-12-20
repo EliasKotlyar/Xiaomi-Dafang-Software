@@ -39,8 +39,9 @@ LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/liveMedia/libliveMedia.a
 LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/groupsock/libgroupsock.a
 LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/UsageEnvironment/libUsageEnvironment.a
 LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/BasicUsageEnvironment/libBasicUsageEnvironment.a
-
-
+LIVE_LIB 	+= $(MIDDLEWARE_INS_DIR)/BasicUsageEnvironment/libBasicUsageEnvironment.a
+LIVE_LIB 	+= $(PWD)/uclibc/libimp.so
+LIVE_LIB 	+= $(PWD)/uclibc/libalog.so
 
 SRC_OBJ	= main.o 
 SRC_OBJ	+=ServerMediaSubsession.o
