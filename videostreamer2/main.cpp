@@ -118,7 +118,6 @@ void sighandler(int n) {
 }
 
 
-
 // -----------------------------------------
 //    entry point
 // -----------------------------------------
@@ -169,7 +168,10 @@ int main(int argc, char **argv) {
             case 'O':
                 outputFile = optarg;
                 break;
-                //case 'v':	verbose = 1; if (optarg && *optarg=='v') verbose++;  break;
+            case 'v':
+                verbose = 1;
+                if (optarg && *optarg == 'v') verbose++;
+                break;
             case 'm':
                 multicast = true;
                 if (optarg) murl = optarg;
@@ -300,7 +302,8 @@ int main(int argc, char **argv) {
         if (format == V4L2_PIX_FMT_H264)
             videoES = H264_V4L2DeviceSource::createNew(*env, 0, useThread);
         else {
-            videoES = V4L2DeviceSource::createNew(*env, 0, useThread);
+            //videoES = V4L2DeviceSource::createNew(*env, 0, useThread);
+            //mjpeg_qp
         }
 
         /*  check if create a Device source success */
@@ -381,7 +384,6 @@ int main(int argc, char **argv) {
 #if AUDIO_STREAM
 
 #endif
-
 
 
     }
