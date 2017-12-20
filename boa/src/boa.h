@@ -236,4 +236,10 @@ void nls_convert(unsigned char * buffer, unsigned char * table, long count);
 void dump_auth(void);
 #endif
 
+#ifdef DEBUG
+#define DBG(x) x
+#else
+#define DBG(x)
+#endif
+
 #endif
