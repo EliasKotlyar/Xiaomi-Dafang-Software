@@ -42,7 +42,7 @@ public:
 
 protected:
     ImpJpegVideoDeviceSource(UsageEnvironment &env,
-                             int fd, impParams params);
+                             impParams params);
 
     // called only by createNew()
     virtual ~ImpJpegVideoDeviceSource();
@@ -64,7 +64,7 @@ private:
 private:
 #ifndef JPEG_TEST
 
-    int initDevice(UsageEnvironment &env, int fd);
+    int initDevice(impParams fd);
 
 #endif
     struct buffer {

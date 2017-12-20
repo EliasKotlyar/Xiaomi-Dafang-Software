@@ -38,13 +38,13 @@
 
 ImpJpegVideoDeviceSource *
 ImpJpegVideoDeviceSource::createNew(UsageEnvironment &env,
-                                    unsigned timePerFrame,int width,int height) {
-    int fd = -1;
+                                    impParams params) {
+    //int fd = -1;
 #ifndef JPEG_TEST
 
 #endif
     try {
-        return new ImpJpegVideoDeviceSource(env, fd, timePerFrame,width,height);
+        return new ImpJpegVideoDeviceSource(env, params);
     } catch (DeviceException) {
         return NULL;
     }
@@ -62,8 +62,8 @@ int ImpJpegVideoDeviceSource::initDevice(impParams params) {
 #endif // JPEG_TEST
 
 ImpJpegVideoDeviceSource
-::ImpJpegVideoDeviceSource(UsageEnvironment &env, int fd, unsigned timePerFrame, impParams params)
-        : JPEGVideoSource(env), fFd(fd), fTimePerFrame(timePerFrame) {
+::ImpJpegVideoDeviceSource(UsageEnvironment &env, impParams params)
+        : JPEGVideoSource(env), fFd(0) {
 #ifdef JPEG_TEST
     jpeg_dat = new unsigned char [MAX_JPEG_FILE_SZ];
     FILE *fp = fopen("test.jpg", "rb");
