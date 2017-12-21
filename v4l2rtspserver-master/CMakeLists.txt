@@ -39,17 +39,17 @@ if (NOT V4L2WRAPPER_LIBRARY)
 	find_library(V4L2WRAPPER_LIBRARY libv4l2wrapper.a PATHS "." NO_CMAKE_FIND_ROOT_PATH)
         message(STATUS "v4l2wrapper built in V4L2WRAPPER_LIBRARY=${V4L2WRAPPER_LIBRARY}")	
 endif (NOT V4L2WRAPPER_LIBRARY)
-target_link_libraries(${PROJECT_NAME} ${V4L2WRAPPER_LIBRARY})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${V4L2WRAPPER_LIBRARY})
 
 #pthread
 find_package (Threads)
-target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT}) 
+target_link_libraries (${PROJECT_NAME} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 #ALSA
 find_package(ALSA QUIET)
 if (ALSA_LIBRARY)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_ALSA")
-        target_link_libraries (${PROJECT_NAME} ${ALSA_LIBRARY}) 
+        target_link_libraries (${PROJECT_NAME} PUBLIC ${ALSA_LIBRARY})
 endif (ALSA_LIBRARY)
 
 # LOG4CPP
@@ -95,6 +95,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiao
 target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/live/BasicUsageEnvironment/libBasicUsageEnvironment.a")
 target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/libv4l2wrapper.a")
 
+
+target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/uclibc/libalog.so")
+target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/uclibc/libimp.so")
+target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/uclibc/libsysutils.so")
 
 
 
