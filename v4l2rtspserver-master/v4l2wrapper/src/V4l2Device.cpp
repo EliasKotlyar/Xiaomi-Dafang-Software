@@ -59,19 +59,11 @@ void V4l2Device::queryFormat()
 // intialize the V4L2 connection
 bool V4l2Device::init(unsigned int mandatoryCapabilities)
 {
-        struct stat sb;
-        if ( (stat(m_params.m_devName.c_str(), &sb)==0) && ((sb.st_mode & S_IFMT) == S_IFCHR) )
-        {
-		if (initdevice(m_params.m_devName.c_str(), mandatoryCapabilities) == -1)
-		{
-			LOG(ERROR) << "Cannot init device:" << m_params.m_devName;
-		}
-	}
-	else
-	{
-                // open a normal file
-                m_fd = open(m_params.m_devName.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
-	}
+
+    if (initdevice(m_params.m_devName.c_str(), mandatoryCapabilities) == -1)
+    {
+        LOG(ERROR) << "Cannot init device:" << m_params.m_devName;
+    }
 	return (m_fd!=-1);
 }
 
