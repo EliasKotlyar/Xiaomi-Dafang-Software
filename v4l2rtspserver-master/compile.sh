@@ -9,6 +9,11 @@ export CPPFLAGS="-muclibc -O2"
 export LDFLAGS="-muclibc -O2"
 #make clean
 #make all
+cd v4l2wrapper
+./compile.sh
+cd ..
+cp ./v4l2wrapper/libv4l2wrapper.a ./
+
 rm -r CMakeFiles
 cmake -DCMAKE_TOOLCHAIN_FILE="dafang.toolchain"
 make VERBOSE=1 -j4

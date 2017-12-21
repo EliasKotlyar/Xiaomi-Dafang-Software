@@ -90,6 +90,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiao
 target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/live/groupsock/libgroupsock.a")
 target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/live/UsageEnvironment/libUsageEnvironment.a")
 target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/live/BasicUsageEnvironment/libBasicUsageEnvironment.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/libv4l2wrapper.a")
 
 
 
