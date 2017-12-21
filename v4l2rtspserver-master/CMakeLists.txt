@@ -79,7 +79,7 @@ foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnviro
 
 endforeach (LIBLIVE555_module)
 
-include_directories(imp/)
+
 
 
 set(LIBLIVE555_LIBRARIES "")
