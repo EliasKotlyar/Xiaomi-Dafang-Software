@@ -8,5 +8,7 @@ export CFLAGS="-muclibc -O2 "
 export CPPFLAGS="-muclibc -O2"
 export LDFLAGS="-muclibc -O2"
 ./configure --host=mips-linux-gnu --prefix=${PWD}/_install
+cd utils/v4l2-ctl
 make clean
-make all
+make -j4
+make install

@@ -22438,8 +22438,8 @@ LIBS=$dl_saved_libs
 ac_fn_c_check_header_mongrel "$LINENO" "argp.h" "ac_cv_header_argp_h" "$ac_includes_default"
 if test "x$ac_cv_header_argp_h" = xyes; then :
 
-else
-  as_fn_error $? "Cannot continue: argp.h not found" "$LINENO" 5
+#else
+  #as_fn_error $? "Cannot continue: argp.h not found" "$LINENO" 5
 fi
 
 
@@ -22498,8 +22498,8 @@ ac_res=$ac_cv_search_argp_parse
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   test "$ac_cv_search_argp_parse" = "none required" || ARGP_LIBS=$ac_cv_search_argp_parse
-else
-  as_fn_error $? "unable to find the argp_parse() function" "$LINENO" 5
+#else
+ # as_fn_error $? "unable to find the argp_parse() function" "$LINENO" 5
 fi
 
 

@@ -1,0 +1,94 @@
+diff --git a/configure.ac b/configure.ac
+index 13df263..d645386 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -270,14 +270,24 @@ dl_saved_libs=$LIBS
+   AC_SUBST([DLOPEN_LIBS])
+ LIBS=$dl_saved_libs
+ 
+-AC_CHECK_HEADER([argp.h],,AC_MSG_ERROR(Cannot continue: argp.h not found))
++AC_ARG_WITH([argp],
++            AS_HELP_STRING([--without-argp], [Do not use argp.h]),
++            [],
++            [with_argp=yes])
++
+ argp_saved_libs=$LIBS
+-  AC_SEARCH_LIBS([argp_parse],
+-                 [argp],
+-                 [test "$ac_cv_search_argp_parse" = "none required" || ARGP_LIBS=$ac_cv_search_argp_parse],
+-                 [AC_MSG_ERROR([unable to find the argp_parse() function])])
+-  AC_SUBST([ARGP_LIBS])
++AS_IF([test "x$with_argp" != xno],
++      [
++          AC_CHECK_HEADER([argp.h],,AC_MSG_ERROR(Cannot continue: argp.h not found))]
++	  AC_SEARCH_LIBS([argp_parse],
++			 [argp],
++			 [test "$ac_cv_search_argp_parse" = "none required" || ARGP_LIBS=$ac_cv_search_argp_parse],
++			 [AC_MSG_ERROR([unable to find the argp_parse() function])])
++	  AC_SUBST([ARGP_LIBS])
++      ],
++      )
+ LIBS=$argp_saved_libs
++AM_CONDITIONAL([HAVE_ARGP], [test "x$with_argp" != xno])
+ 
+ AC_CHECK_HEADER([linux/i2c-dev.h], [linux_i2c_dev=yes], [linux_i2c_dev=no])
+ AM_CONDITIONAL([HAVE_LINUX_I2C_DEV], [test x$linux_i2c_dev = xyes])
+diff --git a/contrib/test/Makefile.am b/contrib/test/Makefile.am
+index 7f84435..f223f68 100644
+--- a/contrib/test/Makefile.am
++++ b/contrib/test/Makefile.am
+@@ -2,7 +2,6 @@ noinst_PROGRAMS = \
+ 	ioctl-test		\
+ 	sliced-vbi-test		\
+ 	sliced-vbi-detect	\
+-	v4l2grab		\
+ 	driver-test		\
+ 	stress-buffer		\
+ 	capture-example
+@@ -12,8 +11,14 @@ noinst_PROGRAMS += pixfmt-test
+ endif
+ 
+ if HAVE_GLU
++if HAVE_ARGP
+ noinst_PROGRAMS += v4l2gl
+ endif
++endif
++
++if HAVE_ARGP
++noinst_PROGRAMS += v4l2grab
++endif
+ 
+ driver_test_SOURCES = driver-test.c
+ driver_test_LDADD = ../../utils/libv4l2util/libv4l2util.la
+diff --git a/utils/Makefile.am b/utils/Makefile.am
+index 5674c16..5645d55 100644
+--- a/utils/Makefile.am
++++ b/utils/Makefile.am
+@@ -1,16 +1,12 @@
+ SUBDIRS = \
+-	dvb \
+ 	libv4l2util \
+ 	libmedia_dev \
+-	decode_tm6000 \
+ 	ivtv-ctl \
+ 	cx18-ctl \
+-	keytable \
+ 	media-ctl \
+ 	v4l2-compliance \
+ 	v4l2-ctl \
+ 	v4l2-dbg \
+-	v4l2-sysfs-path \
+ 	rds-ctl
+ 
+ if LINUX_OS
+@@ -27,3 +23,10 @@ if WITH_QV4L2
+ SUBDIRS += qv4l2
+ endif
+ 
++if HAVE_ARGP
++SUBDIRS += \
++	dvb \
++	keytable \
++	decode_tm6000 \
++	v4l2-sysfs-path
++endif
