@@ -79,6 +79,9 @@ foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnviro
 
 endforeach (LIBLIVE555_module)
 
+include_directories(imp/)
+
+
 set(LIBLIVE555_LIBRARIES "")
 foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnvironment)
 	find_library( ${LIBLIVE555_module}_LIBRARY ${LIBLIVE555_module} )

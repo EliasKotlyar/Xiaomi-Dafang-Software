@@ -18,4 +18,4 @@ rm -r CMakeFiles
 cmake -DCMAKE_TOOLCHAIN_FILE="dafang.toolchain"
 make VERBOSE=1 -j4
 HOST=192.168.0.99
-ftp-upload -h ${HOST} -u root --password ismart12 -d /system/sdcard/bin/ v4l2rtspserver-master
+#ftp-upload -h ${HOST} -u root --password ismart12 -d /system/sdcard/bin/ v4l2rtspserver-master

@@ -129,7 +129,8 @@ FramedSource* createFramedSource(UsageEnvironment* env, int format, DeviceInterf
 	}
 	else
 	{
-		source = V4L2DeviceSource::createNew(*env, videoCapture, outfd, queueSize, useThread);
+		//source = V4L2DeviceSource::createNew(*env, videoCapture, outfd, queueSize, useThread);
+		source = ImpJpegDeviceSource::createNew(*env, videoCapture, outfd, queueSize, useThread);
 	}
 	return source;
 }
