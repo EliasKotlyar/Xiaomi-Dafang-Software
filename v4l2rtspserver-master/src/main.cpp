@@ -36,6 +36,8 @@
 #include "V4l2Capture.h"
 #include "V4l2Output.h"
 
+#include "ImpJpegDeviceSource.h"
+
 #include "H264_V4l2DeviceSource.h"
 #include "ServerMediaSubsession.h"
 #include "UnicastServerMediaSubsession.h"
