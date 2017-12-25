@@ -36,7 +36,7 @@
 #include "V4l2Capture.h"
 #include "V4l2Output.h"
 
-#include "ImpJpegDeviceSource.h"
+#include "ImpCapture.h"
 
 #include "H264_V4l2DeviceSource.h"
 #include "ServerMediaSubsession.h"
@@ -122,8 +122,8 @@ createFramedSource(UsageEnvironment *env, int format, DeviceInterface *videoCapt
             source = muxer;
         }
     } else {
-        //source = V4L2DeviceSource::createNew(*env, videoCapture, outfd, queueSize, useThread);
-        source = ImpJpegDeviceSource::createNew(*env, videoCapture, outfd, queueSize, useThread);
+        source = V4L2DeviceSource::createNew(*env, videoCapture, outfd, queueSize, useThread);
+        //source = ImpJpegDeviceSource::createNew(*env, videoCapture, outfd, queueSize, useThread);
     }
     return source;
 }
@@ -600,10 +600,10 @@ int main(int argc, char **argv) {
             }
         }
 
-
+        ImpCapture* impCapture = new ImpCapture();
         rtpFormat.assign(getRtpFormat(videoFormat, muxTS));
         FramedSource *videoSource = createFramedSource(env, videoFormat,
-                                                       NULL,
+                                                       new DeviceCaptureAccess<ImpCapture>(impCapture),
                                                        outfd, queueSize, useThread, repeatConfig, muxer);
         if (videoSource == NULL) {
             LOG(FATAL) << "Unable to create source for device " ;
