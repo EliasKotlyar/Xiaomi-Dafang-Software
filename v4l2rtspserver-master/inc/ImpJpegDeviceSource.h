@@ -28,6 +28,10 @@ public:
 
     unsigned long getBufferSize();
 
+    void* thread();
+
+protected:
+    static void* threadStub(void* clientData) { return ((ImpJpegDeviceSource*) clientData)->thread();};
 
 };
 

@@ -9,6 +9,7 @@ ImpJpegDeviceSource::createNew(UsageEnvironment &env, DeviceInterface *device, i
 ImpJpegDeviceSource::ImpJpegDeviceSource(UsageEnvironment &env, DeviceInterface *device, int outputFd,
                                          unsigned int queueSize, bool useThread)
         : V4L2DeviceSource(env, device, outputFd, queueSize, useThread) {
+
     impParams params;
     params.width = 320;
     params.height = 240;
@@ -21,7 +22,7 @@ ImpJpegDeviceSource::ImpJpegDeviceSource(UsageEnvironment &env, DeviceInterface 
 
 
 
-    impEncoder = new ImpEncoder(params);
+    //impEncoder = new ImpEncoder(params);
 }
 
 int ImpJpegDeviceSource::getWidth() {
@@ -79,5 +80,26 @@ int ImpJpegDeviceSource::getNextFrame() {
     }
     return frameSize;
 }
+
+
+// thread mainloop
+void *ImpJpegDeviceSource::thread() {
+    int stop = 0;
+    fd_set fdset;
+    FD_ZERO(&fdset);
+    timeval tv;
+
+    LOG(NOTICE) << "begin thread new";
+    while (!stop) {
+        if (this->getNextFrame() <= 0) {
+            LOG(ERROR) << "error:" << strerror(errno);
+            stop = 1;
+        }
+
+    }
+    LOG(NOTICE) << "end thread";
+    return NULL;
+}
+
 
 

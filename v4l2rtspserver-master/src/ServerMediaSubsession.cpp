@@ -37,10 +37,12 @@ FramedSource* BaseServerMediaSubsession::createSource(UsageEnvironment& env, Fra
 #endif
 	else if (format == "video/JPEG")
 	{
+		//LOG(NOTICE) << "Creating JPG Source...";
 		source = MJPEGVideoSource::createNew(env, videoES);
 	}
 	else 
 	{
+        //LOG(NOTICE) << "Creating normal Source...";
 		source = videoES;
 	}
 	return source;
