@@ -4,13 +4,30 @@
 #include "DeviceSource.h"
 #include "ImpEncoder.h"
 #include "logger.h"
+
 class ImpJpegDeviceSource : public V4L2DeviceSource {
 public:
 
-    static ImpJpegDeviceSource* createNew(UsageEnvironment& env, DeviceInterface * device, int outputFd, unsigned int queueSize, bool useThread) ;
-    ImpJpegDeviceSource(UsageEnvironment& env, DeviceInterface * device, int outputFd, unsigned int queueSize, bool useThread) ;
+    static ImpJpegDeviceSource *
+    createNew(UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize, bool useThread);
+
+    ImpJpegDeviceSource(UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize,
+                        bool useThread);
+
     int getNextFrame();
-    ImpEncoder* impEncoder;
+
+    ImpEncoder *impEncoder;
+
+    int getWidth();
+
+    int getHeight();
+
+    size_t read(char *buffer, size_t bufferSize);
+
+    int getFd();
+
+    unsigned long getBufferSize();
+
 
 };
 
