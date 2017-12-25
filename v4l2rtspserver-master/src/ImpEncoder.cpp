@@ -64,6 +64,10 @@ void *ImpEncoder::getBuffer() {
     return buffer;
 }
 
+int ImpEncoder::getBufferSize(){
+    return bufferSize;
+}
+
 
 ImpEncoder::ImpEncoder(impParams params) {
     currentParams = params;
@@ -108,8 +112,8 @@ ImpEncoder::ImpEncoder(impParams params) {
     int height = currentParams.height;
     int ret;
 
-
-    buffer = malloc(width * height);
+    bufferSize = width * height;
+    buffer = malloc(bufferSize);
 
     /* Step.1 System init */
     ret = sample_system_init();

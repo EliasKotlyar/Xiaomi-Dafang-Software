@@ -71,10 +71,16 @@ public:
 
     void setNightVision(bool state);
 
+    int getBufferSize();
+
 private:
     int save_stream(void *buffer, IMPEncoderStream *stream);
 
     void *buffer;
+    int bufferSize;
+
+
+
     int encoderMode;
 
     int sample_system_init();

@@ -7,7 +7,7 @@
 
 class ImpCapture {
 public:
-    ImpCapture();
+    ImpCapture(impParams params);
 
     int getWidth();
 

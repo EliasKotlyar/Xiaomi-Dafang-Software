@@ -600,7 +600,24 @@ int main(int argc, char **argv) {
             }
         }
 
-        ImpCapture* impCapture = new ImpCapture();
+        impParams params;
+        params.width = 320;
+        params.height = 240;
+        if(videoFormat == V4L2_PIX_FMT_MJPEG){
+            params.mode = IMP_MODE_JPEG;
+        }else if(videoFormat == V4L2_PIX_FMT_H264){
+            params.mode = IMP_MODE_H264_SNAP;
+        }else{
+            LOG(FATAL) << "Unrecognized Format " ;
+            exit(0);
+        }
+
+        params.framerate = 25;
+        params.nightvision = false;
+
+
+
+        ImpCapture* impCapture = new ImpCapture(params);
         rtpFormat.assign(getRtpFormat(videoFormat, muxTS));
         FramedSource *videoSource = createFramedSource(env, videoFormat,
                                                        new DeviceCaptureAccess<ImpCapture>(impCapture),

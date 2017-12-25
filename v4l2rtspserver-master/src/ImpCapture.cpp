@@ -1,13 +1,7 @@
 #include "ImpCapture.h"
 
 
-ImpCapture::ImpCapture() {
-    impParams params;
-    params.width = 320;
-    params.height = 240;
-    params.mode = IMP_MODE_JPEG;
-    params.framerate = 25;
-    params.nightvision = false;
+ImpCapture::ImpCapture(impParams params) {
     impEncoder = new ImpEncoder(params);
 }
 
@@ -31,7 +25,7 @@ int ImpCapture::getFd() {
     return 0;
 }
 unsigned long ImpCapture::getBufferSize(){
-    return this->getWidth() * this->getHeight();
+    return impEncoder->getBufferSize();
 }
 
 
