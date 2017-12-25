@@ -81,12 +81,9 @@ void *V4L2DeviceSource::thread() {
     int stop = 0;
     fd_set fdset;
     FD_ZERO(&fdset);
-    timeval tv;
 
     LOG(NOTICE) << "begin thread";
     while (!stop) {
-        int fd = m_device->getFd();
-
         if (this->getNextFrame() <= 0) {
             LOG(ERROR) << "error:" << strerror(errno);
             stop = 1;
@@ -124,7 +121,7 @@ void V4L2DeviceSource::deliverFrame() {
             m_captureQueue.pop_front();
 
             m_out.notify(curTime.tv_sec, frame->m_size);
-            if (frame->m_size > fMaxSize) {
+            if (frame->m_size > (int)fMaxSize) {
                 fFrameSize = fMaxSize;
                 fNumTruncatedBytes = frame->m_size - fMaxSize;
             } else {

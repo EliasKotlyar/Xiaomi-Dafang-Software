@@ -3,15 +3,17 @@
 
 ImpCapture::ImpCapture(impParams params) {
     impEncoder = new ImpEncoder(params);
+    height = params.height;
+    width = params.width;
 }
 
 
 int ImpCapture::getWidth() {
-    return 320;
+    return this->width;
 };
 
 int ImpCapture::getHeight() {
-    return 240;
+    return this->height;
 };
 
 
