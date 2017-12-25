@@ -22,8 +22,15 @@ ImpJpegDeviceSource::ImpJpegDeviceSource(UsageEnvironment &env, DeviceInterface 
 int ImpJpegDeviceSource::getNextFrame() {
     timeval ref;
     gettimeofday(&ref, NULL);
+
+
+    LOG(NOTICE) << "Got into getNextFrame";
+
     //char buffer[m_device->getBufferSize()];
     int frameSize = impEncoder->snap_jpeg();
+
+    LOG(NOTICE) << "Got out getNextFrame";
+
 
     //int frameSize = m_device->read(buffer,  m_device->getBufferSize());
     if (frameSize < 0) {

@@ -148,7 +148,7 @@ int addSession(RTSPServer *rtspServer, const std::string &sessionName,
 
             char *url = rtspServer->rtspURL(sms);
             if (url != NULL) {
-                LOG(NOTICE) << "Play this stream using the URL \"" << url << "\"";
+                LOG(NOTICE) << "Play this stream using the URL \"" << url << "\"" << std::endl;;
                 delete[] url;
             }
         }
