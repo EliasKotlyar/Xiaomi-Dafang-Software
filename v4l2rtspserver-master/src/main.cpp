@@ -590,7 +590,9 @@ int main(int argc, char **argv) {
 
 
         int outfd = -1;
-        int videoFormat = V4L2_PIX_FMT_MJPEG;
+        //int videoFormat = V4L2_PIX_FMT_MJPEG;
+        int videoFormat = V4L2_PIX_FMT_H264;
+
         if (!outputFile.empty()) {
             V4L2DeviceParameters outparam(outputFile.c_str(), videoFormat,
                                           width, height, 0, verbose);

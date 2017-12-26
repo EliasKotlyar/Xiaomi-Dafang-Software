@@ -25,6 +25,7 @@ protected:
     ImpEncoder *impEncoder;
     int width;
     int height;
+    int mode;
 
 };
 
