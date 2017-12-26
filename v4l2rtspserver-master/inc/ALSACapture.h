@@ -27,7 +27,7 @@ struct ALSACaptureParameters
 	unsigned int     m_channels;
 	int              m_verbose;
 };
-
+#define RECBUF_SIZE		512
 class ALSACapture 
 {
 	public:
@@ -42,7 +42,7 @@ class ALSACapture
 		virtual size_t read(char* buffer, size_t bufferSize);		
 		virtual int getFd();
 		
-		virtual unsigned long getBufferSize() { return m_bufferSize; };
+		virtual unsigned long getBufferSize() { return RECBUF_SIZE; };
 		virtual int getWidth()  {return -1;}
 		virtual int getHeight() {return -1;}	
 		
@@ -53,6 +53,7 @@ class ALSACapture
 		unsigned long         m_bufferSize;
 		unsigned long         m_periodSize;
 		ALSACaptureParameters m_params;
+        int fd;
 };
 
 #endif
