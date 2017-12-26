@@ -323,6 +323,14 @@ int ImpEncoder::snap_h264() {
     int bytesRead = 0;
     /* H264 Channel start receive picture */
 
+    if (framesCount == currentParams.framerate * 2) {
+        framesCount = 0;
+        //requestIDR();
+        IMP_Encoder_FlushStream(0);
+    } else {
+        framesCount++;
+    }
+
 
 
     int i;
