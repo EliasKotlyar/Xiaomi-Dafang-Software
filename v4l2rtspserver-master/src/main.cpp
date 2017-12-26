@@ -645,7 +645,7 @@ int main(int argc, char **argv) {
         StreamReplicator *audioReplicator = NULL;
         std::string rtpAudioFormat;
 #ifdef HAVE_ALSA
-        std::string audioDev="test";
+        std::string audioDev="/dev/dsp";
         if (!audioDev.empty())
         {
             // find the ALSA device associated with the V4L2 device
