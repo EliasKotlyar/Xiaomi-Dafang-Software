@@ -21,12 +21,14 @@
 FramedSource* BaseServerMediaSubsession::createSource(UsageEnvironment& env, FramedSource* videoES, const std::string& format)
 {
 	FramedSource* source = NULL;
+    LOG(NOTICE) << "Creating Source..."<< std::endl;
 	if (format == "video/MP2T")
 	{
 		source = MPEG2TransportStreamFramer::createNew(env, videoES); 
 	}
 	else if (format == "video/H264")
 	{
+        LOG(NOTICE) << "Creating H264 Source...";
 		source = H264VideoStreamDiscreteFramer::createNew(env, videoES);
 	}
 #if LIVEMEDIA_LIBRARY_VERSION_INT > 1414454400
@@ -37,12 +39,12 @@ FramedSource* BaseServerMediaSubsession::createSource(UsageEnvironment& env, Fra
 #endif
 	else if (format == "video/JPEG")
 	{
-		//LOG(NOTICE) << "Creating JPG Source...";
+		LOG(NOTICE) << "Creating JPG Source...";
 		source = MJPEGVideoSource::createNew(env, videoES);
 	}
 	else 
 	{
-        //LOG(NOTICE) << "Creating normal Source...";
+        LOG(NOTICE) << "Creating normal Source...";
 		source = videoES;
 	}
 	return source;
