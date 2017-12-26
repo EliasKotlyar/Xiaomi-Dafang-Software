@@ -205,6 +205,7 @@ int decodeVideoFormat(const char *fmt) {
 //    convert string audio format to pcm
 // -----------------------------------------
 #ifdef HAVE_ALSA
+/*
 snd_pcm_format_t decodeAudioFormat(const std::string& fmt)
 {
     snd_pcm_format_t audioFmt = SND_PCM_FORMAT_UNKNOWN;
@@ -223,6 +224,7 @@ snd_pcm_format_t decodeAudioFormat(const std::string& fmt)
     }
     return audioFmt;
 }
+*/
 #endif
 
 // -------------------------------------------------------
@@ -269,6 +271,7 @@ std::string getDeviceName(const std::string &devicePath) {
 **  get a "deviceid" from uevent sys file
 ** -------------------------------------------------------------------------*/
 #ifdef HAVE_ALSA
+/*
 std::string getDeviceId(const std::string& evt) {
     std::string deviceid;
     std::istringstream f(evt);
@@ -353,6 +356,7 @@ std::string  getV4l2Alsa(const std::string& v4l2device) {
 
     return audioDevice;
 }
+*/
 #endif
 
 // -----------------------------------------
@@ -387,7 +391,7 @@ int main(int argc, char **argv) {
     int audioFreq = 44100;
     int audioNbChannels = 2;
 #ifdef HAVE_ALSA
-    snd_pcm_format_t audioFmt = SND_PCM_FORMAT_S16_BE;
+    //snd_pcm_format_t audioFmt = SND_PCM_FORMAT_S16_BE;
 #endif
     const char *defaultPort = getenv("PORT");
     if (defaultPort != NULL) {
@@ -479,7 +483,7 @@ int main(int argc, char **argv) {
 #ifdef HAVE_ALSA
             case 'A':	audioFreq = atoi(optarg); break;
             case 'C':	audioNbChannels = atoi(optarg); break;
-            case 'a':	audioFmt = decodeAudioFormat(optarg); break;
+            //case 'a':	audioFmt = decodeAudioFormat(optarg); break;
 #endif
 
                 // version
@@ -641,15 +645,16 @@ int main(int argc, char **argv) {
         StreamReplicator *audioReplicator = NULL;
         std::string rtpAudioFormat;
 #ifdef HAVE_ALSA
+        std::string audioDev="test";
         if (!audioDev.empty())
         {
             // find the ALSA device associated with the V4L2 device
-            audioDev = getV4l2Alsa(audioDev);
+            //audioDev = "";
 
             // Init audio capture
             LOG(NOTICE) << "Create ALSA Source..." << audioDev;
 
-            ALSACaptureParameters param(audioDev.c_str(), audioFmt, audioFreq, audioNbChannels, verbose);
+            ALSACaptureParameters param(audioDev.c_str(), audioFreq, audioNbChannels, verbose);
             ALSACapture* audioCapture = ALSACapture::createNew(param);
             if (audioCapture)
             {

@@ -46,11 +46,10 @@ find_package (Threads)
 target_link_libraries (${PROJECT_NAME} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 #ALSA
-find_package(ALSA QUIET)
-if (ALSA_LIBRARY)
+
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_ALSA")
         target_link_libraries (${PROJECT_NAME} PUBLIC ${ALSA_LIBRARY})
-endif (ALSA_LIBRARY)
+
 
 # LOG4CPP
 find_path(LOG4CPP_INCLUDE_DIR log4cpp/Category.hh)

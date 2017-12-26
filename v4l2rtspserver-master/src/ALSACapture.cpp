@@ -37,17 +37,14 @@ ALSACapture::~ALSACapture()
 
 void ALSACapture::close()
 {
-	if (m_pcm != NULL)
-	{
-		snd_pcm_close (m_pcm);
-		m_pcm = NULL;
-	}
+
 }
 	
-ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_pcm(NULL), m_bufferSize(0), m_periodSize(0), m_params(params)
+ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0), m_periodSize(0), m_params(params)
 {
 	LOG(NOTICE) << "Open ALSA device: \"" << params.m_devName << "\"";
-	
+
+	/*
 	snd_pcm_hw_params_t *hw_params = NULL;
 	int err = 0;
 	
@@ -103,10 +100,12 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_pcm(NULL), m_
 	}			
 	
 	LOG(NOTICE) << "ALSA device: \"" << m_params.m_devName << "\" buffer_size:" << m_bufferSize << " period_size:" << m_periodSize << " rate:" << m_params.m_sampleRate;
+	*/
 }
 			
 size_t ALSACapture::read(char* buffer, size_t bufferSize)
 {
+/*
 	size_t size = 0;
 	int fmt_phys_width_bytes = 0;
 	if (m_pcm != 0)
@@ -137,10 +136,12 @@ size_t ALSACapture::read(char* buffer, size_t bufferSize)
 		}
 	}
 	return size * m_params.m_channels * fmt_phys_width_bytes;
+	*/
 }
 		
 int ALSACapture::getFd()
 {
+/*
 	unsigned int nbfs = 1;
 	struct pollfd pfds[nbfs]; 
 	pfds[0].fd = -1;
@@ -154,6 +155,7 @@ int ALSACapture::getFd()
 		}
 	}
 	return pfds[0].fd;
+*/
 }
 		
 #endif
