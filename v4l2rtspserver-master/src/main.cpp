@@ -362,8 +362,8 @@ int main(int argc, char **argv) {
     // default parameters
     const char *dev_name = "/dev/video0";
     int format = V4L2_PIX_FMT_H264;
-    int width = 640;
-    int height = 480;
+    int width = 1280;
+    int height = 720;
     int queueSize = 10;
     int fps = 25;
     unsigned short rtspPort = 8554;
@@ -591,7 +591,7 @@ int main(int argc, char **argv) {
 
         int outfd = -1;
         //int videoFormat = V4L2_PIX_FMT_MJPEG;
-        int videoFormat = V4L2_PIX_FMT_H264;
+        int videoFormat = format;
 
         if (!outputFile.empty()) {
             V4L2DeviceParameters outparam(outputFile.c_str(), videoFormat,
