@@ -64,14 +64,14 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
     { /* Fatal error */
         LOG(ERROR) << "Cant set format..." << params.m_devName;
     }
-    int stereo = 0;
+    int stereo = params.m_channels-1;
     if (::ioctl(fd, SNDCTL_DSP_STEREO, &stereo)==-1)
     { /* Fatal error */
        LOG(ERROR) << "Cant set Mono ..." << params.m_devName;
     }
 
 
-    int speed = 44100;
+    int speed = params.m_sampleRate;
 
     if (ioctl(fd, SNDCTL_DSP_SPEED, &speed)==-1)
     { /* Fatal error */
