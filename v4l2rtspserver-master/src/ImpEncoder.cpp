@@ -84,13 +84,13 @@ ImpEncoder::ImpEncoder(impParams params) {
     chn.fs_chn_attr.nrVBs = 3;
     chn.fs_chn_attr.type = FS_PHY_CHANNEL;
 
-    chn.fs_chn_attr.crop.enable = 1;
+    chn.fs_chn_attr.crop.enable = 0;
     chn.fs_chn_attr.crop.width = currentParams.width;
     chn.fs_chn_attr.crop.height = currentParams.height;
     chn.fs_chn_attr.crop.top = 0;
     chn.fs_chn_attr.crop.left = 0;
 
-    chn.fs_chn_attr.scaler.enable = 0;
+    chn.fs_chn_attr.scaler.enable = 1;
     chn.fs_chn_attr.scaler.outwidth = currentParams.width;
     chn.fs_chn_attr.scaler.outheight = currentParams.height;
 
