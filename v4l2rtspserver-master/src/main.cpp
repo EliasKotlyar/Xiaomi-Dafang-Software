@@ -504,7 +504,7 @@ int main(int argc, char **argv) {
                 std::cout << "\t -v        : verbose" << std::endl;
                 std::cout << "\t -vv       : very verbose" << std::endl;
                 std::cout << "\t -Q length : Number of frame queue  (default " << queueSize << ")" << std::endl;
-                std::cout << "\t -O output : Copy captured frame to a file or a V4L2 device" << std::endl;
+                std::cout << "\t -O output : Copy captured frame to stdout" << std::endl;
 
                 std::cout << "\t RTSP/RTP options :" << std::endl;
                 std::cout << "\t -I addr   : RTSP interface (default autodetect)" << std::endl;
@@ -597,14 +597,6 @@ int main(int argc, char **argv) {
         //int videoFormat = V4L2_PIX_FMT_MJPEG;
         int videoFormat = format;
 
-        if (!outputFile.empty()) {
-            V4L2DeviceParameters outparam(outputFile.c_str(), videoFormat,
-                                          width, height, 0, verbose);
-            out = V4l2Output::create(outparam, ioTypeOut);
-            if (out != NULL) {
-                outfd = out->getFd();
-            }
-        }
 
         impParams params;
         params.width = width;
@@ -623,6 +615,22 @@ int main(int argc, char **argv) {
 
 
         ImpCapture *impCapture = new ImpCapture(params);
+
+
+
+        if (!outputFile.empty()) {
+
+            int bufferSize = impCapture->getBufferSize();
+            char *buffer = (char*)malloc(bufferSize);
+            int bytesRead = impCapture->read(buffer,bufferSize);
+            int ret = fwrite(buffer, bytesRead, 1, stdout);
+            exit(ret);
+
+        }
+
+
+
+
         rtpFormat.assign(getRtpFormat(videoFormat, muxTS));
         FramedSource *videoSource = createFramedSource(env, videoFormat,
                                                        new DeviceCaptureAccess<ImpCapture>(impCapture),

@@ -70,7 +70,7 @@ inline void initLogger(int verbose)
                 default: LogLevel=NOTICE; break;
 
         }
-	std::cout << "log level:" << LogLevel << std::endl;
+	//std::cout << "log level:" << LogLevel << std::endl;
 }
 
 #endif
