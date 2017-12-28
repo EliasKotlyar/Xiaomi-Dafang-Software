@@ -390,7 +390,8 @@ int main(int argc, char **argv) {
     std::list <std::string> userPasswordList;
     int audioFreq = 44100;
     int audioNbChannels = 2;
-    int nightVision = 0;
+    bool nightVision = false;
+    bool flip = false;
 #ifdef HAVE_ALSA
     //snd_pcm_format_t audioFmt = SND_PCM_FORMAT_S16_BE;
 #endif
@@ -401,7 +402,7 @@ int main(int argc, char **argv) {
 
     // decode parameters
     int c = 0;
-    while ((c = getopt(argc, argv, "v::Q:O:" "I:P:p:m:n:u:M:ct:TS::" "R:U:" "rwsf::F:W:H:" "A:C:a:" "Vh")) != -1) {
+    while ((c = getopt(argc, argv, "v::Q:O:" "I:P:p:m:u:M:ct:TS::" "R:U:" "nrwsf::F:W:H:" "A:C:a:" "Vh")) != -1) {
         switch (c) {
             case 'v':
                 verbose = 1;
@@ -428,7 +429,7 @@ int main(int argc, char **argv) {
                 url = optarg;
                 break;
             case 'n':
-                nightVision = atoi(optarg);
+                nightVision = true;
                 break;
             case 'm':
                 multicast = true;
@@ -462,10 +463,7 @@ int main(int argc, char **argv) {
 
                 // V4L2
             case 'r':
-                ioTypeIn = V4l2Access::IOTYPE_READWRITE;
-                break;
-            case 'w':
-                ioTypeOut = V4l2Access::IOTYPE_READWRITE;
+                flip = true;
                 break;
             case 's':
                 useThread = false;
@@ -536,6 +534,8 @@ int main(int argc, char **argv) {
                 std::cout << "\t -f        : V4L2 capture using current capture format (-W,-H,-F are ignored)"
                           << std::endl;
                 std::cout << "\t -n        : Nightvision On/off"
+                          << std::endl;
+                std::cout << "\t -r        : Rotation On/off"
                           << std::endl;
                 std::cout << "\t -fformat  : V4L2 capture using format (-W,-H,-F are used)" << std::endl;
                 std::cout << "\t -W width  : V4L2 capture width (default " << width << ")" << std::endl;
@@ -618,6 +618,7 @@ int main(int argc, char **argv) {
 
         params.framerate = fps;
         params.nightvision = nightVision;
+        params.flip = flip;
 
 
         ImpCapture *impCapture = new ImpCapture(params);

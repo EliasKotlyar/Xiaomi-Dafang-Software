@@ -40,6 +40,7 @@ struct impParams {
     int bitrate;
     int framerate;
     bool nightvision;
+    bool flip;
 };
 struct chn_conf {
     unsigned int index;//0 for main channel ,1 for second channel

@@ -437,6 +437,13 @@ int ImpEncoder::sample_system_init() {
 
     setNightVision(currentParams.nightvision);
 
+    if(currentParams.flip == true){
+        IMP_ISP_Tuning_SetISPVflip(IMPISP_TUNING_OPS_MODE_ENABLE);
+    } else{
+        IMP_ISP_Tuning_SetISPVflip(IMPISP_TUNING_OPS_MODE_DISABLE);
+    }
+
+
 
     /*
     ret = IMP_ISP_Tuning_SetWDRAttr(IMPISP_TUNING_OPS_MODE_DISABLE);
