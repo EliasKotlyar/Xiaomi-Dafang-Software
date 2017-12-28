@@ -375,8 +375,6 @@ int main(int argc, char **argv) {
     bool multicast = false;
     int verbose = 0;
     std::string outputFile;
-    V4l2Access::IoType ioTypeIn = V4l2Access::IOTYPE_MMAP;
-    V4l2Access::IoType ioTypeOut = V4l2Access::IOTYPE_MMAP;
     std::string url = "unicast";
     std::string murl = "multicast";
     bool useThread = true;
@@ -609,6 +607,7 @@ int main(int argc, char **argv) {
         params.height = height;
         if (videoFormat == V4L2_PIX_FMT_MJPEG) {
             params.mode = IMP_MODE_JPEG;
+            OutPacketBuffer::maxSize = 250000;
         } else if (videoFormat == V4L2_PIX_FMT_H264) {
             params.mode = IMP_MODE_H264_SNAP;
         } else {
