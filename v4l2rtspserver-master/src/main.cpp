@@ -610,6 +610,7 @@ int main(int argc, char **argv) {
             OutPacketBuffer::maxSize = 250000;
         } else if (videoFormat == V4L2_PIX_FMT_H264) {
             params.mode = IMP_MODE_H264_SNAP;
+            MPEG2TransportStreamFromESSource::maxInputESFrameSize += 4820;
         } else {
             LOG(FATAL) << "Unrecognized Format ";
             exit(0);
