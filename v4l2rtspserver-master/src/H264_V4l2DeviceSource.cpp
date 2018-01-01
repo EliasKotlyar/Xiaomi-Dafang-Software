@@ -168,7 +168,7 @@ unsigned char*  H26X_V4L2DeviceSource::extractFrame(unsigned char* frame, size_t
 		}
 		size -= outsize;		
 	} else if (size>= sizeof(H264shortmarker)) {
-		 LOG(INFO) << "No marker found";
+		 LOG(FATAL) << "No marker found";
 	}
 
 	return outFrame;

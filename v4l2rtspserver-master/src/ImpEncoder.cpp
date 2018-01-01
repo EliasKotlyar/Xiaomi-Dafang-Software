@@ -325,11 +325,13 @@ int ImpEncoder::snap_h264() {
 
     if (framesCount == currentParams.framerate * 2) {
         framesCount = 0;
-        //requestIDR();
-        IMP_Encoder_FlushStream(0);
+        //
+        //IMP_Encoder_FlushStream(0);
+        requestIDR();
     } else {
         framesCount++;
     }
+
 
 
 
@@ -637,7 +639,7 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264Cbr.outBitRate = currentParams.bitrate;
     rc_attr->attrH264Cbr.maxQp = 38;
     rc_attr->attrH264Cbr.minQp = 15;
-    rc_attr->attrH264Cbr.maxFPS = 100;
+    rc_attr->attrH264Cbr.maxFPS = imp_chn_attr_tmp->outFrmRateNum;
     rc_attr->attrH264Cbr.minFPS = 1;
     rc_attr->attrH264Cbr.IBiasLvl = 2;
     rc_attr->attrH264Cbr.FrmQPStep = 3;
@@ -652,7 +654,7 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264Denoise.dnPQp = 1;
 
 
-    rc_attr->attrH264FrmUsed.enable = 1;
+    rc_attr->attrH264FrmUsed.enable = false;
     rc_attr->attrH264FrmUsed.frmUsedMode = ENC_FRM_SKIP;
     rc_attr->attrH264FrmUsed.frmUsedTimes = 2000;
 
@@ -689,6 +691,21 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264FrmUsed.enable = 1;
     */
 
+    /*
+    rc_attr->rcMode = ENC_RC_MODE_H264VBR;
+    rc_attr->attrH264Vbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
+    rc_attr->attrH264Vbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
+    rc_attr->attrH264Vbr.maxGop =
+            1 * rc_attr->attrH264Vbr.outFrmRate.frmRateNum / rc_attr->attrH264Vbr.outFrmRate.frmRateDen;
+    rc_attr->attrH264Vbr.maxQp = 38;
+    rc_attr->attrH264Vbr.minQp = 15;
+    rc_attr->attrH264Vbr.staticTime = 1;
+    rc_attr->attrH264Vbr.maxBitRate =
+            100 ;
+    rc_attr->attrH264Vbr.changePos = 50;
+    rc_attr->attrH264Vbr.FrmQPStep = 3;
+    rc_attr->attrH264Vbr.GOPQPStep = 15;
+     */
 
 
     ret = IMP_Encoder_CreateChn(0, &channel_attr);
