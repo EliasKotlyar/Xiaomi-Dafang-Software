@@ -33,6 +33,8 @@
 #define SENSOR_I2C_ADDR            0x40
 #define SENSOR_WIDTH            320
 #define SENSOR_HEIGHT            240
+#define STRING_MAX_SIZE          256
+
 struct impParams {
     int mode;
     int width;
@@ -41,6 +43,8 @@ struct impParams {
     int framerate;
     bool nightvision;
     bool flip;
+    char osdTimeDisplay[STRING_MAX_SIZE];
+    int osdPos;
 };
 struct chn_conf {
     unsigned int index;//0 for main channel ,1 for second channel
@@ -48,6 +52,7 @@ struct chn_conf {
     IMPFSChnAttr fs_chn_attr;
     IMPCell framesource_chn;
     IMPCell imp_encoder;
+    IMPCell OSD_Cell;
 };
 
 class ImpEncoder {
@@ -103,7 +108,7 @@ private:
 
     int sample_encoder_exit(void);
 
-    IMPRgnHandle *sample_osd_init(int grpNum);
+    IMPRgnHandle *sample_osd_init(int grpNum, int, int,int);
 
     int sample_osd_exit(IMPRgnHandle *prHandle, int grpNum);
 
