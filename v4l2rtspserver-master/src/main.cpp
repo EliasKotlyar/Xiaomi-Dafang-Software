@@ -201,6 +201,16 @@ int decodeVideoFormat(const char *fmt) {
     return v4l2_fourcc(fourcc[0], fourcc[1], fourcc[2], fourcc[3]);
 }
 
+int decodeOsdPos(const char *osdPos)
+{
+    if (strcasecmp(osdPos, "DOWN") == 0)
+        return 1;
+    else if (strcasecmp(osdPos, "UP") == 0)
+        return 0;
+
+   LOG(ERROR) << "\"" << osdPos << "\"" << " not recodnized as OSD position, use the default (TOP)";
+   return 0 ;
+}
 // -----------------------------------------
 //    convert string audio format to pcm
 // -----------------------------------------
@@ -390,6 +400,8 @@ int main(int argc, char **argv) {
     int audioNbChannels = 2;
     bool nightVision = false;
     bool flip = false;
+    std::string osdTimeDisplay;
+    int osdPos;
 #ifdef HAVE_ALSA
     //snd_pcm_format_t audioFmt = SND_PCM_FORMAT_S16_BE;
 #endif
@@ -400,7 +412,7 @@ int main(int argc, char **argv) {
 
     // decode parameters
     int c = 0;
-    while ((c = getopt(argc, argv, "v::Q:O:" "I:P:p:m:u:M:ct:TS::" "R:U:" "nrwsf::F:W:H:" "A:C:a:" "Vh")) != -1) {
+    while ((c = getopt(argc, argv, "v::Q:O:" "D:d:I:P:p:m:u:M:ct:TS::" "R:U:" "nrwsf::F:W:H:" "A:C:a:" "Vh")) != -1) {
         switch (c) {
             case 'v':
                 verbose = 1;
@@ -478,7 +490,12 @@ int main(int argc, char **argv) {
             case 'H':
                 height = atoi(optarg);
                 break;
-
+	        case 'D':
+	            osdTimeDisplay = optarg;
+                break;
+            case 'd':
+	            osdPos = decodeOsdPos(optarg);
+                break;
                 // ALSA
 #ifdef HAVE_ALSA
             case 'A':	audioFreq = atoi(optarg); break;
@@ -498,6 +515,8 @@ int main(int argc, char **argv) {
                 std::cout << argv[0] << " [-v[v]] [-Q queueSize] [-O file]" << std::endl;
                 std::cout
                         << "\t          [-I interface] [-P RTSP port] [-p RTSP/HTTP port] [-m multicast url] [-u unicast url] [-M multicast addr] [-c] [-t timeout] [-T] [-S[duration]]"
+                        << "\t          [-D OSD Text] [-d TOP|DOWN]"
+
                         << std::endl;
                 std::cout << "\t          [-r] [-w] [-s] [-f[format] [-W width] [-H height] [-F fps] [device] [device]"
                           << std::endl;
@@ -521,6 +540,8 @@ int main(int argc, char **argv) {
                 std::cout << "\t -T        : send Transport Stream instead of elementary Stream" << std::endl;
                 std::cout << "\t -S[duration]: enable HLS & MPEG-DASH with segment duration  in seconds (default "
                           << defaultHlsSegment << ")" << std::endl;
+		        std::cout << "\t -D OSD Display   : text for OSD Display, support strftime format (example: \"%Y-%m-%d %I:%M:%S\") " << std::endl;
+                std::cout << "\t -d TOP|DOWN   : Display on top left or down left cornet " << std::endl;
 
                 std::cout << "\t V4L2 options :" << std::endl;
                 std::cout << "\t -r        : V4L2 capture using read interface (default use memory mapped buffers)"
@@ -622,7 +643,8 @@ int main(int argc, char **argv) {
         params.bitrate = 2000;
         params.nightvision = nightVision;
         params.flip = flip;
-
+	    strncpy(params.osdTimeDisplay, osdTimeDisplay.c_str(), sizeof(params.osdTimeDisplay));
+        params.osdPos = osdPos;
 
         ImpCapture *impCapture = new ImpCapture(params);
 

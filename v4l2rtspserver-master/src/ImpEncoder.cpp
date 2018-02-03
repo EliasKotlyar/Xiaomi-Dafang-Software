@@ -26,6 +26,7 @@
 
 #include "ImpEncoder.h"
 #include <stdexcept>
+#include "logger.h"
 
 #define TAG "Sample-Encoder-jpeg"
 
@@ -58,6 +59,198 @@
         .imp_encoder = {DEV_ID_ENC, 1, 0},
 },
  */
+
+// ---- OSD
+//
+
+//#include <time.h>
+#include "Fontmap.h"
+
+#define OSD_REGION_HEIGHT               CHARHEIGHT
+
+IMPRgnHandle *prHander;
+int grpNum = 0;
+unsigned int gRegionH = 0;
+unsigned  gRegionW = 0;
+
+IMPRgnHandle *ImpEncoder::sample_osd_init(int grpNum, int width, int height, int pos)
+{
+	int ret;
+	IMPRgnHandle *prHander;
+	IMPRgnHandle rHanderFont;
+
+	prHander = (IMPRgnHandle *) malloc(1 * sizeof(IMPRgnHandle));
+	if (prHander <= 0) {
+		IMP_LOG_ERR(TAG, "malloc() error !\n");
+		return NULL;
+	}
+
+	rHanderFont = IMP_OSD_CreateRgn(NULL);
+	if (rHanderFont == INVHANDLE) {
+		IMP_LOG_ERR(TAG, "IMP_OSD_CreateRgn TimeStamp error !\n");
+		return NULL;
+	}
+	
+	ret = IMP_OSD_RegisterRgn(rHanderFont, grpNum, NULL);
+	if (ret < 0) {
+		IMP_LOG_ERR(TAG, "IVS IMP_OSD_RegisterRgn failed\n");
+		return NULL;
+	}
+
+	IMPOSDRgnAttr rAttrFont;
+	memset(&rAttrFont, 0, sizeof(IMPOSDRgnAttr));
+	rAttrFont.type = OSD_REG_PIC;
+	rAttrFont.rect.p0.x = 0;
+	// 1 is down
+	if (pos == 1)
+	{
+	    rAttrFont.rect.p0.y = height -(CHARHEIGHT *2) ;
+	}
+	else
+	{
+	    rAttrFont.rect.p0.y = 0;
+	}
+	rAttrFont.rect.p1.x = width;
+	rAttrFont.rect.p1.y = rAttrFont.rect.p0.y + OSD_REGION_HEIGHT - 1;
+	rAttrFont.fmt = PIX_FMT_BGRA;
+        gRegionH = OSD_REGION_HEIGHT;
+        gRegionW = width;
+
+	rAttrFont.data.picData.pData = NULL;
+	ret = IMP_OSD_SetRgnAttr(rHanderFont, &rAttrFont);
+	if (ret < 0) {
+		IMP_LOG_ERR(TAG, "IMP_OSD_SetRgnAttr TimeStamp error !\n");
+		return NULL;
+	}
+
+	IMPOSDGrpRgnAttr grAttrFont;
+
+	if (IMP_OSD_GetGrpRgnAttr(rHanderFont, grpNum, &grAttrFont) < 0) {
+		IMP_LOG_ERR(TAG, "IMP_OSD_GetGrpRgnAttr Logo error !\n");
+		return NULL;
+
+	}
+	memset(&grAttrFont, 0, sizeof(IMPOSDGrpRgnAttr));
+	grAttrFont.show = 0;
+
+	/* Disable Font global alpha, only use pixel alpha. */
+	grAttrFont.gAlphaEn = 1;
+	grAttrFont.fgAlhpa = 0xff;
+	grAttrFont.layer = 3;
+	if (IMP_OSD_SetGrpRgnAttr(rHanderFont, grpNum, &grAttrFont) < 0) {
+		IMP_LOG_ERR(TAG, "IMP_OSD_SetGrpRgnAttr Logo error !\n");
+		return NULL;
+	}
+
+	ret = IMP_OSD_Start(grpNum);
+	if (ret < 0) {
+		IMP_LOG_ERR(TAG, "IMP_OSD_Start TimeStamp, Logo, Cover and Rect error !\n");
+		return NULL;
+	}
+
+	prHander[0] = rHanderFont;
+	return prHander;
+}
+
+static int osd_show(void)
+{
+	int ret;
+
+	ret = IMP_OSD_ShowRgn(prHander[0], grpNum, 1);
+	if (ret != 0) {
+		IMP_LOG_ERR(TAG, "IMP_OSD_ShowRgn() timeStamp error\n");
+		return -1;
+	}
+
+	return 0;
+}
+
+static void *update_thread(void *p)
+{
+	int ret;
+
+	/*generate time*/
+	char DateStr[STRING_MAX_SIZE];
+	time_t currTime;
+	struct tm *currDate;
+	unsigned i = 0, j = 0;
+	char osdTimeDisplay[STRING_MAX_SIZE];
+	IMPOSDRgnAttrData rAttrData;
+
+	uint32_t *data = (uint32_t *) malloc(gRegionW * gRegionH * 4);
+        strcpy(osdTimeDisplay, (char*)p);
+
+	if (data == NULL) {
+		IMP_LOG_ERR(TAG, "malloc timeStampData error\n");
+		return NULL;
+	}
+
+	ret = osd_show();
+	if (ret < 0) {
+		IMP_LOG_ERR(TAG, "OSD show error\n");
+		return NULL;
+	}
+
+	while(1)
+	{
+		int penpos_t = 0;
+		int fontadv = 0;
+		void *dateData;
+
+		time(&currTime);
+		currDate = localtime(&currTime);
+		memset(DateStr, 0, sizeof(DateStr));
+		memset(data, 0, gRegionW * gRegionH * 4);
+		strftime(DateStr, STRING_MAX_SIZE, osdTimeDisplay, currDate);
+
+		//strftime(DateStr, 40, "%Y-%m-%d %I:%M:%S", currDate);
+        	// For all char in string
+		for (i = 0; DateStr[i] != 0; i++)
+		{
+		    if (DateStr[i] == ' ')
+		    {
+		    	penpos_t += SPACELENGHT*2; 
+		    }
+		    //Check if the char is in the font
+		    else if (DateStr[i] >= STARTCHAR && DateStr[i] <= ENDCHAR)
+		    {
+		        // Get the right font pointer
+                	dateData = (void *)gBgramap[DateStr[i] - STARTCHAR].pdata;
+	                // Fonts are stored in bytes
+        	        fontadv = gBgramap[DateStr[i] - STARTCHAR].widthInByte *8;
+
+                	//Check if their is still room
+		        if (penpos_t + gBgramap[DateStr[i] - STARTCHAR].width <= gRegionW-80)
+		        {
+	                    for (j = 0; j < OSD_REGION_HEIGHT; j++)
+        	            {
+                	          memcpy((void *)((uint32_t *)data + j*gRegionW + penpos_t),
+                        	         (void *)((uint32_t *)dateData + j*fontadv), fontadv*4);
+
+                    	    }	
+			    penpos_t += gBgramap[DateStr[i] - STARTCHAR].width;
+			}
+			else
+			{
+				LOG(NOTICE) << "No more space to display " <<  DateStr+i;
+				break;
+			}
+		    }
+		    else
+		    {
+			    LOG(NOTICE) << "Character " <<  DateStr[i] << " is not supported";
+		    }
+		}
+		rAttrData.picData.pData = data;
+		IMP_OSD_UpdateRgnAttrData(prHander[0], &rAttrData);
+
+		sleep(1);
+	}
+
+	return NULL;
+}
+// ---- END OSD
+//
 
 
 void *ImpEncoder::getBuffer() {
@@ -106,6 +299,10 @@ ImpEncoder::ImpEncoder(impParams params) {
     chn.imp_encoder.groupID = 0;
     chn.imp_encoder.outputID = 0;
 
+	chn.OSD_Cell.deviceID = DEV_ID_OSD;
+	chn.OSD_Cell.groupID = 0;
+	chn.OSD_Cell.outputID = 0;
+
 
     encoderMode = currentParams.mode;
     int width = currentParams.width;
@@ -153,21 +350,57 @@ ImpEncoder::ImpEncoder(impParams params) {
         }
     }
 
+	// ----- OSD implementation: Init
+	//
+	if (strlen(params.osdTimeDisplay) > 0)
+	{
+	    LOG(INFO) << "OSD Activated with string " << params.osdTimeDisplay;
+
+	    if (IMP_OSD_CreateGroup(0) < 0) {
+		IMP_LOG_ERR(TAG, "IMP_OSD_CreateGroup(0) error !\n");
+	    }
+
+        prHander = sample_osd_init(0,currentParams.width, currentParams.height,currentParams.osdPos );
+        if (prHander <= 0) {
+            IMP_LOG_ERR(TAG, "OSD init failed\n");
+        }
+
+        /* Step Bind */
+        ret = IMP_System_Bind(&chn.framesource_chn, &chn.OSD_Cell);
+        if (ret < 0) {
+            IMP_LOG_ERR(TAG, "Bind FrameSource channel0 and OSD failed\n");
+        }
+
+        ret = IMP_System_Bind(&chn.OSD_Cell, &chn.imp_encoder);
+        if (ret < 0) {
+            IMP_LOG_ERR(TAG, "Bind OSD and Encoder failed\n");
+        }
+
+        pthread_t tid;
 
 
+        ret = pthread_create(&tid, NULL, update_thread,(void*)params.osdTimeDisplay);
 
-    /* Step.4 Bind */
-
-    ret = IMP_System_Bind(&chn.framesource_chn, &chn.imp_encoder);
-    if (ret < 0) {
-        IMP_LOG_ERR(TAG, "Bind FrameSource channel%d and Encoder failed\n", 0);
+        sleep(0);
+        if (ret) {
+            IMP_LOG_ERR(TAG, "thread create error\n");
+        }
     }
+    else
+    {
+        //-------------------------
+	    //
+	    /* Step.4 Bind */
 
-
-    /* Step.5 Stream On */
-    ret = sample_framesource_streamon();
-    if (ret < 0) {
-        IMP_LOG_ERR(TAG, "ImpStreamOn failed\n");
+	    ret = IMP_System_Bind(&chn.framesource_chn, &chn.imp_encoder);
+	    if (ret < 0) {
+		    IMP_LOG_ERR(TAG, "Bind FrameSource channel%d and Encoder failed\n", 0);
+	    }
+    }
+	/* Step.5 Stream On */
+	ret = sample_framesource_streamon();
+	if (ret < 0) {
+		IMP_LOG_ERR(TAG, "ImpStreamOn failed\n");
 
     }
     //exit(0);
