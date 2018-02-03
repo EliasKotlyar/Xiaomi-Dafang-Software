@@ -626,16 +626,12 @@ int main(int argc, char **argv) {
 
         ImpCapture *impCapture = new ImpCapture(params);
 
-
-
         if (!outputFile.empty()) {
-
-            int bufferSize = impCapture->getBufferSize();
-            char *buffer = (char*)malloc(bufferSize);
-            int bytesRead = impCapture->read(buffer,bufferSize);
-            int ret = fwrite(buffer, bytesRead, 1, stdout);
-            exit(ret);
-
+            if(strcmp(outputFile.c_str(),"memory")==0){
+                outfd = -2;
+            }else{
+                outfd = (int)fopen(outputFile.c_str(),"w");
+            }
         }
 
 
