@@ -629,6 +629,8 @@ int main(int argc, char **argv) {
         if (videoFormat == V4L2_PIX_FMT_MJPEG) {
             params.mode = IMP_MODE_JPEG;
             OutPacketBuffer::maxSize = 250000;
+
+
         } else if (videoFormat == V4L2_PIX_FMT_H264) {
             params.mode = IMP_MODE_H264_SNAP;
             MPEG2TransportStreamFromESSource::maxInputESFrameSize += 4820;
@@ -638,9 +640,13 @@ int main(int argc, char **argv) {
             LOG(FATAL) << "Unrecognized Format ";
             exit(0);
         }
+        if(width == 1920 && height == 1080){
+            OutPacketBuffer::maxSize = 500000;
+        }
+
 
         params.framerate = fps;
-        params.bitrate = 2000;
+        params.bitrate = 5000;
         params.nightvision = nightVision;
         params.flip = flip;
 	    strncpy(params.osdTimeDisplay, osdTimeDisplay.c_str(), sizeof(params.osdTimeDisplay));
