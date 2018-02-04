@@ -71,183 +71,167 @@
 IMPRgnHandle *prHander;
 int grpNum = 0;
 unsigned int gRegionH = 0;
-unsigned  gRegionW = 0;
+unsigned gRegionW = 0;
 
-IMPRgnHandle *ImpEncoder::sample_osd_init(int grpNum, int width, int height, int pos)
-{
-	int ret;
-	IMPRgnHandle *prHander;
-	IMPRgnHandle rHanderFont;
+IMPRgnHandle *ImpEncoder::sample_osd_init(int grpNum, int width, int height, int pos) {
+    int ret;
+    IMPRgnHandle *prHander;
+    IMPRgnHandle rHanderFont;
 
-	prHander = (IMPRgnHandle *) malloc(1 * sizeof(IMPRgnHandle));
-	if (prHander <= 0) {
-		IMP_LOG_ERR(TAG, "malloc() error !\n");
-		return NULL;
-	}
+    prHander = (IMPRgnHandle *) malloc(1 * sizeof(IMPRgnHandle));
+    if (prHander <= 0) {
+        IMP_LOG_ERR(TAG, "malloc() error !\n");
+        return NULL;
+    }
 
-	rHanderFont = IMP_OSD_CreateRgn(NULL);
-	if (rHanderFont == INVHANDLE) {
-		IMP_LOG_ERR(TAG, "IMP_OSD_CreateRgn TimeStamp error !\n");
-		return NULL;
-	}
-	
-	ret = IMP_OSD_RegisterRgn(rHanderFont, grpNum, NULL);
-	if (ret < 0) {
-		IMP_LOG_ERR(TAG, "IVS IMP_OSD_RegisterRgn failed\n");
-		return NULL;
-	}
+    rHanderFont = IMP_OSD_CreateRgn(NULL);
+    if (rHanderFont == INVHANDLE) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_CreateRgn TimeStamp error !\n");
+        return NULL;
+    }
 
-	IMPOSDRgnAttr rAttrFont;
-	memset(&rAttrFont, 0, sizeof(IMPOSDRgnAttr));
-	rAttrFont.type = OSD_REG_PIC;
-	rAttrFont.rect.p0.x = 0;
-	// 1 is down
-	if (pos == 1)
-	{
-	    rAttrFont.rect.p0.y = height -(CHARHEIGHT *2) ;
-	}
-	else
-	{
-	    rAttrFont.rect.p0.y = 0;
-	}
-	rAttrFont.rect.p1.x = width;
-	rAttrFont.rect.p1.y = rAttrFont.rect.p0.y + OSD_REGION_HEIGHT - 1;
-	rAttrFont.fmt = PIX_FMT_BGRA;
-        gRegionH = OSD_REGION_HEIGHT;
-        gRegionW = width;
+    ret = IMP_OSD_RegisterRgn(rHanderFont, grpNum, NULL);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IVS IMP_OSD_RegisterRgn failed\n");
+        return NULL;
+    }
 
-	rAttrFont.data.picData.pData = NULL;
-	ret = IMP_OSD_SetRgnAttr(rHanderFont, &rAttrFont);
-	if (ret < 0) {
-		IMP_LOG_ERR(TAG, "IMP_OSD_SetRgnAttr TimeStamp error !\n");
-		return NULL;
-	}
+    IMPOSDRgnAttr rAttrFont;
+    memset(&rAttrFont, 0, sizeof(IMPOSDRgnAttr));
+    rAttrFont.type = OSD_REG_PIC;
+    rAttrFont.rect.p0.x = 0;
+    // 1 is down
+    if (pos == 1) {
+        rAttrFont.rect.p0.y = height - (CHARHEIGHT * 2);
+    } else {
+        rAttrFont.rect.p0.y = 0;
+    }
+    rAttrFont.rect.p1.x = width;
+    rAttrFont.rect.p1.y = rAttrFont.rect.p0.y + OSD_REGION_HEIGHT - 1;
+    rAttrFont.fmt = PIX_FMT_BGRA;
+    gRegionH = OSD_REGION_HEIGHT;
+    gRegionW = width;
 
-	IMPOSDGrpRgnAttr grAttrFont;
+    rAttrFont.data.picData.pData = NULL;
+    ret = IMP_OSD_SetRgnAttr(rHanderFont, &rAttrFont);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_SetRgnAttr TimeStamp error !\n");
+        return NULL;
+    }
 
-	if (IMP_OSD_GetGrpRgnAttr(rHanderFont, grpNum, &grAttrFont) < 0) {
-		IMP_LOG_ERR(TAG, "IMP_OSD_GetGrpRgnAttr Logo error !\n");
-		return NULL;
+    IMPOSDGrpRgnAttr grAttrFont;
 
-	}
-	memset(&grAttrFont, 0, sizeof(IMPOSDGrpRgnAttr));
-	grAttrFont.show = 0;
+    if (IMP_OSD_GetGrpRgnAttr(rHanderFont, grpNum, &grAttrFont) < 0) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_GetGrpRgnAttr Logo error !\n");
+        return NULL;
 
-	/* Disable Font global alpha, only use pixel alpha. */
-	grAttrFont.gAlphaEn = 1;
-	grAttrFont.fgAlhpa = 0xff;
-	grAttrFont.layer = 3;
-	if (IMP_OSD_SetGrpRgnAttr(rHanderFont, grpNum, &grAttrFont) < 0) {
-		IMP_LOG_ERR(TAG, "IMP_OSD_SetGrpRgnAttr Logo error !\n");
-		return NULL;
-	}
+    }
+    memset(&grAttrFont, 0, sizeof(IMPOSDGrpRgnAttr));
+    grAttrFont.show = 0;
 
-	ret = IMP_OSD_Start(grpNum);
-	if (ret < 0) {
-		IMP_LOG_ERR(TAG, "IMP_OSD_Start TimeStamp, Logo, Cover and Rect error !\n");
-		return NULL;
-	}
+    /* Disable Font global alpha, only use pixel alpha. */
+    grAttrFont.gAlphaEn = 1;
+    grAttrFont.fgAlhpa = 0xff;
+    grAttrFont.layer = 3;
+    if (IMP_OSD_SetGrpRgnAttr(rHanderFont, grpNum, &grAttrFont) < 0) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_SetGrpRgnAttr Logo error !\n");
+        return NULL;
+    }
 
-	prHander[0] = rHanderFont;
-	return prHander;
+    ret = IMP_OSD_Start(grpNum);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_Start TimeStamp, Logo, Cover and Rect error !\n");
+        return NULL;
+    }
+
+    prHander[0] = rHanderFont;
+    return prHander;
 }
 
-static int osd_show(void)
-{
-	int ret;
+static int osd_show(void) {
+    int ret;
 
-	ret = IMP_OSD_ShowRgn(prHander[0], grpNum, 1);
-	if (ret != 0) {
-		IMP_LOG_ERR(TAG, "IMP_OSD_ShowRgn() timeStamp error\n");
-		return -1;
-	}
+    ret = IMP_OSD_ShowRgn(prHander[0], grpNum, 1);
+    if (ret != 0) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_ShowRgn() timeStamp error\n");
+        return -1;
+    }
 
-	return 0;
+    return 0;
 }
 
-static void *update_thread(void *p)
-{
-	int ret;
+static void *update_thread(void *p) {
+    int ret;
 
-	/*generate time*/
-	char DateStr[STRING_MAX_SIZE];
-	time_t currTime;
-	struct tm *currDate;
-	unsigned i = 0, j = 0;
-	char osdTimeDisplay[STRING_MAX_SIZE];
-	IMPOSDRgnAttrData rAttrData;
+    /*generate time*/
+    char DateStr[STRING_MAX_SIZE];
+    time_t currTime;
+    struct tm *currDate;
+    unsigned i = 0, j = 0;
+    char osdTimeDisplay[STRING_MAX_SIZE];
+    IMPOSDRgnAttrData rAttrData;
 
-	uint32_t *data = (uint32_t *) malloc(gRegionW * gRegionH * 4);
-        strcpy(osdTimeDisplay, (char*)p);
+    uint32_t *data = (uint32_t *) malloc(gRegionW * gRegionH * 4);
+    strcpy(osdTimeDisplay, (char *) p);
 
-	if (data == NULL) {
-		IMP_LOG_ERR(TAG, "malloc timeStampData error\n");
-		return NULL;
-	}
+    if (data == NULL) {
+        IMP_LOG_ERR(TAG, "malloc timeStampData error\n");
+        return NULL;
+    }
 
-	ret = osd_show();
-	if (ret < 0) {
-		IMP_LOG_ERR(TAG, "OSD show error\n");
-		return NULL;
-	}
+    ret = osd_show();
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "OSD show error\n");
+        return NULL;
+    }
 
-	while(1)
-	{
-		int penpos_t = 0;
-		int fontadv = 0;
-		void *dateData;
+    while (1) {
+        int penpos_t = 0;
+        int fontadv = 0;
+        void *dateData;
 
-		time(&currTime);
-		currDate = localtime(&currTime);
-		memset(DateStr, 0, sizeof(DateStr));
-		memset(data, 0, gRegionW * gRegionH * 4);
-		strftime(DateStr, STRING_MAX_SIZE, osdTimeDisplay, currDate);
+        time(&currTime);
+        currDate = localtime(&currTime);
+        memset(DateStr, 0, sizeof(DateStr));
+        memset(data, 0, gRegionW * gRegionH * 4);
+        strftime(DateStr, STRING_MAX_SIZE, osdTimeDisplay, currDate);
 
-		//strftime(DateStr, 40, "%Y-%m-%d %I:%M:%S", currDate);
-        	// For all char in string
-		for (i = 0; DateStr[i] != 0; i++)
-		{
-		    if (DateStr[i] == ' ')
-		    {
-		    	penpos_t += SPACELENGHT*2; 
-		    }
-		    //Check if the char is in the font
-		    else if (DateStr[i] >= STARTCHAR && DateStr[i] <= ENDCHAR)
-		    {
-		        // Get the right font pointer
-                	dateData = (void *)gBgramap[DateStr[i] - STARTCHAR].pdata;
-	                // Fonts are stored in bytes
-        	        fontadv = gBgramap[DateStr[i] - STARTCHAR].widthInByte *8;
+        //strftime(DateStr, 40, "%Y-%m-%d %I:%M:%S", currDate);
+        // For all char in string
+        for (i = 0; DateStr[i] != 0; i++) {
+            if (DateStr[i] == ' ') {
+                penpos_t += SPACELENGHT * 2;
+            }
+                //Check if the char is in the font
+            else if (DateStr[i] >= STARTCHAR && DateStr[i] <= ENDCHAR) {
+                // Get the right font pointer
+                dateData = (void *) gBgramap[DateStr[i] - STARTCHAR].pdata;
+                // Fonts are stored in bytes
+                fontadv = gBgramap[DateStr[i] - STARTCHAR].widthInByte * 8;
 
-                	//Check if their is still room
-		        if (penpos_t + gBgramap[DateStr[i] - STARTCHAR].width <= gRegionW-80)
-		        {
-	                    for (j = 0; j < OSD_REGION_HEIGHT; j++)
-        	            {
-                	          memcpy((void *)((uint32_t *)data + j*gRegionW + penpos_t),
-                        	         (void *)((uint32_t *)dateData + j*fontadv), fontadv*4);
+                //Check if their is still room
+                if (penpos_t + gBgramap[DateStr[i] - STARTCHAR].width <= gRegionW - 80) {
+                    for (j = 0; j < OSD_REGION_HEIGHT; j++) {
+                        memcpy((void *) ((uint32_t *) data + j * gRegionW + penpos_t),
+                               (void *) ((uint32_t *) dateData + j * fontadv), fontadv * 4);
 
-                    	    }	
-			    penpos_t += gBgramap[DateStr[i] - STARTCHAR].width;
-			}
-			else
-			{
-				LOG(NOTICE) << "No more space to display " <<  DateStr+i;
-				break;
-			}
-		    }
-		    else
-		    {
-			    LOG(NOTICE) << "Character " <<  DateStr[i] << " is not supported";
-		    }
-		}
-		rAttrData.picData.pData = data;
-		IMP_OSD_UpdateRgnAttrData(prHander[0], &rAttrData);
+                    }
+                    penpos_t += gBgramap[DateStr[i] - STARTCHAR].width;
+                } else {
+                    LOG(NOTICE) << "No more space to display " << DateStr + i;
+                    break;
+                }
+            } else {
+                LOG(NOTICE) << "Character " << DateStr[i] << " is not supported";
+            }
+        }
+        rAttrData.picData.pData = data;
+        IMP_OSD_UpdateRgnAttrData(prHander[0], &rAttrData);
 
-		sleep(1);
-	}
+        sleep(1);
+    }
 
-	return NULL;
+    return NULL;
 }
 // ---- END OSD
 //
@@ -257,7 +241,7 @@ void *ImpEncoder::getBuffer() {
     return buffer;
 }
 
-int ImpEncoder::getBufferSize(){
+int ImpEncoder::getBufferSize() {
     return bufferSize;
 }
 
@@ -299,9 +283,9 @@ ImpEncoder::ImpEncoder(impParams params) {
     chn.imp_encoder.groupID = 0;
     chn.imp_encoder.outputID = 0;
 
-	chn.OSD_Cell.deviceID = DEV_ID_OSD;
-	chn.OSD_Cell.groupID = 0;
-	chn.OSD_Cell.outputID = 0;
+    chn.OSD_Cell.deviceID = DEV_ID_OSD;
+    chn.OSD_Cell.groupID = 0;
+    chn.OSD_Cell.outputID = 0;
 
 
     encoderMode = currentParams.mode;
@@ -333,34 +317,33 @@ ImpEncoder::ImpEncoder(impParams params) {
     }
 
 
-    if (encoderMode == IMP_MODE_JPEG) {
-        /* Step.3 Encoder init */
-        ret = sample_jpeg_init();
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "Encoder JPEG init failed\n");
 
-        }
+    /* Step.3 Encoder init */
+    ret = sample_jpeg_init();
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "Encoder JPEG init failed\n");
 
-    } else {
-        /* Step.3 Encoder init */
-        ret = sample_encoder_init();
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "Encoder h264 init failed\n");
-
-        }
     }
 
-	// ----- OSD implementation: Init
-	//
-	if (strlen(params.osdTimeDisplay) > 0)
-	{
-	    LOG(INFO) << "OSD Activated with string " << params.osdTimeDisplay;
 
-	    if (IMP_OSD_CreateGroup(0) < 0) {
-		IMP_LOG_ERR(TAG, "IMP_OSD_CreateGroup(0) error !\n");
-	    }
+    /* Step.3 Encoder init */
+    ret = sample_encoder_init();
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "Encoder h264 init failed\n");
 
-        prHander = sample_osd_init(0,currentParams.width, currentParams.height,currentParams.osdPos );
+    }
+
+
+    // ----- OSD implementation: Init
+    //
+    if (strlen(params.osdTimeDisplay) > 0) {
+        LOG(INFO) << "OSD Activated with string " << params.osdTimeDisplay;
+
+        if (IMP_OSD_CreateGroup(0) < 0) {
+            IMP_LOG_ERR(TAG, "IMP_OSD_CreateGroup(0) error !\n");
+        }
+
+        prHander = sample_osd_init(0, currentParams.width, currentParams.height, currentParams.osdPos);
         if (prHander <= 0) {
             IMP_LOG_ERR(TAG, "OSD init failed\n");
         }
@@ -379,28 +362,26 @@ ImpEncoder::ImpEncoder(impParams params) {
         pthread_t tid;
 
 
-        ret = pthread_create(&tid, NULL, update_thread,(void*)params.osdTimeDisplay);
+        ret = pthread_create(&tid, NULL, update_thread, (void *) params.osdTimeDisplay);
 
         sleep(0);
         if (ret) {
             IMP_LOG_ERR(TAG, "thread create error\n");
         }
-    }
-    else
-    {
+    } else {
         //-------------------------
-	    //
-	    /* Step.4 Bind */
+        //
+        /* Step.4 Bind */
 
-	    ret = IMP_System_Bind(&chn.framesource_chn, &chn.imp_encoder);
-	    if (ret < 0) {
-		    IMP_LOG_ERR(TAG, "Bind FrameSource channel%d and Encoder failed\n", 0);
-	    }
+        ret = IMP_System_Bind(&chn.framesource_chn, &chn.imp_encoder);
+        if (ret < 0) {
+            IMP_LOG_ERR(TAG, "Bind FrameSource channel%d and Encoder failed\n", 0);
+        }
     }
-	/* Step.5 Stream On */
-	ret = sample_framesource_streamon();
-	if (ret < 0) {
-		IMP_LOG_ERR(TAG, "ImpStreamOn failed\n");
+    /* Step.5 Stream On */
+    ret = sample_framesource_streamon();
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "ImpStreamOn failed\n");
 
     }
     //exit(0);
@@ -409,21 +390,18 @@ ImpEncoder::ImpEncoder(impParams params) {
     /* drop several pictures of invalid data */
     sleep(SLEEP_TIME);
 
-    if (encoderMode == IMP_MODE_JPEG) {
-
-        ret = IMP_Encoder_StartRecvPic(2);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", 2);
-        }
-
-
-    } else {
-        ret = IMP_Encoder_StartRecvPic(0);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", 0);
-        }
-
+    // JPEG
+    ret = IMP_Encoder_StartRecvPic(1);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", 2);
     }
+
+    // H264
+    ret = IMP_Encoder_StartRecvPic(0);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_Encoder_StartRecvPic(%d) failed\n", 0);
+    }
+
     memset(&m_mutex, 0, sizeof(m_mutex));
     pthread_mutex_init(&m_mutex, NULL);
 
@@ -434,21 +412,20 @@ ImpEncoder::ImpEncoder(impParams params) {
 ImpEncoder::~ImpEncoder() {
     int ret;
 
-    if (encoderMode == IMP_MODE_JPEG) {
-        /* Step.b UnBind */
-        ret = IMP_Encoder_StopRecvPic(2);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
 
-        }
-    } else {
-        ret = IMP_Encoder_StopRecvPic(0);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
-
-        }
+    /* Step.b UnBind */
+    ret = IMP_Encoder_StopRecvPic(1);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
 
     }
+
+    ret = IMP_Encoder_StopRecvPic(0);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_Encoder_StopRecvPic() failed\n");
+
+    }
+
 
 
 
@@ -501,7 +478,7 @@ int ImpEncoder::snap_jpeg() {
 
 
     /* Polling JPEG Snap, set timeout as 1000msec */
-    ret = IMP_Encoder_PollingStream(2, 1000);
+    ret = IMP_Encoder_PollingStream(1, 1000);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "Polling stream timeout\n");
         return -1;
@@ -509,7 +486,7 @@ int ImpEncoder::snap_jpeg() {
 
     IMPEncoderStream stream;
     /* Get JPEG Snap */
-    ret = IMP_Encoder_GetStream(2, &stream, 1);
+    ret = IMP_Encoder_GetStream(1, &stream, 1);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_Encoder_GetStream() failed\n");
         return -1;
@@ -525,7 +502,7 @@ int ImpEncoder::snap_jpeg() {
         return -1;
     }
 
-    IMP_Encoder_ReleaseStream(2, &stream);
+    IMP_Encoder_ReleaseStream(1, &stream);
 
 
     return bytesRead;
@@ -564,8 +541,6 @@ int ImpEncoder::snap_h264() {
     } else {
         framesCount++;
     }
-
-
 
 
     int i;
@@ -672,10 +647,10 @@ int ImpEncoder::sample_system_init() {
 
     setNightVision(currentParams.nightvision);
 
-    if(currentParams.flip == true){
+    if (currentParams.flip == true) {
         IMP_ISP_Tuning_SetISPVflip(IMPISP_TUNING_OPS_MODE_ENABLE);
         IMP_ISP_Tuning_SetISPHflip(IMPISP_TUNING_OPS_MODE_ENABLE);
-    } else{
+    } else {
         IMP_ISP_Tuning_SetISPVflip(IMPISP_TUNING_OPS_MODE_DISABLE);
         IMP_ISP_Tuning_SetISPHflip(IMPISP_TUNING_OPS_MODE_DISABLE);
     }
@@ -826,7 +801,7 @@ int ImpEncoder::sample_jpeg_init() {
     enc_attr->picHeight = imp_chn_attr_tmp->picHeight;
 
     /* Create Channel */
-    ret = IMP_Encoder_CreateChn(2, &channel_attr);
+    ret = IMP_Encoder_CreateChn(1, &channel_attr);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_Encoder_CreateChn(%d) error: %d\n",
                     0, ret);
@@ -834,7 +809,7 @@ int ImpEncoder::sample_jpeg_init() {
     }
 
     /* Resigter Channel */
-    ret = IMP_Encoder_RegisterChn(0, 2);
+    ret = IMP_Encoder_RegisterChn(0, 1);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_Encoder_RegisterChn(0, %d) error: %d\n",
                     0, ret);
@@ -1084,11 +1059,11 @@ void ImpEncoder::setNightVision(bool state) {
     int ret;
     if (state) {
         isprunningmode = IMPISP_RUNNING_MODE_NIGHT;
-        sceneMode =  IMPISP_SCENE_MODE_NIGHT;
+        sceneMode = IMPISP_SCENE_MODE_NIGHT;
         colormode = IMPISP_COLORFX_MODE_BW;
     } else {
         isprunningmode = IMPISP_RUNNING_MODE_DAY;
-        sceneMode =  IMPISP_SCENE_MODE_AUTO;
+        sceneMode = IMPISP_SCENE_MODE_AUTO;
         colormode = IMPISP_COLORFX_MODE_AUTO;
     }
     ret = IMP_ISP_Tuning_SetISPRunningMode(isprunningmode);
@@ -1104,7 +1079,6 @@ void ImpEncoder::setNightVision(bool state) {
     if (ret) {
         IMP_LOG_ERR(TAG, "IMP_ISP_Tuning_GetColorfxMode error !\n");
     }
-
 
 
 }
