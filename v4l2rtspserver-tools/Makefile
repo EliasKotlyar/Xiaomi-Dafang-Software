@@ -14,9 +14,13 @@ LDFLAG += -muclibc
 LDFLAG += -Wl,-gc-sections
 
 
-all: 	getimage
+all: 	getimage setconf
 
-motor: getimage.o
+image: getimage.o
+	$(CPLUSPLUS) $(LDFLAG) -o $@ $^ $(LIBS) -lpthread -lm -lrt
+	$(STRIP) $@
+
+setconf: setconf.o
 	$(CPLUSPLUS) $(LDFLAG) -o $@ $^ $(LIBS) -lpthread -lm -lrt
 	$(STRIP) $@
 
