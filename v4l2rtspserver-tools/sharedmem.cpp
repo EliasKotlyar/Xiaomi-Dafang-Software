@@ -1,12 +1,9 @@
-#include<stdio.h>
+#include "sharedmem.h"
+SharedMem::SharedMem(){
 
+}
 
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <string.h>
-int main(int argc, char *argv[]) {
-
+SharedMem::getImage(){
     key_t key1;
     key1 = ftok("/usr/include", 'x');
     int shm_id;
@@ -19,6 +16,4 @@ int main(int argc, char *argv[]) {
     shared_mem = shmat( shm_id, NULL, 0);
     fwrite(shared_mem, memlen, 1, stdout);
     shmdt(shared_mem);
-
-    return 0;
 }

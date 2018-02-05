@@ -9,6 +9,8 @@ CFLAGS += -muclibc
 LDFLAG += -muclibc
 
 
+.$(CPP).$(OBJ):
+	$(CPLUSPLUS) -c $(CPLUSPLUS_FLAGS) -o $@ $<
 
 
 LDFLAG += -Wl,-gc-sections
