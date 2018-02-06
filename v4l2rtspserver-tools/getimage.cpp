@@ -7,8 +7,7 @@
 
 int main(int argc, char *argv[]) {
 
-    SharedMem* mem = new SharedMem();
-
+    SharedMem& mem = SharedMem::instance();
 
     return 0;
 }

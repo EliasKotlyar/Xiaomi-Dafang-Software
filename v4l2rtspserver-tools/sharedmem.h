@@ -17,6 +17,15 @@ public:
     SharedMem();
     void getImage();
 
+    static SharedMem& instance()
+    {
+        static SharedMem _instance;
+        return _instance;
+    }
+
+
+
+
     ~SharedMem();
 
 

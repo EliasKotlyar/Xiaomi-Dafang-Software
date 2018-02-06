@@ -3,6 +3,10 @@ SharedMem::SharedMem(){
 
 }
 
+SharedMem::~SharedMem(){
+
+}
+
 void SharedMem::getImage(){
     key_t key1;
     key1 = ftok("/usr/include", 'x');
