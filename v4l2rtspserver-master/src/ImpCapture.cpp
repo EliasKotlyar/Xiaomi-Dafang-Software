@@ -26,31 +26,7 @@ size_t ImpCapture::read(char *buffer, size_t bufferSize) {
     // Save to JPG
     frameSize = impEncoder->snap_jpeg();
 
-    key_t key1;
-    key1 = ftok("/usr/include", 'x');
-    int shm_id;
 
-    shm_id = shmget( key1, 0, 0);
-    if(shm_id != -1){
-        struct shmid_ds buf;
-        shmctl(shm_id, IPC_STAT, &buf);
-        int memlen = buf.shm_segsz;
-        if(memlen !=  impEncoder->getBufferSize()){
-            shmctl(shm_id, IPC_RMID, NULL);
-        }
-    }
-
-
-
-    shm_id = shmget( key1, impEncoder->getBufferSize(), IPC_CREAT);
-    if(shm_id != -1 ){
-        void* shared_mem;
-        shared_mem = shmat( shm_id, NULL, 0);
-        memcpy(shared_mem,impEncoder->getBuffer(),frameSize);
-        shmdt(shared_mem);
-    }else{
-
-    }
 
 
 

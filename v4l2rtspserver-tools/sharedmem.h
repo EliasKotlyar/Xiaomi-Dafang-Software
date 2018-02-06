@@ -24,12 +24,17 @@ public:
     }
 
 
+    void readMemory(char key, void *memory, int memorylenght);
 
+    int getMemorySize(char key);
+
+    void writeMemory(char key, void *memory, int memorylenght);
 
     ~SharedMem();
 
 
 private:
+
 
 
 };

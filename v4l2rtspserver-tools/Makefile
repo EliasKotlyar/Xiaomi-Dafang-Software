@@ -12,13 +12,13 @@ LDFLAG += -muclibc
 LDFLAG += -Wl,-gc-sections
 
 
-all:  getimage
+all:  getimage setconf
 
 getimage: getimage.cpp sharedmem.cpp
 	$(CPLUSPLUS) $(LDFLAG) -o $@ $^ $(LIBS) -lpthread -lm -lrt
 	$(STRIP) $@
 
-setconf: setconf.o
+setconf: setconf.cpp sharedmem.cpp
 	$(CPLUSPLUS) $(LDFLAG) -o $@ $^ $(LIBS) -lpthread -lm -lrt
 	$(STRIP) $@
 
