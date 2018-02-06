@@ -9,10 +9,6 @@ CFLAGS += -muclibc
 LDFLAG += -muclibc
 
 
-.$(CPP).$(OBJ):
-	$(CPLUSPLUS) -c $(CPLUSPLUS_FLAGS) -o $@ $<
-
-
 LDFLAG += -Wl,-gc-sections
 
 
@@ -30,6 +26,10 @@ setconf: setconf.o
 
 %.o:%.c sample-common.h
 	$(CC) -c $(CFLAGS) $< -o $@
+
+%.o:%.cpp
+	$(CPLUSPLUS) -c $(CFLAGS) $< -o $@
+
 
 clean:
 	rm -f *.o *~
