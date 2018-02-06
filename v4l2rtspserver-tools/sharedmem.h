@@ -15,6 +15,7 @@ struct shared_conf {
 class SharedMem {
 public:
     SharedMem();
+    void getImage();
 
     ~SharedMem();
 

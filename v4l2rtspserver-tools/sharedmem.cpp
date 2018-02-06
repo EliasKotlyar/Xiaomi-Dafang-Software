@@ -3,7 +3,7 @@ SharedMem::SharedMem(){
 
 }
 
-SharedMem::getImage(){
+void SharedMem::getImage(){
     key_t key1;
     key1 = ftok("/usr/include", 'x');
     int shm_id;
@@ -14,6 +14,6 @@ SharedMem::getImage(){
 
     void* shared_mem;
     shared_mem = shmat( shm_id, NULL, 0);
-    fwrite(shared_mem, memlen, 1, stdout);
+    //fwrite(shared_mem, memlen, 1, stdout);
     shmdt(shared_mem);
 }
