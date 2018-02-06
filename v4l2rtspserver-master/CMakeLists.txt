@@ -72,6 +72,10 @@ endif (NOT LIBLIVE555_INCLUDE_DIR)
 
 find_path(LIBLIVE555_INCLUDE_DIR liveMedia/liveMedia.hh)
 include_directories(../live/liveMedia/include)
+
+include_directories(../v4l2rtspserver-tools/)
+
+
 #include_directories(../live/liveMedia/)
 foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnvironment)
 	include_directories(../live/${LIBLIVE555_module}/include)

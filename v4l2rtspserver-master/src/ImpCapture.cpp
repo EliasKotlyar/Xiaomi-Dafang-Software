@@ -1,8 +1,10 @@
 #include "ImpCapture.h"
 
 #include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
+
+
+#include "sharedmem.h"
+
 ImpCapture::ImpCapture(impParams params) {
     impEncoder = new ImpEncoder(params);
     height = params.height;
@@ -25,6 +27,12 @@ size_t ImpCapture::read(char *buffer, size_t bufferSize) {
 
     // Save to JPG
     frameSize = impEncoder->snap_jpeg();
+
+
+    SharedMem &mem = SharedMem::instance();
+    mem.writeMemory('x', impEncoder->getBuffer(), impEncoder->getBufferSize());
+
+
 
 
 
