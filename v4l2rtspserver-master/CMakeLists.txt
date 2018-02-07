@@ -73,8 +73,14 @@ endif (NOT LIBLIVE555_INCLUDE_DIR)
 find_path(LIBLIVE555_INCLUDE_DIR liveMedia/liveMedia.hh)
 include_directories(../live/liveMedia/include)
 
-include_directories(../v4l2rtspserver-tools/)
 
+#target_link_libraries(sharedmem ../v4l2rtspserver-tools/sharedmem.cpp )
+
+
+include_directories(../v4l2rtspserver-tools/)
+add_library(sharedmem ../v4l2rtspserver-tools/sharedmem.cpp)
+#add_subdirectory(../v4l2rtspserver-tools/ ./)
+target_link_libraries(${PROJECT_NAME} sharedmem)
 
 #include_directories(../live/liveMedia/)
 foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnvironment)
