@@ -30,7 +30,7 @@ size_t ImpCapture::read(char *buffer, size_t bufferSize) {
 
 
     SharedMem &mem = SharedMem::instance();
-    mem.writeMemory('x', impEncoder->getBuffer(), impEncoder->getBufferSize());
+    mem.copyImage(impEncoder->getBuffer(), impEncoder->getBufferSize());
 
 
 
