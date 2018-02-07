@@ -5,36 +5,60 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <string.h>
+#include <sys/sem.h>
 
 struct shared_conf {
     int nightmode;
     int flip;
 };
+struct sembuf semaphore_lock[1]   = { 0, -1, SEM_UNDO };
+struct sembuf semaphore_unlock[1] = { 0, 1,  SEM_UNDO };
 
 
 class SharedMem {
 public:
     SharedMem();
+
     void getImage();
 
-    static SharedMem& instance()
-    {
+    static SharedMem &instance() {
         static SharedMem _instance;
         return _instance;
     }
 
 
-    void readMemory(char key, void *memory, int memorylenght);
-
-    int getMemorySize(char key);
-
-    void writeMemory(char key, void *memory, int memorylenght);
-
     ~SharedMem();
 
+    shared_conf *getConfig();
+    void setConfig();
+
+
+    int getImageSize();
+    void *getImageBuffer();
+    void copyImage(void *imageMemory, int imageSize);
 
 private:
+    key_t key_image_mem;
+    key_t key_image_semaphore;
+    key_t key_config_mem;
+    key_t key_config_semaphore;
 
+    struct shared_conf currentConfig;
+
+
+
+    void readMemory(key_t key, void *memory, int memorylenght);
+
+    void lockSemaphore(key_t key);
+
+    void unlockSemaphore(key_t key);
+
+
+
+    void writeMemory(key_t key, void *memory, int memorylenght);
+
+
+    int getMemorySize(key_t key);
 
 
 };

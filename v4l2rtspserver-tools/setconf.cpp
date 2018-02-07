@@ -26,20 +26,19 @@ int main(int argc, char *argv[]) {
     }
 
     SharedMem &mem = SharedMem::instance();
-    struct shared_conf conf;
-    mem.readMemory('x', &conf, sizeof(shared_conf));
+    shared_conf* conf = mem.getConfig();
     switch (key) {
         case 'f':
-            conf.flip = value;
+            conf->flip = value;
             break;
         case 'n':
-            conf.nightmode = value;
+            conf->nightmode = value;
             break;
         default:
             printf("Invalid Argument %c\n", c);
             exit(EXIT_FAILURE);
     }
-    mem.writeMemory('x', &conf, sizeof(shared_conf));
+    mem.setConfig();
 
     return 0;
 
