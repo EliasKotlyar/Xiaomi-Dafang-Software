@@ -11,8 +11,6 @@ struct shared_conf {
     int nightmode;
     int flip;
 };
-struct sembuf semaphore_lock[1]   = { 0, -1, SEM_UNDO };
-struct sembuf semaphore_unlock[1] = { 0, 1,  SEM_UNDO };
 
 
 class SharedMem {
@@ -59,6 +57,10 @@ private:
 
 
     int getMemorySize(key_t key);
+
+    struct sembuf semaphore_lock[1];
+    struct sembuf semaphore_unlock[1];
+
 
 
 };

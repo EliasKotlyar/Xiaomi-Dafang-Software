@@ -10,6 +10,16 @@ SharedMem::SharedMem() {
     key_config_mem = ftok("/usr/include", '3');
     key_config_semaphore = ftok("/usr/include", '4');
 
+    semaphore_lock[0].sem_flg = 0;
+    semaphore_lock[0].sem_num = (unsigned short)-1;
+    semaphore_lock[0].sem_op = SEM_UNDO;
+
+
+    semaphore_unlock[0].sem_flg = 0;
+    semaphore_unlock[0].sem_num = (unsigned short)1;
+    semaphore_unlock[0].sem_op = SEM_UNDO;
+
+
 }
 
 SharedMem::~SharedMem() {
