@@ -34,6 +34,7 @@ public:
     int getImageSize();
     void *getImageBuffer();
     void copyImage(void *imageMemory, int imageSize);
+    void readConfig();
 
 private:
     key_t key_image_mem;

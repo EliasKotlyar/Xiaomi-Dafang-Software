@@ -26,7 +26,10 @@ int main(int argc, char *argv[]) {
     }
 
     SharedMem &mem = SharedMem::instance();
-    shared_conf* conf = mem.getConfig();
+    shared_conf *conf = mem.getConfig();
+    printf("%d,%d\n", conf->nightmode, conf->flip);
+    mem.readConfig();
+    printf("%d,%d\n", conf->nightmode, conf->flip);
     switch (key) {
         case 'f':
             conf->flip = value;
@@ -39,6 +42,8 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
     }
     mem.setConfig();
+    mem.readConfig();
+    printf("%d,%d\n", conf->nightmode, conf->flip);
 
     return 0;
 

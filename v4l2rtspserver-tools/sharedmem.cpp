@@ -49,10 +49,13 @@ void SharedMem::copyImage(void *imageMemory, int imageSize) {
 }
 
 shared_conf *SharedMem::getConfig() {
+    return &currentConfig;
+}
+
+void SharedMem::readConfig(){
     this->lockSemaphore(key_config_semaphore);
     this->readMemory(key_config_mem, &currentConfig, sizeof(shared_conf));
     this->unlockSemaphore(key_config_semaphore);
-    return &currentConfig;
 }
 
 void SharedMem::setConfig() {

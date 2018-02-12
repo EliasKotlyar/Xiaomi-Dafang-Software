@@ -65,6 +65,8 @@
 
 //#include <time.h>
 #include "Fontmap.h"
+#include "sharedmem.h"
+#include "../../v4l2rtspserver-tools/sharedmem.h"
 
 #define OSD_REGION_HEIGHT               CHARHEIGHT
 
@@ -184,6 +186,11 @@ static void *update_thread(void *p) {
         IMP_LOG_ERR(TAG, "OSD show error\n");
         return NULL;
     }
+    struct shared_conf currentConfig;
+    shared_conf* newConfig;
+    //SharedMem &sharedMem = SharedMem::instance();
+    //newConfig = sharedMem.getConfig();
+    //sharedMem.readConfig();
 
     while (1) {
         int penpos_t = 0;
@@ -229,6 +236,29 @@ static void *update_thread(void *p) {
         IMP_OSD_UpdateRgnAttrData(prHander[0], &rAttrData);
 
         sleep(1);
+
+
+        IMP_LOG_ERR(TAG, "THread Running...%d,%d\n",newConfig->flip,newConfig->nightmode);
+
+        /*
+        if(currentConfig.flip != newConfig->flip){
+            IMP_LOG_ERR(TAG, "Changed FLIP\n");
+            if (newConfig->flip == 1) {
+                IMP_ISP_Tuning_SetISPVflip(IMPISP_TUNING_OPS_MODE_ENABLE);
+                IMP_ISP_Tuning_SetISPHflip(IMPISP_TUNING_OPS_MODE_ENABLE);
+            } else {
+                IMP_ISP_Tuning_SetISPVflip(IMPISP_TUNING_OPS_MODE_DISABLE);
+                IMP_ISP_Tuning_SetISPHflip(IMPISP_TUNING_OPS_MODE_DISABLE);
+            }
+        }
+
+        if(currentConfig.nightmode != newConfig->nightmode){
+            IMP_LOG_ERR(TAG, "Changed NIGHTVISION\n");
+            ImpEncoder::setNightVision(newConfig->nightmode);
+        }
+        memcpy(&currentConfig,newConfig, sizeof(shared_conf));
+        */
+
     }
 
     return NULL;
@@ -336,7 +366,7 @@ ImpEncoder::ImpEncoder(impParams params) {
 
     // ----- OSD implementation: Init
     //
-    if (strlen(params.osdTimeDisplay) > 0) {
+    //if (strlen(params.osdTimeDisplay) > 0) {
         LOG(INFO) << "OSD Activated with string " << params.osdTimeDisplay;
 
         if (IMP_OSD_CreateGroup(0) < 0) {
@@ -368,7 +398,7 @@ ImpEncoder::ImpEncoder(impParams params) {
         if (ret) {
             IMP_LOG_ERR(TAG, "thread create error\n");
         }
-    } else {
+    //} else {
         //-------------------------
         //
         /* Step.4 Bind */
@@ -377,7 +407,7 @@ ImpEncoder::ImpEncoder(impParams params) {
         if (ret < 0) {
             IMP_LOG_ERR(TAG, "Bind FrameSource channel%d and Encoder failed\n", 0);
         }
-    }
+   // }
     /* Step.5 Stream On */
     ret = sample_framesource_streamon();
     if (ret < 0) {
@@ -645,15 +675,7 @@ int ImpEncoder::sample_system_init() {
         return -1;
     }
 
-    setNightVision(currentParams.nightvision);
 
-    if (currentParams.flip == true) {
-        IMP_ISP_Tuning_SetISPVflip(IMPISP_TUNING_OPS_MODE_ENABLE);
-        IMP_ISP_Tuning_SetISPHflip(IMPISP_TUNING_OPS_MODE_ENABLE);
-    } else {
-        IMP_ISP_Tuning_SetISPVflip(IMPISP_TUNING_OPS_MODE_DISABLE);
-        IMP_ISP_Tuning_SetISPHflip(IMPISP_TUNING_OPS_MODE_DISABLE);
-    }
 
 
 

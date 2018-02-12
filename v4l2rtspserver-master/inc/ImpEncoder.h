@@ -75,7 +75,7 @@ public:
 
     IMPEncoderPack getFrame();
 
-    void setNightVision(bool state);
+    void static setNightVision(bool state);
 
     int getBufferSize();
 
