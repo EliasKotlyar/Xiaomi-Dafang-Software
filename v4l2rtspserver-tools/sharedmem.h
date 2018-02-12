@@ -17,7 +17,7 @@ class SharedMem {
 public:
     SharedMem();
 
-    void getImage();
+    void* getImage();
 
     static SharedMem &instance() {
         static SharedMem _instance;

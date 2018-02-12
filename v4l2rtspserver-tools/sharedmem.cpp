@@ -11,12 +11,12 @@ SharedMem::SharedMem() {
     key_config_semaphore = ftok("/usr/include", '4');
 
     semaphore_lock[0].sem_flg = 0;
-    semaphore_lock[0].sem_num = (unsigned short)-1;
+    semaphore_lock[0].sem_num = (unsigned short) -1;
     semaphore_lock[0].sem_op = SEM_UNDO;
 
 
     semaphore_unlock[0].sem_flg = 0;
-    semaphore_unlock[0].sem_num = (unsigned short)1;
+    semaphore_unlock[0].sem_num = (unsigned short) 1;
     semaphore_unlock[0].sem_op = SEM_UNDO;
 
 
@@ -114,7 +114,12 @@ void SharedMem::writeMemory(key_t key, void *memory, int memorylenght) {
 
 }
 
-void SharedMem::getImage() {
-
+void *SharedMem::getImage() {
+    int memlen = getImageSize();
+    void *memory = malloc((size_t) memlen);
+    this->lockSemaphore(key_image_semaphore);
+    this->readMemory(key_image_mem, memory, memlen);
+    this->unlockSemaphore(key_image_semaphore);
+    return memory;
 
 }
