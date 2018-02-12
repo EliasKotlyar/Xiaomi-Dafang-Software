@@ -44,7 +44,7 @@ void *SharedMem::getImageBuffer() {
 
 void SharedMem::copyImage(void *imageMemory, int imageSize) {
     this->lockSemaphore(key_image_semaphore);
-    this->readMemory(key_image_mem, imageMemory, imageSize);
+    this->writeMemory(key_image_mem, imageMemory, imageSize);
     this->unlockSemaphore(key_image_semaphore);
 }
 
@@ -88,11 +88,10 @@ int SharedMem::getMemorySize(key_t key) {
 }
 
 void SharedMem::writeMemory(key_t key, void *memory, int memorylenght) {
-    key_t key1;
-    key1 = ftok("/usr/include", key);
+
     int shm_id;
 
-    shm_id = shmget(key1, 0, 0);
+    shm_id = shmget(key, 0, 0);
     if (shm_id != -1) {
         int memlen = this->getMemorySize(key);
         if (memlen != memorylenght) {
@@ -101,7 +100,7 @@ void SharedMem::writeMemory(key_t key, void *memory, int memorylenght) {
     }
 
 
-    shm_id = shmget(key1, memorylenght, IPC_CREAT);
+    shm_id = shmget(key, memorylenght, IPC_CREAT);
     if (shm_id != -1) {
         void *shared_mem;
         shared_mem = shmat(shm_id, NULL, 0);
