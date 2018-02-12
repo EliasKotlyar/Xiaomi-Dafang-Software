@@ -188,9 +188,9 @@ static void *update_thread(void *p) {
     }
     struct shared_conf currentConfig;
     shared_conf* newConfig;
-    //SharedMem &sharedMem = SharedMem::instance();
-    //newConfig = sharedMem.getConfig();
-    //sharedMem.readConfig();
+    SharedMem &sharedMem = SharedMem::instance();
+    newConfig = sharedMem.getConfig();
+
 
     while (1) {
         int penpos_t = 0;
@@ -238,9 +238,9 @@ static void *update_thread(void *p) {
         sleep(1);
 
 
-        IMP_LOG_ERR(TAG, "THread Running...%d,%d\n",newConfig->flip,newConfig->nightmode);
+        //IMP_LOG_ERR(TAG, "THread Running...%d,%d\n",newConfig->flip,newConfig->nightmode);
 
-        /*
+        sharedMem.readConfig();
         if(currentConfig.flip != newConfig->flip){
             IMP_LOG_ERR(TAG, "Changed FLIP\n");
             if (newConfig->flip == 1) {
@@ -257,7 +257,7 @@ static void *update_thread(void *p) {
             ImpEncoder::setNightVision(newConfig->nightmode);
         }
         memcpy(&currentConfig,newConfig, sizeof(shared_conf));
-        */
+
 
     }
 

@@ -5,10 +5,10 @@ SharedMem::SharedMem() {
     currentConfig.nightmode = 0;
     currentConfig.flip = 0;
 
-    key_image_mem = ftok("/usr/include", '1');
-    key_image_semaphore = ftok("/usr/include", '2');
-    key_config_mem = ftok("/usr/include", '3');
-    key_config_semaphore = ftok("/usr/include", '4');
+    key_image_mem = ftok("/usr/", '1');
+    key_image_semaphore = ftok("/usr/", '2');
+    key_config_mem = ftok("/usr/", '3');
+    key_config_semaphore = ftok("/usr/", '4');
 
     semaphore_lock[0].sem_flg = 0;
     semaphore_lock[0].sem_num = (unsigned short) -1;
@@ -77,6 +77,9 @@ void SharedMem::unlockSemaphore(key_t key) {
 void SharedMem::readMemory(key_t key, void *memory, int memorylenght) {
     void *shared_mem;
     int shm_id = shmget(key, 0, 0);
+    if (shm_id == -1) {
+        return;
+    }
     shared_mem = shmat(shm_id, NULL, 0);
     memcpy(memory, shared_mem, (size_t) memorylenght);
     shmdt(shared_mem);
