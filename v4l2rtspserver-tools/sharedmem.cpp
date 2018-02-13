@@ -4,6 +4,7 @@
 SharedMem::SharedMem() {
     currentConfig.nightmode = 0;
     currentConfig.flip = 0;
+    memset(currentConfig.osdTimeDisplay,0,STRING_MAX_SIZE);
 
     key_image_mem = ftok("/usr/", '1');
     key_image_semaphore = ftok("/usr/", '2');

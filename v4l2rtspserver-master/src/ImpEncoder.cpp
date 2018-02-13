@@ -174,7 +174,7 @@ static void *update_thread(void *p) {
     IMPOSDRgnAttrData rAttrData;
 
     uint32_t *data = (uint32_t *) malloc(gRegionW * gRegionH * 4);
-    strcpy(osdTimeDisplay, (char *) p);
+    //strcpy(osdTimeDisplay, (char *) p);
 
     if (data == NULL) {
         IMP_LOG_ERR(TAG, "malloc timeStampData error\n");
@@ -255,6 +255,10 @@ static void *update_thread(void *p) {
         if (currentConfig.nightmode != newConfig->nightmode) {
             IMP_LOG_ERR(TAG, "Changed NIGHTVISION\n");
             ImpEncoder::setNightVision(newConfig->nightmode);
+        }
+        if (strcmp(currentConfig.osdTimeDisplay, newConfig->osdTimeDisplay) != 0) {
+            IMP_LOG_ERR(TAG, "Changed OSD\n");
+            strcpy(osdTimeDisplay, newConfig->osdTimeDisplay);
         }
         memcpy(&currentConfig, newConfig, sizeof(shared_conf));
 
