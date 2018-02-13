@@ -51,15 +51,16 @@ static int sample_ivs_move_start(int grp_num, int chn_num, IMPIVSInterface **int
 
 	memset(&param, 0, sizeof(IMP_IVS_MoveParam));
 	param.skipFrameCnt = 5;
-	param.frameInfo.width = SENSOR_WIDTH_SECOND;
-	param.frameInfo.height = SENSOR_HEIGHT_SECOND;
+	param.frameInfo.width = 100;
+	param.frameInfo.height = 100;
+    param.frameInfo.index = 100;
 	param.roiRectCnt = 4;
 
 	for(i=0; i<param.roiRectCnt; i++){
 	  param.sense[i] = 4;
 	}
 
-	/* printf("param.sense=%d, param.skipFrameCnt=%d, param.frameInfo.width=%d, param.frameInfo.height=%d\n", param.sense, param.skipFrameCnt, param.frameInfo.width, param.frameInfo.height); */
+	 printf("param.sense=%d, param.skipFrameCnt=%d, param.frameInfo.width=%d, param.frameInfo.height=%d\n", param.sense, param.skipFrameCnt, param.frameInfo.width, param.frameInfo.height);
 	for (j = 0; j < 2; j++) {
 		for (i = 0; i < 2; i++) {
 		  if((i==0)&&(j==0)){
@@ -79,17 +80,23 @@ static int sample_ivs_move_start(int grp_num, int chn_num, IMPIVSInterface **int
 		    }
 		}
 	}
-	*interface = IMP_IVS_CreateMoveInterface(&param);
+	//*interface = IMP_IVS_CreateMoveInterface(&param);
+    IMPIVSInterface* iface = IMP_IVS_CreateMoveInterface(&param);
+    IMP_LOG_ERR(TAG, "Paramsize:(%d) \n", iface->paramSize);
+
+
 	if (*interface == NULL) {
 		IMP_LOG_ERR(TAG, "IMP_IVS_CreateGroup(%d) failed\n", grp_num);
 		return -1;
 	}
-
+    IMP_LOG_ERR(TAG, "Started1\n");
+    chn_num = 0;
 	ret = IMP_IVS_CreateChn(chn_num, *interface);
 	if (ret < 0) {
 		IMP_LOG_ERR(TAG, "IMP_IVS_CreateChn(%d) failed\n", chn_num);
 		return -1;
 	}
+    IMP_LOG_ERR(TAG, "Started2\n");
 
 	ret = IMP_IVS_RegisterChn(grp_num, chn_num);
 	if (ret < 0) {
