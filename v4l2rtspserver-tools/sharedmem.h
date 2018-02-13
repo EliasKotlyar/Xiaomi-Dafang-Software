@@ -6,10 +6,12 @@
 #include <sys/shm.h>
 #include <string.h>
 #include <sys/sem.h>
-
+#define STRING_MAX_SIZE          256
 struct shared_conf {
     int nightmode;
     int flip;
+    char osdTimeDisplay[STRING_MAX_SIZE];
+
 };
 
 

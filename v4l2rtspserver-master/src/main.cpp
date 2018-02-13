@@ -388,8 +388,6 @@ int main(int argc, char **argv) {
     std::list <std::string> userPasswordList;
     int audioFreq = 44100;
     int audioNbChannels = 2;
-    bool nightVision = false;
-    bool flip = false;
 #ifdef HAVE_ALSA
     //snd_pcm_format_t audioFmt = SND_PCM_FORMAT_S16_BE;
 #endif
@@ -426,9 +424,6 @@ int main(int argc, char **argv) {
             case 'u':
                 url = optarg;
                 break;
-            case 'n':
-                nightVision = true;
-                break;
             case 'm':
                 multicast = true;
                 murl = optarg;
@@ -457,11 +452,6 @@ int main(int argc, char **argv) {
                 break;
             case 'U':
                 userPasswordList.push_back(optarg);
-                break;
-
-                // V4L2
-            case 'r':
-                flip = true;
                 break;
             case 's':
                 useThread = false;
@@ -522,19 +512,6 @@ int main(int argc, char **argv) {
                 std::cout << "\t -S[duration]: enable HLS & MPEG-DASH with segment duration  in seconds (default "
                           << defaultHlsSegment << ")" << std::endl;
 
-                std::cout << "\t V4L2 options :" << std::endl;
-                std::cout << "\t -r        : V4L2 capture using read interface (default use memory mapped buffers)"
-                          << std::endl;
-                std::cout << "\t -w        : V4L2 capture using write interface (default use memory mapped buffers)"
-                          << std::endl;
-                std::cout << "\t -s        : V4L2 capture using live555 mainloop (default use a reader thread)"
-                          << std::endl;
-                std::cout << "\t -f        : V4L2 capture using current capture format (-W,-H,-F are ignored)"
-                          << std::endl;
-                std::cout << "\t -n        : Nightvision On/off"
-                          << std::endl;
-                std::cout << "\t -r        : Rotation On/off"
-                          << std::endl;
                 std::cout << "\t -fformat  : V4L2 capture using format (-W,-H,-F are used)" << std::endl;
                 std::cout << "\t -W width  : V4L2 capture width (default " << width << ")" << std::endl;
                 std::cout << "\t -H height : V4L2 capture height (default " << height << ")" << std::endl;
@@ -626,8 +603,6 @@ int main(int argc, char **argv) {
 
         params.framerate = fps;
         params.bitrate = 5000;
-        params.nightvision = nightVision;
-        params.flip = flip;
 
 
         ImpCapture *impCapture = new ImpCapture(params);

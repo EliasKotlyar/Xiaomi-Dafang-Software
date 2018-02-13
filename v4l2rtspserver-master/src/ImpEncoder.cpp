@@ -187,7 +187,7 @@ static void *update_thread(void *p) {
         return NULL;
     }
     struct shared_conf currentConfig;
-    shared_conf* newConfig;
+    shared_conf *newConfig;
     SharedMem &sharedMem = SharedMem::instance();
     newConfig = sharedMem.getConfig();
 
@@ -241,7 +241,7 @@ static void *update_thread(void *p) {
         //IMP_LOG_ERR(TAG, "THread Running...%d,%d\n",newConfig->flip,newConfig->nightmode);
 
         sharedMem.readConfig();
-        if(currentConfig.flip != newConfig->flip){
+        if (currentConfig.flip != newConfig->flip) {
             IMP_LOG_ERR(TAG, "Changed FLIP\n");
             if (newConfig->flip == 1) {
                 IMP_ISP_Tuning_SetISPVflip(IMPISP_TUNING_OPS_MODE_ENABLE);
@@ -252,11 +252,11 @@ static void *update_thread(void *p) {
             }
         }
 
-        if(currentConfig.nightmode != newConfig->nightmode){
+        if (currentConfig.nightmode != newConfig->nightmode) {
             IMP_LOG_ERR(TAG, "Changed NIGHTVISION\n");
             ImpEncoder::setNightVision(newConfig->nightmode);
         }
-        memcpy(&currentConfig,newConfig, sizeof(shared_conf));
+        memcpy(&currentConfig, newConfig, sizeof(shared_conf));
 
 
     }
@@ -367,47 +367,47 @@ ImpEncoder::ImpEncoder(impParams params) {
     // ----- OSD implementation: Init
     //
     //if (strlen(params.osdTimeDisplay) > 0) {
-        LOG(INFO) << "OSD Activated with string " << params.osdTimeDisplay;
+    //LOG(INFO) << "OSD Activated with string " << params.osdTimeDisplay;
 
-        if (IMP_OSD_CreateGroup(0) < 0) {
-            IMP_LOG_ERR(TAG, "IMP_OSD_CreateGroup(0) error !\n");
-        }
+    if (IMP_OSD_CreateGroup(0) < 0) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_CreateGroup(0) error !\n");
+    }
+    int osdPos = 0; // 0 = UP,1 = down
+    prHander = sample_osd_init(0, currentParams.width, currentParams.height, osdPos);
+    if (prHander <= 0) {
+        IMP_LOG_ERR(TAG, "OSD init failed\n");
+    }
 
-        prHander = sample_osd_init(0, currentParams.width, currentParams.height, currentParams.osdPos);
-        if (prHander <= 0) {
-            IMP_LOG_ERR(TAG, "OSD init failed\n");
-        }
+    /* Step Bind */
+    ret = IMP_System_Bind(&chn.framesource_chn, &chn.OSD_Cell);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "Bind FrameSource channel0 and OSD failed\n");
+    }
 
-        /* Step Bind */
-        ret = IMP_System_Bind(&chn.framesource_chn, &chn.OSD_Cell);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "Bind FrameSource channel0 and OSD failed\n");
-        }
+    ret = IMP_System_Bind(&chn.OSD_Cell, &chn.imp_encoder);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "Bind OSD and Encoder failed\n");
+    }
 
-        ret = IMP_System_Bind(&chn.OSD_Cell, &chn.imp_encoder);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "Bind OSD and Encoder failed\n");
-        }
-
-        pthread_t tid;
+    pthread_t tid;
 
 
-        ret = pthread_create(&tid, NULL, update_thread, (void *) params.osdTimeDisplay);
+    ret = pthread_create(&tid, NULL, update_thread, NULL);
 
-        sleep(0);
-        if (ret) {
-            IMP_LOG_ERR(TAG, "thread create error\n");
-        }
+    sleep(0);
+    if (ret) {
+        IMP_LOG_ERR(TAG, "thread create error\n");
+    }
     //} else {
-        //-------------------------
-        //
-        /* Step.4 Bind */
+    //-------------------------
+    //
+    /* Step.4 Bind */
 
-        ret = IMP_System_Bind(&chn.framesource_chn, &chn.imp_encoder);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "Bind FrameSource channel%d and Encoder failed\n", 0);
-        }
-   // }
+    ret = IMP_System_Bind(&chn.framesource_chn, &chn.imp_encoder);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "Bind FrameSource channel%d and Encoder failed\n", 0);
+    }
+    // }
     /* Step.5 Stream On */
     ret = sample_framesource_streamon();
     if (ret < 0) {
