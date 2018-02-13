@@ -7,7 +7,7 @@
 int main(int argc, char *argv[]) {
 
     char key = 0;
-    int value = 0;
+    char *value;
 
     // Parse Arguments:
     int c;
@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
                 key = optarg[0];
                 break;
             case 'v':
-                value = atoi(optarg);
+                value = optarg;
                 break;
             default:
                 printf("Invalid Argument %c\n", c);
@@ -32,10 +32,13 @@ int main(int argc, char *argv[]) {
     //printf("%d,%d\n", conf->nightmode, conf->flip);
     switch (key) {
         case 'f':
-            conf->flip = value;
+            conf->flip = atoi(value);
             break;
         case 'n':
-            conf->nightmode = value;
+            conf->nightmode = atoi(value);
+            break;
+        case 'o':
+            strcpy(conf->osdTimeDisplay,value);
             break;
         default:
             printf("Invalid Argument %c\n", c);
