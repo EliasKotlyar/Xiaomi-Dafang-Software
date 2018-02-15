@@ -49,10 +49,10 @@ static int sample_ivs_move_start(int grp_num, int chn_num, IMPIVSInterface **int
 	IMP_IVS_MoveParam param;
 	int i = 0, j = 0;
 
-	memset(&param, 0, sizeof(IMP_IVS_MoveParam));
-	param.skipFrameCnt = 5;
+	//memset(&param, '4', sizeof(IMP_IVS_MoveParam));
+	param.skipFrameCnt = 1;
 	param.frameInfo.width = 100;
-	param.frameInfo.height = 100;
+	param.frameInfo.height = 200;
     param.frameInfo.index = 100;
 	param.roiRectCnt = 4;
 
@@ -64,10 +64,10 @@ static int sample_ivs_move_start(int grp_num, int chn_num, IMPIVSInterface **int
 	for (j = 0; j < 2; j++) {
 		for (i = 0; i < 2; i++) {
 		  if((i==0)&&(j==0)){
-			param.roiRect[j * 2 + i].p0.x = i * param.frameInfo.width /* / 2 */;
-			param.roiRect[j * 2 + i].p0.y = j * param.frameInfo.height /* / 2 */;
-			param.roiRect[j * 2 + i].p1.x = (i + 1) * param.frameInfo.width /* / 2 */ - 1;
-			param.roiRect[j * 2 + i].p1.y = (j + 1) * param.frameInfo.height /* / 2 */ - 1;
+			param.roiRect[j * 2 + i].p0.x = i * param.frameInfo.width  / 2 ;
+			param.roiRect[j * 2 + i].p0.y = j * param.frameInfo.height / 2 ;
+			param.roiRect[j * 2 + i].p1.x = (i + 1) * param.frameInfo.width / 2 - 1;
+			param.roiRect[j * 2 + i].p1.y = (j + 1) * param.frameInfo.height / 2 - 1;
 			printf("(%d,%d) = ((%d,%d)-(%d,%d))\n", i, j, param.roiRect[j * 2 + i].p0.x, param.roiRect[j * 2 + i].p0.y,param.roiRect[j * 2 + i].p1.x, param.roiRect[j * 2 + i].p1.y);
 		  }
 		  else
@@ -85,13 +85,41 @@ static int sample_ivs_move_start(int grp_num, int chn_num, IMPIVSInterface **int
     IMP_LOG_ERR(TAG, "Paramsize:(%d) \n", iface->paramSize);
 
 
-	if (*interface == NULL) {
+    //memset(iface->param, '4', 4);
+    srand(time(NULL));
+    int memadr = iface->param + rand()%iface->paramSize;
+    memadr = iface->param + 0x50;
+    //memset(memadr, '4', 1);
+    // 50 AND 54:
+    int value = 1920;
+    int valueShifted =
+            ( value << 24) |                // Move 4th byte to 1st
+            ((value << 8) & 0x00ff0000) |  // Move 2nd byte to 3rd
+            ((value >> 8) & 0x0000ff00) |  // Move 3rd byte to 2nd
+            ( value >> 24);                 // Move 4th byte to 1st
+    uint32_t *width = iface->param + 0x50;
+    *width = 50*3;
+
+    uint32_t *height = iface->param + 0x54;
+    *height = 100*3;
+
+
+
+
+
+
+    hexdump(iface->param,iface->paramSize);
+
+
+
+
+	if (iface == NULL) {
 		IMP_LOG_ERR(TAG, "IMP_IVS_CreateGroup(%d) failed\n", grp_num);
 		return -1;
 	}
     IMP_LOG_ERR(TAG, "Started1\n");
-    chn_num = 0;
-	ret = IMP_IVS_CreateChn(chn_num, *interface);
+    //chn_num = 0;
+	ret = IMP_IVS_CreateChn(1, iface);
 	if (ret < 0) {
 		IMP_LOG_ERR(TAG, "IMP_IVS_CreateChn(%d) failed\n", chn_num);
 		return -1;
@@ -112,6 +140,28 @@ static int sample_ivs_move_start(int grp_num, int chn_num, IMPIVSInterface **int
 
 	return 0;
 }
+
+#include <ctype.h>
+#include <stdio.h>
+
+void hexdump(void *ptr, int buflen) {
+    unsigned char *buf = (unsigned char*)ptr;
+    int i, j;
+    for (i=0; i<buflen; i+=16) {
+        printf("%06x: ", i);
+        for (j=0; j<16; j++)
+            if (i+j < buflen)
+                printf("%02x ", buf[i+j]);
+            else
+                printf("   ");
+        printf(" ");
+        for (j=0; j<16; j++)
+            if (i+j < buflen)
+                printf("%c", isprint(buf[i+j]) ? buf[i+j] : '.');
+        printf("\n");
+    }
+}
+
 
 static int sample_ivs_move_stop(int chn_num, IMPIVSInterface *interface)
 {
@@ -283,7 +333,7 @@ int main(int argc, char *argv[])
 	 *       \--(output.1)--> IVS
 	 */
 	IMPCell ivs_cell = {DEV_ID_IVS, 0, 0};
-	IMPCell fs_for_ivs_cell = {DEV_ID_FS, 1, 1};
+	IMPCell fs_for_ivs_cell = {DEV_ID_FS, 0, 1};
 	ret = IMP_System_Bind(&fs_for_ivs_cell, &ivs_cell);
 	if (ret < 0) {
 		IMP_LOG_ERR(TAG, "Bind FrameSource channel.1 output.1 and ivs0 failed\n");
