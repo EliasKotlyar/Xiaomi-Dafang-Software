@@ -407,10 +407,6 @@ ImpEncoder::ImpEncoder(impParams params) {
     //
     /* Step.4 Bind */
 
-    ret = IMP_System_Bind(&chn.framesource_chn, &chn.imp_encoder);
-    if (ret < 0) {
-        IMP_LOG_ERR(TAG, "Bind FrameSource channel%d and Encoder failed\n", 0);
-    }
     // }
     /* Step.5 Stream On */
     ret = sample_framesource_streamon();
