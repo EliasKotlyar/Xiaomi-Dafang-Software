@@ -264,8 +264,6 @@ static void *update_thread(void *p) {
             IMP_Encoder_GetChnRcAttr(0, &attr);
             attr.attrH264Cbr.outBitRate = (uint)newConfig->bitrate;
             IMP_Encoder_SetChnRcAttr(0, &attr);
-
-            ImpEncoder::setNightVision(newConfig->bitrate);
         }
 
         if (strcmp(currentConfig.osdTimeDisplay, newConfig->osdTimeDisplay) != 0) {

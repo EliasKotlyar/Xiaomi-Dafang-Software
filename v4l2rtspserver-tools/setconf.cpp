@@ -39,11 +39,12 @@ int main(int argc, char *argv[]) {
             break;
         case 'b':
             conf->bitrate =  atoi(value);
+            break;
         case 'o':
             strcpy(conf->osdTimeDisplay,value);
             break;
         default:
-            printf("Invalid Argument %c\n", c);
+            printf("Invalid Argument %c\n", key);
             exit(EXIT_FAILURE);
     }
     mem.setConfig();
