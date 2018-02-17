@@ -37,6 +37,8 @@ int main(int argc, char *argv[]) {
         case 'n':
             conf->nightmode = atoi(value);
             break;
+        case 'b':
+            conf->bitrate =  atoi(value);
         case 'o':
             strcpy(conf->osdTimeDisplay,value);
             break;

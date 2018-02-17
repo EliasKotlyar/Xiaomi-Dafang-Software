@@ -11,7 +11,7 @@ struct shared_conf {
     int nightmode;
     int flip;
     char osdTimeDisplay[STRING_MAX_SIZE];
-
+    int bitrate;
 };
 
 

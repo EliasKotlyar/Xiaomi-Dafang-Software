@@ -67,6 +67,7 @@
 #include "Fontmap.h"
 #include "sharedmem.h"
 #include "../../v4l2rtspserver-tools/sharedmem.h"
+#include "../inc/imp/imp_encoder.h"
 
 #define OSD_REGION_HEIGHT               CHARHEIGHT
 
@@ -190,6 +191,7 @@ static void *update_thread(void *p) {
     shared_conf *newConfig;
     SharedMem &sharedMem = SharedMem::instance();
     newConfig = sharedMem.getConfig();
+    memcpy(&currentConfig, newConfig, sizeof(shared_conf));
 
 
     while (1) {
@@ -256,6 +258,16 @@ static void *update_thread(void *p) {
             IMP_LOG_ERR(TAG, "Changed NIGHTVISION\n");
             ImpEncoder::setNightVision(newConfig->nightmode);
         }
+        if (currentConfig.bitrate != newConfig->bitrate) {
+            IMP_LOG_ERR(TAG, "Changed Bitrate\n");
+            IMPEncoderRcAttr attr;
+            IMP_Encoder_GetChnRcAttr(0, &attr);
+            attr.attrH264Cbr.outBitRate = (uint)newConfig->bitrate;
+            IMP_Encoder_SetChnRcAttr(0, &attr);
+
+            ImpEncoder::setNightVision(newConfig->bitrate);
+        }
+
         if (strcmp(currentConfig.osdTimeDisplay, newConfig->osdTimeDisplay) != 0) {
             IMP_LOG_ERR(TAG, "Changed OSD\n");
             strcpy(osdTimeDisplay, newConfig->osdTimeDisplay);
