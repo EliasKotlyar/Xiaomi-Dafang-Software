@@ -25,9 +25,8 @@
 #   $Id$
 #
 
-LDFLAGS = -lusb
 
-CFLAGS = -c -O2 -Wall
+
 
 BIN = USBMissileLauncherUtils
 OBJS = USBMissileLauncherUtils.o USBMissileLauncher.o InputEvent.o
