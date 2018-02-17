@@ -19,7 +19,7 @@ LDFLAG="-lusb -lusb-1.0 -L$LIBUSB_PATH/lib -L$LIBCOMPAT_PATH/lib "
 
 export CFLAGS="-muclibc -O2  -c -O2 -Wall $CFLAGS"
 export CPPFLAGS="-muclibc -O2"
-export LDFLAGS="-muclibc -O2 $LDFLAG -static"
+export LDFLAGS="-muclibc -O2 $LDFLAG"
 
 echo $CFLAGS
 echo $LDFLAGS
