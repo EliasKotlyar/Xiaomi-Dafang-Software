@@ -1033,7 +1033,7 @@ void ImpEncoder::geth264frames() {
     if (framesCount == currentParams.framerate * 8) {
         framesCount = 0;
         //requestIDR();
-        IMP_Encoder_FlushStream(0);
+        //IMP_Encoder_FlushStream(0);
     } else {
         framesCount++;
     }
