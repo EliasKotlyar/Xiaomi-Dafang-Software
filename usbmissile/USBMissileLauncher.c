@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <asm/io.h>
+//#include <sys/io.h>
 #include <assert.h>
 #include <usb.h>
 #include <errno.h>
