@@ -577,7 +577,7 @@ int ImpEncoder::snap_h264() {
         framesCount = 0;
         //
         //IMP_Encoder_FlushStream(0);
-        requestIDR();
+        //requestIDR();
     } else {
         framesCount++;
     }
