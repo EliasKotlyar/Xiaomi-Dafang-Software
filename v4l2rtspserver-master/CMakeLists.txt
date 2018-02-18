@@ -109,6 +109,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiao
 target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/uclibc/libimp.so")
 target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/uclibc/libsysutils.so")
 
+target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/lame-3.100/_install/lib/libmp3lame.a")
 
 
 #testing

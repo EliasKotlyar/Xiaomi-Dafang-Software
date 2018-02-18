@@ -73,10 +73,25 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
 
     int speed = params.m_sampleRate;
 
+
+
+
     if (ioctl(fd, SNDCTL_DSP_SPEED, &speed)==-1)
     { /* Fatal error */
         LOG(ERROR) << "Cant set Speed ..." << params.m_devName;
     }
+
+
+    // Lame Init:
+    gfp = lame_init();
+    int ret_code = lame_init_params(gfp);
+    if (ret_code < 0)
+    { /* Fatal error */
+        LOG(ERROR) << "Cant init Lame";
+    }
+
+
+
 
 
 
@@ -141,9 +156,11 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
 
 size_t ALSACapture::read(char* buffer, size_t bufferSize)
 {
-
-
-    return ::read (fd, buffer, bufferSize);
+    int num_samples = bufferSize / sizeof(short);
+    short localBuffer[ num_samples ];
+    int bytesRead = ::read (fd, &localBuffer, bufferSize);
+    bytesRead = lame_encode_buffer( gfp,         localBuffer, localBuffer,  num_samples,(unsigned char*)buffer,bufferSize);
+    return bytesRead;
 
 
 

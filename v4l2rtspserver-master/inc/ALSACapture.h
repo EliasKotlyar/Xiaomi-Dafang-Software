@@ -15,6 +15,7 @@
 #define ALSA_CAPTURE
 
 
+#include "lame.h"
 #include "logger.h"
 
 struct ALSACaptureParameters 
@@ -54,6 +55,7 @@ class ALSACapture
 		unsigned long         m_periodSize;
 		ALSACaptureParameters m_params;
         int fd;
+		lame_global_flags *gfp;
 };
 
 #endif
