@@ -53,6 +53,7 @@ FramedSource* BaseServerMediaSubsession::createSource(UsageEnvironment& env, Fra
 RTPSink*  BaseServerMediaSubsession::createSink(UsageEnvironment& env, Groupsock* rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, const std::string& format)
 {
 	RTPSink* videoSink = NULL;
+    LOG(NOTICE) << "Creating Sink for format : " << format;
 	if (format == "video/MP2T")
 	{
 		videoSink = SimpleRTPSink::createNew(env, rtpGroupsock,rtpPayloadTypeIfDynamic, 90000, "video", "MP2T", 1, True, False); 
