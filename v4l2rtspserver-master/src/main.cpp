@@ -365,6 +365,7 @@ std::string  getV4l2Alsa(const std::string& v4l2device) {
 int main(int argc, char **argv) {
     // default parameters
     const char *dev_name = "/dev/video0";
+    bool disableAudio = false;
     int format = V4L2_PIX_FMT_H264;
     int width = 1280;
     int height = 720;
@@ -398,7 +399,7 @@ int main(int argc, char **argv) {
 
     // decode parameters
     int c = 0;
-    while ((c = getopt(argc, argv, "v::Q:O:" "I:P:p:m:u:M:ct:TS::" "R:U:" "nrwsf::F:W:H:" "A:C:a:" "Vh")) != -1) {
+    while ((c = getopt(argc, argv, "v::Q:O:" "I:P:p:m:u:M:ct:TS::" "R:U:" "nrwsf::F:W:H:" "AC:a:" "Vh")) != -1) {
         switch (c) {
             case 'v':
                 verbose = 1;
@@ -471,7 +472,7 @@ int main(int argc, char **argv) {
 
                 // ALSA
 #ifdef HAVE_ALSA
-            case 'A':	audioFreq = atoi(optarg); break;
+            case 'A':	disableAudio = true; break;
             case 'C':	audioNbChannels = atoi(optarg); break;
             //case 'a':	audioFmt = decodeAudioFormat(optarg); break;
 #endif
@@ -517,15 +518,9 @@ int main(int argc, char **argv) {
                 std::cout << "\t -H height : V4L2 capture height (default " << height << ")" << std::endl;
                 std::cout << "\t -F fps    : V4L2 capture framerate (default " << fps << ")" << std::endl;
 
-                std::cout << "\t ALSA options :" << std::endl;
-                std::cout << "\t -A freq    : ALSA capture frequency and channel (default " << audioFreq << ")"
+                std::cout << "\t Sound options :" << std::endl;
+                std::cout << "\t -A freq    : Disable Sound"
                           << std::endl;
-                std::cout << "\t -C channels: ALSA capture channels (default " << audioNbChannels << ")" << std::endl;
-                std::cout << "\t -a fmt     : ALSA capture audio format (default S16_BE)" << std::endl;
-
-                std::cout << "\t Devices :" << std::endl;
-                std::cout << "\t [V4L2 device][,ALSA device] : V4L2 capture device or/and ALSA capture device (default "
-                          << dev_name << ")" << std::endl;
                 exit(0);
             }
         }
@@ -642,7 +637,7 @@ int main(int argc, char **argv) {
 #ifdef HAVE_ALSA
         std::string audioDev="/dev/dsp";
         //audioDev = "";
-        if (!audioDev.empty())
+        if (disableAudio == false)
         {
             // find the ALSA device associated with the V4L2 device
             //audioDev = "";
