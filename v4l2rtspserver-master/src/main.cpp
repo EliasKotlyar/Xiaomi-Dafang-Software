@@ -387,7 +387,7 @@ int main(int argc, char **argv) {
     const char *realm = NULL;
     std::list <std::string> userPasswordList;
     int audioFreq = 44100;
-    int audioNbChannels = 2;
+    int audioNbChannels = 1;
 #ifdef HAVE_ALSA
     //snd_pcm_format_t audioFmt = SND_PCM_FORMAT_S16_BE;
 #endif

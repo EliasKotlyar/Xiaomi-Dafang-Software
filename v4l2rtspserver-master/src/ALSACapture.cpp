@@ -65,9 +65,10 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
         LOG(ERROR) << "Cant set format..." << params.m_devName;
     }
     int stereo = params.m_channels-1;
+    LOG(ERROR) << "Channel Count:" << params.m_channels;
     if (::ioctl(fd, SNDCTL_DSP_STEREO, &stereo)==-1)
     { /* Fatal error */
-       LOG(ERROR) << "Cant set Mono ..." << params.m_devName;
+       LOG(ERROR) << "Cant set Mono/Stereo ..." << params.m_devName;
     }
 
 
@@ -84,11 +85,15 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
 
     // Lame Init:
     gfp = lame_init();
+    lame_set_num_channels(gfp, 1);
+    //lame_set_mode(gfp, 3);
+
     int ret_code = lame_init_params(gfp);
     if (ret_code < 0)
     { /* Fatal error */
         LOG(ERROR) << "Cant init Lame";
     }
+    lame_print_config(gfp);
 
 
 }
@@ -98,9 +103,15 @@ size_t ALSACapture::read(char* buffer, size_t bufferSize)
     int num_samples = bufferSize / sizeof(short);
     short localBuffer[ num_samples ];
     int bytesRead = ::read (fd, &localBuffer, bufferSize);
-    bytesRead = lame_encode_buffer( gfp,         localBuffer, localBuffer,  bytesRead*sizeof(short),(unsigned char*)buffer,bufferSize);
-    LOG(ERROR) << "Bytes Converted to MP3:" << bytesRead;
+
+    num_samples = bytesRead / sizeof(short);
+    int mp3buf_size = 1.25*num_samples + 7200;
+
+    bytesRead = lame_encode_buffer( gfp,         localBuffer, NULL,  num_samples,(unsigned char*)buffer,mp3buf_size);
+    //LOG(ERROR) << "Bytes Converted to MP3:" << bytesRead;
     if(bytesRead == 0){
+        LOG(ERROR) << "Error converting to MP3";
+        //LOG(ERROR) << "Buffersize " << bufferSize;
         bytesRead = 1;
     }
     return bytesRead;

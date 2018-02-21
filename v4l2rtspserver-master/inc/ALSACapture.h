@@ -28,7 +28,7 @@ struct ALSACaptureParameters
 	unsigned int     m_channels;
 	int              m_verbose;
 };
-#define RECBUF_SIZE		512
+#define RECBUF_SIZE		8192
 class ALSACapture 
 {
 	public:
