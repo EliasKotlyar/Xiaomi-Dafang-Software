@@ -641,6 +641,7 @@ int main(int argc, char **argv) {
         std::string rtpAudioFormat;
 #ifdef HAVE_ALSA
         std::string audioDev="/dev/dsp";
+        //audioDev = "";
         if (!audioDev.empty())
         {
             // find the ALSA device associated with the V4L2 device
@@ -662,7 +663,8 @@ int main(int argc, char **argv) {
                 else
                 {
                     std::ostringstream os;
-                    os << "audio/L16/" << audioCapture->getSampleRate() << "/" << audioCapture->getChannels();
+                    //os << "audio/L16/" << audioCapture->getSampleRate() << "/" << audioCapture->getChannels();
+                    os << "audio/MPEG";
                     rtpAudioFormat.assign(os.str());
 
                     // extend buffer size if needed
