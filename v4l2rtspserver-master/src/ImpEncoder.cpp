@@ -65,21 +65,60 @@
 
 //#include <time.h>
 #include "Fontmap.h"
+#include "FontMapBig.h"
 #include "sharedmem.h"
 #include "../../v4l2rtspserver-tools/sharedmem.h"
 #include "../inc/imp/imp_encoder.h"
 
-#define OSD_REGION_HEIGHT               CHARHEIGHT
+#define OSD_REGION_HEIGHT               CHARHEIGHT_BIG
 
-IMPRgnHandle *prHander;
 int grpNum = 0;
 unsigned int gRegionH = 0;
 unsigned gRegionW = 0;
+IMPRgnHandle *prHander = NULL;
+IMPOSDGrpRgnAttr grAttrFont;
+IMPRgnHandle rHanderFont;
+int gwidth;
+int gheight;
+int gpos;
 
-IMPRgnHandle *ImpEncoder::sample_osd_init(int grpNum, int width, int height, int pos) {
+
+static void set_osd_posY(int width, int height, int fontSize, int posY) {
+    int ret = 0;
+    IMPOSDRgnAttr rAttrFont;
+    memset(&rAttrFont, 0, sizeof(IMPOSDRgnAttr));
+    rAttrFont.type = OSD_REG_PIC;
+    rAttrFont.rect.p0.x = 0;
+    rAttrFont.rect.p0.y = posY;
+    rAttrFont.rect.p1.x= rAttrFont.rect.p0.x + width -1;
+    rAttrFont.rect.p1.y = rAttrFont.rect.p0.y + OSD_REGION_HEIGHT - 1;
+    rAttrFont.fmt = PIX_FMT_BGRA;
+    gRegionH = OSD_REGION_HEIGHT;
+    gRegionW = width;
+
+    rAttrFont.data.picData.pData = NULL;
+    ret= IMP_OSD_SetRgnAttr(rHanderFont, &rAttrFont);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_SetRgnAttr TimeStamp error !\n");
+    }
+}
+
+static void set_osd_pos(int width, int height, int fontSize, int pos) {
+
+    // 1 is down
+    if (pos == 1) {
+        set_osd_posY(width, height, fontSize, height - (fontSize));
+    } else {
+        set_osd_posY(width, height, fontSize, 0);
+    }
+}
+
+static IMPRgnHandle *sample_osd_init(int grpNum, int width, int height, int pos) {
     int ret;
-    IMPRgnHandle *prHander;
-    IMPRgnHandle rHanderFont;
+
+    gwidth= width;
+    gheight = height;
+    gpos = pos;
 
     prHander = (IMPRgnHandle *) malloc(1 * sizeof(IMPRgnHandle));
     if (prHander <= 0) {
@@ -99,30 +138,7 @@ IMPRgnHandle *ImpEncoder::sample_osd_init(int grpNum, int width, int height, int
         return NULL;
     }
 
-    IMPOSDRgnAttr rAttrFont;
-    memset(&rAttrFont, 0, sizeof(IMPOSDRgnAttr));
-    rAttrFont.type = OSD_REG_PIC;
-    rAttrFont.rect.p0.x = 0;
-    // 1 is down
-    if (pos == 1) {
-        rAttrFont.rect.p0.y = height - (CHARHEIGHT * 2);
-    } else {
-        rAttrFont.rect.p0.y = 0;
-    }
-    rAttrFont.rect.p1.x = width;
-    rAttrFont.rect.p1.y = rAttrFont.rect.p0.y + OSD_REGION_HEIGHT - 1;
-    rAttrFont.fmt = PIX_FMT_BGRA;
-    gRegionH = OSD_REGION_HEIGHT;
-    gRegionW = width;
-
-    rAttrFont.data.picData.pData = NULL;
-    ret = IMP_OSD_SetRgnAttr(rHanderFont, &rAttrFont);
-    if (ret < 0) {
-        IMP_LOG_ERR(TAG, "IMP_OSD_SetRgnAttr TimeStamp error !\n");
-        return NULL;
-    }
-
-    IMPOSDGrpRgnAttr grAttrFont;
+    set_osd_pos(width,height,OSD_REGION_HEIGHT, pos);
 
     if (IMP_OSD_GetGrpRgnAttr(rHanderFont, grpNum, &grAttrFont) < 0) {
         IMP_LOG_ERR(TAG, "IMP_OSD_GetGrpRgnAttr Logo error !\n");
@@ -133,9 +149,11 @@ IMPRgnHandle *ImpEncoder::sample_osd_init(int grpNum, int width, int height, int
     grAttrFont.show = 0;
 
     /* Disable Font global alpha, only use pixel alpha. */
-    grAttrFont.gAlphaEn = 1;
-    grAttrFont.fgAlhpa = 0xff;
-    grAttrFont.layer = 3;
+    grAttrFont.gAlphaEn = 0; 
+    grAttrFont.fgAlhpa = 0;
+    grAttrFont.bgAlhpa = 0;
+    grAttrFont.layer = 1;
+
     if (IMP_OSD_SetGrpRgnAttr(rHanderFont, grpNum, &grAttrFont) < 0) {
         IMP_LOG_ERR(TAG, "IMP_OSD_SetGrpRgnAttr Logo error !\n");
         return NULL;
@@ -159,9 +177,9 @@ static int osd_show(void) {
         IMP_LOG_ERR(TAG, "IMP_OSD_ShowRgn() timeStamp error\n");
         return -1;
     }
-
     return 0;
 }
+static uint32_t colorMap[] = { OSD_WHITE,OSD_BLACK, OSD_RED, OSD_GREEN, OSD_BLUE, OSD_GREEN | OSD_BLUE, OSD_RED|OSD_GREEN, OSD_BLUE|OSD_RED};
 
 static void *update_thread(void *p) {
     int ret;
@@ -170,9 +188,11 @@ static void *update_thread(void *p) {
     char DateStr[STRING_MAX_SIZE];
     time_t currTime;
     struct tm *currDate;
-    unsigned i = 0, j = 0;
     char osdTimeDisplay[STRING_MAX_SIZE];
     IMPOSDRgnAttrData rAttrData;
+    bitmapinfo_t * fontmap = gBgramap; 
+    int fontSize = CHARHEIGHT;
+    int fontWidth = fontmap['W' - STARTCHAR].width; // Take 'W' as the biggest char  
 
     uint32_t *data = (uint32_t *) malloc(gRegionW * gRegionH * 4);
     //strcpy(osdTimeDisplay, (char *) p);
@@ -182,50 +202,57 @@ static void *update_thread(void *p) {
         return NULL;
     }
 
-    ret = osd_show();
-    if (ret < 0) {
-        IMP_LOG_ERR(TAG, "OSD show error\n");
-        return NULL;
-    }
     struct shared_conf currentConfig;
     shared_conf *newConfig;
     SharedMem &sharedMem = SharedMem::instance();
     newConfig = sharedMem.getConfig();
     memcpy(&currentConfig, newConfig, sizeof(shared_conf));
 
+    ret = osd_show();
+    if (ret < 0) {
+	    IMP_LOG_ERR(TAG, "OSD show error\n");
+	    return NULL;
+    }
 
     while (1) {
         int penpos_t = 0;
         int fontadv = 0;
         void *dateData;
-
         time(&currTime);
         currDate = localtime(&currTime);
         memset(DateStr, 0, sizeof(DateStr));
         memset(data, 0, gRegionW * gRegionH * 4);
         strftime(DateStr, STRING_MAX_SIZE, osdTimeDisplay, currDate);
-
         //strftime(DateStr, 40, "%Y-%m-%d %I:%M:%S", currDate);
         // For all char in string
-        for (i = 0; DateStr[i] != 0; i++) {
-            if (DateStr[i] == ' ') {
+        for (int i = 0; DateStr[i] != 0; i++) {
+	    if (DateStr[i] == ' ') {
                 penpos_t += SPACELENGHT * 2;
             }
                 //Check if the char is in the font
             else if (DateStr[i] >= STARTCHAR && DateStr[i] <= ENDCHAR) {
                 // Get the right font pointer
-                dateData = (void *) gBgramap[DateStr[i] - STARTCHAR].pdata;
+                dateData = (void *) fontmap[DateStr[i] - STARTCHAR].pdata;
                 // Fonts are stored in bytes
-                fontadv = gBgramap[DateStr[i] - STARTCHAR].widthInByte * 8;
-
+                fontadv = fontmap[DateStr[i] - STARTCHAR].widthInByte * 8;
                 //Check if their is still room
-                if (penpos_t + gBgramap[DateStr[i] - STARTCHAR].width <= gRegionW - 80) {
-                    for (j = 0; j < OSD_REGION_HEIGHT; j++) {
-                        memcpy((void *) ((uint32_t *) data + j * gRegionW + penpos_t),
-                               (void *) ((uint32_t *) dateData + j * fontadv), fontadv * 4);
-
+                if (penpos_t + fontmap[DateStr[i] - STARTCHAR].width <= gRegionW - 80) {
+                    for (int j = 0; j < fontSize; j++) {
+			for (int x = 0 ; x < fontadv ;x++)
+			{
+				if (((uint32_t *) dateData)[x+fontadv*j]) {
+					((uint32_t *) data) [j * (gRegionW) + x + penpos_t] = colorMap[currentConfig.osdColor]; //((uint32_t *) dateData)[x+fontadv*j]; 
+				}
+				else {
+					((uint32_t *) data) [j * (gRegionW) + x + penpos_t] = 0; 
+				}
+			}
                     }
-                    penpos_t += gBgramap[DateStr[i] - STARTCHAR].width;
+		    // Move the cursor to the next position, depending on configured width and/or space between chars
+		    if (currentConfig.osdFixedWidth == true)
+	                    penpos_t += fontWidth+currentConfig.osdSpace; 
+		    else
+	                    penpos_t += fontadv+currentConfig.osdSpace; 
                 } else {
                     LOG(NOTICE) << "No more space to display " << DateStr + i;
                     break;
@@ -238,7 +265,6 @@ static void *update_thread(void *p) {
         IMP_OSD_UpdateRgnAttrData(prHander[0], &rAttrData);
 
         sleep(1);
-
 
         //IMP_LOG_ERR(TAG, "THread Running...%d,%d\n",newConfig->flip,newConfig->nightmode);
 
@@ -270,9 +296,46 @@ static void *update_thread(void *p) {
             IMP_LOG_ERR(TAG, "Changed OSD\n");
             strcpy(osdTimeDisplay, newConfig->osdTimeDisplay);
         }
-        memcpy(&currentConfig, newConfig, sizeof(shared_conf));
 
+	if (currentConfig.osdColor != newConfig->osdColor) {
+		if (newConfig->osdColor<sizeof(colorMap) / sizeof(colorMap[0])) {
+			IMP_LOG_ERR(TAG, "Changed OSD color\n");
+			currentConfig.osdColor = newConfig->osdColor;
+		}
+		else {
+			newConfig->osdColor = currentConfig.osdColor;
+		}
+	}
 
+	if ((currentConfig.osdSize != newConfig->osdSize) ||
+	    (currentConfig.osdPosY != newConfig->osdPosY)) {
+		currentConfig.osdSize = newConfig->osdSize;
+		currentConfig.osdPosY = newConfig->osdPosY;
+		if (currentConfig.osdSize == 0) {
+			fontmap = gBgramap; 
+			fontSize = CHARHEIGHT;
+		} else {
+			fontmap = gBgramapBig;
+			fontSize = CHARHEIGHT_BIG;
+		}
+		fontWidth = fontmap['W' - STARTCHAR].width; // Take 'W' as the biggest char  
+
+		// As the size changed, re-display the OSD
+		set_osd_posY(gwidth,gheight,fontSize, currentConfig.osdPosY);
+		IMP_LOG_ERR(TAG, "Changed OSD size and/or OSD pos\n");
+	}
+    
+	if (currentConfig.osdSpace != newConfig->osdSpace) {
+		currentConfig.osdSpace = newConfig->osdSpace;
+		// As the size changed, re-display the OSD
+		IMP_LOG_ERR(TAG, "Changed OSD space\n");
+	}
+	if (currentConfig.osdFixedWidth != newConfig->osdFixedWidth) {
+		currentConfig.osdFixedWidth = newConfig->osdFixedWidth;
+		// As the size changed, re-display the OSD
+		IMP_LOG_ERR(TAG, "Changed OSD FixedWidth\n");
+	}
+	memcpy(&currentConfig, newConfig, sizeof(shared_conf));
     }
 
     return NULL;
@@ -387,6 +450,7 @@ ImpEncoder::ImpEncoder(impParams params) {
         IMP_LOG_ERR(TAG, "IMP_OSD_CreateGroup(0) error !\n");
     }
     int osdPos = 0; // 0 = UP,1 = down
+    //prHander = sample_osd_init(0, currentParams.width, currentParams.height, osdPos);
     prHander = sample_osd_init(0, currentParams.width, currentParams.height, osdPos);
     if (prHander <= 0) {
         IMP_LOG_ERR(TAG, "OSD init failed\n");

@@ -104,9 +104,9 @@ private:
 
     int sample_encoder_exit(void);
 
-    IMPRgnHandle *sample_osd_init(int grpNum, int, int,int);
+    //IMPRgnHandle *sample_osd_init(int grpNum, int, int,int);
 
-    int sample_osd_exit(IMPRgnHandle *prHandle, int grpNum);
+   int sample_osd_exit(IMPRgnHandle *prHandle, int grpNum);
 
     int sample_do_get_h264_stream(int nr_frames);
 
