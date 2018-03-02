@@ -43,6 +43,21 @@ int main(int argc, char *argv[]) {
         case 'o':
             strcpy(conf->osdTimeDisplay,value);
             break;
+	case 'c':
+	    conf->osdColor = atoi(value);
+	    break;
+	case 's':
+	    conf->osdSize = atoi(value);
+	    break;
+	case 'x':
+	    conf->osdPosY = atoi(value);
+	    break;
+	case 'p':
+	    conf->osdSpace = atoi(value);
+	    break;
+	case 'w':
+	    conf->osdFixedWidth = atoi(value)==0?false:true;
+	    break;
         default:
             printf("Invalid Argument %c\n", key);
             exit(EXIT_FAILURE);
@@ -55,3 +70,4 @@ int main(int argc, char *argv[]) {
 
 
 }
+
