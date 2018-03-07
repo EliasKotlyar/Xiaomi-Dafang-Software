@@ -12,6 +12,11 @@ struct shared_conf {
     int flip;
     char osdTimeDisplay[STRING_MAX_SIZE];
     int bitrate;
+    int osdColor;
+    int osdSize;
+    int osdPosY;
+    int osdSpace;
+    bool osdFixedWidth;
 };
 
 
