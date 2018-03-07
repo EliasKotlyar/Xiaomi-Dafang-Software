@@ -1,4 +1,4 @@
-CFLAGS = -W -Wall -pthread -g -pipe $(CFLAGS_EXTRA)
+CFLAGS = -W -Wall -pthread -g -pipe -muclibc
 CFLAGS += -I inc
 RM = rm -rf
 PREFIX?=/usr
