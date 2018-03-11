@@ -11,6 +11,8 @@
 #include <imp/imp_system.h>
 #include <imp/imp_framesource.h>
 #include <imp/imp_encoder.h>
+#include <imp/imp_ivs.h>
+#include <imp/imp_ivs_move.h>
 
 
 #include <fcntl.h>
@@ -32,32 +34,32 @@
 
 
 /*
-{
-        .index = CH1_INDEX,
-        .enable = CHN1_EN,
-        .fs_chn_attr = {
-                .pixFmt = PIX_FMT_NV12,
-                .outFrmRateNum = SENSOR_FRAME_RATE_NUM,
-                .outFrmRateDen = SENSOR_FRAME_RATE_DEN,
-                .nrVBs = 3,
-                .type = FS_PHY_CHANNEL,
+   {
+   .index = CH1_INDEX,
+   .enable = CHN1_EN,
+   .fs_chn_attr = {
+   .pixFmt = PIX_FMT_NV12,
+   .outFrmRateNum = SENSOR_FRAME_RATE_NUM,
+   .outFrmRateDen = SENSOR_FRAME_RATE_DEN,
+   .nrVBs = 3,
+   .type = FS_PHY_CHANNEL,
 
-                .crop.enable = CROP_EN,
-                .crop.top = 0,
-                .crop.left = 0,
-                .crop.width = SENSOR_WIDTH,
-                .crop.height = SENSOR_HEIGHT,
+   .crop.enable = CROP_EN,
+   .crop.top = 0,
+   .crop.left = 0,
+   .crop.width = SENSOR_WIDTH,
+   .crop.height = SENSOR_HEIGHT,
 
-                .scaler.enable = 1,
-                .scaler.outwidth = SENSOR_WIDTH_SECOND,
-                .scaler.outheight = SENSOR_HEIGHT_SECOND,
+   .scaler.enable = 1,
+   .scaler.outwidth = SENSOR_WIDTH_SECOND,
+   .scaler.outheight = SENSOR_HEIGHT_SECOND,
 
-                .picWidth = SENSOR_WIDTH_SECOND,
-                .picHeight = SENSOR_HEIGHT_SECOND,
-        },
-        .framesource_chn =    {DEV_ID_FS, 1, 0},
-        .imp_encoder = {DEV_ID_ENC, 1, 0},
-},
+   .picWidth = SENSOR_WIDTH_SECOND,
+   .picHeight = SENSOR_HEIGHT_SECOND,
+   },
+   .framesource_chn =    {DEV_ID_FS, 1, 0},
+   .imp_encoder = {DEV_ID_ENC, 1, 0},
+   },
  */
 
 // ---- OSD
@@ -210,8 +212,8 @@ static void *update_thread(void *p) {
 
     ret = osd_show();
     if (ret < 0) {
-	    IMP_LOG_ERR(TAG, "OSD show error\n");
-	    return NULL;
+        IMP_LOG_ERR(TAG, "OSD show error\n");
+        return NULL;
     }
 
     while (1) {
@@ -226,10 +228,10 @@ static void *update_thread(void *p) {
         //strftime(DateStr, 40, "%Y-%m-%d %I:%M:%S", currDate);
         // For all char in string
         for (int i = 0; DateStr[i] != 0; i++) {
-	    if (DateStr[i] == ' ') {
+            if (DateStr[i] == ' ') {
                 penpos_t += SPACELENGHT * 2;
             }
-                //Check if the char is in the font
+            //Check if the char is in the font
             else if (DateStr[i] >= STARTCHAR && DateStr[i] <= ENDCHAR) {
                 // Get the right font pointer
                 dateData = (void *) fontmap[DateStr[i] - STARTCHAR].pdata;
@@ -238,21 +240,21 @@ static void *update_thread(void *p) {
                 //Check if their is still room
                 if (penpos_t + fontmap[DateStr[i] - STARTCHAR].width <= gRegionW - 80) {
                     for (int j = 0; j < fontSize; j++) {
-			for (int x = 0 ; x < fontadv ;x++)
-			{
-				if (((uint32_t *) dateData)[x+fontadv*j]) {
-					((uint32_t *) data) [j * (gRegionW) + x + penpos_t] = colorMap[currentConfig.osdColor]; //((uint32_t *) dateData)[x+fontadv*j]; 
-				}
-				else {
-					((uint32_t *) data) [j * (gRegionW) + x + penpos_t] = 0; 
-				}
-			}
+                        for (int x = 0 ; x < fontadv ;x++)
+                        {
+                            if (((uint32_t *) dateData)[x+fontadv*j]) {
+                                ((uint32_t *) data) [j * (gRegionW) + x + penpos_t] = colorMap[currentConfig.osdColor]; //((uint32_t *) dateData)[x+fontadv*j]; 
+                            }
+                            else {
+                                ((uint32_t *) data) [j * (gRegionW) + x + penpos_t] = 0; 
+                            }
+                        }
                     }
-		    // Move the cursor to the next position, depending on configured width and/or space between chars
-		    if (currentConfig.osdFixedWidth == true)
-	                    penpos_t += fontWidth+currentConfig.osdSpace; 
-		    else
-	                    penpos_t += fontadv+currentConfig.osdSpace; 
+                    // Move the cursor to the next position, depending on configured width and/or space between chars
+                    if (currentConfig.osdFixedWidth == true)
+                        penpos_t += fontWidth+currentConfig.osdSpace; 
+                    else
+                        penpos_t += fontadv+currentConfig.osdSpace; 
                 } else {
                     LOG(NOTICE) << "No more space to display " << DateStr + i;
                     break;
@@ -297,45 +299,45 @@ static void *update_thread(void *p) {
             strcpy(osdTimeDisplay, newConfig->osdTimeDisplay);
         }
 
-	if (currentConfig.osdColor != newConfig->osdColor) {
-		if (newConfig->osdColor<sizeof(colorMap) / sizeof(colorMap[0])) {
-			IMP_LOG_ERR(TAG, "Changed OSD color\n");
-			currentConfig.osdColor = newConfig->osdColor;
-		}
-		else {
-			newConfig->osdColor = currentConfig.osdColor;
-		}
-	}
+        if (currentConfig.osdColor != newConfig->osdColor) {
+            if ((unsigned int)newConfig->osdColor<sizeof(colorMap) / sizeof(colorMap[0])) {
+                IMP_LOG_ERR(TAG, "Changed OSD color\n");
+                currentConfig.osdColor = newConfig->osdColor;
+            }
+            else {
+                newConfig->osdColor = currentConfig.osdColor;
+            }
+        }
 
-	if ((currentConfig.osdSize != newConfig->osdSize) ||
-	    (currentConfig.osdPosY != newConfig->osdPosY)) {
-		currentConfig.osdSize = newConfig->osdSize;
-		currentConfig.osdPosY = newConfig->osdPosY;
-		if (currentConfig.osdSize == 0) {
-			fontmap = gBgramap; 
-			fontSize = CHARHEIGHT;
-		} else {
-			fontmap = gBgramapBig;
-			fontSize = CHARHEIGHT_BIG;
-		}
-		fontWidth = fontmap['W' - STARTCHAR].width; // Take 'W' as the biggest char  
+        if ((currentConfig.osdSize != newConfig->osdSize) ||
+                (currentConfig.osdPosY != newConfig->osdPosY)) {
+            currentConfig.osdSize = newConfig->osdSize;
+            currentConfig.osdPosY = newConfig->osdPosY;
+            if (currentConfig.osdSize == 0) {
+                fontmap = gBgramap; 
+                fontSize = CHARHEIGHT;
+            } else {
+                fontmap = gBgramapBig;
+                fontSize = CHARHEIGHT_BIG;
+            }
+            fontWidth = fontmap['W' - STARTCHAR].width; // Take 'W' as the biggest char  
 
-		// As the size changed, re-display the OSD
-		set_osd_posY(gwidth,gheight,fontSize, currentConfig.osdPosY);
-		IMP_LOG_ERR(TAG, "Changed OSD size and/or OSD pos\n");
-	}
-    
-	if (currentConfig.osdSpace != newConfig->osdSpace) {
-		currentConfig.osdSpace = newConfig->osdSpace;
-		// As the size changed, re-display the OSD
-		IMP_LOG_ERR(TAG, "Changed OSD space\n");
-	}
-	if (currentConfig.osdFixedWidth != newConfig->osdFixedWidth) {
-		currentConfig.osdFixedWidth = newConfig->osdFixedWidth;
-		// As the size changed, re-display the OSD
-		IMP_LOG_ERR(TAG, "Changed OSD FixedWidth\n");
-	}
-	memcpy(&currentConfig, newConfig, sizeof(shared_conf));
+            // As the size changed, re-display the OSD
+            set_osd_posY(gwidth,gheight,fontSize, currentConfig.osdPosY);
+            IMP_LOG_ERR(TAG, "Changed OSD size and/or OSD pos\n");
+        }
+
+        if (currentConfig.osdSpace != newConfig->osdSpace) {
+            currentConfig.osdSpace = newConfig->osdSpace;
+            // As the size changed, re-display the OSD
+            IMP_LOG_ERR(TAG, "Changed OSD space\n");
+        }
+        if (currentConfig.osdFixedWidth != newConfig->osdFixedWidth) {
+            currentConfig.osdFixedWidth = newConfig->osdFixedWidth;
+            // As the size changed, re-display the OSD
+            IMP_LOG_ERR(TAG, "Changed OSD FixedWidth\n");
+        }
+        memcpy(&currentConfig, newConfig, sizeof(shared_conf));
     }
 
     return NULL;
@@ -350,6 +352,104 @@ void *ImpEncoder::getBuffer() {
 
 int ImpEncoder::getBufferSize() {
     return bufferSize;
+}
+
+
+static int sample_ivs_move_start(int grp_num, int chn_num, IMPIVSInterface **interface, int width, int height)
+{
+    int ret = 0;
+    IMP_IVS_MoveParam param;
+
+    memset(&param, 0, sizeof(IMP_IVS_MoveParam));
+    // Skip to 50 avoid detection at startup, not sure it impacts when running
+    param.skipFrameCnt = 50;
+    param.frameInfo.width = width;
+    param.frameInfo.height = height;
+    // Define the detection region, for now only one of the size of the video
+    param.roiRectCnt = 1;
+    // Sensibility (to make configurable)
+    param.sense[0] = 4;
+
+    param.roiRect[0].p0.x = 0;
+    param.roiRect[0].p0.y = 0;
+    param.roiRect[0].p1.x = param.frameInfo.width - 1;
+    param.roiRect[0].p1.y = param.frameInfo.height  - 1;
+    LOG(NOTICE) << "Detection region= ((" << param.roiRect[0].p0.x << "," << param.roiRect[0].p0.y << ")-("<< param.roiRect[0].p1.x << "," << param.roiRect[0].p1.y << "))\n";
+
+
+    *interface = IMP_IVS_CreateMoveInterface(&param);
+    if (*interface == NULL) {
+        IMP_LOG_ERR(TAG, "IMP_IVS_CreateGroup(%d) failed\n", grp_num);
+        return -1;
+    }
+
+    ret = IMP_IVS_CreateChn(chn_num, *interface);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_IVS_CreateChn(%d) failed\n", chn_num);
+        return -1;
+    }
+
+    ret = IMP_IVS_RegisterChn(grp_num, chn_num);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_IVS_RegisterChn(%d, %d) failed\n", grp_num, chn_num);
+        return -1;
+    }
+
+    ret = IMP_IVS_StartRecvPic(chn_num);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_IVS_StartRecvPic(%d) failed\n", chn_num);
+        return -1;
+    }
+
+    return 0;
+}
+
+static void *sample_ivs_move_get_result_process(void *arg)
+{
+    int i = 0, ret = 0;
+    int chn_num = 0; 
+    IMP_IVS_MoveOutput *result = NULL;
+    bool isWasOn = false;
+
+    while (1) {
+        ret = IMP_IVS_PollingResult(chn_num, IMP_IVS_DEFAULT_TIMEOUTMS);
+        if (ret < 0) {
+            IMP_LOG_ERR(TAG, "IMP_IVS_PollingResult(%d, %d) failed\n", chn_num, IMP_IVS_DEFAULT_TIMEOUTMS);
+            return (void *)-1;
+        }
+        ret = IMP_IVS_GetResult(chn_num, (void **)&result);
+        if (ret < 0) {
+            IMP_LOG_ERR(TAG, "IMP_IVS_GetResult(%d) failed\n", chn_num);
+            return (void *)-1;
+        }
+
+        // Detection !!!
+        if (isWasOn == false &&
+                result->retRoi[0] == 1)
+        {
+            isWasOn = true;
+            system("/system/sdcard/scripts/detectionOn.sh");
+            LOG(NOTICE) << "Detect !!\n";
+        }
+
+        if (isWasOn == true &&
+                result->retRoi[0] == 0)
+        {
+            isWasOn = false;
+            system("/system/sdcard/scripts/detectionOff.sh");
+            LOG(NOTICE) << "Detect finished!!\n";
+        }
+
+        IMP_LOG_INFO(TAG, "result->retRoi(%d)\n", result->retRoi[0]);
+
+        ret = IMP_IVS_ReleaseResult(chn_num, (void *)result);
+        if (ret < 0) {
+            IMP_LOG_ERR(TAG, "IMP_IVS_ReleaseResult(%d) failed\n", chn_num);
+            return (void *)-1;
+        }
+    }
+
+    return (void *)0;
 }
 
 
@@ -423,6 +523,10 @@ ImpEncoder::ImpEncoder(impParams params) {
 
     }
 
+    ret = IMP_Encoder_CreateGroup(1);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_Encoder_CreateGroup(%d) error !\n", 1);
+    }
 
 
     /* Step.3 Encoder init */
@@ -443,14 +547,10 @@ ImpEncoder::ImpEncoder(impParams params) {
 
     // ----- OSD implementation: Init
     //
-    //if (strlen(params.osdTimeDisplay) > 0) {
-    //LOG(INFO) << "OSD Activated with string " << params.osdTimeDisplay;
-
     if (IMP_OSD_CreateGroup(0) < 0) {
         IMP_LOG_ERR(TAG, "IMP_OSD_CreateGroup(0) error !\n");
     }
     int osdPos = 0; // 0 = UP,1 = down
-    //prHander = sample_osd_init(0, currentParams.width, currentParams.height, osdPos);
     prHander = sample_osd_init(0, currentParams.width, currentParams.height, osdPos);
     if (prHander <= 0) {
         IMP_LOG_ERR(TAG, "OSD init failed\n");
@@ -469,27 +569,49 @@ ImpEncoder::ImpEncoder(impParams params) {
 
     pthread_t tid;
 
+    // ----- Motion implementation: Init
+    //
+    // Motion detection stuff, not sure it is optimized, maybe some calls are useless
+    IMPCell ivs_grp0 = { DEV_ID_IVS , 0, 0};
+    ret = IMP_IVS_CreateGroup(0);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_IVS_CreateGroup(0) failed\n");
+    }
 
+    ret = IMP_System_Bind (&chn.framesource_chn, &ivs_grp0);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_System_Binf for \n");
+    }
+
+
+    // --- OSD and other stuffs thread
+    pthread_t tid;
     ret = pthread_create(&tid, NULL, update_thread, NULL);
-
     sleep(0);
     if (ret) {
         IMP_LOG_ERR(TAG, "thread create error\n");
     }
-    //} else {
-    //-------------------------
-    //
-    /* Step.4 Bind */
 
-    // }
-    /* Step.5 Stream On */
     ret = sample_framesource_streamon();
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "ImpStreamOn failed\n");
 
     }
-    //exit(0);
 
+
+    // --- Motion 
+    IMPIVSInterface *inteface = NULL;
+
+    /*  ivs move start */
+    ret = sample_ivs_move_start(0, 0, &inteface, currentParams.width, currentParams.height);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "sample_ivs_move_start(0, 0) failed\n");
+    }
+
+    /*  start to get ivs move result */
+    if (pthread_create(&tid, NULL, sample_ivs_move_get_result_process, NULL)) {
+        IMP_LOG_ERR(TAG, "create sample_ivs_move_get_result_process failed\n");
+    }
 
     /* drop several pictures of invalid data */
     sleep(SLEEP_TIME);
@@ -754,11 +876,11 @@ int ImpEncoder::sample_system_init() {
 
 
     /*
-    ret = IMP_ISP_Tuning_SetWDRAttr(IMPISP_TUNING_OPS_MODE_DISABLE);
-    if (ret < 0) {
-        IMP_LOG_ERR(TAG, "failed to set WDR\n");
-        return -1;
-    }
+       ret = IMP_ISP_Tuning_SetWDRAttr(IMPISP_TUNING_OPS_MODE_DISABLE);
+       if (ret < 0) {
+       IMP_LOG_ERR(TAG, "failed to set WDR\n");
+       return -1;
+       }
      */
 
 
@@ -862,6 +984,18 @@ int ImpEncoder::sample_framesource_init() {
         return -1;
     }
 
+    ret = IMP_FrameSource_CreateChn(1, &chn.fs_chn_attr);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_FrameSource_CreateChn(chn%d) error !\n", 1);
+        return -1;
+    }
+
+    ret = IMP_FrameSource_SetChnAttr(1, &chn.fs_chn_attr);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_FrameSource_SetChnAttr(chn%d) error !\n", 1);
+        return -1;
+    }
+
 
     return 0;
 }
@@ -900,7 +1034,7 @@ int ImpEncoder::sample_jpeg_init() {
     ret = IMP_Encoder_CreateChn(1, &channel_attr);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_Encoder_CreateChn(%d) error: %d\n",
-                    0, ret);
+                0, ret);
         return -1;
     }
 
@@ -908,7 +1042,7 @@ int ImpEncoder::sample_jpeg_init() {
     ret = IMP_Encoder_RegisterChn(0, 1);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_Encoder_RegisterChn(0, %d) error: %d\n",
-                    0, ret);
+                0, ret);
         return -1;
     }
 
@@ -939,7 +1073,7 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264Cbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
     rc_attr->attrH264Cbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
     rc_attr->attrH264Cbr.maxGop =
-            2 * rc_attr->attrH264Cbr.outFrmRate.frmRateNum / rc_attr->attrH264Cbr.outFrmRate.frmRateDen;
+        2 * rc_attr->attrH264Cbr.outFrmRate.frmRateNum / rc_attr->attrH264Cbr.outFrmRate.frmRateDen;
     rc_attr->attrH264Cbr.outBitRate = currentParams.bitrate;
     rc_attr->attrH264Cbr.maxQp = 38;
     rc_attr->attrH264Cbr.minQp = 15;
@@ -963,52 +1097,52 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264FrmUsed.frmUsedTimes = 2000;
 
     /*
-    rc_attr->attrH264FrmUsed.enable = true;
-    rc_attr->attrH264FrmUsed.dnIQp = ENC_FRM_REUSED ;
-    rc_attr->attrH264FrmUsed.frmUsedTimes = 50;
-*/
+       rc_attr->attrH264FrmUsed.enable = true;
+       rc_attr->attrH264FrmUsed.dnIQp = ENC_FRM_REUSED ;
+       rc_attr->attrH264FrmUsed.frmUsedTimes = 50;
+     */
 
 
 
 
     /*
-    rc_attr->attrH264FrmUsed.enable = true;
-    rc_attr->attrH264FrmUsed.frmUsedMode = ENC_FRM_REUSED ;
-    rc_attr->attrH264FrmUsed.frmUsedTimes = 50;
-    */
+       rc_attr->attrH264FrmUsed.enable = true;
+       rc_attr->attrH264FrmUsed.frmUsedMode = ENC_FRM_REUSED ;
+       rc_attr->attrH264FrmUsed.frmUsedTimes = 50;
+     */
 
-
-/*
-    rc_attr->rcMode = ENC_RC_MODE_H264VBR;
-    rc_attr->attrH264Vbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
-    rc_attr->attrH264Vbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
-    rc_attr->attrH264Vbr.maxGop =
-            1 * rc_attr->attrH264Vbr.outFrmRate.frmRateNum / rc_attr->attrH264Vbr.outFrmRate.frmRateDen;
-    rc_attr->attrH264Vbr.maxQp = 38;
-    rc_attr->attrH264Vbr.minQp = 15;
-    rc_attr->attrH264Vbr.staticTime = 1;
-    rc_attr->attrH264Vbr.maxBitRate =
-            100 ;
-    rc_attr->attrH264Vbr.changePos = 50;
-    rc_attr->attrH264Vbr.FrmQPStep = 3;
-    rc_attr->attrH264Vbr.GOPQPStep = 15;
-    rc_attr->attrH264FrmUsed.enable = 1;
-    */
 
     /*
-    rc_attr->rcMode = ENC_RC_MODE_H264VBR;
-    rc_attr->attrH264Vbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
-    rc_attr->attrH264Vbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
-    rc_attr->attrH264Vbr.maxGop =
-            1 * rc_attr->attrH264Vbr.outFrmRate.frmRateNum / rc_attr->attrH264Vbr.outFrmRate.frmRateDen;
-    rc_attr->attrH264Vbr.maxQp = 38;
-    rc_attr->attrH264Vbr.minQp = 15;
-    rc_attr->attrH264Vbr.staticTime = 1;
-    rc_attr->attrH264Vbr.maxBitRate =
-            100 ;
-    rc_attr->attrH264Vbr.changePos = 50;
-    rc_attr->attrH264Vbr.FrmQPStep = 3;
-    rc_attr->attrH264Vbr.GOPQPStep = 15;
+       rc_attr->rcMode = ENC_RC_MODE_H264VBR;
+       rc_attr->attrH264Vbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
+       rc_attr->attrH264Vbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
+       rc_attr->attrH264Vbr.maxGop =
+       1 * rc_attr->attrH264Vbr.outFrmRate.frmRateNum / rc_attr->attrH264Vbr.outFrmRate.frmRateDen;
+       rc_attr->attrH264Vbr.maxQp = 38;
+       rc_attr->attrH264Vbr.minQp = 15;
+       rc_attr->attrH264Vbr.staticTime = 1;
+       rc_attr->attrH264Vbr.maxBitRate =
+       100 ;
+       rc_attr->attrH264Vbr.changePos = 50;
+       rc_attr->attrH264Vbr.FrmQPStep = 3;
+       rc_attr->attrH264Vbr.GOPQPStep = 15;
+       rc_attr->attrH264FrmUsed.enable = 1;
+     */
+
+    /*
+       rc_attr->rcMode = ENC_RC_MODE_H264VBR;
+       rc_attr->attrH264Vbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
+       rc_attr->attrH264Vbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
+       rc_attr->attrH264Vbr.maxGop =
+       1 * rc_attr->attrH264Vbr.outFrmRate.frmRateNum / rc_attr->attrH264Vbr.outFrmRate.frmRateDen;
+       rc_attr->attrH264Vbr.maxQp = 38;
+       rc_attr->attrH264Vbr.minQp = 15;
+       rc_attr->attrH264Vbr.staticTime = 1;
+       rc_attr->attrH264Vbr.maxBitRate =
+       100 ;
+       rc_attr->attrH264Vbr.changePos = 50;
+       rc_attr->attrH264Vbr.FrmQPStep = 3;
+       rc_attr->attrH264Vbr.GOPQPStep = 15;
      */
 
 
@@ -1021,7 +1155,7 @@ int ImpEncoder::sample_encoder_init() {
     ret = IMP_Encoder_RegisterChn(0, 0);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_Encoder_RegisterChn(%d, %d) error: %d\n",
-                    0, 0, ret);
+                0, 0, ret);
         return -1;
     }
     return 0;
@@ -1033,7 +1167,7 @@ int ImpEncoder::encoder_chn_exit(int encChn) {
     ret = IMP_Encoder_Query(encChn, &chn_stat);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_Encoder_Query(%d) error: %d\n",
-                    encChn, ret);
+                encChn, ret);
         return -1;
     }
 
@@ -1041,14 +1175,14 @@ int ImpEncoder::encoder_chn_exit(int encChn) {
         ret = IMP_Encoder_UnRegisterChn(encChn);
         if (ret < 0) {
             IMP_LOG_ERR(TAG, "IMP_Encoder_UnRegisterChn(%d) error: %d\n",
-                        encChn, ret);
+                    encChn, ret);
             return -1;
         }
 
         ret = IMP_Encoder_DestroyChn(encChn);
         if (ret < 0) {
             IMP_LOG_ERR(TAG, "IMP_Encoder_DestroyChn(%d) error: %d\n",
-                        encChn, ret);
+                    encChn, ret);
             return -1;
         }
     }
@@ -1062,14 +1196,14 @@ int ImpEncoder::sample_encoder_exit(void) {
     ret = encoder_chn_exit(0);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "Encoder Channel %d exit  error: %d\n",
-                    0, ret);
+                0, ret);
         return -1;
     }
 
     ret = encoder_chn_exit(ENC_JPEG_CHANNEL);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "Encoder Channel %d exit  error: %d\n",
-                    ENC_JPEG_CHANNEL, ret);
+                ENC_JPEG_CHANNEL, ret);
         return -1;
     }
 
