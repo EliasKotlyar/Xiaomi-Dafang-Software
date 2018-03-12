@@ -406,7 +406,7 @@ static int sample_ivs_move_start(int grp_num, int chn_num, IMPIVSInterface **int
 
 static void *sample_ivs_move_get_result_process(void *arg)
 {
-    int i = 0, ret = 0;
+    int ret = 0;
     int chn_num = 0; 
     IMP_IVS_MoveOutput *result = NULL;
     bool isWasOn = false;
@@ -566,8 +566,6 @@ ImpEncoder::ImpEncoder(impParams params) {
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "Bind OSD and Encoder failed\n");
     }
-
-    pthread_t tid;
 
     // ----- Motion implementation: Init
     //
