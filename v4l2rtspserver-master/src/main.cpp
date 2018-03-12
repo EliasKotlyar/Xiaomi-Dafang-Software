@@ -365,6 +365,7 @@ std::string  getV4l2Alsa(const std::string& v4l2device) {
 int main(int argc, char **argv) {
     // default parameters
     const char *dev_name = "/dev/video0";
+    bool disableAudio = false;
     int format = V4L2_PIX_FMT_H264;
     int width = 1280;
     int height = 720;
@@ -387,9 +388,7 @@ int main(int argc, char **argv) {
     const char *realm = NULL;
     std::list <std::string> userPasswordList;
     int audioFreq = 44100;
-    int audioNbChannels = 2;
-    bool nightVision = false;
-    bool flip = false;
+    int audioNbChannels = 1;
 #ifdef HAVE_ALSA
     //snd_pcm_format_t audioFmt = SND_PCM_FORMAT_S16_BE;
 #endif
@@ -400,7 +399,7 @@ int main(int argc, char **argv) {
 
     // decode parameters
     int c = 0;
-    while ((c = getopt(argc, argv, "v::Q:O:" "I:P:p:m:u:M:ct:TS::" "R:U:" "nrwsf::F:W:H:" "A:C:a:" "Vh")) != -1) {
+    while ((c = getopt(argc, argv, "v::Q:O:" "I:P:p:m:u:M:ct:TS::" "R:U:" "nrwsf::F:W:H:" "AC:a:" "Vh")) != -1) {
         switch (c) {
             case 'v':
                 verbose = 1;
@@ -425,9 +424,6 @@ int main(int argc, char **argv) {
                 break;
             case 'u':
                 url = optarg;
-                break;
-            case 'n':
-                nightVision = true;
                 break;
             case 'm':
                 multicast = true;
@@ -458,11 +454,6 @@ int main(int argc, char **argv) {
             case 'U':
                 userPasswordList.push_back(optarg);
                 break;
-
-                // V4L2
-            case 'r':
-                flip = true;
-                break;
             case 's':
                 useThread = false;
                 break;
@@ -481,7 +472,7 @@ int main(int argc, char **argv) {
 
                 // ALSA
 #ifdef HAVE_ALSA
-            case 'A':	audioFreq = atoi(optarg); break;
+            case 'A':	disableAudio = true; break;
             case 'C':	audioNbChannels = atoi(optarg); break;
             //case 'a':	audioFmt = decodeAudioFormat(optarg); break;
 #endif
@@ -522,33 +513,14 @@ int main(int argc, char **argv) {
                 std::cout << "\t -S[duration]: enable HLS & MPEG-DASH with segment duration  in seconds (default "
                           << defaultHlsSegment << ")" << std::endl;
 
-                std::cout << "\t V4L2 options :" << std::endl;
-                std::cout << "\t -r        : V4L2 capture using read interface (default use memory mapped buffers)"
-                          << std::endl;
-                std::cout << "\t -w        : V4L2 capture using write interface (default use memory mapped buffers)"
-                          << std::endl;
-                std::cout << "\t -s        : V4L2 capture using live555 mainloop (default use a reader thread)"
-                          << std::endl;
-                std::cout << "\t -f        : V4L2 capture using current capture format (-W,-H,-F are ignored)"
-                          << std::endl;
-                std::cout << "\t -n        : Nightvision On/off"
-                          << std::endl;
-                std::cout << "\t -r        : Rotation On/off"
-                          << std::endl;
                 std::cout << "\t -fformat  : V4L2 capture using format (-W,-H,-F are used)" << std::endl;
                 std::cout << "\t -W width  : V4L2 capture width (default " << width << ")" << std::endl;
                 std::cout << "\t -H height : V4L2 capture height (default " << height << ")" << std::endl;
                 std::cout << "\t -F fps    : V4L2 capture framerate (default " << fps << ")" << std::endl;
 
-                std::cout << "\t ALSA options :" << std::endl;
-                std::cout << "\t -A freq    : ALSA capture frequency and channel (default " << audioFreq << ")"
+                std::cout << "\t Sound options :" << std::endl;
+                std::cout << "\t -A freq    : Disable Sound"
                           << std::endl;
-                std::cout << "\t -C channels: ALSA capture channels (default " << audioNbChannels << ")" << std::endl;
-                std::cout << "\t -a fmt     : ALSA capture audio format (default S16_BE)" << std::endl;
-
-                std::cout << "\t Devices :" << std::endl;
-                std::cout << "\t [V4L2 device][,ALSA device] : V4L2 capture device or/and ALSA capture device (default "
-                          << dev_name << ")" << std::endl;
                 exit(0);
             }
         }
@@ -608,6 +580,8 @@ int main(int argc, char **argv) {
         if (videoFormat == V4L2_PIX_FMT_MJPEG) {
             params.mode = IMP_MODE_JPEG;
             OutPacketBuffer::maxSize = 250000;
+
+
         } else if (videoFormat == V4L2_PIX_FMT_H264) {
             params.mode = IMP_MODE_H264_SNAP;
             MPEG2TransportStreamFromESSource::maxInputESFrameSize += 4820;
@@ -617,25 +591,23 @@ int main(int argc, char **argv) {
             LOG(FATAL) << "Unrecognized Format ";
             exit(0);
         }
+        if(width == 1920 && height == 1080){
+            OutPacketBuffer::maxSize = 500000;
+        }
+
 
         params.framerate = fps;
-        params.bitrate = 2000;
-        params.nightvision = nightVision;
-        params.flip = flip;
+        params.bitrate = 5000;
 
 
         ImpCapture *impCapture = new ImpCapture(params);
 
-
-
         if (!outputFile.empty()) {
-
-            int bufferSize = impCapture->getBufferSize();
-            char *buffer = (char*)malloc(bufferSize);
-            int bytesRead = impCapture->read(buffer,bufferSize);
-            int ret = fwrite(buffer, bytesRead, 1, stdout);
-            exit(ret);
-
+            if(strcmp(outputFile.c_str(),"memory")==0){
+                outfd = -2;
+            }else{
+                outfd = (int)fopen(outputFile.c_str(),"w");
+            }
         }
 
 
@@ -664,7 +636,8 @@ int main(int argc, char **argv) {
         std::string rtpAudioFormat;
 #ifdef HAVE_ALSA
         std::string audioDev="/dev/dsp";
-        if (!audioDev.empty())
+        //audioDev = "";
+        if (disableAudio == false)
         {
             // find the ALSA device associated with the V4L2 device
             //audioDev = "";
@@ -685,7 +658,8 @@ int main(int argc, char **argv) {
                 else
                 {
                     std::ostringstream os;
-                    os << "audio/L16/" << audioCapture->getSampleRate() << "/" << audioCapture->getChannels();
+                    //os << "audio/L16/" << audioCapture->getSampleRate() << "/" << audioCapture->getChannels();
+                    os << "audio/MPEG";
                     rtpAudioFormat.assign(os.str());
 
                     // extend buffer size if needed

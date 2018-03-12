@@ -3,6 +3,7 @@ CMakeFiles/
 CMakeCache.txt
 *.cmake
 Makefile
+!v4l2wrapper/Makefile
 # build
 libv4l2wrapper.a
 h264_v4l2_rtspserver

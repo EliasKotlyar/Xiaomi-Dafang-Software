@@ -47,6 +47,8 @@ struct chn_conf chn[FS_CHN_NUM] = {
 			.crop.height = SENSOR_HEIGHT,
 
 			.scaler.enable = 0,
+				.scaler.outwidth = SENSOR_WIDTH_SECOND,
+				.scaler.outheight = SENSOR_HEIGHT_SECOND,
 
 			.picWidth = SENSOR_WIDTH,
 			.picHeight = SENSOR_HEIGHT,

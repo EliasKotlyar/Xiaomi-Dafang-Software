@@ -72,6 +72,16 @@ endif (NOT LIBLIVE555_INCLUDE_DIR)
 
 find_path(LIBLIVE555_INCLUDE_DIR liveMedia/liveMedia.hh)
 include_directories(../live/liveMedia/include)
+
+
+#target_link_libraries(sharedmem ../v4l2rtspserver-tools/sharedmem.cpp )
+
+
+include_directories(../v4l2rtspserver-tools/)
+add_library(sharedmem ../v4l2rtspserver-tools/sharedmem.cpp)
+#add_subdirectory(../v4l2rtspserver-tools/ ./)
+target_link_libraries(${PROJECT_NAME} sharedmem)
+
 #include_directories(../live/liveMedia/)
 foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnvironment)
 	include_directories(../live/${LIBLIVE555_module}/include)
@@ -99,6 +109,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiao
 target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/uclibc/libimp.so")
 target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/uclibc/libsysutils.so")
 
+target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/lame-3.100/_install/lib/libmp3lame.a")
 
 
 #testing

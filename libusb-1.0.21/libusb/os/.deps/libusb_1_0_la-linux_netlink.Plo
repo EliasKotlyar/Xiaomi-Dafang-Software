@@ -1,0 +1,300 @@
+os/libusb_1_0_la-linux_netlink.lo: os/linux_netlink.c ../config.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/assert.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/features.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uClibc_config.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/cdefs.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/errno.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/errno.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/errno.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/errno.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm-generic/errno-base.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/fcntl.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/fcntl.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sgidefs.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/types.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/types.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/wordsize.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/stddef.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/typesizes.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/pthreadtypes.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/endian.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/endian.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/byteswap.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/byteswap.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/byteswap-common.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/time.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/select.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/select.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/sigset.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/time.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/sysmacros.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uio.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/stat.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/stat.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/poll.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/poll.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/poll.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/stdio.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uClibc_stdio.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/wchar.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/wchar.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uClibc_mutex.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/pthread.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sched.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/sched.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uClibc_clk_tck.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/signal.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/setjmp.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uClibc_pthread.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/stdarg.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/stdio_lim.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/stdlib.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/waitflags.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/waitstatus.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/alloca.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/string.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/unistd.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/posix_opt.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/environments.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/confname.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/getopt.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/types.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm-generic/int-ll64.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/bitsperlong.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm-generic/bitsperlong.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/socket.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/uio.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/socket.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include-fixed/uclibc/limits.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include-fixed/uclibc/syslimits.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/limits.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/posix1_lim.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/local_lim.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/limits.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uClibc_local_lim.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/posix2_lim.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/xopen_lim.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/sockaddr.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/socket.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/sockios.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/ioctl.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm-generic/ioctl.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/netlink.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/kernel.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/sysinfo.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/types.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/posix_types.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/stddef.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/posix_types.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/sgidefs.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm-generic/posix_types.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/socket.h \
+ libusbi.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/stdint.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/stdint.h \
+ libusb.h \
+ /home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/time.h \
+ version.h version_nano.h os/threads_posix.h os/poll_posix.h \
+ os/linux_usbfs.h
+
+../config.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/assert.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/features.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uClibc_config.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/cdefs.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/errno.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/errno.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/errno.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/errno.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm-generic/errno-base.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/fcntl.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/fcntl.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sgidefs.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/types.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/types.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/wordsize.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/stddef.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/typesizes.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/pthreadtypes.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/endian.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/endian.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/byteswap.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/byteswap.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/byteswap-common.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/time.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/select.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/select.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/sigset.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/time.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/sysmacros.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uio.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/stat.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/stat.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/poll.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/poll.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/poll.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/stdio.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uClibc_stdio.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/wchar.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/wchar.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uClibc_mutex.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/pthread.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sched.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/sched.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uClibc_clk_tck.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/signal.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/setjmp.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uClibc_pthread.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/stdarg.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/stdio_lim.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/stdlib.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/waitflags.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/waitstatus.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/alloca.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/string.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/unistd.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/posix_opt.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/environments.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/confname.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/getopt.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/types.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm-generic/int-ll64.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/bitsperlong.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm-generic/bitsperlong.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/socket.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/uio.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/socket.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include-fixed/uclibc/limits.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include-fixed/uclibc/syslimits.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/limits.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/posix1_lim.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/local_lim.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/limits.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/uClibc_local_lim.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/posix2_lim.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/xopen_lim.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/bits/sockaddr.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/socket.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/sockios.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/ioctl.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm-generic/ioctl.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/netlink.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/kernel.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/sysinfo.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/types.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/posix_types.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/stddef.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/posix_types.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm/sgidefs.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/asm-generic/posix_types.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/linux/socket.h:
+
+libusbi.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../lib/gcc/mips-linux-gnu/4.7.2/include/stdint.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/stdint.h:
+
+libusb.h:
+
+/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/mips-gcc472-glibc216-64bit/bin/../mips-linux-gnu/libc/uclibc/usr/include/sys/time.h:
+
+version.h:
+
+version_nano.h:
+
+os/threads_posix.h:
+
+os/poll_posix.h:
+
+os/linux_usbfs.h:

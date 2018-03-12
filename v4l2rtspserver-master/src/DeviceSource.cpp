@@ -16,7 +16,9 @@
 // project
 #include "logger.h"
 #include "DeviceSource.h"
-
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 // ---------------------------------
 // V4L2 FramedSource Stats
 // ---------------------------------
@@ -173,8 +175,23 @@ int V4L2DeviceSource::getNextFrame() {
         LOG(DEBUG) << "getNextFrame\ttimestamp:" << ref.tv_sec << "." << ref.tv_usec << "\tsize:" << frameSize
                    << "\tdiff:" << (diff.tv_sec * 1000 + diff.tv_usec / 1000) << "ms";
         processFrame(buffer, frameSize, ref);
-        if (m_outfd != -1) {
-            write(m_outfd, buffer, frameSize);
+        switch(m_outfd){
+            case -1:
+
+            break;
+            case -2:
+                key_t key1;
+                key1 = ftok("/usr/include", 'x');
+                int shm_id;
+                shm_id = shmget( key1, m_device->getBufferSize(), IPC_CREAT);
+                void* shared_mem;
+                shared_mem = shmat( shm_id, NULL, 0);
+                memcpy(shared_mem,buffer,frameSize);
+                shmdt(shared_mem);
+            break;
+            default:
+                fwrite (buffer , 1, frameSize, (FILE*)m_outfd);
+            break;
         }
     }
     return frameSize;
