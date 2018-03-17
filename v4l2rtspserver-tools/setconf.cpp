@@ -51,7 +51,7 @@ void usage(char *command)
     fprintf(stderr, "\t'p' OSD space between char is set to VALUE (can be negative)\n");
     fprintf(stderr, "\t'w' fixed text width (0 variable, 1 fixed)\n");
 
-    fprintf(stderr, "\t'm' motion sensibility (0 to 4) -1 to deactivate motion\n");
+    fprintf(stderr, "\t'm' motion sensitivity (0 to 4) -1 to deactivate motion\n");
     fprintf(stderr, "\t'z' display a red circle when motion detected (0 deactivated, 1 activated)\n");
     fprintf(stderr, "\t'r' set detection region (shall be: x0,y0,x1,y1)\n");
 
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
             break;
         // Motion configuration
         case 'm':
-            SETGETSHAREDMEMORYINT(conf->sensibility);
+            SETGETSHAREDMEMORYINT(conf->sensitivity);
             break;
         case 'z':
            SETGETSHAREDMEMORYBOOL(conf->motionOSD);

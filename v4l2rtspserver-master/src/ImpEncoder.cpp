@@ -243,7 +243,7 @@ static IMPRgnHandle osdDetectionIndicatorInit(int number, int width, int height,
 }
 
 
-static int ivsSetSensibility(int sens)
+static int ivsSetsensitivity(int sens)
 {
 	int ret = 0;
 	IMP_IVS_MoveParam param;
@@ -496,14 +496,14 @@ static void *update_thread(void *p) {
             IMP_LOG_ERR(TAG, "Changed OSD FixedWidth\n");
         }
 
-        if (currentConfig.sensibility !=  newConfig->sensibility) {
-            if (newConfig->sensibility == -1) {
+        if (currentConfig.sensitivity !=  newConfig->sensitivity) {
+            if (newConfig->sensitivity == -1) {
                 ismotionActivated = false;
                 IMP_LOG_ERR(TAG, "Deactivate motion\n");
             } else {
                 ismotionActivated = true;
-                ivsSetSensibility(newConfig->sensibility);
-                IMP_LOG_ERR(TAG, "Changed motion sensibility %d\n",currentConfig.sensibility );
+                ivsSetsensitivity(newConfig->sensitivity);
+                IMP_LOG_ERR(TAG, "Changed motion sensitivity %d\n",currentConfig.sensitivity );
             }
         }
 
@@ -585,7 +585,7 @@ static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, i
     param.frameInfo.height = height;
     // Define the detection region, for now only one of the size of the video
     param.roiRectCnt = 1;
-    // Sensibility (to make configurable)
+    // Sensitivity (0 to 4)
     param.sense[0] = 4;
 
     param.roiRect[0].p0.x = 0;
