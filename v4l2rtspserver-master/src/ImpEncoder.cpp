@@ -263,6 +263,41 @@ static int ivsSetSensibility(int sens)
 	return 0;
 }
 
+static int ivsSetDetectionRegion(int detectionRegion[4] )
+{
+	int ret = 0;
+
+	if ((detectionRegion[0] == 0) &&
+	    (detectionRegion[1] == 0) &&
+	    (detectionRegion[2] == 0) &&
+	    (detectionRegion[3] == 0)) {
+           LOG(NOTICE) << "Detection region set to 0: don't use it\n";
+    } else {
+        IMP_IVS_MoveParam param;
+        ret = IMP_IVS_GetParam(0, &param);
+        if (ret < 0) {
+            IMP_LOG_ERR(TAG, "IMP_IVS_GetParam(0) failed\n");
+            return -1;
+        }
+
+        param.roiRect[0].p0.x = detectionRegion[0];
+        param.roiRect[0].p0.y = detectionRegion[1];
+        param.roiRect[0].p1.x = detectionRegion[2] - 1;
+        param.roiRect[0].p1.y = detectionRegion[3]  - 1;
+        LOG(NOTICE) << "Detection region= ((" << param.roiRect[0].p0.x << "," << param.roiRect[0].p0.y << ")-("<< param.roiRect[0].p1.x << "," << param.roiRect[0].p1.y << "))\n";
+
+
+
+        ret = IMP_IVS_SetParam(0, &param);
+        if (ret < 0) {
+            IMP_LOG_ERR(TAG, "IMP_IVS_SetParam(0) failed\n");
+            return -1;
+        }
+    }
+
+	return 0;
+}
+
 static int osd_show(void) {
     int ret;
 
@@ -311,7 +346,6 @@ static void *update_thread(void *p) {
     SharedMem &sharedMem = SharedMem::instance();
     newConfig = sharedMem.getConfig();
     memcpy(&currentConfig, newConfig, sizeof(shared_conf));
-    printf("****************** %d\n", currentConfig.motionOSD);
     ret = osd_show();
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "OSD show error\n");
@@ -473,6 +507,16 @@ static void *update_thread(void *p) {
             }
         }
 
+       if ((currentConfig.detectionRegion[0] !=  newConfig->detectionRegion[0]) ||
+           (currentConfig.detectionRegion[1] !=  newConfig->detectionRegion[1]) ||
+           (currentConfig.detectionRegion[2] !=  newConfig->detectionRegion[2]) ||
+           (currentConfig.detectionRegion[3] !=  newConfig->detectionRegion[3])) {
+                ivsSetDetectionRegion(newConfig->detectionRegion);
+                IMP_LOG_ERR(TAG, "Changed motion region\n");
+        }
+
+
+
         if (currentConfig.motionOSD !=  newConfig->motionOSD) {
             ismotionOSDActivated = newConfig->motionOSD;
             IMP_LOG_ERR(TAG, "Display motion OSD %s\n",ismotionOSDActivated?"YES":"NO" );
@@ -514,8 +558,8 @@ static void exec_command(const char *command)
             // Detach from parent
             setsid();
             LOG(NOTICE) << "Will execute command " << command << "\n";
-            //execl("/bin/sh", "sh", "-c", command, " &", NULL);
-            execlp(command, command, "&", NULL);
+            execl("/bin/sh", "sh", "-c", command, " &", NULL);
+            //execl(command, command, "&", NULL);
             exit(1);
         }
     }
@@ -606,6 +650,7 @@ static void *ivsMoveDetectionThread(void *arg)
                 gDetectionOn = true;
                 exec_command("/system/sdcard/scripts/detectionOn.sh");
                 LOG(NOTICE) << "Detect !!\n";
+
             }
 
             if ((isWasOn == true) &&
@@ -1279,7 +1324,6 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264Cbr.GOPQPStep = 15;
     rc_attr->attrH264Cbr.AdaptiveMode = false;
     rc_attr->attrH264Cbr.GOPRelation = false;
-
 
     rc_attr->attrH264Denoise.enable = false;
     rc_attr->attrH264Denoise.dnType = 2;

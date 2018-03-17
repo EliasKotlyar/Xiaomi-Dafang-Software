@@ -3,11 +3,30 @@
 #include <cstdlib>
 #include "sharedmem.h"
 
+#define SETGETSHAREDMEMORYINT(INT) if (get) printf("%d\n",  INT); else INT = atoi(value);
+#define SETGETSHAREDMEMORYSTRING(STR) if (get) printf("%s\n",  STR); else  strcpy(STR,value);
+#define SETGETSHAREDMEMORYBOOL(INT) if (get) printf("%s\n",  INT?"TRUE":"FALSE"); else INT= atoi(value)==0?false:true;
+
+int stringToInts(char *str, int region[4])
+{
+    int i = 0;
+
+    char *pt = strtok (str,",");
+    while ((pt != NULL) &&
+            i < sizeof(region)) {
+        int a = atoi(pt);
+        region[i] = a;
+        i++;
+        pt = strtok (NULL, ",");
+    }
+    return (i == 4);
+}
+
 
 void usage(char *command)
 {
-    fprintf(stderr, "Usage %s -k KEY -v VALUE\n", command);
-    fprintf(stderr, "Where k is in\n");
+    fprintf(stderr, "Usage %s -g -k KEY -v VALUE\n", command);
+    fprintf(stderr, "Where k to set value, g to get the value\n");
     fprintf(stderr, "\t'f' flip mode set to\n");
     fprintf(stderr, "\t\t'1' -> flip on\n");
     fprintf(stderr, "\t\t'0' -> flip off\n");
@@ -34,32 +53,47 @@ void usage(char *command)
 
     fprintf(stderr, "\t'm' motion sensibility (0 to 4) -1 to deactivate motion\n");
     fprintf(stderr, "\t'z' display a red circle when motion detected (0 deactivated, 1 activated)\n");
+    fprintf(stderr, "\t'r' set detection region (shall be: x0,y0,x1,y1)\n");
 
+    fprintf(stderr, "Example: to set osd text: %s -k o -v OSDTEXT\n", command);
+    fprintf(stderr, "         to get osd text: %s -g o\n", command);
 
 }
 
 int main(int argc, char *argv[]) {
 
     char key = 0;
-    char *value;
+    char *value = NULL;
+    bool get = false;
 
     // Parse Arguments:
     int c;
-    while ((c = getopt(argc, argv, "k:v:")) != -1) {
+    while ((c = getopt(argc, argv, "g:k:v:")) != -1) {
         switch (c) {
+            case 'g':
+                    get = true;
+                    // no break on purpose, execute 'k' case
             case 'k':
-                key = optarg[0];
+                if (key == 0) {
+                    key = optarg[0];
+                } else {
+                       printf("Can not use g and k values at the same time\n", c);
+                       usage(argv[0]);
+                       exit(EXIT_FAILURE);
+                }
                 break;
+
             case 'v':
                 value = optarg;
                 break;
+
+
             default:
                 printf("Invalid Argument %c\n", c);
                 usage(argv[0]);
                 exit(EXIT_FAILURE);
         }
     }
-
     SharedMem &mem = SharedMem::instance();
     shared_conf *conf = mem.getConfig();
     //printf("%d,%d\n", conf->nightmode, conf->flip);
@@ -67,42 +101,47 @@ int main(int argc, char *argv[]) {
     //printf("%d,%d\n", conf->nightmode, conf->flip);
     switch (key) {
         case 'f':
-            conf->flip = atoi(value);
+            SETGETSHAREDMEMORYINT(conf->flip );
             break;
         case 'n':
-            conf->nightmode = atoi(value);
+            SETGETSHAREDMEMORYINT(conf->nightmode );
             break;
         case 'b':
-            conf->bitrate =  atoi(value);
+            SETGETSHAREDMEMORYINT(conf->bitrate );
             break;
 
         // OSD configuration
         case 'o':
-            strcpy(conf->osdTimeDisplay,value);
+            SETGETSHAREDMEMORYSTRING(conf->osdTimeDisplay );
             break;
         case 'c':
-            conf->osdColor = atoi(value);
+            SETGETSHAREDMEMORYINT(conf->osdColor);
             break;
         case 's':
-            conf->osdSize = atoi(value);
+            SETGETSHAREDMEMORYINT(conf->osdSize);
             break;
         case 'x':
-            conf->osdPosY = atoi(value);
+            SETGETSHAREDMEMORYINT(conf->osdPosY);
             break;
         case 'p':
-            conf->osdSpace = atoi(value);
+            SETGETSHAREDMEMORYINT(conf->osdSpace);
             break;
         case 'w':
-            conf->osdFixedWidth = atoi(value)==0?false:true;
+            SETGETSHAREDMEMORYBOOL(conf->osdFixedWidth);
             break;
         // Motion configuration
         case 'm':
-            conf->sensibility =  atoi(value);
+            SETGETSHAREDMEMORYINT(conf->sensibility);
             break;
         case 'z':
-           conf->motionOSD =  atoi(value)==0?false:true;
+           SETGETSHAREDMEMORYBOOL(conf->motionOSD);
            break;
-
+        case 'r':
+            if (get)
+                printf("%d,%d,%d,%d\n", conf->detectionRegion[0], conf->detectionRegion[1],conf->detectionRegion[2],conf->detectionRegion[3]);
+            else
+                stringToInts(value, conf->detectionRegion);
+            break;
     default:
         printf("Invalid Argument %c\n", key);
         usage(argv[0]);

@@ -19,6 +19,7 @@ struct shared_conf {
     bool osdFixedWidth;
     int sensibility;
     bool motionOSD;
+    int detectionRegion[4]; // x0,y0,x1,y1
 };
 
 
