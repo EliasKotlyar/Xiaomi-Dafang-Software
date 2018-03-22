@@ -91,8 +91,11 @@ IMPRgnHandle prHander[2] = {INVHANDLE, INVHANDLE};
 #define OSD_DETECTIONWIDTH  40
 
 bool gDetectionOn = false;
-bool ismotionOSDActivated = true;
 bool ismotionActivated = true;
+IMPIVSInterface *inteface = NULL;
+static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, int x0, int y0, int x1, int y1, int width, int height );
+static void *ivsMoveDetectionThread(void *arg);
+
 static unsigned char charDetection[] = {
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -267,35 +270,16 @@ static int ivsSetDetectionRegion(int detectionRegion[4] )
 {
 	int ret = 0;
 
-	if ((detectionRegion[0] == 0) &&
-	    (detectionRegion[1] == 0) &&
-	    (detectionRegion[2] == 0) &&
-	    (detectionRegion[3] == 0)) {
-           LOG(NOTICE) << "Detection region set to 0: don't use it\n";
-    } else {
-        IMP_IVS_MoveParam param;
-        ret = IMP_IVS_GetParam(0, &param);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "IMP_IVS_GetParam(0) failed\n");
-            return -1;
-        }
-
-        param.roiRect[0].p0.x = detectionRegion[0];
-        param.roiRect[0].p0.y = detectionRegion[1];
-        param.roiRect[0].p1.x = detectionRegion[2] - 1;
-        param.roiRect[0].p1.y = detectionRegion[3]  - 1;
-        LOG(NOTICE) << "Detection region= ((" << param.roiRect[0].p0.x << "," << param.roiRect[0].p0.y << ")-("<< param.roiRect[0].p1.x << "," << param.roiRect[0].p1.y << "))\n";
-
-
-
-        ret = IMP_IVS_SetParam(0, &param);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "IMP_IVS_SetParam(0) failed\n");
-            return -1;
-        }
+    ret = ivsMoveStart(0, 0, &inteface, detectionRegion[0], detectionRegion[1], detectionRegion[2], detectionRegion[3],gwidth,gheight) ;
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "ivsMoveStart(0, 0) failed\n");
     }
-
-	return 0;
+    pthread_t tid;
+    //  start to get ivs move result
+    if (pthread_create(&tid, NULL, ivsMoveDetectionThread, NULL)) {
+        IMP_LOG_ERR(TAG, "create sample_ivs_move_get_result_process failed\n");
+    }
+  	return 0;
 }
 
 static int osd_show(void) {
@@ -330,6 +314,8 @@ static void *update_thread(void *p) {
     bitmapinfo_t * fontmap = gBgramap; 
     int fontSize = CHARHEIGHT;
     int fontWidth = fontmap['W' - STARTCHAR].width; // Take 'W' as the biggest char  
+    bool alreadySetDetectionRegion = false;
+
 
     uint32_t *data = (uint32_t *) malloc(gRegionW * gRegionH * 4);
     uint32_t *dataDetection = (uint32_t *) malloc(OSD_DETECTIONHEIGHT * OSD_DETECTIONWIDTH * 4);
@@ -401,8 +387,8 @@ static void *update_thread(void *p) {
         }
         rAttrData.picData.pData = data;
         IMP_OSD_UpdateRgnAttrData(prHander[0], &rAttrData);
-
-        if (ismotionOSDActivated == true)
+        if ((currentConfig.motionOSD != -1 )
+            && ((unsigned int)currentConfig.motionOSD < sizeof(colorMap) / sizeof(colorMap[0])))
         {
             // In case of detection
             memset(dataDetection, 0, OSD_DETECTIONHEIGHT * OSD_DETECTIONWIDTH * 4);
@@ -412,7 +398,7 @@ static void *update_thread(void *p) {
                     for (int x = 0 ; x < 26 ;x++)
                     {
                         if (((unsigned char *) charDetection)[x+26*j]) {
-                            ((uint32_t *) dataDetection) [(j *OSD_DETECTIONWIDTH) + x] = OSD_RED;
+                            ((uint32_t *) dataDetection) [(j *OSD_DETECTIONWIDTH) + x] = colorMap[currentConfig.motionOSD];
                         } else {
                             ((uint32_t *) dataDetection) [(j * OSD_DETECTIONWIDTH) + x] = 0;
                         }
@@ -503,23 +489,22 @@ static void *update_thread(void *p) {
             } else {
                 ismotionActivated = true;
                 ivsSetsensitivity(newConfig->sensitivity);
-                IMP_LOG_ERR(TAG, "Changed motion sensitivity %d\n",currentConfig.sensitivity );
+                IMP_LOG_ERR(TAG, "Changed motion sensitivity %d\n",newConfig->sensitivity );
             }
         }
 
-       if ((currentConfig.detectionRegion[0] !=  newConfig->detectionRegion[0]) ||
-           (currentConfig.detectionRegion[1] !=  newConfig->detectionRegion[1]) ||
-           (currentConfig.detectionRegion[2] !=  newConfig->detectionRegion[2]) ||
-           (currentConfig.detectionRegion[3] !=  newConfig->detectionRegion[3])) {
-                ivsSetDetectionRegion(newConfig->detectionRegion);
-                IMP_LOG_ERR(TAG, "Changed motion region\n");
-        }
+       if (alreadySetDetectionRegion == false)
+       {
+        alreadySetDetectionRegion = true;
+        ivsSetDetectionRegion(newConfig->detectionRegion);
+        IMP_LOG_ERR(TAG, "Changed motion region\n");
+       }
 
 
 
         if (currentConfig.motionOSD !=  newConfig->motionOSD) {
-            ismotionOSDActivated = newConfig->motionOSD;
-            IMP_LOG_ERR(TAG, "Display motion OSD %s\n",ismotionOSDActivated?"YES":"NO" );
+
+            IMP_LOG_ERR(TAG, "Display motion OSD color=%d\n", newConfig->motionOSD );
         }
 
 
@@ -554,26 +539,27 @@ static void exec_command(const char *command)
 {
     if (file_exist(command))
     {
-        if (!fork()) {
+     /*   if (!fork()) {
             // Detach from parent
             setsid();
             LOG(NOTICE) << "Will execute command " << command << "\n";
             execl("/bin/sh", "sh", "-c", command, " &", NULL);
             //execl(command, command, "&", NULL);
             exit(1);
-        }
+        }*/
+        system(command);
     }
     else
     {
         LOG(NOTICE) << "command " << command << " does not exist\n";
     }
-    int r;
-    wait(&r);
+    //int r;
+    //wait(&r);
 }
 
 
 
-static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, int width, int height)
+static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, int x0, int y0, int x1, int y1, int width, int height )
 {
     int ret = 0;
     IMP_IVS_MoveParam param;
@@ -588,10 +574,17 @@ static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, i
     // Sensitivity (0 to 4)
     param.sense[0] = 4;
 
-    param.roiRect[0].p0.x = 0;
-    param.roiRect[0].p0.y = 0;
-    param.roiRect[0].p1.x = param.frameInfo.width - 1;
-    param.roiRect[0].p1.y = param.frameInfo.height  - 1;
+    param.roiRect[0].p0.x = x0;
+    param.roiRect[0].p0.y = y0;
+    if (x1 == 0 && y1 == 0)
+    {
+        param.roiRect[0].p1.x = width - 1;
+        param.roiRect[0].p1.y = height  - 1;
+    } else {
+        param.roiRect[0].p1.x = x1 - 1;
+        param.roiRect[0].p1.y = y1  - 1;
+
+    }
     LOG(NOTICE) << "Detection region= ((" << param.roiRect[0].p0.x << "," << param.roiRect[0].p0.y << ")-("<< param.roiRect[0].p1.x << "," << param.roiRect[0].p1.y << "))\n";
 
 
@@ -628,6 +621,7 @@ static void *ivsMoveDetectionThread(void *arg)
     int chn_num = 0; 
     IMP_IVS_MoveOutput *result = NULL;
     bool isWasOn = false;
+
 
     while (1) {
         if (ismotionActivated == true) {
@@ -839,20 +833,13 @@ ImpEncoder::ImpEncoder(impParams params) {
     }
 
 
-    // --- Motion 
-    IMPIVSInterface *inteface = NULL;
 
-    /*  ivs move start */
-    ret = ivsMoveStart(0, 0, &inteface, currentParams.width, currentParams.height);
+    // --- Motion
+  /*  ret = ivsMoveStart(0, 0, &inteface, 0,0,currentParams.width, currentParams.height, currentParams.width, currentParams.height);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "ivsMoveStart(0, 0) failed\n");
     }
-
-    /*  start to get ivs move result */
-    if (pthread_create(&tid, NULL, ivsMoveDetectionThread, NULL)) {
-        IMP_LOG_ERR(TAG, "create sample_ivs_move_get_result_process failed\n");
-    }
-
+*/
     /* drop several pictures of invalid data */
     sleep(SLEEP_TIME);
 

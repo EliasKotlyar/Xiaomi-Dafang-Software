@@ -19,7 +19,7 @@ int stringToInts(char *str, int region[4])
         i++;
         pt = strtok (NULL, ",");
     }
-    return (i == 4);
+    return (i == sizeof(region));
 }
 
 
@@ -52,8 +52,8 @@ void usage(char *command)
     fprintf(stderr, "\t'w' fixed text width (0 variable, 1 fixed)\n");
 
     fprintf(stderr, "\t'm' motion sensitivity (0 to 4) -1 to deactivate motion\n");
-    fprintf(stderr, "\t'z' display a red circle when motion detected (0 deactivated, 1 activated)\n");
-    fprintf(stderr, "\t'r' set detection region (shall be: x0,y0,x1,y1)\n");
+    fprintf(stderr, "\t'z' display a circle when motion detected (-1 deactivated, use the OSD color numbers)\n");
+    fprintf(stderr, "\t'r' set detection region (shall be: x0,y0,x1,y1) the server need to be restarted to take into account the new value\n");
 
     fprintf(stderr, "Example: to set osd text: %s -k o -v OSDTEXT\n", command);
     fprintf(stderr, "         to get osd text: %s -g o\n", command);
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
             SETGETSHAREDMEMORYINT(conf->sensitivity);
             break;
         case 'z':
-           SETGETSHAREDMEMORYBOOL(conf->motionOSD);
+           SETGETSHAREDMEMORYINT(conf->motionOSD);
            break;
         case 'r':
             if (get)

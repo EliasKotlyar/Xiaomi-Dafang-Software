@@ -9,7 +9,7 @@ SharedMem::SharedMem() {
     currentConfig.osdSize = 0;
     currentConfig.osdFixedWidth = 0;
     currentConfig.sensitivity = 4;
-    currentConfig.motionOSD = true;
+    currentConfig.motionOSD = 0;
     currentConfig.detectionRegion[0] = 0;
     currentConfig.detectionRegion[1] = 0;
     currentConfig.detectionRegion[2] = 0;
