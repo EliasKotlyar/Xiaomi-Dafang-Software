@@ -4,8 +4,8 @@ CROSS_COMPILE=$TOOLCHAIN/mips-linux-gnu-
 export CROSS_COMPILE=${CROSS_COMPILE}
 export CC=${CROSS_COMPILE}gcc
 export LD=${CROSS_COMPILE}g++
-export CFLAGS="-muclibc -O2 -lrt "
-export CPPFLAGS="-muclibc -O2 -lrt "
+export CFLGS="-muclibc -O2 -lrt -I../v4l2rtspserver-tools"
+export CPPFLAGS="-muclibc -O2 -lrt -I../v4l2rtspserver-tools"
 export LDFLAGS="-muclibc -O2 -lrt"
 #make clean
 #make all
@@ -15,8 +15,7 @@ export LDFLAGS="-muclibc -O2 -lrt"
 #cp ./v4l2wrapper/libv4l2wrapper.a ./
 rm CMakeCache.txt
 rm -r CMakeFiles
-cmake -DCMAKE_TOOLCHAIN_FILE="dafang.toolchain"
+cmake -DCMAKE_TOOLCHAIN_FILE="./dafang.toolchain"
 make VERBOSE=1 -j4
-#HOST=192.168.0.99
-HOST=192.168.0.99
+HOST=192.168.0.18
 ftp-upload -h ${HOST} -u root --password ismart12 -d /system/sdcard/bin/ v4l2rtspserver-master
