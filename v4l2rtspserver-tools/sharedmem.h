@@ -17,6 +17,9 @@ struct shared_conf {
     int osdPosY;
     int osdSpace;
     bool osdFixedWidth;
+    int sensitivity;
+    int motionOSD;
+    int detectionRegion[4]; // x0,y0,x1,y1
 };
 
 

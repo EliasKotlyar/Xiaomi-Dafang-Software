@@ -14,7 +14,6 @@
 #include <imp/imp_ivs.h>
 #include <imp/imp_ivs_move.h>
 
-
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
@@ -23,7 +22,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
 
 
 #include "ImpEncoder.h"
@@ -77,74 +77,111 @@
 int grpNum = 0;
 unsigned int gRegionH = 0;
 unsigned gRegionW = 0;
-IMPRgnHandle *prHander = NULL;
-IMPOSDGrpRgnAttr grAttrFont;
-IMPRgnHandle rHanderFont;
 int gwidth;
 int gheight;
 int gpos;
 
+// OSD for text and OSD for detection indicator
+#define OSD_TEXT 0
+#define OSD_MOTION 1
+IMPRgnHandle prHander[2] = {INVHANDLE, INVHANDLE};
 
-static void set_osd_posY(int width, int height, int fontSize, int posY) {
+
+#define OSD_DETECTIONHEIGHT  40
+#define OSD_DETECTIONWIDTH  40
+
+bool gDetectionOn = false;
+bool ismotionActivated = true;
+IMPIVSInterface *inteface = NULL;
+static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, int x0, int y0, int x1, int y1, int width, int height );
+static void *ivsMoveDetectionThread(void *arg);
+
+static unsigned char charDetection[] = {
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,
+0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,
+0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,
+0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,
+0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,
+0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,
+0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,
+0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,
+0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+
+};
+
+
+
+static void setOsdPosXY(IMPRgnHandle handle, int width, int height, int fontSize, int posX, int posY) {
     int ret = 0;
     IMPOSDRgnAttr rAttrFont;
     memset(&rAttrFont, 0, sizeof(IMPOSDRgnAttr));
     rAttrFont.type = OSD_REG_PIC;
-    rAttrFont.rect.p0.x = 0;
+    rAttrFont.rect.p0.x = posX;
     rAttrFont.rect.p0.y = posY;
     rAttrFont.rect.p1.x= rAttrFont.rect.p0.x + width -1;
-    rAttrFont.rect.p1.y = rAttrFont.rect.p0.y + OSD_REGION_HEIGHT - 1;
+    rAttrFont.rect.p1.y = rAttrFont.rect.p0.y + fontSize -1 ;
     rAttrFont.fmt = PIX_FMT_BGRA;
-    gRegionH = OSD_REGION_HEIGHT;
-    gRegionW = width;
-
+    LOG(NOTICE) << "OSD pos " <<  rAttrFont.rect.p0.x << "," << rAttrFont.rect.p0.y << "," << rAttrFont.rect.p1.x << ',' << rAttrFont.rect.p1.y << "\n";
     rAttrFont.data.picData.pData = NULL;
-    ret= IMP_OSD_SetRgnAttr(rHanderFont, &rAttrFont);
+    ret= IMP_OSD_SetRgnAttr(handle, &rAttrFont);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IMP_OSD_SetRgnAttr TimeStamp error !\n");
     }
 }
 
-static void set_osd_pos(int width, int height, int fontSize, int pos) {
+static void setOsdPos(IMPRgnHandle handle, int width, int height, int fontSize, int pos) {
 
     // 1 is down
     if (pos == 1) {
-        set_osd_posY(width, height, fontSize, height - (fontSize));
+        setOsdPosXY(handle, width, height, fontSize, 0, height - (fontSize));
     } else {
-        set_osd_posY(width, height, fontSize, 0);
+        setOsdPosXY(handle, width, height, fontSize, 0,0);
     }
 }
 
-static IMPRgnHandle *sample_osd_init(int grpNum, int width, int height, int pos) {
-    int ret;
-
-    gwidth= width;
-    gheight = height;
-    gpos = pos;
-
-    prHander = (IMPRgnHandle *) malloc(1 * sizeof(IMPRgnHandle));
-    if (prHander <= 0) {
-        IMP_LOG_ERR(TAG, "malloc() error !\n");
-        return NULL;
-    }
+static IMPRgnHandle osdInit(int number, int width, int height, int pos) {
+    int ret = 0;
+    IMPOSDGrpRgnAttr grAttrFont;
+    IMPRgnHandle rHanderFont;
 
     rHanderFont = IMP_OSD_CreateRgn(NULL);
     if (rHanderFont == INVHANDLE) {
         IMP_LOG_ERR(TAG, "IMP_OSD_CreateRgn TimeStamp error !\n");
-        return NULL;
+        return INVHANDLE;
     }
 
-    ret = IMP_OSD_RegisterRgn(rHanderFont, grpNum, NULL);
+    ret = IMP_OSD_RegisterRgn(rHanderFont, 0, NULL);
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "IVS IMP_OSD_RegisterRgn failed\n");
-        return NULL;
+        return INVHANDLE;
     }
 
-    set_osd_pos(width,height,OSD_REGION_HEIGHT, pos);
+    setOsdPos(rHanderFont, width,height,OSD_REGION_HEIGHT, pos);
 
-    if (IMP_OSD_GetGrpRgnAttr(rHanderFont, grpNum, &grAttrFont) < 0) {
+    if (IMP_OSD_GetGrpRgnAttr(rHanderFont, 0, &grAttrFont) < 0) {
         IMP_LOG_ERR(TAG, "IMP_OSD_GetGrpRgnAttr Logo error !\n");
-        return NULL;
+        return INVHANDLE;
 
     }
     memset(&grAttrFont, 0, sizeof(IMPOSDGrpRgnAttr));
@@ -154,31 +191,112 @@ static IMPRgnHandle *sample_osd_init(int grpNum, int width, int height, int pos)
     grAttrFont.gAlphaEn = 0; 
     grAttrFont.fgAlhpa = 0;
     grAttrFont.bgAlhpa = 0;
-    grAttrFont.layer = 1;
+    grAttrFont.layer = number +1;
 
-    if (IMP_OSD_SetGrpRgnAttr(rHanderFont, grpNum, &grAttrFont) < 0) {
+    if (IMP_OSD_SetGrpRgnAttr(rHanderFont, 0, &grAttrFont) < 0) {
         IMP_LOG_ERR(TAG, "IMP_OSD_SetGrpRgnAttr Logo error !\n");
-        return NULL;
+        return INVHANDLE;
     }
 
-    ret = IMP_OSD_Start(grpNum);
+
+    return rHanderFont;
+}
+
+static IMPRgnHandle osdDetectionIndicatorInit(int number, int width, int height, int x, int y) {
+    int ret = 0;
+
+    IMPRgnHandle rHanderFont;
+    IMPOSDGrpRgnAttr grAttrFont;
+
+    rHanderFont = IMP_OSD_CreateRgn(NULL);
+    if (rHanderFont == INVHANDLE) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_CreateRgn TimeStamp error !\n");
+        return INVHANDLE;
+    }
+
+    ret = IMP_OSD_RegisterRgn(rHanderFont, 0, NULL);
     if (ret < 0) {
-        IMP_LOG_ERR(TAG, "IMP_OSD_Start TimeStamp, Logo, Cover and Rect error !\n");
-        return NULL;
+        IMP_LOG_ERR(TAG, "IVS IMP_OSD_RegisterRgn failed\n");
+        return INVHANDLE;
     }
 
-    prHander[0] = rHanderFont;
-    return prHander;
+    setOsdPosXY(rHanderFont, OSD_DETECTIONWIDTH, OSD_DETECTIONHEIGHT, OSD_DETECTIONHEIGHT, x, y);
+
+    if (IMP_OSD_GetGrpRgnAttr(rHanderFont, 0, &grAttrFont) < 0) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_GetGrpRgnAttr Logo error !\n");
+        return INVHANDLE;
+
+    }
+    memset(&grAttrFont, 0, sizeof(IMPOSDGrpRgnAttr));
+    grAttrFont.show = 0;
+
+    // Disable Font global alpha, only use pixel alpha.
+    grAttrFont.gAlphaEn = 0;
+    grAttrFont.fgAlhpa = 0;
+    grAttrFont.bgAlhpa = 0;
+    grAttrFont.layer = number +1;
+
+    if (IMP_OSD_SetGrpRgnAttr(rHanderFont, 0, &grAttrFont) < 0) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_SetGrpRgnAttr Logo error !\n");
+        return INVHANDLE;
+    }
+
+
+    return rHanderFont;
+}
+
+
+static int ivsSetsensitivity(int sens)
+{
+	int ret = 0;
+	IMP_IVS_MoveParam param;
+	ret = IMP_IVS_GetParam(0, &param);
+	if (ret < 0) {
+		IMP_LOG_ERR(TAG, "IMP_IVS_GetParam(0) failed\n");
+		return -1;
+	}
+
+    param.sense[0] = sens;
+
+	ret = IMP_IVS_SetParam(0, &param);
+	if (ret < 0) {
+		IMP_LOG_ERR(TAG, "IMP_IVS_SetParam(0) failed\n");
+		return -1;
+	}
+	return 0;
+}
+
+static int ivsSetDetectionRegion(int detectionRegion[4] )
+{
+	int ret = 0;
+
+    ret = ivsMoveStart(0, 0, &inteface, detectionRegion[0], detectionRegion[1], detectionRegion[2], detectionRegion[3],gwidth,gheight) ;
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "ivsMoveStart(0, 0) failed\n");
+    }
+    pthread_t tid;
+    //  start to get ivs move result
+    if (pthread_create(&tid, NULL, ivsMoveDetectionThread, NULL)) {
+        IMP_LOG_ERR(TAG, "create sample_ivs_move_get_result_process failed\n");
+    }
+  	return 0;
 }
 
 static int osd_show(void) {
     int ret;
 
-    ret = IMP_OSD_ShowRgn(prHander[0], grpNum, 1);
+    ret = IMP_OSD_ShowRgn(prHander[OSD_TEXT], grpNum, 1);
     if (ret != 0) {
         IMP_LOG_ERR(TAG, "IMP_OSD_ShowRgn() timeStamp error\n");
         return -1;
     }
+
+    ret = IMP_OSD_ShowRgn(prHander[OSD_MOTION], grpNum, 1);
+    if (ret != 0) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_ShowRgn() timeStamp error\n");
+        return -1;
+    }
+
     return 0;
 }
 static uint32_t colorMap[] = { OSD_WHITE,OSD_BLACK, OSD_RED, OSD_GREEN, OSD_BLUE, OSD_GREEN | OSD_BLUE, OSD_RED|OSD_GREEN, OSD_BLUE|OSD_RED};
@@ -192,14 +310,19 @@ static void *update_thread(void *p) {
     struct tm *currDate;
     char osdTimeDisplay[STRING_MAX_SIZE];
     IMPOSDRgnAttrData rAttrData;
+    IMPOSDRgnAttrData rAttrDataDetection;
     bitmapinfo_t * fontmap = gBgramap; 
     int fontSize = CHARHEIGHT;
     int fontWidth = fontmap['W' - STARTCHAR].width; // Take 'W' as the biggest char  
+    bool alreadySetDetectionRegion = false;
+
 
     uint32_t *data = (uint32_t *) malloc(gRegionW * gRegionH * 4);
+    uint32_t *dataDetection = (uint32_t *) malloc(OSD_DETECTIONHEIGHT * OSD_DETECTIONWIDTH * 4);
+
     //strcpy(osdTimeDisplay, (char *) p);
 
-    if (data == NULL) {
+    if ((data == NULL) || (dataDetection == NULL))  {
         IMP_LOG_ERR(TAG, "malloc timeStampData error\n");
         return NULL;
     }
@@ -209,7 +332,6 @@ static void *update_thread(void *p) {
     SharedMem &sharedMem = SharedMem::instance();
     newConfig = sharedMem.getConfig();
     memcpy(&currentConfig, newConfig, sizeof(shared_conf));
-
     ret = osd_show();
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "OSD show error\n");
@@ -265,6 +387,28 @@ static void *update_thread(void *p) {
         }
         rAttrData.picData.pData = data;
         IMP_OSD_UpdateRgnAttrData(prHander[0], &rAttrData);
+        if ((currentConfig.motionOSD != -1 )
+            && ((unsigned int)currentConfig.motionOSD < sizeof(colorMap) / sizeof(colorMap[0])))
+        {
+            // In case of detection
+            memset(dataDetection, 0, OSD_DETECTIONHEIGHT * OSD_DETECTIONWIDTH * 4);
+            if (gDetectionOn == true) {
+                // red circle is 29x26
+                for (int j = 0; j < 29; j++) {
+                    for (int x = 0 ; x < 26 ;x++)
+                    {
+                        if (((unsigned char *) charDetection)[x+26*j]) {
+                            ((uint32_t *) dataDetection) [(j *OSD_DETECTIONWIDTH) + x] = colorMap[currentConfig.motionOSD];
+                        } else {
+                            ((uint32_t *) dataDetection) [(j * OSD_DETECTIONWIDTH) + x] = 0;
+                        }
+                    }
+                }
+            }
+            rAttrDataDetection.picData.pData = dataDetection;
+            IMP_OSD_UpdateRgnAttrData(prHander[OSD_MOTION], &rAttrDataDetection);
+        }
+
 
         sleep(1);
 
@@ -323,7 +467,7 @@ static void *update_thread(void *p) {
             fontWidth = fontmap['W' - STARTCHAR].width; // Take 'W' as the biggest char  
 
             // As the size changed, re-display the OSD
-            set_osd_posY(gwidth,gheight,fontSize, currentConfig.osdPosY);
+            setOsdPosXY(prHander[OSD_TEXT], gwidth,gheight,fontSize, 0, currentConfig.osdPosY);
             IMP_LOG_ERR(TAG, "Changed OSD size and/or OSD pos\n");
         }
 
@@ -337,6 +481,33 @@ static void *update_thread(void *p) {
             // As the size changed, re-display the OSD
             IMP_LOG_ERR(TAG, "Changed OSD FixedWidth\n");
         }
+
+        if (currentConfig.sensitivity !=  newConfig->sensitivity) {
+            if (newConfig->sensitivity == -1) {
+                ismotionActivated = false;
+                IMP_LOG_ERR(TAG, "Deactivate motion\n");
+            } else {
+                ismotionActivated = true;
+                ivsSetsensitivity(newConfig->sensitivity);
+                IMP_LOG_ERR(TAG, "Changed motion sensitivity %d\n",newConfig->sensitivity );
+            }
+        }
+
+       if (alreadySetDetectionRegion == false)
+       {
+        alreadySetDetectionRegion = true;
+        ivsSetDetectionRegion(newConfig->detectionRegion);
+        IMP_LOG_ERR(TAG, "Changed motion region\n");
+       }
+
+
+
+        if (currentConfig.motionOSD !=  newConfig->motionOSD) {
+
+            IMP_LOG_ERR(TAG, "Display motion OSD color=%d\n", newConfig->motionOSD );
+        }
+
+
         memcpy(&currentConfig, newConfig, sizeof(shared_conf));
     }
 
@@ -355,7 +526,40 @@ int ImpEncoder::getBufferSize() {
 }
 
 
-static int sample_ivs_move_start(int grp_num, int chn_num, IMPIVSInterface **interface, int width, int height)
+static int file_exist(const char *filename)
+{
+  FILE *f = fopen(filename,"r");
+  if (f == NULL)
+    return 0;
+   fclose(f);
+   return 1;
+}
+
+static void exec_command(const char *command)
+{
+    if (file_exist(command))
+    {
+     /*   if (!fork()) {
+            // Detach from parent
+            setsid();
+            LOG(NOTICE) << "Will execute command " << command << "\n";
+            execl("/bin/sh", "sh", "-c", command, " &", NULL);
+            //execl(command, command, "&", NULL);
+            exit(1);
+        }*/
+        system(command);
+    }
+    else
+    {
+        LOG(NOTICE) << "command " << command << " does not exist\n";
+    }
+    //int r;
+    //wait(&r);
+}
+
+
+
+static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, int x0, int y0, int x1, int y1, int width, int height )
 {
     int ret = 0;
     IMP_IVS_MoveParam param;
@@ -367,13 +571,20 @@ static int sample_ivs_move_start(int grp_num, int chn_num, IMPIVSInterface **int
     param.frameInfo.height = height;
     // Define the detection region, for now only one of the size of the video
     param.roiRectCnt = 1;
-    // Sensibility (to make configurable)
+    // Sensitivity (0 to 4)
     param.sense[0] = 4;
 
-    param.roiRect[0].p0.x = 0;
-    param.roiRect[0].p0.y = 0;
-    param.roiRect[0].p1.x = param.frameInfo.width - 1;
-    param.roiRect[0].p1.y = param.frameInfo.height  - 1;
+    param.roiRect[0].p0.x = x0;
+    param.roiRect[0].p0.y = y0;
+    if (x1 == 0 && y1 == 0)
+    {
+        param.roiRect[0].p1.x = width - 1;
+        param.roiRect[0].p1.y = height  - 1;
+    } else {
+        param.roiRect[0].p1.x = x1 - 1;
+        param.roiRect[0].p1.y = y1  - 1;
+
+    }
     LOG(NOTICE) << "Detection region= ((" << param.roiRect[0].p0.x << "," << param.roiRect[0].p0.y << ")-("<< param.roiRect[0].p1.x << "," << param.roiRect[0].p1.y << "))\n";
 
 
@@ -404,51 +615,60 @@ static int sample_ivs_move_start(int grp_num, int chn_num, IMPIVSInterface **int
     return 0;
 }
 
-static void *sample_ivs_move_get_result_process(void *arg)
+static void *ivsMoveDetectionThread(void *arg)
 {
-    int i = 0, ret = 0;
+    int ret = 0;
     int chn_num = 0; 
     IMP_IVS_MoveOutput *result = NULL;
     bool isWasOn = false;
 
+
     while (1) {
-        ret = IMP_IVS_PollingResult(chn_num, IMP_IVS_DEFAULT_TIMEOUTMS);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "IMP_IVS_PollingResult(%d, %d) failed\n", chn_num, IMP_IVS_DEFAULT_TIMEOUTMS);
-            return (void *)-1;
-        }
-        ret = IMP_IVS_GetResult(chn_num, (void **)&result);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "IMP_IVS_GetResult(%d) failed\n", chn_num);
-            return (void *)-1;
-        }
+        if (ismotionActivated == true) {
+            ret = IMP_IVS_PollingResult(chn_num, IMP_IVS_DEFAULT_TIMEOUTMS);
+            if (ret < 0) {
+                IMP_LOG_ERR(TAG, "IMP_IVS_PollingResult(%d, %d) failed\n", chn_num, IMP_IVS_DEFAULT_TIMEOUTMS);
+                return (void *)-1;
+            }
+            ret = IMP_IVS_GetResult(chn_num, (void **)&result);
+            if (ret < 0) {
+                IMP_LOG_ERR(TAG, "IMP_IVS_GetResult(%d) failed\n", chn_num);
+                return (void *)-1;
+            }
 
-        // Detection !!!
-        if (isWasOn == false &&
-                result->retRoi[0] == 1)
+            // Detection !!!
+            if ((isWasOn == false) &&
+                (result->retRoi[0]) == 1)
+            {
+                isWasOn = true;
+                gDetectionOn = true;
+                exec_command("/system/sdcard/scripts/detectionOn.sh");
+                LOG(NOTICE) << "Detect !!\n";
+
+            }
+
+            if ((isWasOn == true) &&
+                (result->retRoi[0] == 0))
+            {
+                isWasOn = false;
+                gDetectionOn = false;
+                exec_command("/system/sdcard/scripts/detectionOff.sh");
+                LOG(NOTICE) << "Detect finished!!\n";
+            }
+
+           // IMP_LOG_INFO(TAG, "result->retRoi(%d)\n", result->retRoi[0]);
+
+            ret = IMP_IVS_ReleaseResult(chn_num, (void *)result);
+            if (ret < 0) {
+                IMP_LOG_ERR(TAG, "IMP_IVS_ReleaseResult(%d) failed\n", chn_num);
+                return (void *)-1;
+            }
+        }
+        else
         {
-            isWasOn = true;
-            system("/system/sdcard/scripts/detectionOn.sh");
-            LOG(NOTICE) << "Detect !!\n";
-        }
-
-        if (isWasOn == true &&
-                result->retRoi[0] == 0)
-        {
-            isWasOn = false;
-            system("/system/sdcard/scripts/detectionOff.sh");
-            LOG(NOTICE) << "Detect finished!!\n";
-        }
-
-        IMP_LOG_INFO(TAG, "result->retRoi(%d)\n", result->retRoi[0]);
-
-        ret = IMP_IVS_ReleaseResult(chn_num, (void *)result);
-        if (ret < 0) {
-            IMP_LOG_ERR(TAG, "IMP_IVS_ReleaseResult(%d) failed\n", chn_num);
-            return (void *)-1;
+            sleep(1);
         }
     }
-
     return (void *)0;
 }
 
@@ -551,8 +771,14 @@ ImpEncoder::ImpEncoder(impParams params) {
         IMP_LOG_ERR(TAG, "IMP_OSD_CreateGroup(0) error !\n");
     }
     int osdPos = 0; // 0 = UP,1 = down
-    prHander = sample_osd_init(0, currentParams.width, currentParams.height, osdPos);
-    if (prHander <= 0) {
+    gwidth= currentParams.width;
+    gheight = currentParams.height;
+    gpos = osdPos;
+    gRegionH = OSD_REGION_HEIGHT;
+    gRegionW = currentParams.width;
+
+    prHander[OSD_TEXT] = osdInit(OSD_TEXT, currentParams.width, currentParams.height, osdPos);
+    if (prHander[OSD_TEXT] == INVHANDLE) {
         IMP_LOG_ERR(TAG, "OSD init failed\n");
     }
 
@@ -566,8 +792,6 @@ ImpEncoder::ImpEncoder(impParams params) {
     if (ret < 0) {
         IMP_LOG_ERR(TAG, "Bind OSD and Encoder failed\n");
     }
-
-    pthread_t tid;
 
     // ----- Motion implementation: Init
     //
@@ -583,6 +807,16 @@ ImpEncoder::ImpEncoder(impParams params) {
         IMP_LOG_ERR(TAG, "IMP_System_Binf for \n");
     }
 
+    prHander[OSD_MOTION] = osdDetectionIndicatorInit(OSD_MOTION, currentParams.width, currentParams.height,
+                                                     currentParams.width - OSD_DETECTIONWIDTH, 0);
+    if (prHander[OSD_MOTION] == INVHANDLE) {
+        IMP_LOG_ERR(TAG, "OSD detection indicator init failed\n");
+    }
+
+    ret = IMP_OSD_Start(0);
+    if (ret < 0) {
+        IMP_LOG_ERR(TAG, "IMP_OSD_Start error !\n");
+    }
 
     // --- OSD and other stuffs thread
     pthread_t tid;
@@ -599,20 +833,13 @@ ImpEncoder::ImpEncoder(impParams params) {
     }
 
 
-    // --- Motion 
-    IMPIVSInterface *inteface = NULL;
 
-    /*  ivs move start */
-    ret = sample_ivs_move_start(0, 0, &inteface, currentParams.width, currentParams.height);
+    // --- Motion
+  /*  ret = ivsMoveStart(0, 0, &inteface, 0,0,currentParams.width, currentParams.height, currentParams.width, currentParams.height);
     if (ret < 0) {
-        IMP_LOG_ERR(TAG, "sample_ivs_move_start(0, 0) failed\n");
+        IMP_LOG_ERR(TAG, "ivsMoveStart(0, 0) failed\n");
     }
-
-    /*  start to get ivs move result */
-    if (pthread_create(&tid, NULL, sample_ivs_move_get_result_process, NULL)) {
-        IMP_LOG_ERR(TAG, "create sample_ivs_move_get_result_process failed\n");
-    }
-
+*/
     /* drop several pictures of invalid data */
     sleep(SLEEP_TIME);
 
@@ -1084,7 +1311,6 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrH264Cbr.GOPQPStep = 15;
     rc_attr->attrH264Cbr.AdaptiveMode = false;
     rc_attr->attrH264Cbr.GOPRelation = false;
-
 
     rc_attr->attrH264Denoise.enable = false;
     rc_attr->attrH264Denoise.dnType = 2;
