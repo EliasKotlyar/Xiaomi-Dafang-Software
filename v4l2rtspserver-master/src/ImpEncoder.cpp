@@ -24,7 +24,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-
+#include <stdarg.h>
 
 #include "ImpEncoder.h"
 #include <stdexcept>
@@ -93,6 +93,7 @@ IMPRgnHandle prHander[2] = {INVHANDLE, INVHANDLE};
 bool gDetectionOn = false;
 bool ismotionActivated = true;
 IMPIVSInterface *inteface = NULL;
+bool isMotionTracking = true;
 static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, int x0, int y0, int x1, int y1, int width, int height );
 static void *ivsMoveDetectionThread(void *arg);
 
@@ -257,6 +258,9 @@ static int ivsSetsensitivity(int sens)
 	}
 
     param.sense[0] = sens;
+    param.sense[1] = sens;
+    param.sense[2] = sens;
+    param.sense[3] = sens;
 
 	ret = IMP_IVS_SetParam(0, &param);
 	if (ret < 0) {
@@ -316,16 +320,10 @@ static void *update_thread(void *p) {
     int fontWidth = fontmap['W' - STARTCHAR].width; // Take 'W' as the biggest char  
     bool alreadySetDetectionRegion = false;
 
-
-    uint32_t *data = (uint32_t *) malloc(gRegionW * gRegionH * 4);
-    uint32_t *dataDetection = (uint32_t *) malloc(OSD_DETECTIONHEIGHT * OSD_DETECTIONWIDTH * 4);
+    uint32_t *data = NULL;
+    uint32_t *dataDetection = NULL; //(uint32_t *) malloc(OSD_DETECTIONHEIGHT * OSD_DETECTIONWIDTH * 4);
 
     //strcpy(osdTimeDisplay, (char *) p);
-
-    if ((data == NULL) || (dataDetection == NULL))  {
-        IMP_LOG_ERR(TAG, "malloc timeStampData error\n");
-        return NULL;
-    }
 
     struct shared_conf currentConfig;
     shared_conf *newConfig;
@@ -345,6 +343,9 @@ static void *update_thread(void *p) {
         time(&currTime);
         currDate = localtime(&currTime);
         memset(DateStr, 0, sizeof(DateStr));
+        if (data == NULL) {
+            data = (uint32_t *) malloc(gRegionW * gRegionH * 4);
+        }
         memset(data, 0, gRegionW * gRegionH * 4);
         strftime(DateStr, STRING_MAX_SIZE, osdTimeDisplay, currDate);
         //strftime(DateStr, 40, "%Y-%m-%d %I:%M:%S", currDate);
@@ -390,6 +391,10 @@ static void *update_thread(void *p) {
         if ((currentConfig.motionOSD != -1 )
             && ((unsigned int)currentConfig.motionOSD < sizeof(colorMap) / sizeof(colorMap[0])))
         {
+
+            if (dataDetection == NULL) {
+                dataDetection = (uint32_t *) malloc(OSD_DETECTIONHEIGHT * OSD_DETECTIONWIDTH * 4);
+            }
             // In case of detection
             memset(dataDetection, 0, OSD_DETECTIONHEIGHT * OSD_DETECTIONWIDTH * 4);
             if (gDetectionOn == true) {
@@ -482,23 +487,27 @@ static void *update_thread(void *p) {
             IMP_LOG_ERR(TAG, "Changed OSD FixedWidth\n");
         }
 
+
         if (currentConfig.sensitivity !=  newConfig->sensitivity) {
             if (newConfig->sensitivity == -1) {
                 ismotionActivated = false;
                 IMP_LOG_ERR(TAG, "Deactivate motion\n");
             } else {
                 ismotionActivated = true;
+
+                if (alreadySetDetectionRegion == false)
+                {
+                    alreadySetDetectionRegion = true;
+                    ivsSetDetectionRegion(newConfig->detectionRegion);
+                    IMP_LOG_ERR(TAG, "Changed motion region\n");
+                }
+
                 ivsSetsensitivity(newConfig->sensitivity);
                 IMP_LOG_ERR(TAG, "Changed motion sensitivity %d\n",newConfig->sensitivity );
             }
         }
 
-       if (alreadySetDetectionRegion == false)
-       {
-        alreadySetDetectionRegion = true;
-        ivsSetDetectionRegion(newConfig->detectionRegion);
-        IMP_LOG_ERR(TAG, "Changed motion region\n");
-       }
+
 
 
 
@@ -535,28 +544,50 @@ static int file_exist(const char *filename)
    return 1;
 }
 
-static void exec_command(const char *command)
+static void exec_command(const char *command, char param[4][2])
 {
     if (file_exist(command))
     {
-     /*   if (!fork()) {
+        int returnStatus; // The return status of the child process.
+        pid_t pid = fork();
+
+        if (pid == -1) // error with forking.
+        {
+            LOG(ERROR) << "Fork error with command " << command << " error=" << strerror(errno) << "\n";
+        }
+        else if (pid == 0) // We're in the child process.
+        {
             // Detach from parent
             setsid();
-            LOG(NOTICE) << "Will execute command " << command << "\n";
-            execl("/bin/sh", "sh", "-c", command, " &", NULL);
-            //execl(command, command, "&", NULL);
-            exit(1);
-        }*/
-        system(command);
+
+            if (param == NULL) {
+                LOG(NOTICE) << "Will execute command " << command  << "\n";
+                execl("/bin/sh", "sh", "-c", command, " &", NULL);
+            } else {
+                LOG(NOTICE) << "Will execute command " << command << " " << param[0] << " " << param[1]<< " " << param[2]<< " " << param[3]<< "\n";
+                execl(command, command, param[0], param[1], param[2], param[3]," &", NULL);
+            }
+            // If this code executes the execution has failed.
+            exit(EXIT_FAILURE);
+        }
+        else // We're in the parent process.
+        {
+            wait(&returnStatus); // Wait for the child process to exit.
+            if (returnStatus == -1) // The child process execution failed.
+            {
+                // Log an error of execution.
+                LOG(ERROR) << "Execution failed errorcode " << returnStatus <<  strerror(errno) << "\n";
+            }
+        }
+
+        //system(command);
     }
     else
     {
         LOG(NOTICE) << "command " << command << " does not exist\n";
     }
-    //int r;
-    //wait(&r);
-}
 
+}
 
 
 static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, int x0, int y0, int x1, int y1, int width, int height )
@@ -569,24 +600,74 @@ static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, i
     param.skipFrameCnt = 50;
     param.frameInfo.width = width;
     param.frameInfo.height = height;
-    // Define the detection region, for now only one of the size of the video
-    param.roiRectCnt = 1;
-    // Sensitivity (0 to 4)
-    param.sense[0] = 4;
+    if (isMotionTracking == true) {
+        // use the 4 regions
+        param.roiRectCnt = 4;
+        // Sensitivity (0 to 4)
+        param.sense[0] = 4;
+        param.sense[1] = 4;
+        param.sense[2] = 4;
+        param.sense[3] = 4;
 
-    param.roiRect[0].p0.x = x0;
-    param.roiRect[0].p0.y = y0;
-    if (x1 == 0 && y1 == 0)
-    {
-        param.roiRect[0].p1.x = width - 1;
-        param.roiRect[0].p1.y = height  - 1;
-    } else {
-        param.roiRect[0].p1.x = x1 - 1;
-        param.roiRect[0].p1.y = y1  - 1;
+        // 0,0 +--------------------------------------+
+        //     |                    |                 |
+        //     |           0        |      1          |
+        //     |                    |                 |
+        // h/2 +--------------------------------------+
+        //     |                    |                 |
+        //     |          2         |      3          |
+        //     |                    |                 |
+        // h   +--------------------------------------+
+        //                          w/2               w
 
+        // Region 0
+        param.roiRect[0].p0.x = 0;
+        param.roiRect[0].p0.y = 0;
+        param.roiRect[0].p1.x = (width/2)- 1;
+        param.roiRect[0].p1.y = (height/2) - 1;
+
+        // Region 1
+        param.roiRect[1].p0.x = (width/2);
+        param.roiRect[1].p0.y = 0;
+        param.roiRect[1].p1.x = (width)- 1;
+        param.roiRect[1].p1.y = (height/2) - 1;
+
+        // Region 2
+        param.roiRect[2].p0.x = 0;
+        param.roiRect[2].p0.y = (height/2);
+        param.roiRect[2].p1.x = (width/2)- 1;
+        param.roiRect[2].p1.y = (height) - 1;
+
+        // Region 3
+        param.roiRect[3].p0.x = width/2;
+        param.roiRect[3].p0.y = (height/2);
+        param.roiRect[3].p1.x = width-1;
+        param.roiRect[3].p1.y = (height) - 1;
+
+
+        LOG(NOTICE) << "Detection region for motion tracking\n";
     }
-    LOG(NOTICE) << "Detection region= ((" << param.roiRect[0].p0.x << "," << param.roiRect[0].p0.y << ")-("<< param.roiRect[0].p1.x << "," << param.roiRect[0].p1.y << "))\n";
+    else
+    {
+        // Define the detection region, for now only one of the size of the video
+        param.roiRectCnt = 1;
 
+        // Sensitivity (0 to 4)
+        param.sense[0] = 4;
+
+        param.roiRect[0].p0.x = x0;
+        param.roiRect[0].p0.y = y0;
+        if (x1 == 0 && y1 == 0)
+        {
+            param.roiRect[0].p1.x = width - 1;
+            param.roiRect[0].p1.y = height  - 1;
+        } else {
+            param.roiRect[0].p1.x = x1 - 1;
+            param.roiRect[0].p1.y = y1  - 1;
+
+        }
+        LOG(NOTICE) << "Detection region= ((" << param.roiRect[0].p0.x << "," << param.roiRect[0].p0.y << ")-("<< param.roiRect[0].p1.x << "," << param.roiRect[0].p1.y << "))\n";
+    }
 
     *interface = IMP_IVS_CreateMoveInterface(&param);
     if (*interface == NULL) {
@@ -636,26 +717,53 @@ static void *ivsMoveDetectionThread(void *arg)
                 return (void *)-1;
             }
 
-            // Detection !!!
-            if ((isWasOn == false) &&
-                (result->retRoi[0]) == 1)
-            {
-                isWasOn = true;
-                gDetectionOn = true;
-                exec_command("/system/sdcard/scripts/detectionOn.sh");
-                LOG(NOTICE) << "Detect !!\n";
+            if (isMotionTracking == true) {
+               if (result->retRoi[0] == 1 ||
+                   result->retRoi[1] == 1 ||
+                   result->retRoi[2] == 1 ||
+                   result->retRoi[3] == 1) {
+                        char param[4][2] = {};
+                        isWasOn = true;
+                        gDetectionOn = true;
 
+                 
+                       snprintf(param[0], sizeof(param[0]), "%.1d", result->retRoi[0]);
+                       snprintf(param[1], sizeof(param[1]), "%.1d", result->retRoi[1]);
+                       snprintf(param[2], sizeof(param[2]), "%.1d", result->retRoi[2]);
+                       snprintf(param[3], sizeof(param[3]), "%.1d", result->retRoi[3]);
+
+                       exec_command("/system/sdcard/scripts/detectionTracking.sh", param);
+                       exec_command("/system/sdcard/scripts/detectionOn.sh", NULL);
+                }
+                else
+                {
+                        if (isWasOn == true) {
+                            exec_command("/system/sdcard/scripts/detectionOff.sh", NULL);
+                        }
+                        gDetectionOn = false;
+                        isWasOn = false;
+                }
+            } else {
+                // Detection !!!
+                if ((isWasOn == false) &&
+                    (result->retRoi[0]) == 1)
+                {
+                    isWasOn = true;
+                    gDetectionOn = true;
+                    exec_command("/system/sdcard/scripts/detectionOn.sh", NULL);
+                    LOG(NOTICE) << "Detect !!\n";
+
+                }
+
+                if ((isWasOn == true) &&
+                    (result->retRoi[0] == 0))
+                {
+                    isWasOn = false;
+                    gDetectionOn = false;
+                    exec_command("/system/sdcard/scripts/detectionOff.sh", NULL);
+                    LOG(NOTICE) << "Detect finished!!\n";
+                }
             }
-
-            if ((isWasOn == true) &&
-                (result->retRoi[0] == 0))
-            {
-                isWasOn = false;
-                gDetectionOn = false;
-                exec_command("/system/sdcard/scripts/detectionOff.sh");
-                LOG(NOTICE) << "Detect finished!!\n";
-            }
-
            // IMP_LOG_INFO(TAG, "result->retRoi(%d)\n", result->retRoi[0]);
 
             ret = IMP_IVS_ReleaseResult(chn_num, (void *)result);
