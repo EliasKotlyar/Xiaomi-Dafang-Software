@@ -94,8 +94,9 @@ IMPRgnHandle prHander[2] = {INVHANDLE, INVHANDLE};
 bool gDetectionOn = false;
 bool ismotionActivated = true;
 IMPIVSInterface *inteface = NULL;
+// Activate or not tracking
 bool isMotionTracking = false;
-int motionTimeout = -1;
+int motionTimeout = -1; // -1 is for deactivation
 
 static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, int x0, int y0, int x1, int y1, int width, int height );
 static void *ivsMoveDetectionThread(void *arg);
@@ -505,7 +506,6 @@ static void *update_thread(void *p) {
             }
         }
 
-
         if (currentConfig.sensitivity !=  newConfig->sensitivity) {
             if (newConfig->sensitivity == -1) {
                 ismotionActivated = false;
@@ -530,7 +530,7 @@ static void *update_thread(void *p) {
             IMP_LOG_ERR(TAG, "Display motion OSD color=%d\n", newConfig->motionOSD );
         }
 
-        if (newConfig->motionTimeout >0) {
+        if (newConfig->motionTimeout > 0) {
             motionTimeout = newConfig->motionTimeout;
         }
 
@@ -607,7 +607,6 @@ static void exec_command(const char *command, char param[4][2])
 }
 
 
-
 static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, int x0, int y0, int x1, int y1, int width, int height )
 {
     int ret = 0;
@@ -618,7 +617,6 @@ static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, i
     param.frameInfo.width = width;
     param.frameInfo.height = height;
     if (isMotionTracking == true) {
-
         // use the 4 regions
         param.roiRectCnt = 4;
         // Sensitivity (0 to 4)
@@ -667,8 +665,7 @@ static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, i
     }
     else
     {
-
-        // Define the detection region, for now only one of the size of the video
+       // Define the detection region, for now only one of the size of the video
         param.roiRectCnt = 1;
 
         // Sensitivity (0 to 4)
@@ -750,12 +747,10 @@ static void *ivsMoveDetectionThread(void *arg)
                    result->retRoi[1] == 1 ||
                    result->retRoi[2] == 1 ||
                    result->retRoi[3] == 1) {
-
                         char param[4][2] = {};
                         isWasOn = true;
                         gDetectionOn = true;
 
-                 
                        snprintf(param[0], sizeof(param[0]), "%.1d", result->retRoi[0]);
                        snprintf(param[1], sizeof(param[1]), "%.1d", result->retRoi[1]);
                        snprintf(param[2], sizeof(param[2]), "%.1d", result->retRoi[2]);
@@ -763,6 +758,7 @@ static void *ivsMoveDetectionThread(void *arg)
 
                        exec_command("/system/sdcard/scripts/detectionTracking.sh", param);
                        exec_command("/system/sdcard/scripts/detectionOn.sh", NULL);
+
                        if (motionTimeout != -1)
                        {
                             signal(SIGALRM, endofmotion);
@@ -788,6 +784,12 @@ static void *ivsMoveDetectionThread(void *arg)
                     exec_command("/system/sdcard/scripts/detectionOn.sh", NULL);
                     LOG(NOTICE) << "Detect !!\n";
 
+                } else {
+                        if (isWasOn == true) {
+                            exec_command("/system/sdcard/scripts/detectionOff.sh", NULL);
+                        }
+                        gDetectionOn = false;
+                        isWasOn = false;
                 }
 
                 if ((isWasOn == true) &&
