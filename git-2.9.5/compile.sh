@@ -7,7 +7,7 @@ export CFLAGS="-muclibc -O2"
 export CPPFLAGS="-muclibc -O2"
 export LDFLAGS="-muclibc -O2"
 
-export OPENSSLDIR=$(pwd)/../libressl-2.6.4/_install
+export OPENSSLDIR=$(pwd)/../libressl/_install
 export CURLDIR=$(pwd)/../curl-7.58.0/_install
 
 
