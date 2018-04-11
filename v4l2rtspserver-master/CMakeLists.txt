@@ -53,24 +53,27 @@ target_link_libraries (${PROJECT_NAME} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 # LOG4CPP
 find_path(LOG4CPP_INCLUDE_DIR log4cpp/Category.hh)
-if (LOG4CPP_INCLUDE_DIR)
-        message(STATUS "Log4Cpp available")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_LOG4CPP")
-	include_directories(${LOG4CPP_INCLUDE_DIR}) 
+message("${LOG4CPP_LIBRARY}")
+#if (LOG4CPP_INCLUDE_DIR)
+#        message(STATUS "Log4Cpp available")
+#	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_LOG4CPP")
+#	include_directories(${LOG4CPP_INCLUDE_DIR}) 
 
-	find_library(LOG4CPP_LIBRARY log4cpp)
-	target_link_libraries(${PROJECT_NAME} "${LOG4CPP_LIBRARY}")
-endif (LOG4CPP_INCLUDE_DIR)
+#	find_library(LOG4CPP_LIBRARY log4cpp)
+#	target_link_libraries(${PROJECT_NAME} "${LOG4CPP_LIBRARY}")
+#endif (LOG4CPP_INCLUDE_DIR)
 
 
 # live555
-find_path(LIBLIVE555_INCLUDE_DIR liveMedia/liveMedia.hh)
-if (NOT LIBLIVE555_INCLUDE_DIR)
-        message(STATUS "Installing liblivemedia-dev")
-        EXEC_PROGRAM("sudo apt-get install -y liblivemedia-dev")
-endif (NOT LIBLIVE555_INCLUDE_DIR)
+#find_path(LIBLIVE555_INCLUDE_DIR liveMedia/liveMedia.hh)
+#if (NOT LIBLIVE555_INCLUDE_DIR)
+#        message(STATUS "Installing liblivemedia-dev")
+#        EXEC_PROGRAM("sudo apt-get install -y liblivemedia-dev")
+#endif (NOT LIBLIVE555_INCLUDE_DIR)
 
 find_path(LIBLIVE555_INCLUDE_DIR liveMedia/liveMedia.hh)
+include_directories(./live/liveMedia/include)
+#include_directories(./live/liveMedia/)
 include_directories(../live/liveMedia/include)
 
 
@@ -84,7 +87,7 @@ target_link_libraries(${PROJECT_NAME} sharedmem)
 
 #include_directories(../live/liveMedia/)
 foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnvironment)
-	include_directories(../live/${LIBLIVE555_module}/include)
+	include_directories(./live/${LIBLIVE555_module}/include)
 
 endforeach (LIBLIVE555_module)
 
@@ -98,18 +101,18 @@ foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnviro
 		set(LIBLIVE555_LIBRARIES ${LIBLIVE555_LIBRARIES} ${${LIBLIVE555_module}_LIBRARY})
 	endif ( ${LIBLIVE555_module}_LIBRARY )
 endforeach (LIBLIVE555_module)
-target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/live/liveMedia/libliveMedia.a")
-target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/live/groupsock/libgroupsock.a")
-target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/live/UsageEnvironment/libUsageEnvironment.a")
-target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/live/BasicUsageEnvironment/libBasicUsageEnvironment.a")
-target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/libv4l2wrapper.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/live/liveMedia/libliveMedia.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/live/groupsock/libgroupsock.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/live/UsageEnvironment/libUsageEnvironment.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/live/BasicUsageEnvironment/libBasicUsageEnvironment.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/libv4l2wrapper.a")
 
 
-target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/uclibc/libalog.so")
-target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/uclibc/libimp.so")
-target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/v4l2rtspserver-master/uclibc/libsysutils.so")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/uclibc/libalog.so")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/uclibc/libimp.so")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/uclibc/libsysutils.so")
 
-target_link_libraries(${PROJECT_NAME} PRIVATE "/home/eko/Dokumente/projects/Xiaomi-Dafang-Software/lame-3.100/_install/lib/libmp3lame.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../lame-3.100/_install/lib/libmp3lame.a")
 
 
 #testing

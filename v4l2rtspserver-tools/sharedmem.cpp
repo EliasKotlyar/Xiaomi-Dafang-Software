@@ -8,12 +8,14 @@ SharedMem::SharedMem() {
     currentConfig.osdColor = 0;
     currentConfig.osdSize = 0;
     currentConfig.osdFixedWidth = 0;
-    currentConfig.sensitivity = 4;
+    currentConfig.sensitivity = -2;
     currentConfig.motionOSD = 0;
     currentConfig.detectionRegion[0] = 0;
     currentConfig.detectionRegion[1] = 0;
     currentConfig.detectionRegion[2] = 0;
     currentConfig.detectionRegion[3] = 0;
+    currentConfig.motionTracking = false;
+    currentConfig.motionTimeout = -1;
 
     key_image_mem = ftok("/usr/", '1');
     key_image_semaphore = ftok("/usr/", '2');

@@ -53,7 +53,7 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
 
     if ((fd = ::open(params.m_devName.c_str(), O_RDONLY, 0)) == -1)
     {
-    LOG(ERROR) << "cannot open audio device: " << params.m_devName;
+        LOG(ERROR) << "cannot open audio device: " << params.m_devName;
     }
 
 
@@ -65,7 +65,7 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
         LOG(ERROR) << "Cant set format..." << params.m_devName;
     }
     int stereo = params.m_channels-1;
-    LOG(ERROR) << "Channel Count:" << params.m_channels;
+    LOG(NOTICE) << "Channel Count:" << params.m_channels;
     if (::ioctl(fd, SNDCTL_DSP_STEREO, &stereo)==-1)
     { /* Fatal error */
        LOG(ERROR) << "Cant set Mono/Stereo ..." << params.m_devName;
