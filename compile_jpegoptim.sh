@@ -2,7 +2,10 @@
 
 #First start compile_jpeg.sh !!
 
-export JPEGPATH=$(pwd)/jpeg-9c/
+#choose between turbo or regular jpglib
+export JPEGPATH=$(pwd)/libjpeg-turbo-1.5.3/
+#export JPEGPATH=$(pwd)/jpeg-9c/
+
 TOOLCHAIN=$(pwd)/mips-gcc472-glibc216-64bit/bin
 CROSS_COMPILE=$TOOLCHAIN/mips-linux-gnu-
 export CC=${CROSS_COMPILE}gcc
