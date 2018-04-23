@@ -15,9 +15,17 @@ export LDFLAGS="-muclibc -O2"
 export OPENSSLDIR=$(pwd)/../libressl/_install
 export CURLDIR=$(pwd)/../curl-7.58.0/_install
 export NO_R_TO_GCC_LINKER=Yes
+export V=1
+export NO_GETTEXT=1
+export ZLIB_PATH=$(pwd)/../zlib/_install
+export EXPATDIR=$(pwd)/../libexpat/expat/_install
+
+export HOME=${PWD}/_install
+export DEFAULT_PAGER="/system/sdcard/bin/busybox less"
+
 
 make configure
 ./configure --host=mips-linux-gnu --prefix=${PWD}/_install
-make
+make -j16
 make install
 
