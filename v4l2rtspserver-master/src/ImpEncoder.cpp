@@ -442,9 +442,9 @@ static void *update_thread(void *p) {
         if (currentConfig.bitrate != newConfig->bitrate) {
             IMP_LOG_ERR(TAG, "Changed Bitrate\n");
             IMPEncoderRcAttr attr;
-            IMP_Encoder_GetChnRcAttr(0, &attr);
+            //IMP_Encoder_GetChnRcAttr(0, &attr);
             attr.attrH264Cbr.outBitRate = (uint)newConfig->bitrate;
-            IMP_Encoder_SetChnRcAttr(0, &attr);
+            //IMP_Encoder_SetChnRcAttr(0, &attr);
         }
 
         if (strcmp(currentConfig.osdTimeDisplay, newConfig->osdTimeDisplay) != 0) {
