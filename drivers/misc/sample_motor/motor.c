@@ -96,6 +96,7 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
             if(info->motor_status.x_min == 1){
                 info->set_steps[info->direction] = 0;
                 info->cur_steps[info->direction] = 0;
+                motor_idle(info);
             }
 
             if (info->cur_steps[info->direction] != info->set_steps[info->direction]) {
@@ -113,6 +114,7 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
             if(info->motor_status.x_max == 1){
                 info->set_steps[info->direction] = 0;
                 info->cur_steps[info->direction] = 0;
+                motor_idle(info);
             }
 
             if (info->cur_steps[info->direction] != info->set_steps[info->direction]) {
@@ -129,6 +131,7 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
             if(info->motor_status.y_max == 1){
                 info->set_steps[info->direction] = 0;
                 info->cur_steps[info->direction] = 0;
+                motor_idle(info);
             }
 
             if (info->cur_steps[info->direction] != info->set_steps[info->direction]) {
@@ -145,6 +148,7 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
             if(info->motor_status.y_min == 1){
                 info->set_steps[info->direction] = 0;
                 info->cur_steps[info->direction] = 0;
+                motor_idle(info);
             }
 
             if (info->cur_steps[info->direction] != info->set_steps[info->direction]) {
