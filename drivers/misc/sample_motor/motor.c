@@ -104,7 +104,7 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
                 motor_step(info);
                 info->cur_steps[info->direction]++;
                 info->motor_status.x_steps--;
-                if(info->cur_steps[info->direction] == info->set_steps[info->direction]
+                if(info->cur_steps[info->direction] == info->set_steps[info->direction])
                     motor_idle(info);
             }
             break;
@@ -121,7 +121,7 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
                 motor_step(info);
                 info->cur_steps[info->direction]++;
                 info->motor_status.x_steps++;
-                if(info->cur_steps[info->direction] == info->set_steps[info->direction]
+                if(info->cur_steps[info->direction] == info->set_steps[info->direction])
                     motor_idle(info);
             }
             break;
@@ -137,7 +137,7 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
                 motor_step(info);
                 info->cur_steps[info->direction]++;
                 info->motor_status.y_steps++;
-                if(info->cur_steps[info->direction] == info->set_steps[info->direction]
+                if(info->cur_steps[info->direction] == info->set_steps[info->direction])
                     motor_idle(info);
             }
             break;
@@ -153,7 +153,7 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
                 motor_step(info);
                 info->cur_steps[info->direction]++;
                 info->motor_status.y_steps--;
-                if(info->cur_steps[info->direction] == info->set_steps[info->direction]
+                if(info->cur_steps[info->direction] == info->set_steps[info->direction])
                     motor_idle(info);
             }
             break;
