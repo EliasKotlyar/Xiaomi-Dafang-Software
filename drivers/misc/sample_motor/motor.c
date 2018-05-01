@@ -405,15 +405,19 @@ static int motor_probe(struct platform_device *pdev) {
 
         if (info->pdata[i]->motor_st1_gpio != -1) {
             gpio_request(info->pdata[i]->motor_st1_gpio, "motor_st1_gpio");
+            gpio_direction_output(info->pdata[i]->motor_st1_gpio, 0);
         }
         if (info->pdata[i]->motor_st2_gpio != -1) {
             gpio_request(info->pdata[i]->motor_st2_gpio, "motor_st2_gpio");
+            gpio_direction_output(info->pdata[i]->motor_st2_gpio, 0);
         }
         if (info->pdata[i]->motor_st3_gpio != -1) {
             gpio_request(info->pdata[i]->motor_st3_gpio, "motor_st3_gpio");
+            gpio_direction_output(info->pdata[i]->motor_st3_gpio, 0);
         }
         if (info->pdata[i]->motor_st4_gpio != -1) {
             gpio_request(info->pdata[i]->motor_st4_gpio, "motor_st4_gpio");
+            gpio_direction_output(info->pdata[i]->motor_st4_gpio, 0);
         }
     }
 
