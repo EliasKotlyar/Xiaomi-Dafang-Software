@@ -88,7 +88,19 @@ RTPSink *BaseServerMediaSubsession::createSink(UsageEnvironment &env, Groupsock 
 
          */
         videoSink = MPEG1or2AudioRTPSink::createNew (env, rtpGroupsock);
-    }
+    }else if (format.find("audio/OPUS") ==0) {
+            std::istringstream is(format);
+            std::string dummy;
+            getline(is, dummy, '/');
+            getline(is, dummy, '/');
+            std::string sampleRate("48000");
+            getline(is, sampleRate, '/');
+            std::string channels("1");
+            getline(is, channels);
+printf("----------%d %d\n", std::stoi(sampleRate),std::stoi(channels) );
+            videoSink= SimpleRTPSink::createNew(env, rtpGroupsock, rtpPayloadTypeIfDynamic, std::stoi(sampleRate), "audio", "OPUS", std::stoi(channels), False);
+         }
+
     return videoSink;
 }
 

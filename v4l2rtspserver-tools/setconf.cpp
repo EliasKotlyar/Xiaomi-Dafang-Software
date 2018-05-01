@@ -66,6 +66,9 @@ void usage(char *command)
     fprintf(stderr, "\t't' set tracking on/off (detection region is not taken into account anymore)\n");
     fprintf(stderr, "\t'u' set time before launching script after no motion (to restore camera position) -1 to deactivate\n");
 
+    fprintf(stderr, "\t'v' set volume\n");
+    fprintf(stderr, "\t'q' set set filter number\n");
+
 
     fprintf(stderr, "Example: to set osd text: %s -k o -v OSDTEXT\n", command);
     fprintf(stderr, "         to get osd text: %s -g o\n", command);
@@ -160,6 +163,13 @@ int main(int argc, char *argv[]) {
         case 'u':
             SETGETSHAREDMEMORYINT(conf->motionTimeout);
             break;
+        case 'v':
+            SETGETSHAREDMEMORYINT(conf->volume);
+            break;
+        case 'q':
+            SETGETSHAREDMEMORYINT(conf->filter);
+            break;
+
     default:
         printf("Invalid Argument %c\n", key);
         usage(argv[0]);

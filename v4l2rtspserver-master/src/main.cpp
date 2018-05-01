@@ -387,7 +387,10 @@ int main(int argc, char **argv) {
     unsigned int hlsSegment = 0;
     const char *realm = NULL;
     std::list <std::string> userPasswordList;
-    int audioFreq = 44100;
+    int inAudioFreq = 48000;
+    int outAudioFreq = 48000;
+    audioencoding encode = ENCODE_OPUS;
+
     int audioNbChannels = 1;
 #ifdef HAVE_ALSA
     //snd_pcm_format_t audioFmt = SND_PCM_FORMAT_S16_BE;
@@ -645,7 +648,7 @@ int main(int argc, char **argv) {
             // Init audio capture
             LOG(NOTICE) << "Create ALSA Source..." << audioDev;
 
-            ALSACaptureParameters param(audioDev.c_str(), audioFreq, audioNbChannels, verbose);
+            ALSACaptureParameters param(audioDev.c_str(), inAudioFreq, outAudioFreq, verbose, encode);
             ALSACapture* audioCapture = ALSACapture::createNew(param);
             if (audioCapture)
             {
@@ -658,8 +661,23 @@ int main(int argc, char **argv) {
                 else
                 {
                     std::ostringstream os;
+                    switch (encode)
+                    {
+                        case ENCODE_MP3:
+                            os << "audio/MPEG";
+                            break;
+                        case ENCODE_OPUS:
+                            outAudioFreq = 48000;
+                            os << "audio/OPUS/" << outAudioFreq << "/1";
+                            break;
+                        case ENCODE_PCM:
+                            outAudioFreq = inAudioFreq;
+                            os << "audio/L16/" << outAudioFreq << "/1";
+                            break;
+                    }
                     //os << "audio/L16/" << audioCapture->getSampleRate() << "/" << audioCapture->getChannels();
-                    os << "audio/MPEG";
+                    //os << "audio/L16/8000/1";
+                    //os << "audio/MPEG";
                     rtpAudioFormat.assign(os.str());
 
                     // extend buffer size if needed
