@@ -9,6 +9,6 @@ export CPPFLAGS="-muclibc -O2"
 export LDFLAGS="-muclibc -O2"
 
 
-cd oss_build/cmd
+cd oss/cmd
 make clean
 make

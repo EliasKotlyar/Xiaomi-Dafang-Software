@@ -26,8 +26,22 @@ extern "C" {
 #include <noise_remover.h>
 #include "filt.h"
 }
-
-
+/* Tested configuration
++--------------+---------------+--------------+--------------+--------------+--------------+
+|      Audio   |    inSample   |   outSample  |    Filter    |   S/W Vol    |   H/W Vol    |
++--------------+---------------+--------------+--------------+--------------+--------------+
+|      MP3     |    8000       |     8000     |     1,2      |    yes       |    yes       |
+|              |    8000       |     44100    |     1,2      |    yes       |    yes       |
+|              |    44100      |     44100    |     1,2      |    yes       |    yes       |
++--------------+---------------+--------------+--------------+--------------+--------------+
+|      OPUS    |    8000       |     48000    |     1,2      |    yes       |    yes       |
+|              |    48000      |     48000    |     1,2      |    yes       |    yes       |
++--------------+---------------+--------------+--------------+--------------+--------------+
+|      PCM     |    8000       |      8000    |     1,2      |    yes       |    yes       |
++--------------+---------------+--------------+--------------+--------------+--------------+
+|      PCMU    |    8000       |      8000    |     1,2      |    yes       |    yes       |
++--------------+---------------+--------------+--------------+--------------+--------------+
+*/
 ALSACapture* ALSACapture::createNew(const ALSACaptureParameters & params) 
 { 
     ALSACapture* capture = new ALSACapture(params);
@@ -89,12 +103,13 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
         LOG(ERROR) << "Cant set Speed ..." << params.m_devName;
     }
    // int vol = params.m_volume;
-    if (m_newConfig->volume != -1)
+    if (m_newConfig->hardVolume != -1)
     {
-        if (ioctl(fd, SNDCTL_EXT_SET_RECORD_VOLUME, &m_newConfig->volume)==-1)
+        if (ioctl(fd, SNDCTL_EXT_SET_RECORD_VOLUME, &m_newConfig->hardVolume)==-1)
         { /* Fatal error */
-            LOG(ERROR) << "Cant set vol" << m_newConfig->volume;
+            LOG(ERROR) << "Cant set vol" << m_newConfig->hardVolume;
         }
+        m_currentConfig.hardVolume = m_newConfig->hardVolume;
     }
 
     switch (params.m_encode)
@@ -109,7 +124,6 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
        if (err<0)
        {
           fprintf(stderr, "failed to create an encoder: %s\n", opus_strerror(err));
-          exit(0);
        }
 
        /* Set the desired bit-rate. You can also set other parameters if needed.
@@ -117,14 +131,7 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
           parameters you know you need. Doing otherwise is likely to result
           in worse quality, but better. */
 
-       err = opus_encoder_ctl(encoder, OPUS_SET_BITRATE(params.m_outSampleRate));
-       err = opus_encoder_ctl(encoder, OPUS_SET_SIGNAL(OPUS_SIGNAL_VOICE));
-
-       if (err<0)
-       {
-          fprintf(stderr, "failed to set bitrate: %s\n", opus_strerror(err));
-          exit(0);
-       }
+       opus_encoder_ctl(encoder, OPUS_SET_BITRATE(params.m_outSampleRate));
        opus_encoder_ctl(encoder, OPUS_SET_COMPLEXITY(0));
        break;
       }
@@ -154,6 +161,12 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
 
 }
 
+void ALSACapture::setSwVolume(short &val, int vol)
+{
+ val += (short) (val * (vol / 100.0));
+}
+
+
 #define _SWAP(val) (val << 8) | ((val >> 8) & 0xFF);
 inline signed short lowpass(signed short input, bool swap)
 {
@@ -164,13 +177,9 @@ inline signed short lowpass(signed short input, bool swap)
     return _SWAP(retvalue);
    return retvalue;
 }
-static float clampf(float v, float min, float max){
-    return v < min ? min : (v > max ? max : v);
-}
 
 inline short ALSACapture::filter(short val,bool swap, int num_sample)
 {
- //   int method = 2;
     if (m_Filtermethod == 1)
     {
          static struct noise_remover_s nrm;
@@ -201,6 +210,7 @@ inline short ALSACapture::filter(short val,bool swap, int num_sample)
         return lowpass(val, swap);
     }
 
+ // TODO: this filter seems not to work, need to check the input values ...
     if (m_Filtermethod==3)
     {
        static bool isInit = false;
@@ -226,56 +236,100 @@ inline short ALSACapture::filter(short val,bool swap, int num_sample)
 size_t ALSACapture::read(char* buffer, size_t bufferSize)
 {
     m_sharedMem.readConfig();
-    if (m_currentConfig.volume != m_newConfig->volume) {
-        if (ioctl(fd, SNDCTL_EXT_SET_RECORD_VOLUME, &m_newConfig->volume)==-1)
+    if (m_currentConfig.hardVolume != m_newConfig->hardVolume) {
+        if (ioctl(fd, SNDCTL_EXT_SET_RECORD_VOLUME, &m_newConfig->hardVolume)==-1)
         { /* Fatal error */
-            LOG(ERROR) << "Cant set vol" << m_newConfig->volume;
+            LOG(ERROR) << "Cant set vol" << m_newConfig->hardVolume;
         }
-        m_currentConfig.volume = m_newConfig->volume;
+        LOG(ERROR) << "Set H/Wvol" << m_newConfig->hardVolume;
+        m_currentConfig.hardVolume = m_newConfig->hardVolume;
     }
     m_Filtermethod = m_newConfig->filter;
+
     switch (m_params.m_encode)
     {
         case ENCODE_OPUS:
-            return readOpus(buffer, bufferSize);
+            return readOpus(buffer, bufferSize, m_newConfig->softVolume);
             break;
         case ENCODE_MP3:
-            return readMP3(buffer, bufferSize);
+            return readMP3(buffer, bufferSize, m_newConfig->softVolume);
             break;
         case ENCODE_PCM:
-            return readPCM(buffer, bufferSize);
+            return readPCM(buffer, bufferSize, m_newConfig->softVolume);
+            break;
+        case ENCODE_ULAW:
+            return readULAW(buffer, bufferSize, m_newConfig->softVolume);
             break;
 
     }
     return 0;
 }
 
-size_t ALSACapture::readPCM(char* buffer, size_t bufferSize)
+unsigned long ALSACapture::getBufferSize()
+{
+  switch (m_params.m_encode)
+    {
+        case ENCODE_OPUS:
+            return (m_params.m_inSampleRate*2 /50)*6;
+            break;
+        case ENCODE_MP3:
+            return m_params.m_inSampleRate * sizeof(short) * 1;
+            break;
+        case ENCODE_PCM:
+            return (m_params.m_inSampleRate*0.02)*sizeof(short)*10;
+            break;
+        case ENCODE_ULAW:
+            return (m_params.m_inSampleRate*0.02)*sizeof(short)*10;
+            break;
+    }
+    return 1;
+};
+
+size_t ALSACapture::readULAW(char* buffer, size_t bufferSize, int volume)
 {
     int num_samples = bufferSize / sizeof(short);
     short localBuffer[ num_samples ];
     // Read 10 packets of 20ms
-    int bytesRead = ::read (fd, &localBuffer, (m_params.m_inSampleRate*0.02)*sizeof(short)*10);
+    int bytesRead = ::read (fd, &localBuffer, bufferSize); //(m_params.m_inSampleRate*0.02)*sizeof(short)*10);
     num_samples = bytesRead / sizeof(short);
 
     for (int i =0; i<  num_samples ; i++)
     {
+        if (volume != -1) setSwVolume(((signed short*)localBuffer)[i], volume);
+        buffer[i] = ulaw_encode(filter(((signed short*)localBuffer)[i], false, num_samples));
+    }
+
+    return num_samples;
+}
+
+size_t ALSACapture::readPCM(char* buffer, size_t bufferSize, int volume)
+{
+    int num_samples = bufferSize / sizeof(short);
+    short localBuffer[ num_samples ];
+    // Read 10 packets of 20ms
+    int bytesRead = ::read (fd, &localBuffer, bufferSize); //(m_params.m_inSampleRate*0.02)*sizeof(short)*10);
+    num_samples = bytesRead / sizeof(short);
+
+    for (int i =0; i<  num_samples ; i++)
+    {
+        if (volume != -1) setSwVolume(((signed short*)localBuffer)[i], volume);
         ((signed short*)buffer)[i] = filter(((signed short*)localBuffer)[i], true, num_samples);
     }
 
     return num_samples*2;
 }
 
-size_t ALSACapture::readOpus(char* buffer, size_t bufferSize)
+size_t ALSACapture::readOpus(char* buffer, size_t bufferSize, int volume)
 {
     int num_samples = bufferSize / sizeof(short);
     short localBuffer[ num_samples ];
-    int bytesRead = ::read (fd, &localBuffer,(m_params.m_inSampleRate*2 /50)*6);
+    int bytesRead = ::read (fd, &localBuffer,bufferSize); //(m_params.m_inSampleRate*2 /50)*6);
     num_samples = bytesRead / sizeof(short);
 
 
     for (int i =0; i<  num_samples ; i++)
     {
+        if (volume != -1) setSwVolume(((signed short*)localBuffer)[i], volume);
         ((signed short*)localBuffer)[i] = filter(((signed short*)localBuffer)[i], false, num_samples);
     }
 
@@ -293,16 +347,18 @@ size_t ALSACapture::readOpus(char* buffer, size_t bufferSize)
     return bytesRead;
 }
 
-size_t ALSACapture::readMP3(char* buffer, size_t bufferSize)
+size_t ALSACapture::readMP3(char* buffer, size_t bufferSize, int volume)
 {
     int num_samples = bufferSize / sizeof(short);
     short localBuffer[ num_samples ];
     int mp3buf_size = 1.25*num_samples + 7200;
-    int bytesRead = ::read (fd, &localBuffer, bufferSize);
+
+    int bytesRead = ::read (fd, &localBuffer, bufferSize); //m_params.m_inSampleRate * sizeof(short) * 1); //8192*2);
     num_samples = bytesRead / sizeof(short);
 
     for (int i =0; i<  num_samples ; i++)
     {
+        if (volume != -1) setSwVolume(((signed short*)localBuffer)[i], volume);
         ((signed short*)localBuffer)[i] = filter(((signed short*)localBuffer)[i], false, num_samples);
     }
 
@@ -322,6 +378,78 @@ int ALSACapture::getFd()
     return fd;
 }
 
+/*=================================================================================
+**	The following routines came from the sox-12.15 (Sound eXcahcnge) distribution.
+**
+**	This code is not compiled into libsndfile. It is only used to test the
+**	libsndfile lookup tables for correctness.
+**
+**	I have included the original authors comments.
+*/
+
+/*
+** This routine converts from linear to ulaw.
+**
+** Craig Reese: IDA/Supercomputing Research Center
+** Joe Campbell: Department of Defense
+** 29 September 1989
+**
+** References:
+** 1) CCITT Recommendation G.711  (very difficult to follow)
+** 2) "A New Digital Technique for Implementation of Any
+**     Continuous PCM Companding Law," Villeret, Michel,
+**     et al. 1973 IEEE Int. Conf. on Communications, Vol 1,
+**     1973, pg. 11.12-11.17
+** 3) MIL-STD-188-113,"Interoperability and Performance Standards
+**     for Analog-to_Digital Conversion Techniques,"
+**     17 February 1987
+**
+** Input: Signed 16 bit linear sample
+** Output: 8 bit ulaw sample
+*/
+
+#define uBIAS 0x84		/* define the add-in bias for 16 bit.frames */
+
+#define uCLIP 32635
+
+unsigned char ALSACapture::ulaw_encode (short sample)
+{	static int exp_lut [256] =
+	{	0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
+		4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+		5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+		5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+		6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+		6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+		6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+		6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+		7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+		7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+		7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+		7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+		7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+		7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+		7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+		7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+		} ;
+
+	int sign, exponent, mantissa ;
+	unsigned char ulawbyte ;
+
+	/* Get the sample into sign-magnitude. */
+	sign = (sample >> 8) & 0x80 ;					/* set aside the sign */
+	if (sign != 0)
+		sample = -sample ;							/* get magnitude */
+	if (sample > uCLIP)
+		sample = uCLIP ;							/* clip the magnitude */
+
+	/* Convert from 16 bit linear to ulaw. */
+	sample = sample + uBIAS ;
+	exponent = exp_lut [(sample >> 7) & 0xFF] ;
+	mantissa = (sample >> (exponent + 3)) & 0x0F ;
+	ulawbyte = ~ (sign | (exponent << 4) | mantissa) ;
+
+	return ulawbyte ;
+} /* ulaw_encode */
 
 #endif
 

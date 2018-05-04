@@ -97,10 +97,16 @@ RTPSink *BaseServerMediaSubsession::createSink(UsageEnvironment &env, Groupsock 
             getline(is, sampleRate, '/');
             std::string channels("1");
             getline(is, channels);
-printf("----------%d %d\n", std::stoi(sampleRate),std::stoi(channels) );
             videoSink= SimpleRTPSink::createNew(env, rtpGroupsock, rtpPayloadTypeIfDynamic, std::stoi(sampleRate), "audio", "OPUS", std::stoi(channels), False);
-         }
-
+     } else if (format.find("audio/PCMU") ==0) {
+       std::istringstream is(format);
+       std::string dummy;
+       getline(is, dummy, '/');
+       getline(is, dummy, '/');
+       std::string sampleRate("8000");
+       getline(is, sampleRate, '/');
+       videoSink= SimpleRTPSink::createNew(env, rtpGroupsock, rtpPayloadTypeIfDynamic, std::stoi(sampleRate), "audio", "PCMU", 1, False);
+     }
     return videoSink;
 }
 

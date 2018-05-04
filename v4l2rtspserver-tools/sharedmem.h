@@ -22,7 +22,8 @@ struct shared_conf {
     int detectionRegion[4]; // x0,y0,x1,y1
     bool motionTracking;
     int motionTimeout;
-    int volume;
+    int hardVolume;
+    int softVolume;
     int filter;
 };
 

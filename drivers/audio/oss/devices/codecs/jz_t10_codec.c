@@ -195,6 +195,7 @@ static int codec_set_buildin_mic(void)
 
 	/* set record volume */
 	codec_reg_set(TS_CODEC_CACR2_23, 0, 4, 0xc);
+//	codec_reg_set(TS_CODEC_CACR2_23, 0, 4, 31);
 	msleep(10);
 
 	/* MIC mode: 1: Signal-ended input , 0: Full Diff input */

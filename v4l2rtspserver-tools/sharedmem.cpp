@@ -16,7 +16,8 @@ SharedMem::SharedMem() {
     currentConfig.detectionRegion[3] = 0;
     currentConfig.motionTracking = false;
     currentConfig.motionTimeout = -1;
-    currentConfig.volume = -1;
+    currentConfig.softVolume = -1;
+    currentConfig.hardVolume = -1;
     currentConfig.filter = 0;
 
     key_image_mem = ftok("/usr/", '1');
