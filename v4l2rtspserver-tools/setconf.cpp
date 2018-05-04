@@ -66,7 +66,8 @@ void usage(char *command)
     fprintf(stderr, "\t't' set tracking on/off (detection region is not taken into account anymore)\n");
     fprintf(stderr, "\t'u' set time before launching script after no motion (to restore camera position) -1 to deactivate\n");
 
-    fprintf(stderr, "\t'v' set volume\n");
+    fprintf(stderr, "\t'h' set hardware volume (from mic)\n");
+    fprintf(stderr, "\t'i' set software volume (from 0 to 100, -1 to do nothing)\n");
     fprintf(stderr, "\t'q' set set filter number\n");
 
 
@@ -163,8 +164,11 @@ int main(int argc, char *argv[]) {
         case 'u':
             SETGETSHAREDMEMORYINT(conf->motionTimeout);
             break;
-        case 'v':
-            SETGETSHAREDMEMORYINT(conf->volume);
+        case 'h':
+            SETGETSHAREDMEMORYINT(conf->hardVolume);
+            break;
+        case 'i':
+            SETGETSHAREDMEMORYINT(conf->softVolume);
             break;
         case 'q':
             SETGETSHAREDMEMORYINT(conf->filter);

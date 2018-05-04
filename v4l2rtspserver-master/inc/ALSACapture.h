@@ -23,7 +23,8 @@ typedef enum
 {
     ENCODE_MP3,
     ENCODE_OPUS,
-    ENCODE_PCM
+    ENCODE_PCM,
+    ENCODE_ULAW,
 } audioencoding;
 
 
@@ -41,7 +42,7 @@ struct ALSACaptureParameters
 	audioencoding    m_encode;
 
 };
-#define RECBUF_SIZE		8192*2
+#define RECBUF_SIZE		8192*2*4
 class ALSACapture 
 {
 	public:
@@ -51,10 +52,13 @@ class ALSACapture
 	
 	protected:
 		ALSACapture(const ALSACaptureParameters & params);
-		size_t readMP3(char* buffer, size_t bufferSize);
-		size_t readOpus(char* buffer, size_t bufferSize);
-		size_t readPCM(char* buffer, size_t bufferSize);
+		size_t readMP3(char* buffer, size_t bufferSize, int volume);
+		size_t readOpus(char* buffer, size_t bufferSize, int volume);
+		size_t readPCM(char* buffer, size_t bufferSize, int volume);
+		size_t readULAW(char* buffer, size_t bufferSize, int volume);
         short filter(short val,bool swap, int num_sample =0);
+        void setSwVolume(short &val, int vol);
+        unsigned char ulaw_encode(short sample);
 
 	public:
 		virtual size_t read(char* buffer, size_t bufferSize);		
