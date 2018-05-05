@@ -143,6 +143,7 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
         //lame_set_mode(gfp, 3);
         lame_set_in_samplerate(gfp, params.m_inSampleRate);
         lame_set_out_samplerate(gfp, params.m_outSampleRate);
+      //  lame_set_scale(gfp, 3.0);
 
         int ret_code = lame_init_params(gfp);
         if (ret_code < 0)
@@ -246,6 +247,7 @@ size_t ALSACapture::read(char* buffer, size_t bufferSize)
     }
     m_Filtermethod = m_newConfig->filter;
 
+
     switch (m_params.m_encode)
     {
         case ENCODE_OPUS:
@@ -283,7 +285,7 @@ unsigned long ALSACapture::getBufferSize()
             break;
     }
     return 1;
-};
+}
 
 size_t ALSACapture::readULAW(char* buffer, size_t bufferSize, int volume)
 {

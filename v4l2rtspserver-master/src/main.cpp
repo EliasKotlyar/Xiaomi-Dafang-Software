@@ -513,6 +513,8 @@ int main(int argc, char **argv) {
             case 'A':	disableAudio = true; break;
             case 'C':	audioNbChannels = atoi(optarg); break;
             case 'E':   decodeEncodeFormat(optarg,encode,inAudioFreq,outAudioFreq); break;
+                decodeEncodeFormat(optarg,encode,inAudioFreq,outAudioFreq);
+            break;
             //case 'a':	audioFmt = decodeAudioFormat(optarg); break;
 #endif
 
@@ -717,6 +719,7 @@ int main(int argc, char **argv) {
                         case ENCODE_ULAW:
                            // inAudioFreq = 8000;
                             outAudioFreq = inAudioFreq;
+                            os << "audio/PCMU/"  << outAudioFreq << "/1";;
                             os << "audio/PCMU/"  << outAudioFreq << "/1";;
                             break;
                     }
