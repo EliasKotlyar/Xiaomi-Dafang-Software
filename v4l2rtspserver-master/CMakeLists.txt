@@ -92,7 +92,7 @@ target_link_libraries(${PROJECT_NAME} filter)
 
 #include_directories(../live/liveMedia/)
 foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnvironment)
-	include_directories(./live/${LIBLIVE555_module}/include)
+	include_directories(../live/${LIBLIVE555_module}/include)
 
 endforeach (LIBLIVE555_module)
 
@@ -106,10 +106,10 @@ foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnviro
 		set(LIBLIVE555_LIBRARIES ${LIBLIVE555_LIBRARIES} ${${LIBLIVE555_module}_LIBRARY})
 	endif ( ${LIBLIVE555_module}_LIBRARY )
 endforeach (LIBLIVE555_module)
-target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/live/liveMedia/libliveMedia.a")
-target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/live/groupsock/libgroupsock.a")
-target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/live/UsageEnvironment/libUsageEnvironment.a")
-target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/live/BasicUsageEnvironment/libBasicUsageEnvironment.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../live/liveMedia/libliveMedia.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../live/groupsock/libgroupsock.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../live/UsageEnvironment/libUsageEnvironment.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../live/BasicUsageEnvironment/libBasicUsageEnvironment.a")
 target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/libv4l2wrapper.a")
 target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/libfilter.a")
 
