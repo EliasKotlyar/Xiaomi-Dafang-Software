@@ -16,6 +16,9 @@ SharedMem::SharedMem() {
     currentConfig.detectionRegion[3] = 0;
     currentConfig.motionTracking = false;
     currentConfig.motionTimeout = -1;
+    currentConfig.softVolume = -1;
+    currentConfig.hardVolume = -1;
+    currentConfig.filter = 0;
 
     key_image_mem = ftok("/usr/", '1');
     key_image_semaphore = ftok("/usr/", '2');
@@ -30,6 +33,7 @@ SharedMem::SharedMem() {
     semaphore_unlock[0].sem_flg = 0;
     semaphore_unlock[0].sem_num = (unsigned short) 1;
     semaphore_unlock[0].sem_op = SEM_UNDO;
+
 
 
 }

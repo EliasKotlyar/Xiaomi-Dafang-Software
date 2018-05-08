@@ -41,14 +41,15 @@ if (NOT V4L2WRAPPER_LIBRARY)
 endif (NOT V4L2WRAPPER_LIBRARY)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${V4L2WRAPPER_LIBRARY})
 
+
 #pthread
 find_package (Threads)
 target_link_libraries (${PROJECT_NAME} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 #ALSA
 
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_ALSA")
-        target_link_libraries (${PROJECT_NAME} PUBLIC ${ALSA_LIBRARY})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_ALSA")
+    target_link_libraries (${PROJECT_NAME} PUBLIC ${ALSA_LIBRARY})
 
 
 # LOG4CPP
@@ -85,6 +86,10 @@ add_library(sharedmem ../v4l2rtspserver-tools/sharedmem.cpp)
 #add_subdirectory(../v4l2rtspserver-tools/ ./)
 target_link_libraries(${PROJECT_NAME} sharedmem)
 
+include_directories("filter")
+add_library(filter filter/g711super.c  filter/noise_remover.c  filter/wave.c filter/mylog.c)
+target_link_libraries(${PROJECT_NAME} filter)
+
 #include_directories(../live/liveMedia/)
 foreach (LIBLIVE555_module groupsock liveMedia UsageEnvironment BasicUsageEnvironment)
 	include_directories(../live/${LIBLIVE555_module}/include)
@@ -106,6 +111,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../li
 target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../live/UsageEnvironment/libUsageEnvironment.a")
 target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../live/BasicUsageEnvironment/libBasicUsageEnvironment.a")
 target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/libv4l2wrapper.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/libfilter.a")
 
 
 target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/uclibc/libalog.so")
@@ -113,6 +119,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/uclib
 target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/uclibc/libsysutils.so")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../lame-3.100/_install/lib/libmp3lame.a")
+target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../opus/.libs/libopus.a")
 
 
 #testing
