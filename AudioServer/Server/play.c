@@ -136,13 +136,14 @@ void play (int * dsp, int len, unsigned char* buf)
     int status;
     unsigned char tmpBuf[SIZEWRITE];
 
-    int s=fifo_write(&_Fifo, buf, len);
+    // Push input buffer in fifo and write to device block per block
+    // This is ugly with lot of useless copies, but it is the simplest implementation
+    fifo_write(&_Fifo, buf, len);
     while (1)
     {
         if (_Fifo.size >= SIZEWRITE)
         {
-            s=fifo_read(&_Fifo, tmpBuf, SIZEWRITE);
-
+            fifo_read(&_Fifo, tmpBuf, SIZEWRITE);
             status = write(*dsp, tmpBuf, SIZEWRITE);
             if (status != SIZEWRITE)
                     perror("wrote wrong number of bytes");
@@ -152,7 +153,14 @@ void play (int * dsp, int len, unsigned char* buf)
         }
 
     }
-
-    return 0;
 }
 
+void controlVolume(int * dsp, int volume)
+{
+    int level=(volume)|(volume<<8);
+    if (ioctl (*dsp, SNDCTL_DSP_SETPLAYVOL, &level) == -1)
+    {
+        perror("Cant set volume ...");
+    }
+
+}
