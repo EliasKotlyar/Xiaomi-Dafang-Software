@@ -11,9 +11,9 @@ LDFLAG += -muclibc
 LIBS += ../libwebsockets_compil/lib/libwebsockets.a ../../zlib/_install/lib/libz.so ../../libressl/_install/lib/libssl.a ../../libressl/_install/lib/libcrypto.a
 LDFLAG += -Wl,-gc-sections
 
-all: audioserver	
+all: audioserver.bin
 
-audioserver: server.o protocol.o play.o
+audioserver.bin: server.o protocol.o play.o
 	$(CPLUSPLUS) $(LDFLAG) -o $@ $^ $(LIBS) -lpthread -lm -lrt
 
 
