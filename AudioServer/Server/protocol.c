@@ -114,15 +114,23 @@ int callback_minimal(struct lws *wsi, enum lws_callback_reasons reason, void *us
 
 
         if (len) {
-
-           int retval = sscanf(in, MAGIC"[%d,%d]", &inSampleRate, &inVolume);
+           int vol = 0;
+           int retval = sscanf(in, MAGIC"[%d,%d]", &inSampleRate, &vol);
            if (retval == 2)
            {
-            lwsl_user("Sample Rate=%d, Volume=%d", inSampleRate, inVolume);
+                lwsl_user("Sample Rate=%d, Volume=%d oldvol=%d fd=%d", inSampleRate, vol,inVolume, fd);
+                if ((fd > 0) &&
+                    (vol != inVolume))
+                {
+                    controlVolume(&fd,vol );
+                    lwsl_user("Changing volume to %d", vol);
+                }
+                inVolume = vol;
            } else {
                 if (fd == -1)
                 {
                     open_device(&fd, inSampleRate);
+                    controlVolume(&fd,inVolume );
                 }
 
                 play(&fd, len, in);

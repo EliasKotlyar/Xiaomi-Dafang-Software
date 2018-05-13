@@ -5,61 +5,99 @@
 var bufferSize = 1024;
 var audioContext;
 var microphone;
-//var wsUri = "wss://dafang.com:7681";
-var wsUri; // = "192.168.1.18:7681";
+var wsUri;
 var SecurePort = "7681";
 var UnsecurePort = "7682";
 var connected = false;
 var WsConnection;
-var isResampleNeeded = false;
 var myPCMProcessingNode ;
 var isStarted = false;
 var resamplerObj;
+var audioInputSelect = document.querySelector('select#audioSource');
+var audioRateSelect = document.querySelector('select#audiorate');
+var selectors = [audioInputSelect];
+var inSampleRate = 48000;
+var gainNode;
 
-var outSampleRate = 8000;
-var outVolume = 100;
 
+function getOutVolume()
+{
+    return document.getElementById("volumeOut").value;
+}
+
+function ChangeVolume()
+{
+    console.log("ChangeVolume");
+    if (connected == true)
+    {
+        var configString = "ServerSetValues [" + getOutSampleRate().toString() + "," + getOutVolume().toString() + "]";
+        console.log("Configstring is ="+configString);
+        WsConnection.send(configString);
+    }
+}
+
+function wsOpen(){
+    connected = true;
+    console.log("connection made.");
+    var configString = "ServerSetValues [" + getOutSampleRate().toString() + "," + getOutVolume().toString() + "]";
+    console.log("Configstring is ="+configString);
+    WsConnection.send(configString);
+}
 
 var errorCallback = function(e) {
     alert("Error in getUserMedia: " + e);
 };
 
 function handlePWM(e){  }
-
-function wsOpen(){
-    connected = true;
-    console.log("connection made.");
-    var configString = "ServerSetValues [" + outSampleRate.toString() + "," + outVolume.toString() + "]";
-    console.log("Configstring is ="+configString);
-    WsConnection.send(configString);
-}
-
 function wsError(error){
     connected = false;
     console.log('WebSocket Error ' + error.data);
-    stop()
+    stop();
 }
 
 function WsClose(closeEvent){
-    stopAudio()
+    stopAudio();
+    stop();
     connected = false;
     console.log('WS connection closed --- Code: ' + closeEvent.code + ' --- reason: ' + closeEvent.reason);
 }
 
 function stopAudio()
 {
-    window.localStream.getAudioTracks()[0].stop();
+    if (window.localStream != null)
+    {
+        window.localStream.getAudioTracks()[0].stop();
+        //this will stop video and audio both track
+        window.localStream.getTracks().map(function (val) {
+            val.stop();
+        });
+    }
+    window.localStream = null;
     microphone = null;
     resamplerObj = null;
+    audioContext = null;
+    WsConnection  = null;
+    myPCMProcessingNode  = null;
+    resamplerObj = null;
+    gainNode  = null;
 }
 
 ///////////////////////////////////////
 
-var audioInputSelect = document.querySelector('select#audioSource');
-var selectors = [audioInputSelect];
 
+
+function getOutSampleRate()
+{
+ var outSampleRate =  inSampleRate;
+ if (audioRateSelect.selectedIndex > 0)
+    outSampleRate = audioRateSelect[audioRateSelect.selectedIndex].value;
+
+ return outSampleRate;
+
+}
 
 function gotDevices(deviceInfos) {
+   console.log("gotDevices");
   // Handles being called several times to update labels. Preserve values.
   var values = selectors.map(function(select) {
     return select.value;
@@ -86,31 +124,24 @@ function gotDevices(deviceInfos) {
       select.value = values[selectorIndex];
     }
   });
+
+      console.log("audioRateSelect=>"+audioRateSelect);
+      var option = document.createElement('option');
+      option.value = 48000;
+      option.text = "Default sample Rate";
+      audioRateSelect.appendChild(option);
+      option = document.createElement('option');
+      option.value = 8000;
+      option.text = "8000";
+      audioRateSelect.appendChild(option);
+
 }
 
 function getAllDevices()
 {
-    navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
+    navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(errorCallback);
 }
 
-/*
-function start() {
-  if (window.stream) {
-    window.stream.getTracks().forEach(function(track) {
-      track.stop();
-    });
-  }
-  var audioSource = audioInputSelect.value;
-  var videoSource = videoSelect.value;
-  var constraints = {
-    audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
-    video: {deviceId: videoSource ? {exact: videoSource} : undefined}
-  };
-  navigator.mediaDevices.getUserMedia(constraints).
-      then(gotStream).then(gotDevices).catch(handleError);
-}
-*/
-/////////////////////////////////////////////////////
 function start()
 {
     console.log("Start");
@@ -136,11 +167,21 @@ function start()
     myPCMProcessingNode.onaudioprocess = function(e)
     {
         var input = e.inputBuffer.getChannelData(0);
+        var outSampleRate =  inSampleRate;
+        var isResampleNeeded = false;
+
+        if (audioRateSelect.selectedIndex > 0)
+            outSampleRate = audioRateSelect[audioRateSelect.selectedIndex].value;
+        if (inSampleRate == outSampleRate) isResampleNeeded = false
+        else isResampleNeeded = true;
+
+        //console.log("Selected sampleRate="+outSampleRate + "Source samplerate="+inSampleRate+"resampleneeded=", isResampleNeeded);
+
         if (isResampleNeeded == true)
         {
             //var buffer = inputSample;
             var resampledBuffer = resamplerObj.resampler(input);
-            var resamplerObj = new Resampler(48000, 8000, 1, input.length, false);
+            var resamplerObj = new Resampler(inSampleRate, outSampleRate, 1, input.length, false);
             let Uint16Buf = new Uint16Array(resampledBuffer.length);
 
             for (let i=0;i<resampledBuffer.length;i++){
@@ -150,11 +191,9 @@ function start()
                 Uint16Buf[i] = s;
             }
 
-            if(connected == true){
-                WsConnection.send(Uint16Buf);
+            if(connected == true && WsConnection != null){
+               WsConnection.send(Uint16Buf);
             }
-
-
         }
         else
         {
@@ -166,8 +205,8 @@ function start()
                 Uint16Buf[i] = s;
             }
 
-            if(connected == true){
-                WsConnection.send(Uint16Buf);
+            if(connected == true && WsConnection != null ){
+               WsConnection.send(Uint16Buf);
             }
         }
     }
@@ -185,7 +224,7 @@ function start()
 
     console.log(wsUri);
 
-    var audioSource = audioInputSelect.value;
+    var audioSource = audioInputSelect[audioInputSelect.selectedIndex].value;
     var constraints = {
         audio: {deviceId: audioSource ? {exact: audioSource} : undefined}
       };
@@ -193,13 +232,13 @@ function start()
 
     navigator.getUserMedia(constraints, function(stream) {
         window.localStream = stream
-        //var ctx = new AudioContext();
 
         microphone = audioContext.createMediaStreamSource(stream);
+        inSampleRate = audioContext.sampleRate;
         microphone.connect(myPCMProcessingNode);
         myPCMProcessingNode.connect(audioContext.destination);
 
-        var gainNode = audioContext.createGain();
+        gainNode = audioContext.createGain();
         microphone.connect(gainNode);
         gainNode.connect(myPCMProcessingNode);
         document.getElementById('volume').onchange = function() {
@@ -223,12 +262,19 @@ function start()
 function stop()
 {
     console.log("Stop");
-    stopAudio();
-    if (connected == true)
+    if(connected == true && WsConnection != null )
+    {
         WsConnection.close();
+    }
     connected = false;
+    stopAudio();
     $("#mic").attr('src','mic.png');
     isStarted = false;
+
+    // Don't know why, but in Chrome the second start audio is not working
+    // So force reloading ...
+    location.reload();
+
 }
 
 function startorstop()
