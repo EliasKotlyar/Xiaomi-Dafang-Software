@@ -20,6 +20,11 @@ struct shared_conf {
     int sensitivity;
     int motionOSD;
     int detectionRegion[4]; // x0,y0,x1,y1
+    bool motionTracking;
+    int motionTimeout;
+    int hardVolume;
+    int softVolume;
+    int filter;
 };
 
 

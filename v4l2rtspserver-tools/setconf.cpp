@@ -5,7 +5,7 @@
 
 #define SETGETSHAREDMEMORYINT(INT) if (get) printf("%d\n",  INT); else INT = atoi(value);
 #define SETGETSHAREDMEMORYSTRING(STR) if (get) printf("%s\n",  STR); else  strcpy(STR,value);
-#define SETGETSHAREDMEMORYBOOL(INT) if (get) printf("%s\n",  INT?"TRUE":"FALSE"); else INT= atoi(value)==0?false:true;
+#define SETGETSHAREDMEMORYBOOL(INT) if (get) printf("%s\n",  INT?"true":"false"); else INT= strToBool(value);
 
 int stringToInts(char *str, int region[4])
 {
@@ -22,6 +22,15 @@ int stringToInts(char *str, int region[4])
     return (i == sizeof(region));
 }
 
+bool strToBool(char *str)
+{
+    if (strcasecmp(str, "true") == 0) return(true);
+    if (strcasecmp(str, "on") == 0) return(true);
+    if (strcasecmp(str, "false") == 0) return(false);
+    if (strcasecmp(str, "off") == 0) return(false);
+    if (atoi(str) == 1) return (true);
+    return false;
+}
 
 void usage(char *command)
 {
@@ -54,6 +63,13 @@ void usage(char *command)
     fprintf(stderr, "\t'm' motion sensitivity (0 to 4) -1 to deactivate motion\n");
     fprintf(stderr, "\t'z' display a circle when motion detected (-1 deactivated, use the OSD color numbers)\n");
     fprintf(stderr, "\t'r' set detection region (shall be: x0,y0,x1,y1) the server need to be restarted to take into account the new value\n");
+    fprintf(stderr, "\t't' set tracking on/off (detection region is not taken into account anymore)\n");
+    fprintf(stderr, "\t'u' set time before launching script after no motion (to restore camera position) -1 to deactivate\n");
+
+    fprintf(stderr, "\t'h' set hardware volume (from mic)\n");
+    fprintf(stderr, "\t'i' set software volume percentage (X will add X% to the data, from 0 to xxx, -1 to do nothing)\n");
+    fprintf(stderr, "\t'q' set set filter number (1 or 2, 0 no filter)\n");
+
 
     fprintf(stderr, "Example: to set osd text: %s -k o -v OSDTEXT\n", command);
     fprintf(stderr, "         to get osd text: %s -g o\n", command);
@@ -142,6 +158,22 @@ int main(int argc, char *argv[]) {
             else
                 stringToInts(value, conf->detectionRegion);
             break;
+        case 't':
+            SETGETSHAREDMEMORYBOOL(conf->motionTracking);
+            break;
+        case 'u':
+            SETGETSHAREDMEMORYINT(conf->motionTimeout);
+            break;
+        case 'h':
+            SETGETSHAREDMEMORYINT(conf->hardVolume);
+            break;
+        case 'i':
+            SETGETSHAREDMEMORYINT(conf->softVolume);
+            break;
+        case 'q':
+            SETGETSHAREDMEMORYINT(conf->filter);
+            break;
+
     default:
         printf("Invalid Argument %c\n", key);
         usage(argv[0]);

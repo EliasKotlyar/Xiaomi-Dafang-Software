@@ -39,6 +39,7 @@
 
 static short seg_end[8] = {0xFF, 0x1FF, 0x3FF, 0x7FF,
 	0xFFF, 0x1FFF, 0x3FFF, 0x7FFF};
+int chnVol = 10;
 
 static int search(int val, short	*table, int	size)
 {
@@ -614,7 +615,6 @@ static void *IMP_Audio_Play_VolTest_Thread(void *argv)
 	}
 
 	/* Step 4: Set audio channel volume. */
-	int chnVol = 90;
 	ret = IMP_AO_SetVol(devID, chnID, chnVol);
 	if(ret != 0) {
 		IMP_LOG_ERR(TAG, "Audio Play set volume failed\n");
@@ -1484,7 +1484,6 @@ static void *IMP_Audio_Play_ALGO_AO_Thread(void *argv)
 	}
 
 	/* Step 4: Set audio channel volume. */
-	int chnVol = 100;
 	ret = IMP_AO_SetVol(devID, chnID, chnVol);
 	if(ret != 0) {
 		IMP_LOG_ERR(TAG, "Audio Play set volume failed\n");
@@ -1529,9 +1528,9 @@ static void *IMP_Audio_Play_ALGO_AO_Thread(void *argv)
 			return NULL;
 		}
 
-		IMP_LOG_INFO(TAG, "Play: TotalNum %d, FreeNum %d, BusyNum %d\n",
+/*		IMP_LOG_INFO(TAG, "Play: TotalNum %d, FreeNum %d, BusyNum %d\n",
 				play_status.chnTotalNum, play_status.chnFreeNum, play_status.chnBusyNum);
-
+*/
 	}
 
 
@@ -1725,12 +1724,17 @@ void usage() {
 int  main(int argc, char *argv[])
 {
 
-	if (argc != 2)
+	if (argc <= 2)
 		usage();
 
 	char* file = argv[1];
 	int ret;
 
+    if (argv[2] != NULL)
+    {
+        chnVol = atoi(argv[2]);
+        printf("Volume is %d\n", chnVol);
+    }
 	pthread_t play_thread_id;
 
 	ret = pthread_create(&play_thread_id, NULL, IMP_Audio_Play_ALGO_AO_Thread, file);

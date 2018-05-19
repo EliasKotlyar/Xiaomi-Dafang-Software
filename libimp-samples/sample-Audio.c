@@ -762,7 +762,7 @@ static void *IMP_Audio_Record_VolTest_Thread(void *argv)
 	}
 
 	/* Step 5: Set audio channel volume. */
-	int chnVol = 10;
+	int chnVol = 100;
 	ret = IMP_AI_SetVol(devID, chnID, chnVol);
 	if(ret != 0) {
 		IMP_LOG_ERR(TAG, "Audio Record set volume failed\n");
@@ -1811,7 +1811,7 @@ int  main(int argc, char *argv[])
 		return -1;
 	}
 	pthread_join(play_thread_id, NULL);
-
+#ifdef toto
 	printf("[INFO] Test algo ai: Start audio record algo ai test.\n");
 	printf("[INFO]        : Can create the %s file.\n", IMP_AUDIO_RECORD_ALGO_AI_FILE);
 	printf("[INFO]        : Please input any key to continue.\n");
@@ -1933,6 +1933,6 @@ int  main(int argc, char *argv[])
 		return -1;
 	}
 	pthread_join(play_thread_id, NULL);
-
+#endif
 	return 0;
 }

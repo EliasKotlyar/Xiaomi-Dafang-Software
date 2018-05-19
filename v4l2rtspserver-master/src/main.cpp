@@ -230,6 +230,41 @@ snd_pcm_format_t decodeAudioFormat(const std::string& fmt)
 */
 #endif
 
+//"EncodeFormat:InSampleRate:OutSampleRate"
+void decodeEncodeFormat(const std::string &in, audioencoding &format,int &inAudioFreq, int &outAudioFreq )
+{
+  std::istringstream is(in);
+  std::string form("MP3");
+  getline(is, form, ':');
+  std::string inSampleRate("44100");
+  getline(is, inSampleRate, ':');
+  std::string outSampleRate("44100");
+  getline(is, outSampleRate, ':');
+  if (!form.empty()) {
+        if (form.find("OPUS") ==0)
+        {
+            format = ENCODE_OPUS;
+        }
+        else if (form.find("PCMU") ==0)
+        {
+            format = ENCODE_ULAW;
+        }
+        else if (form.find("PCM") ==0)
+        {
+            format = ENCODE_PCM;
+        }
+        else {
+            format = ENCODE_MP3;
+        }
+    }
+    if (inSampleRate.length() > 0)
+        inAudioFreq =  std::stoi(inSampleRate);
+    if (outSampleRate.length() > 0)
+        outAudioFreq =  std::stoi(outSampleRate);
+}
+
+
+
 // -------------------------------------------------------
 //    decode multicast url <group>:<rtp_port>:<rtcp_port>
 // -------------------------------------------------------
@@ -390,8 +425,10 @@ int main(int argc, char **argv) {
     unsigned int hlsSegment = 0;
     const char *realm = NULL;
     std::list <std::string> userPasswordList;
-    int audioFreq = 44100;
-    int audioNbChannels = 1;
+    int inAudioFreq = 44100;
+    int outAudioFreq = 44100;
+    audioencoding encode = ENCODE_MP3;
+
 #ifdef HAVE_ALSA
     //snd_pcm_format_t audioFmt = SND_PCM_FORMAT_S16_BE;
 #endif
@@ -402,7 +439,7 @@ int main(int argc, char **argv) {
     loguru::set_thread_name("main thread");
     // decode parameters
     int c = 0;
-    while ((c = getopt(argc, argv, "v::Q:O:" "I:P:p:m:u:M:ct:TS::" "R:U:" "nrwsf::F:W:H:" "AC:a:" "Vh")) != -1) {
+    while ((c = getopt(argc, argv, "v::Q:O:" "I:P:p:m:u:M:ct:TS::" "R:U:" "nrwsf::F:W:H:" "AC:a:E:" "Vh")) != -1) {
         switch (c) {
             case 'v':
                 verbose = 1;
@@ -476,7 +513,9 @@ int main(int argc, char **argv) {
                 // ALSA
 #ifdef HAVE_ALSA
             case 'A':	disableAudio = true; break;
-            case 'C':	audioNbChannels = atoi(optarg); break;
+            case 'E':   decodeEncodeFormat(optarg,encode,inAudioFreq,outAudioFreq); break;
+                decodeEncodeFormat(optarg,encode,inAudioFreq,outAudioFreq);
+            break;
             //case 'a':	audioFmt = decodeAudioFormat(optarg); break;
 #endif
 
@@ -522,8 +561,12 @@ int main(int argc, char **argv) {
                 std::cout << "\t -F fps    : V4L2 capture framerate (default " << fps << ")" << std::endl;
 
                 std::cout << "\t Sound options :" << std::endl;
-                std::cout << "\t -A freq    : Disable Sound"
-                          << std::endl;
+                std::cout << "\t -A freq    : Disable Sound"<< std::endl;
+                std::cout << "\t -E EncodeFormat:InSampleRate:OutSampleRate"<< std::endl;
+                std::cout << "\t\tEncodeFormat:in MP3 | OPUS | PCM | PCMU"<< std::endl;
+                std::cout << "\t\tInSampleRate: Read sample rate(for OPUS shall be 8000 or 48000) "<< std::endl;
+                std::cout << "\t\tOutSampleRate: output sample rate (forced to 48000 for OPUS, InSampleRate and OutSampleRate have to be the same for PCM and PCMU)"<< std::endl;
+
                 exit(0);
             }
         }
@@ -648,7 +691,7 @@ int main(int argc, char **argv) {
             // Init audio capture
             LOG_S(INFO)<< "Create ALSA Source..." << audioDev;
 
-            ALSACaptureParameters param(audioDev.c_str(), audioFreq, audioNbChannels, verbose);
+            ALSACaptureParameters param(audioDev.c_str(), inAudioFreq, outAudioFreq, verbose, encode);
             ALSACapture* audioCapture = ALSACapture::createNew(param);
             if (audioCapture)
             {
@@ -661,8 +704,29 @@ int main(int argc, char **argv) {
                 else
                 {
                     std::ostringstream os;
+                    switch (encode)
+                    {
+                        case ENCODE_MP3:
+                            os << "audio/MPEG";
+                            break;
+                        case ENCODE_OPUS:
+                            outAudioFreq = 48000;
+                            os << "audio/OPUS/" << outAudioFreq << "/1";
+                            break;
+                        case ENCODE_PCM:
+                            outAudioFreq = inAudioFreq;
+                            os << "audio/L16/" << outAudioFreq << "/1";
+                            break;
+                        case ENCODE_ULAW:
+                           // inAudioFreq = 8000;
+                            outAudioFreq = inAudioFreq;
+                            os << "audio/PCMU/"  << outAudioFreq << "/1";;
+                            os << "audio/PCMU/"  << outAudioFreq << "/1";;
+                            break;
+                    }
                     //os << "audio/L16/" << audioCapture->getSampleRate() << "/" << audioCapture->getChannels();
-                    os << "audio/MPEG";
+                    //os << "audio/L16/8000/1";
+                    //os << "audio/MPEG";
                     rtpAudioFormat.assign(os.str());
 
                     // extend buffer size if needed

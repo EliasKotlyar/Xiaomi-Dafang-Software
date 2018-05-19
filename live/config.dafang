@@ -1,5 +1,30 @@
+# 'CURRENT':'REVISION':'AGE' are updated - whenever a library changes - as follows:
+# The library code changes, but without any changes to the API (i.e., interfaces) => increment REVISION
+# At least one interface changes, or is removed => CURRENT += 1; REVISION = 0; AGE = 0
+# One or more interfaces were added, but no existing interfaces were changed or removed => CURRENT += 1; REVISION = 0; AGE += 1
+
+libliveMedia_LIB_SUFFIX=so
+
+libBasicUsageEnvironment_VERSION_CURRENT=1
+libBasicUsageEnvironment_VERSION_REVISION=0
+libBasicUsageEnvironment_VERSION_AGE=0
+libBasicUsageEnvironment_LIB_SUFFIX=so
+
+libUsageEnvironment_VERSION_CURRENT=4
+libUsageEnvironment_VERSION_REVISION=0
+libUsageEnvironment_VERSION_AGE=1
+libUsageEnvironment_LIB_SUFFIX=so
+
+libgroupsock_VERSION_CURRENT=9
+libgroupsock_VERSION_REVISION=1
+libgroupsock_VERSION_AGE=1
+libgroupsock_LIB_SUFFIX=so
+
+#####
+
+OBJ =			o
 CROSS_COMPILE=        $(PWD)/../../mips-gcc472-glibc216-64bit/bin/mips-linux-gnu-
-COMPILE_OPTS =        $(INCLUDES) -I. -O2 -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -DXLOCALE_NOT_USED=1 -DLOCALE_NOT_USED
+COMPILE_OPTS =        $(INCLUDES) -I. -O2 -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -DXLOCALE_NOT_USED=1 -DLOCALE_NOT_USED -fPIC
 C =            c
 C_COMPILER =        $(CROSS_COMPILE)gcc
 CFLAGS +=        $(COMPILE_OPTS)
@@ -12,10 +37,11 @@ OBJ =            o
 LINK =            $(CROSS_COMPILE)g++ -o
 LINK_OPTS =        -L. $(LDFLAGS)
 CONSOLE_LINK_OPTS =    $(LINK_OPTS)
-LIBRARY_LINK =        "$(CROSS_COMPILE)ar" "cr" ""
+LIBRARY_LINK =		$(CROSS_COMPILE)gcc -o
 
-LIBRARY_LINK_OPTS =
-LIB_SUFFIX =            a
+SHORT_LIB_SUFFIX =	so
+LIB_SUFFIX =	 	$(SHORT_LIB_SUFFIX)
+LIBRARY_LINK_OPTS =	-shared -Wl,-soname,$(NAME).$(SHORT_LIB_SUFFIX) $(LDFLAGS)
 LIBS_FOR_CONSOLE_APPLICATION = $(CXXLIBS)
 LIBS_FOR_GUI_APPLICATION = $(LIBS_FOR_CONSOLE_APPLICATION)
 EXE =

@@ -22,7 +22,7 @@
 FramedSource *
 BaseServerMediaSubsession::createSource(UsageEnvironment &env, FramedSource *videoES, const std::string &format) {
     FramedSource *source = NULL;
-    LOG_S(INFO) << "Creating Source..." << std::endl;
+    LOG_S(INFO) << "Creating Source...";
     if (format == "video/MP2T") {
         source = MPEG2TransportStreamFramer::createNew(env, videoES);
     } else if (format == "video/H264") {
@@ -89,7 +89,25 @@ RTPSink *BaseServerMediaSubsession::createSink(UsageEnvironment &env, Groupsock 
 
          */
         videoSink = MPEG1or2AudioRTPSink::createNew (env, rtpGroupsock);
-    }
+    }else if (format.find("audio/OPUS") ==0) {
+            std::istringstream is(format);
+            std::string dummy;
+            getline(is, dummy, '/');
+            getline(is, dummy, '/');
+            std::string sampleRate("48000");
+            getline(is, sampleRate, '/');
+            std::string channels("1");
+            getline(is, channels);
+            videoSink= SimpleRTPSink::createNew(env, rtpGroupsock, rtpPayloadTypeIfDynamic, std::stoi(sampleRate), "audio", "OPUS", std::stoi(channels), False);
+     } else if (format.find("audio/PCMU") ==0) {
+       std::istringstream is(format);
+       std::string dummy;
+       getline(is, dummy, '/');
+       getline(is, dummy, '/');
+       std::string sampleRate("8000");
+       getline(is, sampleRate, '/');
+       videoSink= SimpleRTPSink::createNew(env, rtpGroupsock, rtpPayloadTypeIfDynamic, std::stoi(sampleRate), "audio", "PCMU", 1, False);
+     }
     return videoSink;
 }
 
