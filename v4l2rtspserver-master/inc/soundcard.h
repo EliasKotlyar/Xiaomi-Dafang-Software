@@ -147,6 +147,7 @@ typedef char oss_handle_t[OSS_HANDLE_SIZE];
 #define SNDCTL_SEQ_TIMING_ENABLE	__SIO  ('Q', 23)	/* Enable incoming MIDI timing messages */
 #define SNDCTL_SEQ_ACTSENSE_ENABLE	__SIO  ('Q', 24)	/* Enable incoming active sensing messages */
 #define SNDCTL_SEQ_RT_ENABLE		__SIO  ('Q', 25)	/* Enable other incoming realtime messages */
+#define SNDCTL_EXT_SET_RECORD_VOLUME       __SIOR ('P', 103, int)
 
 typedef struct synth_control
 {

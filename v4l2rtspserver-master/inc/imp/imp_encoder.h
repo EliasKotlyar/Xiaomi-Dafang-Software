@@ -707,7 +707,7 @@ int IMP_Encoder_GetChnColor2Grey(int encChn, IMPEncoderColor2GreyCfg *pstColor2G
  * ENC_RC_MODE_H264FIXQP支持配置qp，ENC_RC_MODE_H264CBR支持配置outBitRate。
  * @attention 此函数对JPEG通道无意义。
  */
-int IMP_Encoder_SetChnRcAttr(int encChn, const IMPEncoderRcAttr *pstRcCfg);
+int IMP_Encoder_SetChnAttrRcMode(int encChn, const IMPEncoderRcAttr *pstRcCfg);
 
 /**
  * @fn int IMP_Encoder_GetChnRcAttr(int encChn, IMPEncoderRcAttr *pstRcCfg).
@@ -724,7 +724,7 @@ int IMP_Encoder_SetChnRcAttr(int encChn, const IMPEncoderRcAttr *pstRcCfg);
  *
  * @attention 此函数对JPEG通道无意义。
  */
-int IMP_Encoder_GetChnRcAttr(int encChn, IMPEncoderRcAttr *pstRcCfg);
+int IMP_Encoder_GetChnAttrRcMode(int encChn, IMPEncoderRcAttr *pstRcCfg);
 
 /**
  * @fn int IMP_Encoder_SetChnFrmRate(int encChn, const IMPEncoderFrmRate *pstFps)

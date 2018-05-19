@@ -25,7 +25,7 @@ SDK_INC_DIR = include
 
 INCLUDES = -I$(SDK_INC_DIR)
 
-LIBS = $(SDK_LIB_DIR)/libimp.so $(SDK_LIB_DIR)/libalog.so
+LIBS = ../../libimp.so $(SDK_LIB_DIR)/libalog.so
 
 LDFLAG += -Wl,-gc-sections
 

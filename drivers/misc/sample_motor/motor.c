@@ -62,6 +62,17 @@ static unsigned char step_8[8] = {
         0x09
 };
 
+static int motor_idle(struct motor_info *info) {
+    int i = info->id;
+
+    gpio_direction_output(info->pdata[i]->motor_st1_gpio, 0);
+    gpio_direction_output(info->pdata[i]->motor_st2_gpio, 0);
+    gpio_direction_output(info->pdata[i]->motor_st3_gpio, 0);
+    gpio_direction_output(info->pdata[i]->motor_st4_gpio, 0);
+
+    return 0;
+}
+
 static int motor_step(struct motor_info *info) {
     int i = info->id;
 
@@ -85,6 +96,7 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
             if(info->motor_status.x_min == 1){
                 info->set_steps[info->direction] = 0;
                 info->cur_steps[info->direction] = 0;
+                motor_idle(info);
             }
 
             if (info->cur_steps[info->direction] != info->set_steps[info->direction]) {
@@ -93,6 +105,8 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
                 motor_step(info);
                 info->cur_steps[info->direction]++;
                 info->motor_status.x_steps--;
+                if(info->cur_steps[info->direction] == info->set_steps[info->direction])
+                    motor_idle(info);
             }
             break;
         case MOTOR_DIRECTIONAL_RIGHT:
@@ -100,6 +114,7 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
             if(info->motor_status.x_max == 1){
                 info->set_steps[info->direction] = 0;
                 info->cur_steps[info->direction] = 0;
+                motor_idle(info);
             }
 
             if (info->cur_steps[info->direction] != info->set_steps[info->direction]) {
@@ -108,12 +123,15 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
                 motor_step(info);
                 info->cur_steps[info->direction]++;
                 info->motor_status.x_steps++;
+                if(info->cur_steps[info->direction] == info->set_steps[info->direction])
+                    motor_idle(info);
             }
             break;
         case MOTOR_DIRECTIONAL_UP:
             if(info->motor_status.y_max == 1){
                 info->set_steps[info->direction] = 0;
                 info->cur_steps[info->direction] = 0;
+                motor_idle(info);
             }
 
             if (info->cur_steps[info->direction] != info->set_steps[info->direction]) {
@@ -122,15 +140,16 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
                 motor_step(info);
                 info->cur_steps[info->direction]++;
                 info->motor_status.y_steps++;
+                if(info->cur_steps[info->direction] == info->set_steps[info->direction])
+                    motor_idle(info);
             }
             break;
         case MOTOR_DIRECTIONAL_DOWN:
-
             if(info->motor_status.y_min == 1){
                 info->set_steps[info->direction] = 0;
                 info->cur_steps[info->direction] = 0;
+                motor_idle(info);
             }
-
 
             if (info->cur_steps[info->direction] != info->set_steps[info->direction]) {
                 info->run_step = (sizeof(step_8) - 1) - info->cur_steps[info->direction] % sizeof(step_8);
@@ -138,6 +157,8 @@ static irqreturn_t jz_timer_interrupt(int irq, void *dev_id) {
                 motor_step(info);
                 info->cur_steps[info->direction]++;
                 info->motor_status.y_steps--;
+                if(info->cur_steps[info->direction] == info->set_steps[info->direction])
+                    motor_idle(info);
             }
             break;
         default:
@@ -384,15 +405,19 @@ static int motor_probe(struct platform_device *pdev) {
 
         if (info->pdata[i]->motor_st1_gpio != -1) {
             gpio_request(info->pdata[i]->motor_st1_gpio, "motor_st1_gpio");
+            gpio_direction_output(info->pdata[i]->motor_st1_gpio, 0);
         }
         if (info->pdata[i]->motor_st2_gpio != -1) {
             gpio_request(info->pdata[i]->motor_st2_gpio, "motor_st2_gpio");
+            gpio_direction_output(info->pdata[i]->motor_st2_gpio, 0);
         }
         if (info->pdata[i]->motor_st3_gpio != -1) {
             gpio_request(info->pdata[i]->motor_st3_gpio, "motor_st3_gpio");
+            gpio_direction_output(info->pdata[i]->motor_st3_gpio, 0);
         }
         if (info->pdata[i]->motor_st4_gpio != -1) {
             gpio_request(info->pdata[i]->motor_st4_gpio, "motor_st4_gpio");
+            gpio_direction_output(info->pdata[i]->motor_st4_gpio, 0);
         }
     }
 
