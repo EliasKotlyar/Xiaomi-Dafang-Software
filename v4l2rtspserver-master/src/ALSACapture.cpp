@@ -19,6 +19,30 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
+#include <loguru.hpp>
+
+/**
+ * lame_error_callback, lame_message_callback, lame_debug_callback: LAME
+ * logging callback functions.
+ *
+ * [Parameters]
+ *     format: Format string.
+ *     args: Format arguments.
+ */
+static void lame_error_callback(const char *format, va_list args)
+{
+
+    LOG_F(ERROR,format, args);
+}
+
+static void lame_message_callback(const char *format, va_list args)
+{
+    LOG_F(INFO,format, args);
+}
+
+
+
+
 
 ALSACapture* ALSACapture::createNew(const ALSACaptureParameters & params) 
 { 
@@ -48,12 +72,12 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
 {
     // Taken from : http://www.4front-tech.com/pguide/audio.html#channels
 
-    LOG(NOTICE) << "Open ALSA device: \"" << params.m_devName << "\"";
+    LOG_F(INFO, "Open ALSA device: %s", params.m_devName.c_str() );
 
 
     if ((fd = ::open(params.m_devName.c_str(), O_RDONLY, 0)) == -1)
     {
-    LOG(ERROR) << "cannot open audio device: " << params.m_devName;
+        LOG_F(ERROR,"cannot open audio device: %s", params.m_devName.c_str());
     }
 
 
@@ -62,13 +86,13 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
     format = AFMT_S16_LE;
     if (::ioctl(fd, SNDCTL_DSP_SETFMT, &format)==-1)
     { /* Fatal error */
-        LOG(ERROR) << "Cant set format..." << params.m_devName;
+         LOG_F(ERROR,"Cant set format...%s", params.m_devName.c_str());
     }
     int stereo = params.m_channels-1;
-    LOG(ERROR) << "Channel Count:" << params.m_channels;
+    LOG_F(INFO,"Channel Count: %d", params.m_channels);
     if (::ioctl(fd, SNDCTL_DSP_STEREO, &stereo)==-1)
     { /* Fatal error */
-       LOG(ERROR) << "Cant set Mono/Stereo ..." << params.m_devName;
+       LOG_F(ERROR,"Cant set Mono/Stereo ...%s", params.m_devName.c_str());
     }
 
 
@@ -79,19 +103,22 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
 
     if (ioctl(fd, SNDCTL_DSP_SPEED, &speed)==-1)
     { /* Fatal error */
-        LOG(ERROR) << "Cant set Speed ..." << params.m_devName;
+         LOG_F(ERROR, "Cant set Speed ...%s",params.m_devName.c_str());
     }
-
 
     // Lame Init:
     gfp = lame_init();
+    lame_set_errorf(gfp, lame_error_callback);
+    lame_set_msgf  (gfp, lame_message_callback);
+    //lame_set_debugf(lame, lame_debug_callback);
+
     lame_set_num_channels(gfp, 1);
     //lame_set_mode(gfp, 3);
 
     int ret_code = lame_init_params(gfp);
     if (ret_code < 0)
     { /* Fatal error */
-        LOG(ERROR) << "Cant init Lame";
+         LOG_F(ERROR,"Cant init Lame");
     }
     lame_print_config(gfp);
 
@@ -110,7 +137,7 @@ size_t ALSACapture::read(char* buffer, size_t bufferSize)
     bytesRead = lame_encode_buffer( gfp,         localBuffer, NULL,  num_samples,(unsigned char*)buffer,mp3buf_size);
     //LOG(ERROR) << "Bytes Converted to MP3:" << bytesRead;
     if(bytesRead == 0){
-        LOG(ERROR) << "Error converting to MP3";
+         LOG_F(ERROR,"Error converting to MP3");
         //LOG(ERROR) << "Buffersize " << bufferSize;
         bytesRead = 1;
     }

@@ -14,18 +14,19 @@
 #include "ServerMediaSubsession.h"
 #include "MJPEGVideoSource.h"
 #include "DeviceSource.h"
-
+#define LOGURU_WITH_STREAMS 1
+#include <loguru.hpp>
 // ---------------------------------
 //   BaseServerMediaSubsession
 // ---------------------------------
 FramedSource *
 BaseServerMediaSubsession::createSource(UsageEnvironment &env, FramedSource *videoES, const std::string &format) {
     FramedSource *source = NULL;
-    LOG(NOTICE) << "Creating Source..." << std::endl;
+    LOG_S(INFO) << "Creating Source..." << std::endl;
     if (format == "video/MP2T") {
         source = MPEG2TransportStreamFramer::createNew(env, videoES);
     } else if (format == "video/H264") {
-        LOG(NOTICE) << "Creating H264 Source...";
+        LOG_S(INFO) << "Creating H264 Source...";
         source = H264VideoStreamDiscreteFramer::createNew(env, videoES);
     }
 #if LIVEMEDIA_LIBRARY_VERSION_INT > 1414454400
@@ -35,10 +36,10 @@ BaseServerMediaSubsession::createSource(UsageEnvironment &env, FramedSource *vid
         }
 #endif
     else if (format == "video/JPEG") {
-        LOG(NOTICE) << "Creating JPG Source...";
+        LOG_S(INFO) << "Creating JPG Source...";
         source = MJPEGVideoSource::createNew(env, videoES);
     } else {
-        LOG(NOTICE) << "Creating normal Source...";
+        LOG_S(INFO) << "Creating normal Source...";
         source = videoES;
     }
     return source;
@@ -47,7 +48,7 @@ BaseServerMediaSubsession::createSource(UsageEnvironment &env, FramedSource *vid
 RTPSink *BaseServerMediaSubsession::createSink(UsageEnvironment &env, Groupsock *rtpGroupsock,
                                                unsigned char rtpPayloadTypeIfDynamic, const std::string &format) {
     RTPSink *videoSink = NULL;
-    LOG(NOTICE) << "Creating Sink for format : " << format;
+    LOG_S(INFO) << "Creating Sink for format : " << format;
     if (format == "video/MP2T") {
         videoSink = SimpleRTPSink::createNew(env, rtpGroupsock, rtpPayloadTypeIfDynamic, 90000, "video", "MP2T", 1,
                                              True, False);

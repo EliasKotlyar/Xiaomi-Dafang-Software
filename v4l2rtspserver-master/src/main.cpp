@@ -49,13 +49,16 @@
 #include "ALSACapture.h"
 #endif
 
+#define LOGURU_IMPLEMENTATION 1
+#include "loguru.hpp"
+
 // -----------------------------------------
 //    signal handler
 // -----------------------------------------
 char quit = 0;
 
 void sighandler(int n) {
-    printf("SIGINT\n");
+    LOG_S(ERROR) << "SIGINT";
     quit = 1;
 }
 
@@ -148,7 +151,7 @@ int addSession(RTSPServer *rtspServer, const std::string &sessionName,
 
             char *url = rtspServer->rtspURL(sms);
             if (url != NULL) {
-                LOG(NOTICE) << "Play this stream using the URL \"" << url << "\"" << std::endl;;
+                LOG_S(INFO) << "Play this stream using the URL \"" << url << "\"" ;
                 delete[] url;
             }
         }
@@ -396,7 +399,7 @@ int main(int argc, char **argv) {
     if (defaultPort != NULL) {
         rtspPort = atoi(defaultPort);
     }
-
+    loguru::set_thread_name("main thread");
     // decode parameters
     int c = 0;
     while ((c = getopt(argc, argv, "v::Q:O:" "I:P:p:m:u:M:ct:TS::" "R:U:" "nrwsf::F:W:H:" "AC:a:" "Vh")) != -1) {
@@ -535,7 +538,7 @@ int main(int argc, char **argv) {
     }
 
     // init logger
-    initLogger(verbose);
+    //initLogger(verbose);
 
     // create live555 environment
     TaskScheduler *scheduler = BasicTaskScheduler::createNew();
@@ -553,7 +556,7 @@ int main(int argc, char **argv) {
     RTSPServer *rtspServer = createRTSPServer(*env, rtspPort, rtspOverHTTPPort, timeout, hlsSegment, userPasswordList,
                                               realm);
     if (rtspServer == NULL) {
-        LOG(ERROR) << "Failed to create RTSP server: " << env->getResultMsg();
+        LOG_S(ERROR) << "Failed to create RTSP server: " << env->getResultMsg();
     } else {
         V4l2Output *out = NULL;
         int nbSource = 0;
@@ -588,7 +591,7 @@ int main(int argc, char **argv) {
             OutPacketBuffer::maxSize = 300000;
 
         } else {
-            LOG(FATAL) << "Unrecognized Format ";
+            LOG_S(FATAL) << "Unrecognized Format ";
             exit(0);
         }
         if(width == 1920 && height == 1080){
@@ -618,7 +621,7 @@ int main(int argc, char **argv) {
                                                        new DeviceCaptureAccess<ImpCapture>(impCapture),
                                                        outfd, queueSize, useThread, repeatConfig, muxer);
         if (videoSource == NULL) {
-            LOG(FATAL) << "Unable to create source for device ";
+            LOG_S(FATAL) << "Unable to create source for device ";
         } else {
             // extend buffer size if needed
             /*
@@ -643,7 +646,7 @@ int main(int argc, char **argv) {
             //audioDev = "";
 
             // Init audio capture
-            LOG(NOTICE) << "Create ALSA Source..." << audioDev;
+            LOG_S(INFO)<< "Create ALSA Source..." << audioDev;
 
             ALSACaptureParameters param(audioDev.c_str(), audioFreq, audioNbChannels, verbose);
             ALSACapture* audioCapture = ALSACapture::createNew(param);
@@ -652,7 +655,7 @@ int main(int argc, char **argv) {
                 FramedSource* audioSource = V4L2DeviceSource::createNew(*env, new DeviceCaptureAccess<ALSACapture>(audioCapture), -1, queueSize, useThread);
                 if (audioSource == NULL)
                 {
-                    LOG(FATAL) << "Unable to create source for device " << audioDev;
+                    LOG_S(FATAL) << "Unable to create source for device " << audioDev;
                     delete audioCapture;
                 }
                 else
@@ -676,8 +679,8 @@ int main(int argc, char **argv) {
 
         // Create Multicast Session
         if (multicast) {
-            LOG(NOTICE) << "RTP  address " << inet_ntoa(destinationAddress) << ":" << rtpPortNum;
-            LOG(NOTICE) << "RTCP address " << inet_ntoa(destinationAddress) << ":" << rtcpPortNum;
+            LOG_S(INFO) << "RTP  address " << inet_ntoa(destinationAddress) << ":" << rtpPortNum;
+            LOG_S(INFO) << "RTCP address " << inet_ntoa(destinationAddress) << ":" << rtcpPortNum;
 
             std::list < ServerMediaSubsession * > subSession;
             if (videoReplicator) {
@@ -711,8 +714,8 @@ int main(int argc, char **argv) {
 
             struct in_addr ip;
             ip.s_addr = ourIPAddress(*env);
-            LOG(NOTICE) << "HLS       http://" << inet_ntoa(ip) << ":" << rtspPort << "/" << baseUrl + url << ".m3u8";
-            LOG(NOTICE) << "MPEG-DASH http://" << inet_ntoa(ip) << ":" << rtspPort << "/" << baseUrl + url << ".mpd";
+            LOG_S(INFO) << "HLS       http://" << inet_ntoa(ip) << ":" << rtspPort << "/" << baseUrl + url << ".m3u8";
+            LOG_S(INFO) << "MPEG-DASH http://" << inet_ntoa(ip) << ":" << rtspPort << "/" << baseUrl + url << ".mpd";
         } else {
             std::list < ServerMediaSubsession * > subSession;
             if (videoReplicator) {
@@ -729,7 +732,7 @@ int main(int argc, char **argv) {
             // main loop
             signal(SIGINT, sighandler);
             env->taskScheduler().doEventLoop(&quit);
-            LOG(NOTICE) << "Exiting....";
+            LOG_S(INFO) << "Exiting....";
         }
 
         Medium::close(rtspServer);

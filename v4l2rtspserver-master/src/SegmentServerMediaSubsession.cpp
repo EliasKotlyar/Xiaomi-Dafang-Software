@@ -10,7 +10,8 @@
 #include <map>
 
 #include "SegmentServerMediaSubsession.h"
-
+#define LOGURU_WITH_STREAMS 1
+#include <loguru.hpp>
 // -----------------------------------------
 //    ServerMediaSubsession for HLS
 // -----------------------------------------
@@ -145,7 +146,7 @@ void HLSServerMediaSubsession::seekStream(unsigned clientSessionId, void* stream
 	m_slice = seekNPT / m_hlsSink->getSliceDuration();
 	seekNPT = m_slice * m_hlsSink->getSliceDuration();
 	numBytes = m_hlsSink->getHLSBufferSize(m_slice);
-	std::cout << "seek seekNPT:" << seekNPT << " slice:" << m_slice << " numBytes:" << numBytes << std::endl;
+	LOG_S(INFO) << "seek seekNPT:" << seekNPT << " slice:" << m_slice << " numBytes:" << numBytes << std::endl;
 	
 }	
 
