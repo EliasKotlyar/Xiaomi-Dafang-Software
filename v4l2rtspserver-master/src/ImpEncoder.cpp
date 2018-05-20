@@ -494,7 +494,6 @@ static void *update_thread(void *p) {
                 ivsSetsensitivity(newConfig->sensitivity);
             }
         }
-
         if (currentConfig.motionOSD !=  newConfig->motionOSD) {
 
             LOG_S(INFO) << "Display motion OSD color=" << newConfig->motionOSD ;
