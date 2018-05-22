@@ -20,6 +20,30 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
+#include <loguru.hpp>
+
+/**
+ * lame_error_callback, lame_message_callback, lame_debug_callback: LAME
+ * logging callback functions.
+ *
+ * [Parameters]
+ *     format: Format string.
+ *     args: Format arguments.
+ */
+static void lame_error_callback(const char *format, va_list args)
+{
+
+    LOG_F(ERROR,format, args);
+}
+
+static void lame_message_callback(const char *format, va_list args)
+{
+    LOG_F(INFO,format, args);
+}
+
+
+
+
 
 extern "C" {
 #include <wave.h>
@@ -75,39 +99,39 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
     memcpy(&m_currentConfig, m_newConfig, sizeof(shared_conf));
     // Taken from : http://www.4front-tech.com/pguide/audio.html#channels
 
-    LOG(NOTICE) << "Open ALSA device: \"" << params.m_devName << "\"";
+    LOG_F(INFO, "Open ALSA device: %s", params.m_devName.c_str() );
 
 
     if ((fd = ::open(params.m_devName.c_str(), O_RDONLY, 0)) == -1)
     {
-        LOG(ERROR) << "cannot open audio device: " << params.m_devName;
+        LOG_F(ERROR,"cannot open audio device: %s", params.m_devName.c_str());
     }
 
     int format= AFMT_S16_LE;
     if (::ioctl(fd, SNDCTL_DSP_SETFMT, &format)==-1)
     { /* Fatal error */
-        LOG(ERROR) << "Cant set format..." << params.m_devName;
+         LOG_F(ERROR,"Cant set format...%s", params.m_devName.c_str());
     }
 
     int stereo = params.m_channels-1;
-    LOG(NOTICE) << "Channel Count:" << params.m_channels;
+    LOG_F(INFO,"Channel Count: %d", params.m_channels);
     if (::ioctl(fd, SNDCTL_DSP_STEREO, &stereo)==-1)
     { /* Fatal error */
-       LOG(ERROR) << "Cant set Mono/Stereo ..." << params.m_devName;
+       LOG_F(ERROR,"Cant set Mono/Stereo ...%s", params.m_devName.c_str());
     }
 
     int speed =  params.m_inSampleRate;
 
     if (ioctl(fd, SNDCTL_DSP_SPEED, &speed)==-1)
     { /* Fatal error */
-        LOG(ERROR) << "Cant set Speed ..." << params.m_devName;
+         LOG_F(ERROR, "Cant set Speed ...%s",params.m_devName.c_str());
     }
    // int vol = params.m_volume;
     if (m_newConfig->hardVolume != -1)
     {
         if (ioctl(fd, SNDCTL_EXT_SET_RECORD_VOLUME, &m_newConfig->hardVolume)==-1)
         { /* Fatal error */
-            LOG(ERROR) << "Cant set vol" << m_newConfig->hardVolume;
+            LOG_F(ERROR, "Cant set vol %d", m_newConfig->hardVolume);
         }
         m_currentConfig.hardVolume = m_newConfig->hardVolume;
     }
@@ -120,10 +144,9 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
        int err =0;
         /*Create a new encoder state */
        encoder = opus_encoder_create(params.m_inSampleRate, params.m_channels, APPLICATION, &err);
-
        if (err<0)
        {
-          fprintf(stderr, "failed to create an encoder: %s\n", opus_strerror(err));
+          LOG_F(ERROR, "failed to create an encoder: %s", opus_strerror(err));
        }
 
        /* Set the desired bit-rate. You can also set other parameters if needed.
@@ -139,7 +162,15 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
     {
         // Lame Init:
         gfp = lame_init();
+        lame_set_errorf(gfp, lame_error_callback);
+    lame_set_errorf(gfp, lame_error_callback);
+
+        lame_set_msgf  (gfp, lame_message_callback);
+    //lame_set_debugf(lame, lame_debug_callback);
         lame_set_num_channels(gfp,params.m_channels );
+    lame_set_msgf  (gfp, lame_message_callback);
+    //lame_set_debugf(lame, lame_debug_callback);
+
         //lame_set_mode(gfp, 3);
         lame_set_in_samplerate(gfp, params.m_inSampleRate);
         lame_set_out_samplerate(gfp, params.m_outSampleRate);
@@ -148,7 +179,7 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
         int ret_code = lame_init_params(gfp);
         if (ret_code < 0)
         { /* Fatal error */
-            LOG(ERROR) << "Cant init Lame";
+         LOG_F(ERROR,"Cant init Lame");
         }
         lame_print_config(gfp);
         break;
@@ -240,9 +271,9 @@ size_t ALSACapture::read(char* buffer, size_t bufferSize)
     if (m_currentConfig.hardVolume != m_newConfig->hardVolume) {
         if (ioctl(fd, SNDCTL_EXT_SET_RECORD_VOLUME, &m_newConfig->hardVolume)==-1)
         { /* Fatal error */
-            LOG(ERROR) << "Cant set vol" << m_newConfig->hardVolume;
+            LOG_F(ERROR, "Cant set vol %d", m_newConfig->hardVolume);
         }
-        LOG(ERROR) << "Set H/Wvol" << m_newConfig->hardVolume;
+        LOG_F(INFO, "Set H/Wvol %d", m_newConfig->hardVolume);
         m_currentConfig.hardVolume = m_newConfig->hardVolume;
     }
     m_Filtermethod = m_newConfig->filter;
@@ -341,7 +372,7 @@ size_t ALSACapture::readOpus(char* buffer, size_t bufferSize, int volume)
 
       if (bytesRead<0)
       {
-            LOG(ERROR) << "Error converting to OPUS " << bytesRead;
+            LOG_F(ERROR, "Error converting to OPUS %d",bytesRead);
             //LOG(ERROR) << "Buffersize " << bufferSize;
             bytesRead = 1;
       }
@@ -367,7 +398,7 @@ size_t ALSACapture::readMP3(char* buffer, size_t bufferSize, int volume)
     bytesRead = lame_encode_buffer( gfp, localBuffer, NULL,  num_samples,(unsigned char*)buffer,mp3buf_size);
     //LOG(ERROR) << "Bytes Converted to MP3:" << bytesRead;
     if(bytesRead == 0){
-        LOG(ERROR) << "Error converting to MP3";
+         LOG_F(ERROR,"Error converting to MP3");
         //LOG(ERROR) << "Buffersize " << bufferSize;
         bytesRead = 1;
     }

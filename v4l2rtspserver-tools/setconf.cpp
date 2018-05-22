@@ -10,7 +10,6 @@
 int stringToInts(char *str, int region[4])
 {
     int i = 0;
-
     char *pt = strtok (str,",");
     while ((pt != NULL) &&
             i < sizeof(region)) {
