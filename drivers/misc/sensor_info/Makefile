@@ -1,5 +1,8 @@
 CROSS_COMPILE ?= mips-linux-gnu-
 
+TOOLCHAIN=../../../mips-gcc472-glibc216-64bit/bin
+
+
 ifeq (${ISVP_ENV_KERNEL_DIR}, )
 	ISVP_ENV_KERNEL_DIR = ../../../kernel
 endif
@@ -7,7 +10,7 @@ endif
 KDIR := ${ISVP_ENV_KERNEL_DIR}
 MODULE_NAME := sinfo
 
-all: modules
+all: modules sample_sinfo
 
 .PHONY: modules clean
 
@@ -17,7 +20,7 @@ obj-m := $(MODULE_NAME).o
 modules:
 	@$(MAKE) -C $(KDIR) M=$(shell pwd) $@
 sample_sinfo:
-	mips-linux-gnu-gcc sample_sinfo.c -o sample_sinfo
+	$(TOOLCHAIN)/mips-linux-gnu-gcc sample_sinfo.c -o sample_sinfo
 clean:
 	@rm -rf *.o *~ .depend .*.cmd  *.mod.c .tmp_versions *.ko *.symvers modules.order
 	@rm -f sample_sinfo
