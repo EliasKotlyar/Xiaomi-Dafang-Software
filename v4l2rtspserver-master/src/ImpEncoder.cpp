@@ -1146,16 +1146,51 @@ void ImpEncoder::requestIDR() {
     IMP_Encoder_RequestIDR(0);
 }
 
+int ImpEncoder::getSensorName() {
+    int ret  = 0;
+    int fd   = 0;
+    int data = -1;
+    /* open device file */
+    fd = open("/dev/sinfo", O_RDWR);
+    if (-1 == fd) {
+        LOG_S(INFO) <<"err: open failed\n";
+        return -1;
+    }
+    /* iotcl to get sensor info. */
+    /* cmd is IOCTL_SINFO_GET, data note sensor type according to SENSOR_TYPE */
 
+    ret = ::ioctl(fd,IOCTL_SINFO_GET,&data);
+    if (0 != ret) {
+        LOG_S(INFO) <<"err: ioctl failed\n";
+        return -1;
+    }
+    if (SENSOR_TYPE_INVALID == data)
+        LOG_S(INFO) <<"##### sensor not found\n";
+    /* close device file */
+    close(fd);
+    return data;
+}
 int ImpEncoder::sample_system_init() {
 
 
     int ret = 0;
 
+    char sensorName[STRING_MAX_SIZE];
+    int sensorId = getSensorName();
+
+    LOG_S(INFO) << "Found Sensor with ID:"<<  sensorId;
+    if(sensorId == SENSOR_TYPE_JXF22){
+        strcpy(sensorName,"jxf22");
+    }else{
+        strcpy(sensorName,"jxf23");
+    }
+    int sensorNameLen = strlen(sensorName);
+
+
     memset(&sensor_info, 0, sizeof(IMPSensorInfo));
-    memcpy(sensor_info.name, SENSOR_NAME, sizeof(SENSOR_NAME));
+    memcpy(sensor_info.name, sensorName, sensorNameLen);
     sensor_info.cbus_type = SENSOR_CUBS_TYPE;
-    memcpy(sensor_info.i2c.type, SENSOR_NAME, sizeof(SENSOR_NAME));
+    memcpy(sensor_info.i2c.type, sensorName, sensorNameLen);
     sensor_info.i2c.addr = SENSOR_I2C_ADDR;
 
     //IMP_LOG_ERR(TAG, "Imp Log %d\n", IMP_Log_Get_Option());

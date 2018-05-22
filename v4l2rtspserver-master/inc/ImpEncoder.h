@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <imp/imp_encoder.h>
 #include <list>
+#include <sys/ioctl.h>
 
 #define IMP_MODE_JPEG 1
 #define IMP_MODE_H264_STREAM 2
@@ -34,6 +35,49 @@
 #define SENSOR_WIDTH            320
 #define SENSOR_HEIGHT            240
 #define STRING_MAX_SIZE          256
+
+
+#define SENSOR_INFO_IOC_MAGIC  'S'
+#define IOCTL_SINFO_GET			_IO(SENSOR_INFO_IOC_MAGIC, 100)
+#define IOCTL_SINFO_FLASH		_IO(SENSOR_INFO_IOC_MAGIC, 101)
+
+#define SENSOR_TYPE_INVALID	-1
+
+enum SENSOR_TYPE
+{
+    SENSOR_TYPE_OV9712=0,
+    SENSOR_TYPE_OV9732,
+    SENSOR_TYPE_OV9750,
+    SENSOR_TYPE_JXH42,
+    SENSOR_TYPE_SC1035,
+    SENSOR_TYPE_SC1135,
+    SENSOR_TYPE_SC1045,
+    SENSOR_TYPE_SC1145,
+    SENSOR_TYPE_AR0130,
+    SENSOR_TYPE_JXH61,
+    SENSOR_TYPE_GC1024,
+    SENSOR_TYPE_GC1064,
+    SENSOR_TYPE_GC2023,
+    SENSOR_TYPE_BF3115,
+    SENSOR_TYPE_IMX225,
+    SENSOR_TYPE_OV2710,
+    SENSOR_TYPE_IMX322,
+    SENSOR_TYPE_SC2135,
+    SENSOR_TYPE_SP1409,
+    SENSOR_TYPE_JXH62,
+    SENSOR_TYPE_BG0806,
+    SENSOR_TYPE_OV4689,
+    SENSOR_TYPE_JXF22,
+    SENSOR_TYPE_IMX323,
+    SENSOR_TYPE_IMX291
+};
+
+typedef struct SENSOR_INFO_S
+{
+    const char *name;
+} SENSOR_INFO_T;
+
+
 
 struct impParams {
     int mode;
@@ -127,6 +171,7 @@ private:
     std::list <IMPEncoderPack> frameList;
     pthread_mutex_t m_mutex;
 
+    int getSensorName();
 
 };
 
