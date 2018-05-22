@@ -12,7 +12,8 @@
 ** -------------------------------------------------------------------------*/
 
 #include "MJPEGVideoSource.h"
-
+#define LOGURU_WITH_STREAMS 1
+#include <loguru.hpp>
       
 void MJPEGVideoSource::afterGettingFrame(unsigned frameSize,unsigned numTruncatedBytes,struct timeval presentationTime,unsigned durationInMicroseconds)
 {
@@ -24,7 +25,7 @@ void MJPEGVideoSource::afterGettingFrame(unsigned frameSize,unsigned numTruncate
 	    // SOF
 	    if ( ((i+11) < frameSize)  && (fTo[i] == 0xFF) && (fTo[i+1] == 0xC0) ) {
 		int length = (fTo[i+2]<<8)|(fTo[i+3]);		    
-		LOG(DEBUG) << "SOF length:" << length;
+		LOG_S(INFO)  << "SOF length:" << length;
 
 		m_height = (fTo[i+5]<<5)|(fTo[i+6]>>3);
 		m_width  = (fTo[i+7]<<5)|(fTo[i+8]>>3);
@@ -35,17 +36,17 @@ void MJPEGVideoSource::afterGettingFrame(unsigned frameSize,unsigned numTruncate
 		} else if (hv_subsampling == 0x22 ) {
 		    m_type = 1; // JPEG 4:2:0
 		} else {
-		    LOG(NOTICE) << "not managed sampling:0x" << std::hex << hv_subsampling;
+		   LOG_S(INFO)  << "not managed sampling:0x" << std::hex << hv_subsampling;
 		    m_type = 255;
 		}
-		LOG(INFO) << "width:" << (int)(m_width<<3) << " height:" << (int)(m_height<<3) << " type:"<< (int)m_type;
+		LOG_S(INFO)  << "width:" << (int)(m_width<<3) << " height:" << (int)(m_height<<3) << " type:"<< (int)m_type;
 
 		i+=length+2;
 	    }
 	    // DQT
 	    else if ( ( (i+5+64) < frameSize)  && (fTo[i] == 0xFF) && (fTo[i+1] == 0xDB)) {
 		int length = (fTo[i+2]<<8)|(fTo[i+3]);		    
-		LOG(DEBUG) << "DQT length:" << length;
+		LOG_S(INFO) << "DQT length:" << length;
 
 		unsigned int precision = fTo[i+4]<<4;
 		unsigned int quantIdx  = fTo[i+4]&0x0f;
@@ -54,7 +55,7 @@ void MJPEGVideoSource::afterGettingFrame(unsigned frameSize,unsigned numTruncate
 		    memcpy(m_qTable + quantSize*quantIdx, fTo + i + 5, quantSize);
 		    if (quantSize*quantIdx+quantSize > m_qTableSize) {
 			m_qTableSize = quantSize*quantIdx+quantSize;
-			LOG(NOTICE) << "Quantization table idx:" << quantIdx << " precision:" << precision << " size:" << quantSize << " total size:" << m_qTableSize;
+			LOG_S(INFO)  << "Quantization table idx:" << quantIdx << " precision:" << precision << " size:" << quantSize << " total size:" << m_qTableSize;
 		    }
 		}
 
@@ -63,7 +64,7 @@ void MJPEGVideoSource::afterGettingFrame(unsigned frameSize,unsigned numTruncate
 	    // SOS
 	    else if ( ((i+1) < frameSize) && (fTo[i] == 0xFF) && (fTo[i+1] == 0xDA) ) {            
 		int length = (fTo[i+2]<<8)|(fTo[i+3]);		    
-		LOG(DEBUG) << "SOS length:" << length;                
+		LOG_S(INFO)  << "SOS length:" << length;
 		
 		headerSize = i+length+2;                
 	    } else {
@@ -72,11 +73,11 @@ void MJPEGVideoSource::afterGettingFrame(unsigned frameSize,unsigned numTruncate
 	}
 
 	if (headerSize != 0) {
-	    LOG(DEBUG) << "headerSize:" << headerSize;
+	    LOG_S(INFO) << "headerSize:" << headerSize;
 	    fFrameSize = frameSize - headerSize;
 	    memmove( fTo, fTo + headerSize, fFrameSize );
 	} else {
-	    LOG(NOTICE) << "Bad header => dropping frame";
+	    LOG_S(INFO)  << "Bad header => dropping frame";
 	}
 
 	fNumTruncatedBytes = numTruncatedBytes;
