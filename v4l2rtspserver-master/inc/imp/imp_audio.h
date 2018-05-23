@@ -92,6 +92,7 @@ typedef enum {
 typedef enum {
 	AUDIO_SAMPLE_RATE_8000	= 8000,		/**< 8KHz采样率 */
 	AUDIO_SAMPLE_RATE_16000 = 16000,	/**< 16KHz采样率 */
+	AUDIO_SAMPLE_RATE_24000 = 24000,	/**< 24KHz采样率 */
 	AUDIO_SAMPLE_RATE_44100 = 44100,	/**< 44.1KHz采样率 */
 	AUDIO_SAMPLE_RATE_48000 = 48000,	/**< 48KHz采样率 */
 	AUDIO_SAMPLE_RATE_96000 = 96000,	/**< 96KHz采样率 */
@@ -1659,6 +1660,35 @@ int IMP_ADEC_ReleaseStream(int adChn,IMPAudioStream *stream);
  * @attention 无.
  */
  int IMP_AI_DisableAecRefFrame(int audioDevId, int aiChn, int audioAoDevId, int aoChn);
+
+/**
+ * @fn int IMP_AO_CacheSwitch(int audioDevId, int aoChn, int cache_en)
+ * 关闭音频播放缓存机制
+ * @param[in] audioDevId 音频设备号.
+ * @param[in] aoChn 音频输出通道号.
+ * @param[in] cache_en 缓存机制开启开关
+ *
+ * @retval 0 成功.
+ * @retval 非0 失败.
+ *
+ * @remarks 无.
+ * @attention 无.
+ */
+ int IMP_AO_CacheSwitch(int audioDevId, int aoChn, int cache_en);
+
+/**
+ * @fn int IMP_AO_FlushChnBuf(int audioDevId, int aoChn);
+ * 等待最后一段音频数据播完;
+ * @param[in] audioDevId 音频设备号.
+ * @param[in] aoChn 音频输出通道号.
+ *
+ * @retval 0 成功.
+ * @retval 非0 失败.
+ *
+ * @remarks 无.
+ * @attention 无.
+ */
+ int IMP_AO_FlushChnBuf(int audioDevId, int aoChn);
 
 #ifdef __cplusplus
 #if __cplusplus

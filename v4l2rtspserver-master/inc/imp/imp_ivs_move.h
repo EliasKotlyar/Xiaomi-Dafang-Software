@@ -14,7 +14,7 @@ extern "C"
 #endif
 #endif /* __cplusplus */
 
-#define IMP_IVS_MOVE_MAX_ROI_CNT		16
+#define IMP_IVS_MOVE_MAX_ROI_CNT		52
 
 #include <imp/imp_ivs.h>
 
@@ -34,21 +34,19 @@ extern "C"
  * 移动侦测算法的输入结构体
  */
 typedef struct {
-	int             sense[IMP_IVS_MOVE_MAX_ROI_CNT];   /**< 移动侦测的灵敏度，范围为0-4 */
+	int             sense[IMP_IVS_MOVE_MAX_ROI_CNT];   /**< 移动侦测的灵敏度, 对正常摄像机范围是0-4，对全景摄像机范围是0-8 */
 	int             skipFrameCnt;                      /*< 隔帧检测的个数 */
 	IMPFrameInfo    frameInfo;                         /**< 帧尺寸信息,只需要配置width和height */
 	IMPRect         roiRect[IMP_IVS_MOVE_MAX_ROI_CNT]; /*< 需要检测的roi区域坐标信息 */
-	int             roiRectCnt;                        /*< 需要检测的roi区域数量，范围为0-4，若为0：则不检测，1：检测roiRect 0
+	int             roiRectCnt;                        /*< 需要检测的roi区域数量，范围为0-51，若为0：则不检测，1：检测roiRect 0
 														 区域，2、检测roiRect 0,1区域，3、检测roiRect 0,1,2区域，依次类推 */
 } IMP_IVS_MoveParam;
-// I suppose it has something to do with this sequence of bytes which is located in appfs/etc/sensor/jxf22move.txt:
-	// 50 50 14 26 05 2b 3c 96 28 73 14 32 0f 28
 
 /*
  * 移动侦测算法的输出结构体
  */
 typedef struct {
-	int retRoi[IMP_IVS_MOVE_MAX_ROI_CNT];				/*< 区域检测移动结果，与roiRect坐标信息严格对应 */
+	int retRoi[IMP_IVS_MOVE_MAX_ROI_CNT];				/*< 区域检测移动结果，与roiRect坐标信息严格对应,0:表示未检测到运动，1：表示检测到运动 */
 } IMP_IVS_MoveOutput;
 
 /**

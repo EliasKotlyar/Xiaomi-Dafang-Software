@@ -68,6 +68,15 @@ typedef struct {
 } IMPFrameInfo;
 
 /**
+ * IMP帧时间参数.
+ */
+typedef struct {
+	uint64_t ts;						/**< 时间 */
+	uint64_t minus;						/**< 下限 */
+	uint64_t plus;						/**< 上限 */
+} IMPFrameTimestamp;
+
+/**
  * 编解码协议类型
  */
 typedef enum {
@@ -123,6 +132,8 @@ typedef enum {
 
 	PIX_FMT_RAW,
 
+	PIX_FMT_HSV,
+
 	PIX_FMT_NB,        /**< number of pixel formats. */
 } IMPPixelFormat;
 
@@ -163,6 +174,10 @@ static inline int calc_pic_size(int width, int height, IMPPixelFormat imp_pixfmt
 		BPP(PIX_FMT_YUYV422, 2, 1);
 		BPP(PIX_FMT_UYVY422, 2, 1);
 		BPP(PIX_FMT_RGB565BE, 2, 1);
+		BPP(PIX_FMT_BGR0, 4, 1);
+		BPP(PIX_FMT_BGR24, 3, 1);
+		BPP(PIX_FMT_HSV, 4, 1);
+		BPP(PIX_FMT_BGRA, 4, 1);
 	default: break;
 	}
 #undef BPP

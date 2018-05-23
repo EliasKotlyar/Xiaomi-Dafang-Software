@@ -123,20 +123,23 @@ extern "C"
 /**
  * ivs 的通用接口
  */
-typedef struct {
-	void  *param;                             /**< 输入参数 */
-	int   paramSize;                          /**< 参数空间大小 */
-	IMPPixelFormat pixfmt;                    /**< 算法需要数据格式 */
-	int  (*init)(void *param);                /**< 初始化函数 */
-	void (*exit)(void);                       /**< 注销函数 */
-	int  (*PreprocessSync)(IMPFrameInfo *frame);/**< 预处理函数，返回值：0->frame未被free,1->frame已free;-1->错误,frame已free */
-	int  (*ProcessAsync)(IMPFrameInfo *frame);/**< 处理函数,必须确保每个已用完的frame处于free状态,返回值:0->实际检测正常返回,1->跳帧检测正常返回,-1->错误 */
-	int  (*GetResult)(void **result);         /**< 获取结果资源 */
-	int  (*ReleaseResult)(void *result);      /**< 释放结果资源 */
-	int	 (*GetParam)(void *param);            /**< 获得算法参数 */
-	int	 (*SetParam)(void *param);            /**< 设置算法参数 */
-	int	 (*FlushFrame)(void);                 /**< 释放由外部通过ProcessAsync输入给算法后被缓存的所有frame */
-} IMPIVSInterface;
+typedef struct IMPIVSInterface IMPIVSInterface;
+
+struct IMPIVSInterface {
+	void  *param;													/**< 输入参数 */
+	int   paramSize;												/**< 参数空间大小 */
+	IMPPixelFormat pixfmt;											/**< 算法需要数据格式 */
+	int  (*init)(IMPIVSInterface *inf);								/**< 初始化函数 */
+	void (*exit)(IMPIVSInterface *inf);								/**< 注销函数 */
+	int  (*preProcessSync)(IMPIVSInterface *inf, IMPFrameInfo *frame);/**< 预处理函数，不对传入此函数的frame额外加锁，故无需free frame，返回值：>=0 正确，<0：错误 */
+	int  (*processAsync)(IMPIVSInterface *inf, IMPFrameInfo *frame);/**< 处理函数, SDK IVS 模块对传入此函数的frame 额外加了锁，故此函数必须在该frame使用完毕后尽快使用free_data函数解锁; 此函数是必须实现的函数,算法结果由此函数产生;返回值:0->实际检测正常返回,1->跳帧检测正常返回,-1->错误 */
+	int  (*getResult)(IMPIVSInterface *inf, void **result);			/**< 获取结果资源 */
+	int  (*releaseResult)(IMPIVSInterface *inf, void *result);		/**< 释放结果资源 */
+	int	 (*getParam)(IMPIVSInterface *inf, void *param);			/**< 获得算法参数 */
+	int	 (*setParam)(IMPIVSInterface *inf, void *param);			/**< 设置算法参数 */
+	int	 (*flushFrame)(IMPIVSInterface *inf);						/**< 释放由外部通过processAsync输入给算法后被缓存的所有frame */
+	void *priv;														/**< 私有变量 */
+};
 
 /**
  * 创建通道组

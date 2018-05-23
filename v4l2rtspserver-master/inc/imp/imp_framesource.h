@@ -110,6 +110,22 @@ typedef enum {
 } IMPFSChnType;
 
 /**
+* 通道FIFO类型
+*/
+typedef enum {
+	FIFO_CACHE_PRIORITY = 0,	/**< FIFO 优先缓存，然后输出数据 */
+	FIFO_DATA_PRIORITY,			/**< FIFO 优先输出数据，然后缓存 */
+} IMPFSChnFifoType;
+
+/**
+* 通道FIFO属性结构体
+*/
+typedef struct {
+	int maxdepth;				/**< FIFO 最大深度 */
+	IMPFSChnFifoType type;			/**< 通道FIFO类型 */
+} IMPFSChnFifoAttr;
+
+/**
  * 通道属性结构体
  */
 typedef struct {
@@ -299,6 +315,32 @@ int IMP_FrameSource_GetFrameDepth(int chnNum, int *depth);
 int IMP_FrameSource_GetFrame(int chnNum, IMPFrameInfo **frame);
 
 /**
+ * @fn IMP_FrameSource_GetTimedFrame(int chnNum, IMPFrameTimestamp *framets, int block, void *framedata, IMPFrameInfo *frame);
+ *
+ * 获取指定时间的图像
+ *
+ * @param[in] chnNum 通道的编号
+ * @param[in] framets 时间信息
+ * @param[in] block 阻塞属性
+ * @param[in] framedata 拷贝图像的内存指针
+ * @param[in] frame 获取到图像信息
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @remark
+ *
+ * 1.此接口可以获取指定通道指定时间的视频图像信息。图像信息主要包括：图像的宽度、高度、像素格式以及图片数据。
+ *
+ * 2.此接口需在通道已启用后才有效。
+ *
+ * 3.此接口需要先设置IMP_FrameSource_SetMaxDelay和IMP_FrameSource_SetDelay。
+ *
+ * @attention 无.
+ */
+int IMP_FrameSource_GetTimedFrame(int chnNum, IMPFrameTimestamp *framets, int block, void *framedata, IMPFrameInfo *frame);
+
+/**
  * @fn IMP_FrameSource_ReleaseFrame(int chnNum, IMPFrameInfo *frame);
  *
  * 释放获取的图像
@@ -314,6 +356,134 @@ int IMP_FrameSource_GetFrame(int chnNum, IMPFrameInfo **frame);
  * @attention 无.
  */
 int IMP_FrameSource_ReleaseFrame(int chnNum, IMPFrameInfo *frame);
+
+/**
+ * @fn IMP_FrameSource_SnapFrame(int chnNum, IMPPixelFormat fmt, int width, int height, void *framedata, IMPFrameInfo *frame);
+ *
+ * 获取图像
+ *
+ * @param[in] chnNum 通道的编号
+ * @param[in] fmt    图像格式
+ * @param[in] width  图像宽度
+ * @param[in] height 图像高度
+ * @param[in] framedata 拷贝图像的内存指针
+ * @param[in] frame 获取到图像信息
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @remark
+ *
+ * 1.此接口可以获取一帧指定格式和大小的图像；目前格式支持NV12，YUYV422；大小和通道分辨率一致；不需要调用IMP_FrameSource_SetFrameDepth接口.
+ *
+ * 2.此接口需在通道已启用后才有效。
+ *
+ *
+ * @attention 无.
+ */
+int IMP_FrameSource_SnapFrame(int chnNum, IMPPixelFormat fmt, int width, int height, void *framedata, IMPFrameInfo *frame);
+
+/**
+ * @fn IMP_FrameSource_SetMaxDelay(int chnNum, int maxcnt);
+ *
+ * 设置最大延迟帧数
+ *
+ * @param[in] chnNum 通道的编号
+ * @param[in] maxcnt 最大延迟，单位帧
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @remark 无.
+ *
+ * @attention 使用时需要在函数IMP_FrameSource_CreateChn与IMP_FrameSource_EnableChn之间调用.
+ */
+int IMP_FrameSource_SetMaxDelay(int chnNum, int maxcnt);
+
+/**
+ * @fn IMP_FrameSource_GetMaxDelay(int chnNum, int *maxcnt);
+ *
+ * 获取最大延迟帧数
+ *
+ * @param[in] chnNum 通道的编号
+ * @param[out] maxcnt 最大延迟，单位帧
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @remark 无.
+ *
+ * @attention 使用时需要在函数IMP_FrameSource_CreateChn之后.
+ */
+int IMP_FrameSource_GetMaxDelay(int chnNum, int *maxcnt);
+
+/**
+ * @fn IMP_FrameSource_SetDelay(int chnNum, int cnt);
+ *
+ * 设置延迟帧数
+ *
+ * @param[in] chnNum 通道的编号
+ * @param[in] cnt 延迟，单位帧
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @remark 无.
+ *
+ * @attention 使用时需要在函数IMP_FrameSource_SetMaxDelay之后调用.
+ */
+int IMP_FrameSource_SetDelay(int chnNum, int cnt);
+
+/**
+ * @fn IMP_FrameSource_GetDelay(int chnNum, int *cnt);
+ *
+ * 获取延迟帧数
+ *
+ * @param[in] chnNum 通道的编号
+ * @param[out] cnt 延迟，单位帧
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @remark 无.
+ *
+ * @attention 使用时需要在函数IMP_FrameSource_CreateChn之后.
+ */
+int IMP_FrameSource_GetDelay(int chnNum, int *cnt);
+
+/**
+ * @fn IMP_FrameSource_SetChnFifoAttr(int chnNum, IMPFSChnFifoAttr *attr);
+ *
+ * 设置通道最大缓存FIFO属性
+ *
+ * @param[in] chnNum 通道的编号
+ * @param[in] attr	FIFO属性，包括 FIFO最大深度，单位帧；FIFO 类型.
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @remark 无.
+ *
+ * @attention 使用时需要在函数IMP_FrameSource_CreateChn与IMP_FrameSource_EnableChn之间调用.
+ */
+int IMP_FrameSource_SetChnFifoAttr(int chnNum, IMPFSChnFifoAttr *attr);
+
+/**
+ * @fn IMP_FrameSource_GetChnFifoAttr(int chnNum, IMPFSChnFifoAttr *attr);
+ *
+ * 获取通道最大缓存FIFO属性
+ *
+ * @param[in] chnNum 通道的编号
+ * @param[out] attr	FIFO属性.
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @remark 无.
+ *
+ * @attention 使用时需要在函数IMP_FrameSource_CreateChn之后.
+ */
+int IMP_FrameSource_GetChnFifoAttr(int chnNum, IMPFSChnFifoAttr *attr);
 
 #ifdef __cplusplus
 #if __cplusplus

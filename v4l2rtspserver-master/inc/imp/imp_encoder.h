@@ -50,11 +50,11 @@ extern "C"
  * 定义编码Channel码率控制器模式
  */
 typedef enum {
-	ENC_RC_MODE_H264FIXQP               = 0,	/**< H.264 Fixqp 模式（支持） */
-	ENC_RC_MODE_H264CBR                 = 1,	/**< H.264 CBR 模式（支持） */
-	ENC_RC_MODE_H264ABR                 = 2,	/**< H.264 ABR 模式 */
-	ENC_RC_MODE_H264VBR                 = 3,	/**< H.264 VBR 模式 */
-	ENC_RC_MODE_H264INV                 = 4,	/**< H.264 INV 模式 */
+	ENC_RC_MODE_FIXQP               = 0,	/**< Fixqp 模式 */
+	ENC_RC_MODE_CBR                 = 1,	/**< CBR 模式 */
+	ENC_RC_MODE_VBR                 = 2,	/**< VBR 模式*/
+	ENC_RC_MODE_SMART               = 3,	/**< Smart 模式*/
+	ENC_RC_MODE_INV                 = 4,	/**< INV 模式 */
 } IMPEncoderRcMode;
 
 /**
@@ -69,8 +69,6 @@ typedef struct {
  * 定义H.264编码Channel Fixqp属性结构
  */
 typedef struct {
-	uint32_t			maxGop;			/**< H.264 gop值，必须是帧率的整数倍 */
-	IMPEncoderFrmRate	outFrmRate;		/**< 编码Channel的输出帧率（输出帧率不能大于输入帧率）*/
 	uint32_t			qp;				/**< 帧级Qp值 */
 } IMPEncoderAttrH264FixQP;
 
@@ -78,34 +76,47 @@ typedef struct {
  * 定义H.264编码Channel CBR属性结构
  */
 typedef struct {
-	uint32_t			maxGop;			/**< H.264 gop值，必须是帧率的整数倍 */
-	IMPEncoderFrmRate	outFrmRate;		/**< 编码Channel的输出帧率（输出帧率不能大于输入帧率）*/
 	uint32_t			maxQp;			/**< 编码器支持图像最大QP */
 	uint32_t			minQp;			/**< 编码器支持图像最小QP */
 	uint32_t			outBitRate;		/**< 编码器输出码率,以kbps为单位 */
-	uint32_t			maxFPS;			/**< 最大帧率 */
-	uint32_t			minFPS;			/**< 最小帧率 */
-	int					IBiasLvl;		/**< I帧比重，支持(-3~3)，7 个级别 */
-	uint32_t			FrmQPStep;		/**< 帧间QP变化步长 */
-	uint32_t			GOPQPStep;		/**< GOP间QP变化步长 */
-	bool				AdaptiveMode;	/**< 自适应模式*/
-	bool				GOPRelation;	/**< GOP是否关联 */
+	int					iBiasLvl;		/**< 调整I帧QP以调节I帧的图像质量及其码流大小,范围:[-3,3] */
+	uint32_t			frmQPStep;		/**< 帧间QP变化步长 */
+	uint32_t			gopQPStep;		/**< GOP间QP变化步长 */
+	bool				adaptiveMode;	/**< 自适应模式*/
+	bool				gopRelation;	/**< GOP是否关联 */
 } IMPEncoderAttrH264CBR;
 
 /**
  * 定义H.264编码Channel VBR属性结构
  */
 typedef struct {
-	uint32_t			maxGop;			/**< H.264 gop值，必须是帧率的整数倍 */
-	IMPEncoderFrmRate	outFrmRate;		/**< 编码Channel的输出帧率（输出帧率不能大于输入帧率）*/
 	uint32_t			maxQp;			/**< 编码器支持图像最大QP */
 	uint32_t			minQp;			/**< 编码器支持图像最小QP */
 	uint32_t			staticTime;		/**< 码率统计时间,以秒为单位 */
 	uint32_t			maxBitRate;		/**< 编码器输出最大码率,以kbps为单位 */
+    int32_t             iBiasLvl;       /**< 调整I帧QP以调节I帧的图像质量及其码流大小,范围:[-3,3] */
 	uint32_t			changePos;		/**< VBR 开始调整 Qp 时的码率相对于最大码率的比例,取值范围:[50, 100] */
-	uint32_t			FrmQPStep;		/**< 帧间QP变化步长 */
-	uint32_t			GOPQPStep;		/**< GOP间QP变化步长 */
+    uint32_t            qualityLvl;     /**< 视频质量最低水平, 范围[0-7], 值越低图像质量越高, 但码流越大, minBitRate = maxBitRate * quality[qualityLvl], 其中quality[] = {0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1} */
+	uint32_t			frmQPStep;		/**< 帧间QP变化步长 */
+	uint32_t			gopQPStep;		/**< GOP间QP变化步长 */
+	bool				gopRelation;	/**< gop是否关联 */
 } IMPEncoderAttrH264VBR;
+
+/**
+ * 定义H.264编码Channel Smart属性结构
+ */
+typedef struct {
+	uint32_t			maxQp;			/**< 编码器支持图像最大QP */
+	uint32_t			minQp;			/**< 编码器支持图像最小QP */
+	uint32_t			staticTime;		/**< 码率统计时间,以秒为单位 */
+	uint32_t			maxBitRate;		/**< 编码器输出最大码率,以kbps为单位 */
+    int32_t             iBiasLvl;       /**< 调整I帧QP以调节I帧的图像质量及其码流大小,范围:[-3,3] */
+	uint32_t			changePos;		/**< 开始调整 Qp 时的码率相对于最大码率的比例,取值范围:[50, 100] */
+    uint32_t            qualityLvl;     /**< 视频质量最低水平, 范围[0-7], 值越低图像质量越高, 但码流越大. minBitRate = maxBitRate * quality[qualityLvl], 其中quality[] = {0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1} */
+	uint32_t			frmQPStep;		/**< 帧间QP变化步长 */
+	uint32_t			gopQPStep;		/**< gop间QP变化步长 */
+	bool				gopRelation;	/**< gop是否关联 */
+} IMPEncoderAttrH264Smart;
 
 /**
  * 定义H.264编码Channel去马赛克属性
@@ -115,7 +126,7 @@ typedef struct {
 	bool				isAutoMode;		/**< 开启自动去马赛克模式， 0:手动，1：自动 */
 	int					demaskCnt;		/**< 去马赛克保持时间参数 */
 	int					demaskThresd;	/**< 去马赛克阈值 */
-} IMPEncoderAttrH264Demask;
+} IMPEncoderAttrDemask;
 
 /**
  * 定义H.264编码Channel去噪属性,一经使能不能改变,但去噪类型可以动态改变;
@@ -125,7 +136,7 @@ typedef struct {
 	int					dnType;			/**< 去噪类型,0:忽略，不降噪,1:使用IP帧类型降噪,2:使用I帧类型降噪 */
 	int					dnIQp;			/**< 去噪I帧量化参数 */
 	int					dnPQp;			/**< 去噪P帧量化参数 */
-} IMPEncoderAttrH264Denoise;
+} IMPEncoderAttrDenoise;
 
 /**
  * 定义H.264编码Channel输入帧使用模式
@@ -143,43 +154,47 @@ typedef struct {
 	bool				enable;			/**< 是否使能输入帧使用模式 */
 	EncFrmUsedMode		frmUsedMode;	/**< 输入帧使用模式 */
 	uint32_t			frmUsedTimes;	/**< 在重复帧或丢帧模式下每次使用的帧间隔 */
-} IMPEncoderAttrH264FrmUsed;
+} IMPEncoderAttrFrmUsed;
 
 typedef enum {
-	IMP_H264_STYPE_N11			= 0,	/**< 1倍跳帧参考（单实例） */
-	IMP_H264_STYPE_N1X			= 1,	/**< 1倍跳帧参考（多实例） */
-	IMP_H264_STYPE_N2X			= 2,	/**< 2倍跳帧参考 */
-	IMP_H264_STYPE_N4X			= 3,	/**< 4倍跳帧参考 */
-	IMP_H264_STYPE_HN1_FALSE	= 4,	/**< 高级跳帧模式：N,1,HI_FALSE */
-	IMP_H264_STYPE_HN1_TRUE		= 5,	/**< 高级跳帧模式：NN,1,HI_TURE */
-	IMP_H264_STYPE_H1M_TRUE		= 6,	/**< 高级跳帧模式：N1,M,HI_TRUE */
-} IMPH264SkipType;
+	IMP_Encoder_STYPE_N1X			= 0,	/**< 1倍跳帧参考 */
+	IMP_Encoder_STYPE_N2X			= 1,	/**< 2倍跳帧参考 */
+	IMP_Encoder_STYPE_N4X			= 2,	/**< 4倍跳帧参考 */
+	IMP_Encoder_STYPE_HN1_FALSE	    = 3,	/**< 高级跳帧模式：N1开放跳帧 */
+	IMP_Encoder_STYPE_HN1_TRUE		= 4,	/**< 高级跳帧模式：N1封闭跳帧 */
+	IMP_Encoder_STYPE_H1M_FALSE	    = 5,	/**< 高级跳帧模式：1M开放跳帧 */
+	IMP_Encoder_STYPE_H1M_TRUE		= 6,	/**< 高级跳帧模式：1M封闭跳帧 */
+} IMPSkipType;
 
 typedef enum {
-	IMP_H264_FS_IDR		= 0,	/**< 高级跳帧模式中的关键帧 */
-	IMP_H264_FS_BASE	= 1,	/**< 高级跳帧模式中的参考帧 */
-	IMP_H264_FS_ENHANCE	= 2,	/**< 高级跳帧模式中的增强帧 */
-} IMPH264RefType;
+	IMP_Encoder_FSTYPE_IDR		= 0,	/**< 高级跳帧模式中的关键帧 */
+	IMP_Encoder_FSTYPE_LBASE	= 1,	/**< 高级跳帧模式中的长期基本帧 */
+	IMP_Encoder_FSTYPE_SBASE	= 2,	/**< 高级跳帧模式中的短期基本帧 */
+	IMP_Encoder_FSTYPE_ENHANCE	= 3,	/**< 高级跳帧模式中的增强帧 */
+} IMPRefType;
 
 /**
  * 定义H264高级跳帧类型结构体
  */
 typedef struct {
-	IMPH264SkipType	h264SkipType;	/**< 跳帧类型 */
+	IMPSkipType	    skipType;	/**< 跳帧类型 */
 	int				m;				/**< 增强帧间隔数 */
 	int				n;				/**< 参考帧间隔数 */
-} IMPEncoderAttrH264HSkip;
+	int				maxSameSceneCnt;/**< 同一场景占用gop最大数目,仅对H1M Skip类型有效,若设为未大于0,则m值不起作用 */
+	int				bEnableScenecut;/**< 是否使能场景切换,仅对H1M Skip类型有效 */
+	int				bBlackEnhance;	/**< 是否使得增强帧以空码流输出 */
+} IMPEncoderAttrHSkip;
 
 /**
- * 定义H264空白高级跳帧类型结构体
+ * 定义H264高级跳帧类型初始化结构体
  */
 typedef struct {
-	int				i_skip_distance;	/**< 空白帧连续个数 */
-} IMPEncoderAttrH264BSkip;
-
+	IMPEncoderAttrHSkip	hSkipAttr;	/**< 高级跳帧属性 */
+	IMPSkipType			maxHSkipType;/**< 需要使用的最大跳帧类型 */
+} IMPEncoderAttrInitHSkip;
 
 /**
- * 定义编码Channel码率控制器属性
+ * 定义编码Channel码率控制器码率控制模式属性
  */
 typedef struct {
 	IMPEncoderRcMode rcMode;						/**< RC 模式 */
@@ -187,29 +202,38 @@ typedef struct {
 		IMPEncoderAttrH264FixQP	 attrH264FixQp;		/**< H.264 协议编码Channel Fixqp 模式属性 */
 		IMPEncoderAttrH264CBR	 attrH264Cbr;		/**< H.264 协议编码Channel Cbr 模式属性 */
 		IMPEncoderAttrH264VBR	 attrH264Vbr;		/**< H.264 协议编码Channel Vbr 模式属性 */
+		IMPEncoderAttrH264Smart	 attrH264Smart;		/**< H.264 协议编码Channel Smart 模式属性 */
 	};
-	IMPEncoderAttrH264FrmUsed	attrH264FrmUsed;	/**< 输入帧使用模式属性 */
-	IMPEncoderAttrH264Demask	attrH264Demask;		/**< 去马赛克属性 */
-	IMPEncoderAttrH264Denoise	attrH264Denoise;	/**< 去噪属性 */
-	IMPEncoderAttrH264HSkip		attrH264HSkip;		/**< H264高级跳帧属性 */
-	IMPEncoderAttrH264BSkip		attrH264BSkip;		/**< H264空白跳帧属性 */
+} IMPEncoderAttrRcMode;
+
+/**
+ * 定义编码Channel码率控制器属性
+ */
+typedef struct {
+    IMPEncoderFrmRate	        outFrmRate;		/**< 编码Channel的输出帧率（输出帧率不能大于输入帧率）*/
+    uint32_t			        maxGop;			/**< gop值，必须是帧率的整数倍 */
+    IMPEncoderAttrRcMode        attrRcMode;     /**< 码率控制模式属性 */
+	IMPEncoderAttrFrmUsed	    attrFrmUsed;	/**< 输入帧使用模式属性 */
+	IMPEncoderAttrDemask	    attrDemask;		/**< 去马赛克属性 */
+	IMPEncoderAttrDenoise	    attrDenoise;	/**< 去噪属性 */
+	IMPEncoderAttrInitHSkip	    attrHSkip;		/**< 高级跳帧初始化属性 */
 } IMPEncoderRcAttr;
 
 /**
  * H264码流NALU类型
  */
 typedef enum {
-	IMP_NAL_UNKNOWN		= 0,	/**< 未指定 */
-	IMP_NAL_SLICE		= 1,	/**< 一个非IDR图像的编码条带  */
-	IMP_NAL_SLICE_DPA	= 2,	/**< 编码条带数据分割块A */
-	IMP_NAL_SLICE_DPB	= 3,	/**< 编码条带数据分割块B */
-	IMP_NAL_SLICE_DPC	= 4,	/**< 编码条带数据分割块C */
-	IMP_NAL_SLICE_IDR	= 5,	/**< IDR图像的编码条带 */
-	IMP_NAL_SEI			= 6,	/**< 辅助增强信息 (SEI) */
-	IMP_NAL_SPS			= 7,	/**< 序列参数集 */
-	IMP_NAL_PPS			= 8,	/**< 图像参数集 */
-	IMP_NAL_AUD			= 9,	/**< 访问单元分隔符 */
-	IMP_NAL_FILLER		= 12,	/**< 填充数据 */
+	IMP_H264_NAL_UNKNOWN		= 0,	/**< 未指定 */
+	IMP_H264_NAL_SLICE		    = 1,	/**< 一个非IDR图像的编码条带  */
+	IMP_H264_NAL_SLICE_DPA	    = 2,	/**< 编码条带数据分割块A */
+	IMP_H264_NAL_SLICE_DPB	    = 3,	/**< 编码条带数据分割块B */
+	IMP_H264_NAL_SLICE_DPC	    = 4,	/**< 编码条带数据分割块C */
+	IMP_H264_NAL_SLICE_IDR	    = 5,	/**< IDR图像的编码条带 */
+	IMP_H264_NAL_SEI			= 6,	/**< 辅助增强信息 (SEI) */
+	IMP_H264_NAL_SPS			= 7,	/**< 序列参数集 */
+	IMP_H264_NAL_PPS			= 8,	/**< 图像参数集 */
+	IMP_H264_NAL_AUD			= 9,	/**< 访问单元分隔符 */
+	IMP_H264_NAL_FILLER		    = 12,	/**< 填充数据 */
 } IMPEncoderH264NaluType;
 
 /**
@@ -241,7 +265,7 @@ typedef struct {
 	uint32_t	packCount;				/**< 一帧码流的所有包的个数 */
 	uint32_t	seq;					/**< 码流序列号，按帧获取帧序号，按包获取包序号 */
 	union {
-		IMPH264RefType h264RefType;
+		IMPRefType refType;
 	};
 } IMPEncoderStream;
 
@@ -329,6 +353,56 @@ typedef struct {
 	IMPRect		rect;		/**< 区域坐标属性 */
 } IMPEncoderROICfg;
 
+/**
+ * 定义码率控制中超大帧处理模式
+ */
+typedef enum {
+    IMP_RC_SUPERFRM_NONE        = 0,    /**< 无特殊策略, 支持 */
+    IMP_RC_SUPERFRM_DISCARD     = 1,    /**< 丢弃超大帧, 不支持, 由调用者自己决定是否丢弃 */
+    IMP_RC_SUPERFRM_REENCODE    = 2,    /**< 重编超大帧, 支持 */
+    IMP_RC_SUPERFRM_BUTT        = 3,
+} IMPEncoderSuperFrmMode;
+
+/**
+ * 码率控制优先级枚举
+ */
+typedef enum {
+    IMP_RC_PRIORITY_RDO                 = 0,    /**< 目标码率与质量平衡 */
+    IMP_RC_PRIORITY_BITRATE_FIRST       = 1,    /**< 目标码率优先 */
+    IMP_RC_PRIORITY_FRAMEBITS_FIRST     = 2,    /**< 超大帧阈值优先 */
+    IMP_RC_PRIORITY_BUTT                = 3,
+} IMPEncoderRcPriority;
+
+/**
+ * 超大帧处理策略参数
+ */
+typedef struct {
+    IMPEncoderSuperFrmMode      superFrmMode;       /**< 超大帧处理模式,默认为 SUPERFRM_REENCODE */
+    uint32_t                    superIFrmBitsThr;   /**< I 帧超大阈值, 默认为w*h*3/2*8/ratio, ratio: 主分辨率为6, 次分辨率为3 */
+    uint32_t                    superPFrmBitsThr;   /**< P 帧超大阈值, 默认为I帧超大阈值除以1.4 */
+    uint32_t                    superBFrmBitsThr;   /**< B 帧超大阈值, 默认为P帧超大阈值除以1.3, 暂不支持B帧 */
+    IMPEncoderRcPriority        rcPriority;         /**< 码率控制优先级, 默认为 IMP_RC_PRIORITY_RDO */
+} IMPEncoderSuperFrmCfg;
+
+/**
+ * 定义 H.264 协议编码通道变换、量化结构体
+ */
+typedef struct {
+    uint32_t    intraTransMode;             /**< 帧间预测的变换模式 0:支持 4x4,8x8 变换, high profile 支持; 1:4x4 变换, baseline, main, high profile 均支持; 2: 8x8 变换, high profile 支持; 目前只支持配置1 */
+    uint32_t    interTransMode;             /**< 帧间预测的变换模式 0:支持 4x4,8x8 变换, high profile 支持; 1:4x4 变换, baseline, main, high profile 均支持; 2: 8x8 变换, high profile 支持; 目前只支持配置1 */
+    bool        bScalingListValid;          /**< interScalingList8x8、intraScalingList8x8 是否有效标识, 只在 high profile 下才有意义; 0:无效, 1:有效; 只支持配置0 */
+    uint8_t     interScalingList8X8[64];    /**< 帧间预测 8x8 的量化表, 在 high profile 下, 用户可以使用自己的量化表, 保留,暂不使用; 取值范围:[1, 255] */
+    uint8_t     intraScalingList8X8[64];    /**< 帧内预测 8x8 的量化表, 在 high profile 下, 用户可以使用自己的量化表, 保留, 暂不使用; 取值范围:[1, 255] */
+    int         chroma_qp_index_offset;     /**< 具体含义请参见 H.264 协议, 系统默认值为 0; 取值范围:[-12, 12] */
+} IMPEncoderH264TransCfg;
+
+/*
+ MPEncoderJpegeQl*定义JPEG编码量化表参数结构体
+ */
+typedef struct {
+    bool user_ql_en;/**< 0: 使用默认量化表; 1:使用用户量化表*/
+    uint8_t qmem_table[256];/**< 用户自定义量化表*/
+} IMPEncoderJpegeQl;
 /**
  * @fn int IMP_Encoder_CreateGroup(int encGroup)
  *
@@ -691,40 +765,39 @@ int IMP_Encoder_SetChnColor2Grey(int encChn, const IMPEncoderColor2GreyCfg *pstC
 int IMP_Encoder_GetChnColor2Grey(int encChn, IMPEncoderColor2GreyCfg *pstColor2Grey);
 
 /**
- * @fn int IMP_Encoder_SetChnRcAttr(int encChn, const IMPEncoderRcAttr *pstRcCfg).
+ * @fn int IMP_Encoder_SetChnAttrRcMode(int encChn, const IMPEncoderAttrRcMode *pstRcModeCfg).
  *
- * 设置码率控制属性
+ * 设置码率控制模式属性
  *
  * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
- * @param[in] pstRcCfg 码率控制属性参数
+ * @param[in] pstRcCfg 码率控制模式属性参数
  *
  * @retval 0 成功
  * @retval 非0 失败
  *
- * @remarks 调用此API会设置通道的码率控制属性，下一个IDR生效,调用此API需要通道已经存在。
+ * @remarks 调用此API会设置通道的码率控制模式属性，下一个IDR生效,调用此API需要通道已经存在。
  *
- * @attention 目前，码率控制支持ENC_RC_MODE_H264FIXQP与ENC_RC_MODE_H264CBR。
- * ENC_RC_MODE_H264FIXQP支持配置qp，ENC_RC_MODE_H264CBR支持配置outBitRate。
+ * @attention 目前，码率控制模式支持ENC_RC_MODE_FIXQP, ENC_RC_MODE_CBR, ENC_RC_MODE_VBR 与 ENC_RC_MODE_SMART
  * @attention 此函数对JPEG通道无意义。
  */
-int IMP_Encoder_SetChnAttrRcMode(int encChn, const IMPEncoderRcAttr *pstRcCfg);
+int IMP_Encoder_SetChnAttrRcMode(int encChn, const IMPEncoderAttrRcMode *pstRcModeCfg);
 
 /**
- * @fn int IMP_Encoder_GetChnRcAttr(int encChn, IMPEncoderRcAttr *pstRcCfg).
+ * @fn int IMP_Encoder_GetChnAttrRcMode(int encChn, IMPEncoderAttrRcMode *pstRcModeCfg).
  *
- * 获取码率控制属性
+ * 获取码率控制模式属性
  *
  * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
- * @param[out] pstRcCfg 码率控制属性参数
+ * @param[out] pstRcCfg 码率控制模式属性参数
  *
  * @retval 0 成功
  * @retval 非0 失败
  *
- * @remarks 调用此API会获取通道的码率控制属性，调用此API需要通道已经存在。
+ * @remarks 调用此API会获取通道的码率控制模式属性，调用此API需要通道已经存在。
  *
  * @attention 此函数对JPEG通道无意义。
  */
-int IMP_Encoder_GetChnAttrRcMode(int encChn, IMPEncoderRcAttr *pstRcCfg);
+int IMP_Encoder_GetChnAttrRcMode(int encChn, IMPEncoderAttrRcMode *pstRcModeCfg);
 
 /**
  * @fn int IMP_Encoder_SetChnFrmRate(int encChn, const IMPEncoderFrmRate *pstFps)
@@ -830,7 +903,7 @@ int IMP_Encoder_GetGOPSize(int encChn, IMPEncoderGOPSizeCfg *pstGOPSizeCfg);
 int IMP_Encoder_SetGOPSize(int encChn, const IMPEncoderGOPSizeCfg *pstGOPSizeCfg);
 
 /**
- * @fn int IMP_Encoder_SetChnH264Demask(int encChn, const IMPEncoderAttrH264Demask *pdemaskAttr)
+ * @fn int IMP_Encoder_SetChnDemask(int encChn, const IMPEncoderAttrDemask *pdemaskAttr)
  *
  * 设置通道去马赛克属性
  *
@@ -844,10 +917,10 @@ int IMP_Encoder_SetGOPSize(int encChn, const IMPEncoderGOPSizeCfg *pstGOPSizeCfg
  *
  * @attention 无。
  */
-int IMP_Encoder_SetChnH264Demask(int encChn, const IMPEncoderAttrH264Demask *pdemaskAttr);
+int IMP_Encoder_SetChnDemask(int encChn, const IMPEncoderAttrDemask *pdemaskAttr);
 
 /**
- * @fn int IMP_Encoder_GetChnH264Demask(int encChn, IMPEncoderAttrH264Demask *pdemaskAttr)
+ * @fn int IMP_Encoder_GetChnDemask(int encChn, IMPEncoderAttrDemask *pdemaskAttr)
  *
  * 获取通道去马赛克属性
  *
@@ -861,10 +934,10 @@ int IMP_Encoder_SetChnH264Demask(int encChn, const IMPEncoderAttrH264Demask *pde
  *
  * @attention 无。
  */
-int IMP_Encoder_GetChnH264Demask(int encChn, IMPEncoderAttrH264Demask *pdemaskAttr);
+int IMP_Encoder_GetChnDemask(int encChn, IMPEncoderAttrDemask *pdemaskAttr);
 
 /**
- * @fn int IMP_Encoder_SetChnH264FrmUsedMode(int encChn, const IMPEncoderAttrH264FrmUsed *pfrmUsedAttr)
+ * @fn int IMP_Encoder_SetChnFrmUsedMode(int encChn, const IMPEncoderAttrFrmUsed *pfrmUsedAttr)
  *
  * 设置通道输入帧使用模式属性
  *
@@ -878,10 +951,10 @@ int IMP_Encoder_GetChnH264Demask(int encChn, IMPEncoderAttrH264Demask *pdemaskAt
  *
  * @attention 无。
  */
-int IMP_Encoder_SetChnH264FrmUsedMode(int encChn, const IMPEncoderAttrH264FrmUsed *pfrmUsedAttr);
+int IMP_Encoder_SetChnFrmUsedMode(int encChn, const IMPEncoderAttrFrmUsed *pfrmUsedAttr);
 
 /**
- * @fn int IMP_Encoder_GetChnH264FrmUsedMode(int encChn, IMPEncoderAttrH264FrmUsed *pfrmUsedAttr)
+ * @fn int IMP_Encoder_GetChnFrmUsedMode(int encChn, IMPEncoderAttrFrmUsed *pfrmUsedAttr)
  *
  * 获取通道输入帧使用模式属性
  *
@@ -895,15 +968,15 @@ int IMP_Encoder_SetChnH264FrmUsedMode(int encChn, const IMPEncoderAttrH264FrmUse
  *
  * @attention 无。
  */
-int IMP_Encoder_GetChnH264FrmUsedMode(int encChn, IMPEncoderAttrH264FrmUsed *pfrmUsedAttr);
+int IMP_Encoder_GetChnFrmUsedMode(int encChn, IMPEncoderAttrFrmUsed *pfrmUsedAttr);
 
 /**
- * @fn int IMP_Encoder_SetChnH264Denoise(int encChn, const IMPEncoderAttrH264Denoise *pdenoiseAttr)
+ * @fn int IMP_Encoder_SetChnDenoise(int encChn, const IMPEncoderAttrDenoise *pdenoiseAttr)
  *
  * 设置通道去噪属性
  *
  * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
- * @param[out] pdenoiseAttr 去噪属性参数
+ * @param[in] pdenoiseAttr 去噪属性参数
  *
  * @retval 0 成功
  * @retval 非0 失败
@@ -912,10 +985,10 @@ int IMP_Encoder_GetChnH264FrmUsedMode(int encChn, IMPEncoderAttrH264FrmUsed *pfr
  *
  * @attention 无。
  */
-int IMP_Encoder_SetChnH264Denoise(int encChn, const IMPEncoderAttrH264Denoise *pdenoiseAttr);
+int IMP_Encoder_SetChnDenoise(int encChn, const IMPEncoderAttrDenoise *pdenoiseAttr);
 
 /**
- * @fn int IMP_Encoder_GetChnH264Denoise(int encChn, IMPEncoderAttrH264Denoise *pdenoiseAttr)
+ * @fn int IMP_Encoder_GetChnDenoise(int encChn, IMPEncoderAttrDenoise *pdenoiseAttr)
  *
  * 获取通道去噪属性
  *
@@ -929,7 +1002,60 @@ int IMP_Encoder_SetChnH264Denoise(int encChn, const IMPEncoderAttrH264Denoise *p
  *
  * @attention 此函数对JPEG通道无意义。
  */
-int IMP_Encoder_GetChnH264Denoise(int encChn, IMPEncoderAttrH264Denoise *pdenoiseAttr);
+int IMP_Encoder_GetChnDenoise(int encChn, IMPEncoderAttrDenoise *pdenoiseAttr);
+
+/**
+ * @fn int IMP_Encoder_SetChnHSkip(int encChn, const IMPEncoderAttrHSkip *phSkipAttr)
+ *
+ * 设置通道高级跳帧属性
+ *
+ * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[in] phSkipAttr 高级跳帧属性参数
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 调用此API会设置通道高级跳帧属性，调用此API需要通道已经存在。
+ * @remarks 若创建通道时设置的高级跳帧类型是 IMP_Encoder_STYPE_N1X 到 IMP_Encoder_STYPE_N2X 中的一个,
+ * 此API设置跳帧类型只能为 IMP_Encoder_STYPE_N1X 或 IMP_Encoder_STYPE_N2X 中的任意一个
+ * @remarks 若创建通道时设置的高级跳帧类型是 IMP_Encoder_STYPE_N4X 到 IMP_Encoder_STYPE_H1M_TRUE 中的一个，
+ * 则可以设置为任意一个高级跳帧类型
+ *
+ * @attention 无。
+ */
+int IMP_Encoder_SetChnHSkip(int encChn, const IMPEncoderAttrHSkip *phSkipAttr);
+
+/**
+ * @fn int IMP_Encoder_GetChnHSkip(int encChn, IMPEncoderAttrHSkip *phSkipAttr)
+ *
+ * 获取通道高级跳帧属性
+ *
+ * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[out] phSkipAttr 高级跳帧属性参数
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 调用此API会获取通道高级跳帧属性，调用此API需要通道已经存在。
+ */
+int IMP_Encoder_GetChnHSkip(int encChn, IMPEncoderAttrHSkip *phSkipAttr);
+
+/**
+ * @fn int IMP_Encoder_SetChnHSkipBlackEnhance(int encChn, const int bBlackEnhance)
+ *
+ * 设置通道高级跳帧中bBlackEnhance属性
+ *
+ * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[in] bBlackEnhance 逻辑值，对应IMPEncoderAttrHSkip中bBlackEnhance值
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 调用此API会设置通道高级跳帧中bBlackEnhance属性，调用此API需要通道已经存在。
+ *
+ * @attention 无。
+ */
+int IMP_Encoder_SetChnHSkipBlackEnhance(int encChn, const int bBlackEnhance);
 
 /**
  * @fn int IMP_Encoder_InsertUserData(int encChn, void *userData, uint32_t userDataLen)
@@ -991,6 +1117,185 @@ int IMP_Encoder_SetFisheyeEnableStatus(int encChn, int enable);
  * @attention 无
  */
 int IMP_Encoder_GetFisheyeEnableStatus(int encChn, int *enable);
+
+/**
+ * @fn int IMP_Encoder_SetChangeRef(int encChn, int bEnable)
+ *
+ * 设置是否允许改变BASE帧参考方式的状态
+ *
+ * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[in] enable 0：不允许改变，1，允许改变(默认)
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 此API必须在创建编码通道后调用，设置完后编码下一帧就会生效。
+ * @remarks 此API只适用于H264 SMART编码方式
+ *
+ * @attention 无
+ */
+int IMP_Encoder_SetChangeRef(int encChn, int bEnable);
+
+/**
+ * @fn int IMP_Encoder_GetChangeRef(int encChn, int *bEnable)
+ *
+ * 获取是否允许改变BASE帧参考方式的状态
+ *
+ * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[out] enable 返回是否允许改变BASE帧参考方式的状态，0：不允许改变，1，允许改变
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 此API只适用于H264
+ *
+ * @attention 无
+ */
+int IMP_Encoder_GetChangeRef(int encChn, int *bEnable);
+
+/**
+ * @fn int IMP_Encoder_SetMbRC(int encChn, int bEnable)
+ *
+ * 设置是否开启宏块级qp控制
+ *
+ * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[in] bEnable 0:不开启(默认), 1:开启
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 此API必须在创建编码通道后调用，设置完后编码下一帧就会生效。
+ *
+ * @attention 无
+ */
+int IMP_Encoder_SetMbRC(int encChn, int bEnable);
+
+/**
+ * @fn int IMP_Encoder_GetMbRC(int encChn, int *bEnable)
+ *
+ * 获取是否开启宏块级qp控制的状态
+ *
+ * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[out] bEnable 返回是否开启宏块级qp控制的状态, 0:不开启, 1:开启
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 此API只适用于H264
+ *
+ * @attention 无
+ */
+int IMP_Encoder_GetMbRC(int encChn, int *bEnable);
+
+/**
+ * @fn int IMP_Encoder_SetSuperFrameCfg(int encChn, const IMPEncoderSuperFrmCfg *pstSuperFrmParam)
+ *
+ * 设置编码超大帧配置
+ *
+ * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[in] pstSuperFrmParam 编码超大帧配置
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 如果通道未创建,则返回失败
+ * @remarks 此API只适用于H264
+ *
+ * @attention 无
+ */
+int IMP_Encoder_SetSuperFrameCfg(int encChn, const IMPEncoderSuperFrmCfg *pstSuperFrmParam);
+
+/**
+ * @fn int IMP_Encoder_GetSuperFrameCfg(int encChn, IMPEncoderSuperFrmCfg *pstSuperFrmParam)
+ *
+ * 获取编码超大帧配置
+ *
+ * @param[in] encChn 编码Channel号, 取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[out] pstSuperFrmParam 返回编码超大帧配置
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 如果通道未创建, 则返回失败
+ * @remarks 此API只适用于H264
+ *
+ * @attention 无
+ */
+int IMP_Encoder_GetSuperFrameCfg(int encChn, IMPEncoderSuperFrmCfg *pstSuperFrmParam);
+
+/**
+ * @fn int IMP_Encoder_SetH264TransCfg(int encChn, const IMPEncoderH264TransCfg *pstH264TransCfg)
+ *
+ * 设置 H.264 协议编码通道的变换、量化的属性
+ *
+ * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[in] pstH264TransCfg H.264 协议编码通道的变换、量化属性
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 如果通道未创建,则返回失败
+ * @remarks 此API只适用于H264
+ * @remarks 建议在创建编码channel之后，startRecvPic之前调用, 设置时先GetH264TransCfg，然后再SetH264TransCfg
+ *
+ * @attention 无
+ */
+int IMP_Encoder_SetH264TransCfg(int encChn, const IMPEncoderH264TransCfg *pstH264TransCfg);
+
+/**
+ * @fn int IMP_Encoder_GetH264TransCfg(int encChn, IMPEncoderH264TransCfg *pstH264TransCfg)
+ *
+ * 获取 H.264 协议编码通道的变换、量化属性
+ *
+ * @param[in] encChn 编码Channel号, 取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[out] pstH264TransCfg 返回H.264 协议编码通道的变换、量化属性
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 如果通道未创建, 则返回失败
+ * @remarks 此API只适用于H264
+ *
+ * @attention 无
+ */
+int IMP_Encoder_GetH264TransCfg(int encChn, IMPEncoderH264TransCfg *pstH264TransCfg);
+
+/**
+ * @fn int IMP_Encoder_SetJpegeQl(int encChn, const IMPEncoderJpegeQl *pstJpegeQl)
+ *
+ * 设置 JPEG 协议编码通道的量化表配置参数
+ *
+ * @param[in] encChn 编码Channel号,取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[in] pstJpegeQl JPEG 协议编码通道的量化表配置参数,前128个字节填入量化表，后128个字节填0
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 如果通道未创建,则返回失败
+ * @remarks 此API只适用于JPEG
+ *
+ * @attention 无
+ */
+int IMP_Encoder_SetJpegeQl(int encChn, const IMPEncoderJpegeQl *pstJpegeQl);
+
+/**
+ * @fn int IMP_Encoder_GetJpegeQl(int encChn, IMPEncoderJpegeQl *pstJpegeQl)
+ *
+ * 获取 JPEG 协议编码通道的量化表配置参数
+ *
+ * @param[in] encChn 编码Channel号, 取值范围: [0, @ref NR_MAX_ENC_CHN - 1]
+ * @param[out] pstJpegeQl 返回JPEG 协议编码通道的量化表配置参数
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 如果通道未创建, 则返回失败
+ * @remarks 此API只适用于JPEG
+ *
+ * @attention 无
+ */
+int IMP_Encoder_GetJpegeQl(int encChn, IMPEncoderJpegeQl *pstJpegeQl);
+
 
 /**
  * @}

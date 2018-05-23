@@ -135,6 +135,15 @@ typedef struct {
 } IMPOSDRgnAttr;
 
 /**
+ * OSD区域生效时间戳
+ */
+typedef struct {
+	uint64_t ts;						/**< 时间戳 */
+	uint64_t minus;						/**< 下限 */
+	uint64_t plus;						/**< 上限 */
+} IMPOSDRgnTimestamp;
+
+/**
  * OSD组区域属性
  */
 typedef struct {
@@ -281,6 +290,24 @@ int IMP_OSD_UnRegisterRgn(IMPRgnHandle handle, int grpNum);
  * @attention 无。
  */
 int IMP_OSD_SetRgnAttr(IMPRgnHandle handle, IMPOSDRgnAttr *prAttr);
+
+/**
+ * @fn int IMP_OSD_SetRgnAttrWithTimestamp(IMPRgnHandle handle, IMPOSDRgnAttr *prAttr, IMPOSDRgnTimestamp *prTs)
+ *
+ * 设置区域属性和生效时间
+ *
+ * @param[in] handle 区域句柄，IMP_OSD_CreateRgn的返回值
+ * @param[in] prAttr OSD区域属性
+ * @param[in] prTs 生效时间
+ *
+ * @retval 0 成功
+ * @retval 非0 失败
+ *
+ * @remarks 调用此API时要求对应的区域已经创建。
+ *
+ * @attention 无。
+ */
+int IMP_OSD_SetRgnAttrWithTimestamp(IMPRgnHandle handle, IMPOSDRgnAttr *prAttr, IMPOSDRgnTimestamp *prTs);
 
 /**
  * @fn int IMP_OSD_GetRgnAttr(IMPRgnHandle handle, IMPOSDRgnAttr *prAttr)

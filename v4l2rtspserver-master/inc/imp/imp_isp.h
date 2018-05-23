@@ -283,6 +283,7 @@ typedef enum {
 typedef enum {
 	IMPISP_TUNING_OPS_TYPE_AUTO,			/**< 该模块的操作为自动模式 */
 	IMPISP_TUNING_OPS_TYPE_MANUAL,			/**< 该模块的操作为手动模式 */
+	IMPISP_TUNING_OPS_TYPE_RANGE,    /**< 该模块的操作为设置范围模式 */
 	IMPISP_TUNING_OPS_TYPE_BUTT,			/**< 用于判断参数的有效性，参数大小必须小于这个值 */
 } IMPISPTuningOpsType;
 
@@ -393,6 +394,7 @@ typedef enum {
 	IMPISP_DRC_MEDIUM,				/**< ISP 动态范围压缩模块中压缩模式 */
 	IMPISP_DRC_LOW,					/**< ISP 动态范围压缩模块低压缩模式 */
 	IMPISP_DRC_DISABLE,				/**< ISP 动态范围压缩模块不使能 */
+	IMPISP_DRC_RANGE,				/**< ISP 动态范围压缩模块范围设置模式 */
 } IMPISPDrcMode;
 
 /**
@@ -401,6 +403,8 @@ typedef enum {
 typedef struct {
 	IMPISPDrcMode mode;				/**< ISP 动态范围压缩模块操作模式选择 */
 	unsigned char drc_strength;			/**< 手动模式下设置的目标值，取值范围为[0, 0xff] */
+	unsigned char dval_max;				/**< 范围模式最大值，取值范围为[0, 0xff] */
+	unsigned char dval_min;				/**< 范围模式最小值，取值范围为[0, 0xff] */
 	unsigned char slop_max;				/**< 强度控制参数，取值范围为[0, oxff] */
 	unsigned char slop_min;				/**< 强度控制参数，取值范围为[0, oxff] */
 	unsigned short black_level;			/**< DRC增强的最小像素值，取值范围为[0, oxfff] */
@@ -446,6 +450,8 @@ typedef struct {
 	IMPISPTuningOpsMode enable;			/**< 使能空间降噪功能 */
 	IMPISPTuningOpsType type;				/**< 空间降噪功能操作类型，自动或手动 */
 	unsigned char sinter_strength;				/**< 空间降噪强度，手动模式有效，取值范围为[0, 0xff] */
+	unsigned char sval_max;				/**< 空间降噪强度，手动模式有效，取值范围为[0, 0xff] */
+	unsigned char sval_min;				/**< 空间降噪强度，手动模式有效，取值范围为[0, 0xff] */
 } IMPISPSinterDenoiseAttr;
 
 /**
@@ -455,6 +461,7 @@ typedef enum {
 	IMPISP_TEMPER_DISABLE,				/**< ISP 时域降噪模块不使能 */
 	IMPISP_TEMPER_AUTO,					/**< ISP 时域降噪模块自动模式 */
 	IMPISP_TEMPER_MANUAL,				/**< ISP 时域降噪模块手动模式 */
+	IMPISP_TEMPER_RANGE,				/**< ISP 时域降噪模块范围设置模式 */
 } IMPISPTemperMode;
 
 /**
@@ -463,6 +470,8 @@ typedef enum {
 typedef struct imp_isp_temper_denoise_attr {
 	IMPISPTemperMode type;					/**< 时域降噪功能操作类型，不使能，自动或手动 */
 	unsigned char temper_strength;				/**< 时域降噪强度，手动模式有效，取值范围为[0, 0xff] */
+	unsigned char tval_max;						/**< 空间降噪范围设置模式最大值,取值范围为[0, 0xff] */
+	unsigned char tval_min;						/**< 空间降噪范围设置模式最小值,取值范围为[0, 0xff] */
 } IMPISPTemperDenoiseAttr;
 
 
@@ -926,6 +935,36 @@ int IMP_ISP_Tuning_SetISPVflip(IMPISPTuningOpsMode mode);
 int IMP_ISP_Tuning_GetISPVflip(IMPISPTuningOpsMode *pmode);
 
 /**
+ * @fn int IMP_ISP_Tuning_SetISPHVflip(IMPISPTuningOpsMode hmode, IMPISPTuningOpsMode vmode)
+ *
+ * 设置ISP图像H/V反转效果功能是否使能
+ *
+ * @param[in] hmode 是否使能图像H反转
+ * @param[in] vmode 是否使能图像V反转
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_SetISPHVflip(IMPISPTuningOpsMode hmode, IMPISPTuningOpsMode vmode);
+
+/**
+ * @fn int IMP_ISP_Tuning_GetISPHVflip(IMPISPTuningOpsMode *phmode, IMPISPTuningOpsMode *pvmode)
+ *
+ * 获取ISP图像H/V反转效果功能的操作状态
+ *
+ * @param[in] phmode 操作参数指针
+ * @param[in] pvmode 操作参数指针
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_GetISPHVflip(IMPISPTuningOpsMode *phmode, IMPISPTuningOpsMode *pvmode);
+
+/**
  * ISP 工作模式配置，正常模式或夜视模式。
  */
 typedef enum {
@@ -1313,6 +1352,49 @@ int IMP_ISP_Tuning_Awb_SetCwfShift(IMPISPWB *isp_wb_attr);
  *
  * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
  */
+
+typedef struct isp_core_rgb_coefft_wb_attr {
+		unsigned short rgb_coefft_wb_r;
+		unsigned short rgb_coefft_wb_g;
+		unsigned short rgb_coefft_wb_b;
+
+}IMPISPCOEFFTWB;
+/**
+ * @fn IMP_ISP_Tuning_Awb_GetRgbCoefft(IMPISPCOEFFTWB *isp_core_rgb_coefft_wb_attr)
+ *
+ * 获取sensor AWB RGB通道偏移参数。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_Awb_GetRgbCoefft(IMPISPCOEFFTWB *isp_core_rgb_coefft_wb_attr);
+/**
+ * @fn IMP_ISP_Tuning_Awb_SetRgbCoefft(IMPISPCOEFFTWB *isp_core_rgb_coefft_wb_attr)
+ *
+ * 设置sensor可以设置AWB RGB通道偏移参数。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ *
+ * 示例：
+ * @code
+ * IMPISPCOEFFTWB isp_core_rgb_coefft_wb_attr;
+ *
+ *isp_core_rgb_coefft_wb_attr.rgb_coefft_wb_r=x;
+ *isp_core_rgb_coefft_wb_attr.rgb_coefft_wb_g=y;
+ *isp_core_rgb_coefft_wb_attr.rgb_coefft_wb_b=z;
+ *IMP_ISP_Tuning_Awb_SetRgbCoefft(&isp_core_rgb_coefft_wb_attr);
+ if(ret){
+ IMP_LOG_ERR(TAG, "IMP_ISP_Tuning_Awb_SetRgbCoefft error !\n");
+ return -1;
+ }
+*/
+int IMP_ISP_Tuning_Awb_SetRgbCoefft(IMPISPCOEFFTWB *isp_core_rgb_coefft_wb_attr);
+
 int IMP_ISP_Tuning_SetMaxAgain(uint32_t gain);
 
 /**
@@ -1474,6 +1556,381 @@ typedef struct {
 * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
 */
 int IMP_ISP_Tuning_GetEVAttr(IMPISPEVAttr *attr);
+
+/**
+* @fn int IMP_ISP_Tuning_EnableMovestate(void)
+*
+* 当sensor在运动时，设置ISP进入运动态。
+*
+* @retval 0 成功
+* @retval 非0 失败，返回错误码
+*
+* @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+*/
+int IMP_ISP_Tuning_EnableMovestate(void);
+
+/**
+* @fn int IMP_ISP_Tuning_DisableMovestate(void)
+*
+* 当sensor从运动态恢复为静止态，设置ISP不使能运动态。
+*
+* @retval 0 成功
+* @retval 非0 失败，返回错误码
+*
+* @attention 在使用这个函数之前，IMP_ISP_Tuning_EnableMovestate已被调用。
+*/
+int IMP_ISP_Tuning_DisableMovestate(void);
+
+/**
+* 模式选择选项
+*/
+typedef enum {
+	IMPISP_TUNING_MODE_AUTO,    /**< 该模块的操作为自动模式 */
+	IMPISP_TUNING_MODE_MANUAL,    /**< 该模块的操作为手动模式 */
+	IMPISP_TUNING_MODE_RANGE,    /**< 该模块的操作为设置范围模式 */
+	IMPISP_TUNING_MODE_BUTT,    /**< 用于判断参数的有效性，参数大小必须小于这个值 */
+} IMPISPTuningMode;
+
+/**
+* 曝光参数
+*/
+typedef struct {
+	IMPISPTuningMode mode;    /**< 曝光模式，分为自动模式、手动模式、设置范围模式 */
+	uint16_t integration_time;    /**曝光时间 */
+	uint16_t max_integration_time;    /**< 最大曝光时间 */
+} IMPISPITAttr;
+
+/**
+ * @fn int IMP_ISP_Tuning_SetIntegrationTime(IMPISPITAttr *itattr)
+ *
+ * 设置AE参数。
+ *
+ * @param[in] itattr 曝光参数。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_SetIntegrationTime(IMPISPITAttr *itattr);
+
+/**
+ * @fn int IMP_ISP_Tuning_GetIntegrationTime(IMPISPITAttr *itattr)
+ *
+ * 获取曝光相关参数。
+ *
+ * @param[out] itattr 曝光参数。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_GetIntegrationTime(IMPISPITAttr *itattr);
+
+/**
+* 权重信息
+*/
+typedef struct {
+	unsigned char weight[15][15];    /**< 各区域权重信息 [0 ~ 15]*/
+} IMPISPWeight;
+
+/**
+ * @fn int IMP_ISP_Tuning_SetAeWeight(IMPISPWeight *ae_weight)
+ *
+ * 设置AE统计区域的权重。
+ *
+ * @param[in] ae_weight 各区域权重信息。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_SetAeWeight(IMPISPWeight *ae_weight);
+
+/**
+ * @fn int IMP_ISP_Tuning_GetAeWeight(IMPISPWeight *ae_weight)
+ *
+ * 获取AE统计区域的权重。
+ *
+ * @param[out] ae_weight 各区域权重信息。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_GetAeWeight(IMPISPWeight *ae_weight);
+
+/**
+ * @fn int IMP_ISP_Tuning_SetAwbWeight(IMPISPWeight *awb_weight)
+ *
+ * 设置AWB统计区域的权重。
+ *
+ * @param[in] awb_weight 各区域权重信息。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_SetAwbWeight(IMPISPWeight *awb_weight);
+
+/**
+ * @fn int IMP_ISP_Tuning_GetAwbWeight(IMPISPWeight *awb_weight)
+ *
+ * 获取AWB统计区域的权重。
+ *
+ * @param[out] awb_weight 各区域权重信息。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_GetAwbWeight(IMPISPWeight *awb_weight);
+
+/**
+* AE统计值参数
+*/
+typedef struct {
+	unsigned char ae_histhresh[4];    /**< AE统计直方图bin边界 [0 ~ 255]*/
+	unsigned short ae_hist[5];    /**< AE统计直方图bin值 [0 ~ 65535]*/
+	unsigned char ae_stat_nodeh;    /**< 水平方向有效统计区域个数 [0 ~ 15]*/
+	unsigned char ae_stat_nodev;    /**< 垂直方向有效统计区域个数 [0 ~ 15]*/
+} IMPISPAEHist;
+
+/**
+ * @fn int IMP_ISP_Tuning_SetAeHist(IMPISPAEHist *ae_hist)
+ *
+ * 设置AE统计相关参数。
+ *
+ * @param[in] ae_hist AE统计相关参数。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_SetAeHist(IMPISPAEHist *ae_hist);
+
+/**
+ * @fn int IMP_ISP_Tuning_GetAeHist(IMPISPAEHist *ae_hist)
+ *
+ * 获取AE统计值。
+ *
+ * @param[out] ae_hist AE统计值信息。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_GetAeHist(IMPISPAEHist *ae_hist);
+
+typedef struct {
+	unsigned short ae_sta_zone[15*15];		/**AE每个块的统计值*/
+} IMPISPAEZone;
+
+/**
+ * @fn int IMP_ISP_Tuning_GetAeZone(IMPISPAEZone *ae_zone)
+ *
+ * 获取AE每个块的统计值
+ *
+ * @param[out] ae_zone AE每个块的统计值。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_GetAeZone(IMPISPAEZone *ae_zone);
+
+/**
+* AWB统计值
+*/
+struct isp_core_awb_sta_info{
+	unsigned short r_gain;    /**< AWB加权r/g平均值 [0 ~ 4095]*/
+	unsigned short b_gain;    /**< AWB加权b/g平均值 [0 ~ 4095]*/
+	unsigned int awb_sum;    /**< 用于AWB统计的像素数 [0 ~ 4294967295]*/
+};
+/**
+* AWB统计模式
+*/
+enum isp_core_awb_stats_mode{
+	IMPISP_AWB_STATS_LEGACY_MODE = 0,    /**< 延迟模式 */
+	IMPISP_AWB_STATS_CURRENT_MODE = 1,    /**< 当前模式 */
+	IMPISP_AWB_STATS_MODE_BUTT,
+};
+/**
+* AWB统计值参数
+*/
+typedef struct {
+	struct isp_core_awb_sta_info awb_stat;    /**< AWB统计值 */
+	enum isp_core_awb_stats_mode awb_stats_mode;    /**< AWB统计模式 */
+	unsigned short awb_whitelevel;    /**< AWB统计数值上限 [0 ~ 1023]*/
+	unsigned short awb_blacklevel;    /**< AWB统计数值下限 [0 ~ 1023]*/
+	unsigned short cr_ref_max;    /**< AWB统计白点区域r/g最大值 [0 ~ 4095]*/
+	unsigned short cr_ref_min;    /**< AWB统计白点区域r/g最小值 [0 ~ 4095]*/
+	unsigned short cb_ref_max;    /**< AWB统计白点区域b/g最大值  [0 ~ 4095]*/
+	unsigned short cb_ref_min;    /**< AWB统计白点区域b/g最大值  [0 ~ 4095]*/
+	unsigned char awb_stat_nodeh;    /**< 水平方向有效统计区域个数 [0 ~ 15]*/
+	unsigned char awb_stat_nodev;    /**< 垂直方向有效统计区域个数 [0 ~ 15]*/
+} IMPISPAWBHist;
+
+struct isp_core_wb_zone_info{
+	unsigned short red_green;    	/**< r_gain*/
+	unsigned short blue_green;    	/**< b_gain*/
+	unsigned int sum;    			/**< 用于统计的像素个数 */
+};
+
+typedef struct {
+	struct isp_core_wb_zone_info awb_sta_zone[15][15];		/** AWB每个块的统计值*/
+} IMPISPAWBZone;
+
+/**
+ * @fn int int IMP_ISP_Tuning_GetAwbZone(IMPISPAWBZone *awb_zone)
+ *
+ * 获取AWB每个块的统计值。
+ *
+ * @param[out] awb_zone AWB每个块的统计值
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_GetAwbZone(IMPISPAWBZone *awb_zone);
+
+/**
+ * @fn int IMP_ISP_Tuning_GetAwbHist(IMPISPAWBHist *awb_hist)
+ *
+ * 获取AWB统计值。
+ *
+ * @param[out] awb_hist AWB统计值信息。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_GetAwbHist(IMPISPAWBHist *awb_hist);
+
+/**
+ * @fn int IMP_ISP_Tuning_SetAwbHist(IMPISPAWBHist *awb_hist)
+ *
+ * 设置AWB统计相关参数。
+ *
+ * @param[in] awb_hist AWB统计相关参数。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_SetAwbHist(IMPISPAWBHist *awb_hist);
+
+/**
+* AF统计值
+*/
+struct isp_core_af_sta_info{
+	unsigned short af_metrics;/**< AF主统计值 [0 ~ 65535]*/
+	unsigned short af_metrics_alt;/**< AWB次统计值 [0 ~ 65535]*/
+	unsigned short af_thresh_read;/**< AF主统计值阈值 [0 ~ 65535]*/
+	unsigned short af_intensity_read;/**< AF统计值明度值 [0 ~ 65535]*/
+	unsigned short af_intensity_zone;/**< AF统计值明度区域值 [0 ~ 65535]*/
+	unsigned int   af_total_pixels;/**< 用于AF统计的像素数 [0 ~ 4294967295]*/
+	unsigned int   af_counted_pixels;/**< 用于AF统计的像素数累计值 [0 ~ 4294967295]*/
+};
+/**
+* AF统计值参数
+*/
+typedef struct {
+	struct isp_core_af_sta_info af_stat;    /**< AF主统计值信息 */
+	unsigned char af_metrics_shift;    /**< AF主统计值缩小参数 [0 ~ 15]*/
+	unsigned short af_thresh;    /**< AF主统计值阈值 [0 ~ 65535]*/
+	unsigned short af_thresh_alt;    /**< AF次统计值阈值 [0 ~ 65535]*/
+	unsigned char  af_stat_nodeh;    /**< 水平方向有效统计区域个数 [0 ~ 15]*/
+	unsigned char  af_stat_nodev;    /**< 垂直方向有效统计区域个数 [0 · 15]*/
+	unsigned char  af_np_offset;    /**< AF统计噪声特征偏移 [0 ~ 255]*/
+	unsigned char  af_intensity_mode;    /**< AF明度标准化的模式 [0 ~ 7]*/
+	unsigned char  af_skipx;    /**< 水平方向AF跳转统计 [0 ~ 5]*/
+	unsigned char  af_offsetx;    /**< 水平方向AF偏移统计 [0 ~ 1]*/
+	unsigned char  af_skipy;    /**< 垂直方向AF跳转统计 [0 ~ 6]*/
+	unsigned char  af_offsety;    /**< 垂直方向AF偏移统计 [0 ~ 1]*/
+	unsigned char  af_scale_top;    /**< 底半部分缩小参数 [0 ~ 4]*/
+	unsigned char  af_scale_bottom;    /**< 顶半部分缩小参数 [0 ~ 4]*/
+} IMPISPAFHist;
+
+/**
+ * @fn int IMP_ISP_Tuning_GetAfHist(IMPISPAFHist *af_hist);
+ *
+ * 获取AF统计值。
+ *
+ * @param[out] af_hist AF统计值信息。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_GetAfHist(IMPISPAFHist *af_hist);
+
+/**
+ * @fn int IMP_ISP_Tuning_SetAfHist(IMPISPAFHist *af_hist)
+ *
+ * 设置AF统计相关参数。
+ *
+ * @param[in] af_hist AF统计相关参数。
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+ */
+int IMP_ISP_Tuning_SetAfHist(IMPISPAFHist *af_hist);
+
+/**
+ * ISP Wait Frame 参数。
+ */
+typedef struct {
+	uint32_t timeout;		/**< 超时时间，单位ms */
+	uint64_t cnt;			/**< Frame统计 */
+}IMPISPWaitFrameAttr;
+
+/**
+* @fn int IMP_ISP_Tuning_WaitFrame(IMPISPWaitFrameAttr *attr)
+* 等待帧结束
+*
+* @param[out] attr 等待帧结束属性
+*
+* @retval 0 成功
+* @retval 非0 失败，返回错误码
+*
+* @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+*/
+int IMP_ISP_Tuning_WaitFrame(IMPISPWaitFrameAttr *attr);
+
+typedef enum {
+	IMPISP_SHAD_SCALE_L,		/**< Mesh Shading缩放倍数0 */
+	IMPISP_SHAD_SCALE_M,		/**< Mesh Shading缩放倍数1 */
+	IMPISP_SHAD_SCALE_H,		/**< Mesh Shading缩放倍数2 */
+	IMPISP_SHAD_SCALE_U,		/**< Mesh Shading缩放倍数3 */
+} IMPISPMeshShadingScale;
+
+/**
+* @fn int IMP_ISP_Tuning_SetMeshShadingScale(IMPISPMeshShadingScale scale)
+* 设置Mesh Shading缩放倍数
+*
+* @param[out] scale Mesh Shading缩放倍数
+*
+* @retval 0 成功
+* @retval 非0 失败，返回错误码
+*
+* @attention 在使用这个函数之前，IMP_ISP_EnableTuning已被调用。
+*/
+int IMP_ISP_Tuning_SetMeshShadingScale(IMPISPMeshShadingScale scale);
 
 #ifdef __cplusplus
 #if __cplusplus
