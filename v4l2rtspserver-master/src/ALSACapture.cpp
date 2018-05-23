@@ -162,15 +162,13 @@ ALSACapture::ALSACapture(const ALSACaptureParameters & params) : m_bufferSize(0)
     {
         // Lame Init:
         gfp = lame_init();
+
         lame_set_errorf(gfp, lame_error_callback);
-    lame_set_errorf(gfp, lame_error_callback);
-
         lame_set_msgf  (gfp, lame_message_callback);
-    //lame_set_debugf(lame, lame_debug_callback);
-        lame_set_num_channels(gfp,params.m_channels );
-    lame_set_msgf  (gfp, lame_message_callback);
-    //lame_set_debugf(lame, lame_debug_callback);
+        //lame_set_debugf(lame, lame_debug_callback);
 
+        lame_set_num_channels(gfp,params.m_channels );
+    
         //lame_set_mode(gfp, 3);
         lame_set_in_samplerate(gfp, params.m_inSampleRate);
         lame_set_out_samplerate(gfp, params.m_outSampleRate);

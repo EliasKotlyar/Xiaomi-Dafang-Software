@@ -249,9 +249,7 @@ static int ivsSetsensitivity(int sens)
 static int ivsSetDetectionRegion(int detectionRegion[4] )
 {
 	int ret = 0;
-    LOG_S(ERROR) << gwidth << "," << gheight;
     ret = ivsMoveStart(0, 0, &inteface, detectionRegion[0], detectionRegion[1], detectionRegion[2], detectionRegion[3],gwidth,gheight) ;
-    LOG_S(ERROR) << "apres start";
     if (ret < 0) {
         LOG_S(ERROR) << "ivsMoveStart(0, 0) failed";
     }
@@ -412,7 +410,7 @@ static void *update_thread(void *p) {
         }
         if (currentConfig.bitrate != newConfig->bitrate) {
             LOG_S(INFO) << "Changed Bitrate";
-            IMPEncoderRcAttr attr;
+            IMPEncoderAttrRcMode attr;
             IMP_Encoder_GetChnAttrRcMode(0, &attr);
             attr.attrH264Cbr.outBitRate = (uint)newConfig->bitrate;
             IMP_Encoder_SetChnAttrRcMode(0, &attr);
@@ -1416,33 +1414,39 @@ int ImpEncoder::sample_encoder_init() {
     enc_attr->picHeight = imp_chn_attr_tmp->picHeight;
     rc_attr = &channel_attr.rcAttr;
 
+    rc_attr->attrRcMode.rcMode = ENC_RC_MODE_CBR;
+    //rc_attr->attrRcMode.attrH264Cbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
+    //rc_attr->attrRcMode.attrH264Cbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
+    //rc_attr->attrRcMode.attrH264Cbr.maxGop = 2 * rc_attr->attrH264Cbr.outFrmRate.frmRateNum / rc_attr->attrH264Cbr.outFrmRate.frmRateDen;
+    rc_attr->attrRcMode.attrH264Cbr.outBitRate = currentParams.bitrate;
+    rc_attr->attrRcMode.attrH264Cbr.maxQp = 38;
+    rc_attr->attrRcMode.attrH264Cbr.minQp = 15;
+    rc_attr->attrHSkip.hSkipAttr.skipType = IMP_Encoder_STYPE_N1X;
+    rc_attr->attrHSkip.hSkipAttr.m = 0;
+    rc_attr->attrHSkip.hSkipAttr.n = 0;
+    rc_attr->attrHSkip.hSkipAttr.maxSameSceneCnt = 0;
+    rc_attr->attrHSkip.hSkipAttr.bEnableScenecut = 0;
+    rc_attr->attrHSkip.hSkipAttr.bBlackEnhance = 0;
+    rc_attr->attrHSkip.maxHSkipType = IMP_Encoder_STYPE_N1X;
 
-    rc_attr->rcMode = ENC_RC_MODE_H264CBR;
-    rc_attr->attrH264Cbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
-    rc_attr->attrH264Cbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
-    rc_attr->attrH264Cbr.maxGop =
-        2 * rc_attr->attrH264Cbr.outFrmRate.frmRateNum / rc_attr->attrH264Cbr.outFrmRate.frmRateDen;
-    rc_attr->attrH264Cbr.outBitRate = currentParams.bitrate;
-    rc_attr->attrH264Cbr.maxQp = 38;
-    rc_attr->attrH264Cbr.minQp = 15;
-    rc_attr->attrH264Cbr.maxFPS = imp_chn_attr_tmp->outFrmRateNum;
-    rc_attr->attrH264Cbr.minFPS = 1;
-    rc_attr->attrH264Cbr.IBiasLvl = 2;
-    rc_attr->attrH264Cbr.FrmQPStep = 3;
-    rc_attr->attrH264Cbr.GOPQPStep = 15;
-    rc_attr->attrH264Cbr.AdaptiveMode = false;
-    rc_attr->attrH264Cbr.GOPRelation = false;
+    /*rc_attr->attrRcMode.attrH264Cbr.maxFPS = imp_chn_attr_tmp->outFrmRateNum;
+    rc_attr->attrRcMode.attrH264Cbr.minFPS = 1;
+    rc_attr->attrRcMode.attrH264Cbr.IBiasLvl = 2;
+    rc_attr->attrRcMode.attrH264Cbr.FrmQPStep = 3;
+    rc_attr->attrRcMode.attrH264Cbr.GOPQPStep = 15;
+    rc_attr->attrRcMode.attrH264Cbr.AdaptiveMode = false;
+    rc_attr->attrRcMode.attrH264Cbr.GOPRelation = false;
 
-    rc_attr->attrH264Denoise.enable = false;
-    rc_attr->attrH264Denoise.dnType = 2;
-    rc_attr->attrH264Denoise.dnIQp = 1;
-    rc_attr->attrH264Denoise.dnPQp = 1;
+    rc_attr->attrRcMode.attrH264Denoise.enable = false;
+    rc_attr->attrRcMode.attrH264Denoise.dnType = 2;
+    rc_attr->attrRcMode.attrH264Denoise.dnIQp = 1;
+    rc_attr->attrRcMode.attrH264Denoise.dnPQp = 1;
 
 
-    rc_attr->attrH264FrmUsed.enable = false;
-    rc_attr->attrH264FrmUsed.frmUsedMode = ENC_FRM_SKIP;
-    rc_attr->attrH264FrmUsed.frmUsedTimes = 2000;
-
+    rc_attr->attrRcMode.attrH264FrmUsed.enable = false;
+    rc_attr->attrRcMode.attrH264FrmUsed.frmUsedMode = ENC_FRM_SKIP;
+    rc_attr->attrRcMode.attrH264FrmUsed.frmUsedTimes = 2000;
+*/
     /*
        rc_attr->attrH264FrmUsed.enable = true;
        rc_attr->attrH264FrmUsed.dnIQp = ENC_FRM_REUSED ;
