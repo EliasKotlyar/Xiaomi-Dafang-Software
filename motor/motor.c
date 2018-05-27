@@ -20,6 +20,7 @@
 
 #define AXIS_HORIZONAL 1
 #define AXIS_VERTICAL 2
+#define AXIS_FORCIBLY 3
 
 #include <arpa/inet.h>
 #include <string.h>
@@ -99,6 +100,8 @@ void calibrate(int axis) {
     int *minField;
     int *maxField;
     int *stepField;
+    int *stepField_x;
+    int *stepField_y;
     if (axis == AXIS_VERTICAL) {
         direction1 = MOTOR_DIRECTIONAL_UP;
         direction2 = MOTOR_DIRECTIONAL_DOWN;
@@ -111,10 +114,33 @@ void calibrate(int axis) {
         maxField = &status.x_max;
         minField = &status.x_min;
         stepField = &status.x_steps;
+    } else if (axis == AXIS_FORCIBLY)
+    {
+        stepField_x = &status.x_steps;
+        stepField_y = &status.y_steps;
+        minField = &status.x_min;
+        setMovement(MOTOR_DIRECTIONAL_LEFT, 2500);
+        while (*stepField_x != -2500 && *minField != 1 ) {
+            sendCommand(MOTOR_GET_STATUS, &status);
+        }
+        minField = &status.y_min;
+        setMovement(MOTOR_DIRECTIONAL_DOWN, 800);
+        while (*stepField_y != -800 && *minField != 1 ) {
+            sendCommand(MOTOR_GET_STATUS, &status);
+        }
+        reset();
+        setMovement(MOTOR_DIRECTIONAL_RIGHT, 1250);
+        while (*stepField_x != 1250) {
+            sendCommand(MOTOR_GET_STATUS, &status);
+        }
+        setMovement(MOTOR_DIRECTIONAL_UP, 400);
+        while (*stepField_y != 400) {
+            sendCommand(MOTOR_GET_STATUS, &status);
+        }
+        return 0;
     } else{
         exit(0);
     }
-
 
     setMovement(direction1, 5000);
     while (*maxField != 1) {
@@ -143,13 +169,6 @@ void calibrate(int axis) {
     //printf("maxSteps: %d\n", maxSteps);
     //printf("center: %d\n", center);
     //printf("currentsteps: %d\n", status.y_steps);
-
-
-
-
-
-
-
 }
 
 
@@ -193,6 +212,9 @@ int main(int argc, char *argv[]) {
             break;
         case 'h':
             calibrate(AXIS_HORIZONAL);
+            break;
+        case 'f':
+            calibrate(AXIS_FORCIBLY);
             break;
         case 's':
             setStop();
