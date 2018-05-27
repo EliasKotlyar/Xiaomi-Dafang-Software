@@ -29,7 +29,7 @@ int V4L2DeviceSource::Stats::notify(int tv_sec, int framesize) {
     m_fps++;
     m_size += framesize;
     if (tv_sec != m_fps_sec) {
-        //LOG_S(INFO) << m_msg << "tv_sec:" << tv_sec << " fps:" << m_fps << " bandwidth:" << (m_size / 128) << "kbps";
+        LOG_S(9) << m_msg << "tv_sec:" << tv_sec << " fps:" << m_fps << " bandwidth:" << (m_size / 128) << "kbps";
         m_fps_sec = tv_sec;
         m_fps = 0;
         m_size = 0;
@@ -136,10 +136,10 @@ void V4L2DeviceSource::deliverFrame() {
             timeval diff;
             timersub(&curTime, &(frame->m_timestamp), &diff);
 
-            /*LOG_S(INFO) << "deliverFrame\ttimestamp:" << curTime.tv_sec << "." << curTime.tv_usec << "\tsize:"
+            LOG_S(9) << "deliverFrame\ttimestamp:" << curTime.tv_sec << "." << curTime.tv_usec << "\tsize:"
                        << fFrameSize << "\tdiff:" << (diff.tv_sec * 1000 + diff.tv_usec / 1000) << "ms\tqueue:"
                        << m_captureQueue.size();
-            */
+
             fPresentationTime = frame->m_timestamp;
             memcpy(fTo, frame->m_buffer, fFrameSize);
             delete frame;
@@ -167,17 +167,17 @@ int V4L2DeviceSource::getNextFrame() {
     char buffer[m_device->getBufferSize()];
     int frameSize = m_device->read(buffer, m_device->getBufferSize());
     if (frameSize < 0) {
-        //LOG_S(INFO) << "V4L2DeviceSource::getNextFrame errno:" << errno << " " << strerror(errno);
+        LOG_S(9) << "V4L2DeviceSource::getNextFrame errno:" << errno << " " << strerror(errno);
     } else if (frameSize == 0) {
-        //LOG_S(INFO) << "V4L2DeviceSource::getNextFrame no data errno:" << errno << " " << strerror(errno);
+        LOG_S(9) << "V4L2DeviceSource::getNextFrame no data errno:" << errno << " " << strerror(errno);
     } else {
         timeval tv;
         gettimeofday(&tv, NULL);
         timeval diff;
         timersub(&tv, &ref, &diff);
         m_in.notify(tv.tv_sec, frameSize);
-        //LOG_S(INFO) << "getNextFrame\ttimestamp:" << ref.tv_sec << "." << ref.tv_usec << "\tsize:" << frameSize
-        //           << "\tdiff:" << (diff.tv_sec * 1000 + diff.tv_usec / 1000) << "ms";
+        LOG_S(9) << "getNextFrame\ttimestamp:" << ref.tv_sec << "." << ref.tv_usec << "\tsize:" << frameSize
+                   << "\tdiff:" << (diff.tv_sec * 1000 + diff.tv_usec / 1000) << "ms";
         processFrame(buffer, frameSize, ref);
         switch(m_outfd){
             case -1:
@@ -216,8 +216,8 @@ void V4L2DeviceSource::processFrame(char *frame, int frameSize, const timeval &r
         memcpy(buf, frame.first, size);
         queueFrame(buf, size, ref);
 
-        //LOG_S(INFO) << "queueFrame\ttimestamp:" << ref.tv_sec << "." << ref.tv_usec << "\tsize:" << size << "\tdiff:"
-        //           << (diff.tv_sec * 1000 + diff.tv_usec / 1000) << "ms";
+        LOG_S(9) << "queueFrame\ttimestamp:" << ref.tv_sec << "." << ref.tv_usec << "\tsize:" << size << "\tdiff:"
+                   << (diff.tv_sec * 1000 + diff.tv_usec / 1000) << "ms";
         frameList.pop_front();
     }
 }

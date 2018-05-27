@@ -26,6 +26,7 @@ protected:
     int width;
     int height;
     int mode;
+   //unsigned char *m_buffer;
 
 };
 

@@ -176,6 +176,24 @@ int SU_PWM_GetChnAttr(uint32_t chn_num, SUPWMChnAttr *chn_attr);
 int SU_PWM_SetChnAttr(uint32_t chn_num, SUPWMChnAttr *chn_attr);
 
 /**
+ * @fn int SU_PWM_ModifyChnDuty(uint32_t chn_num, int duty);
+ *
+ * 设置通道属性
+ *
+ * @param[in] chn_num 获得第几路通道
+ *
+ * @param[in] chn_attr 通道属性指针
+ *
+ * @retval 0 成功
+ * @retval 非0 失败，返回错误码
+ *
+ * @remark 用于修改高电平时间.
+ *
+ * @attention 必须在通道工作时调用。
+ */
+int SU_PWM_ModifyChnDuty(uint32_t chn_num, int duty);
+
+/**
  * @fn int SU_PWM_EnableChn(uint32_t chn_num);
  *
  * 启动通道

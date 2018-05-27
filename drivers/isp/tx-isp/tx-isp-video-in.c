@@ -37,7 +37,7 @@ static long subdev_core_ops_register_sensor(struct tx_isp_video_in_device *vi, v
 	/* 放在sensor驱动中 */
 	sensor = (struct tx_isp_sensor_instance *)kzalloc(sizeof(*sensor), GFP_KERNEL);
 	if(!sensor){
-		v4l2_err(v4l2_dev, "Failed to allocate sensor subdev.\n",);
+		v4l2_err(v4l2_dev, "Failed to allocate sensor subdev.\n");
 		return -ENOMEM;
 	}
 #endif
@@ -219,7 +219,7 @@ static long subdev_core_ops_get_input(struct tx_isp_video_in_device *vi, int *in
 {
 	if (!vi || !index)
 		return -ISP_ERROR;
-	*index = vi->active->index;
+	*index = IS_ERR_OR_NULL(vi->active) ? -1 : vi->active->index;
 	return ISP_SUCCESS;
 }
 /*
@@ -299,7 +299,7 @@ static long subdev_core_ops_set_input(struct tx_isp_video_in_device *vi, int *in
 
 	ret = tx_isp_pipeline_call(vi->p, prepare); //&sensor->video);
 	if(ret != ISP_SUCCESS){
-		v4l2_warn(v4l2_dev, "Failed to unprepare the pipeline of %s.\n", sensor->attr.name);
+		v4l2_warn(v4l2_dev, "Failed to prepare the pipeline of %s.\n", sensor->attr.name);
 		goto err_prepare;
 	}
 	ret = tx_isp_pipeline_call(vi->p, init, 1);
@@ -556,4 +556,5 @@ void release_tx_isp_video_in_device(struct v4l2_subdev *sd)
 	struct tx_isp_video_in_device *vi = v4l2_get_subdevdata(sd);
 
 	v4l2_device_unregister_subdev(&vi->sd);
+	kfree(vi);
 }

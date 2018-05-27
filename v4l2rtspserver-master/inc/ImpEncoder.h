@@ -101,15 +101,9 @@ public:
 
     ~ImpEncoder();
 
-    int snap_jpeg();
-
-    void geth264frames();
-
     void requestIDR();
 
-    int snap_h264();
-
-    void *getBuffer();
+    int snap_h264(char *buffer);
 
     bool listEmpty();
 
@@ -117,15 +111,8 @@ public:
 
     void static setNightVision(bool state);
 
-    int getBufferSize();
-
 private:
     int save_stream(void *buffer, IMPEncoderStream *stream);
-
-    void *buffer;
-    int bufferSize;
-
-
 
     int encoderMode;
 
@@ -150,13 +137,8 @@ private:
 
     //IMPRgnHandle *sample_osd_init(int grpNum, int, int,int);
 
-   int sample_osd_exit(IMPRgnHandle *prHandle, int grpNum);
+    int sample_osd_exit(IMPRgnHandle *prHandle, int grpNum);
 
-    int sample_do_get_h264_stream(int nr_frames);
-
-    int sample_get_h264_stream();
-
-    int sample_do_get_jpeg_snap(void);
 
     IMPSensorInfo sensor_info;
 
@@ -166,9 +148,7 @@ private:
 
     chn_conf chn;
 
-    int framesCount;
-
-    std::list <IMPEncoderPack> frameList;
+  //  std::list <IMPEncoderPack> frameList;
     pthread_mutex_t m_mutex;
 
     int getSensorName();

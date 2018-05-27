@@ -1,10 +1,11 @@
-CROSS_COMPILE ?= mips-linux-gnu-
+CROSS_COMPILE ?= mips-linux-uclibc-gnu-
 
 TOOLCHAIN=../../../mips-gcc472-glibc216-64bit/bin
 
 
 ifeq (${ISVP_ENV_KERNEL_DIR}, )
-	ISVP_ENV_KERNEL_DIR = ../../../kernel
+	#ISVP_ENV_KERNEL_DIR = ../../../kernel
+	ISVP_ENV_KERNEL_DIR = /home/beihj/Ingenic-kernel
 endif
 
 KDIR := ${ISVP_ENV_KERNEL_DIR}

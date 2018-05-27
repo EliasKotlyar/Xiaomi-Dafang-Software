@@ -574,4 +574,3 @@ module_init(motor_init);
 module_exit(motor_exit);
 
 MODULE_LICENSE("GPL");
-

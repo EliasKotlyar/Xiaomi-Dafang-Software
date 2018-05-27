@@ -72,6 +72,7 @@ int motionTimeout = -1; // -1 is for deactivation
 
 static int ivsMoveStart(int grp_num, int chn_num, IMPIVSInterface **interface, int x0, int y0, int x1, int y1, int width, int height );
 static void *ivsMoveDetectionThread(void *arg);
+static int snap_jpeg(int width, int height);
 
 static unsigned char charDetection[] = {
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -502,21 +503,16 @@ static void *update_thread(void *p) {
         }
 
         memcpy(&currentConfig, newConfig, sizeof(shared_conf));
+
+
+        snap_jpeg(gwidth, gheight);
     }
+
 
     return NULL;
 }
 // ---- END OSD
 //
-
-
-void *ImpEncoder::getBuffer() {
-    return buffer;
-}
-
-int ImpEncoder::getBufferSize() {
-    return bufferSize;
-}
 
 
 static int file_exist(const char *filename)
@@ -735,12 +731,11 @@ static void *ivsMoveDetectionThread(void *arg)
                 }
                 else
                 {
-
-                        if (isWasOn == true) {
-                            exec_command("/system/sdcard/scripts/detectionOff.sh", NULL);
-                        }
-                        gDetectionOn = false;
-                        isWasOn = false;
+                    if (isWasOn == true) {
+                        exec_command("/system/sdcard/scripts/detectionOff.sh", NULL);
+                    }
+                    gDetectionOn = false;
+                    isWasOn = false;
                 }
             } else {
                 // Detection !!!
@@ -787,7 +782,6 @@ static void *ivsMoveDetectionThread(void *arg)
 
 ImpEncoder::ImpEncoder(impParams params) {
     currentParams = params;
-    framesCount = 0;
 
     // Init Structure:
     memset(&chn, 0, sizeof(chn_conf));
@@ -828,12 +822,7 @@ ImpEncoder::ImpEncoder(impParams params) {
 
 
     encoderMode = currentParams.mode;
-    int width = currentParams.width;
-    int height = currentParams.height;
     int ret;
-
-    bufferSize = width * height;
-    buffer = malloc(bufferSize);
 
     /* Step.1 System init */
     ret = sample_system_init();
@@ -860,14 +849,12 @@ ImpEncoder::ImpEncoder(impParams params) {
         LOG_S(ERROR) << "IMP_Encoder_CreateGroup(1) error !";
     }
 
-
     /* Step.3 Encoder init */
     ret = sample_jpeg_init();
     if (ret < 0) {
         LOG_S(ERROR) << "Encoder JPEG init failed";
 
     }
-
 
     /* Step.3 Encoder init */
     ret = sample_encoder_init();
@@ -1022,11 +1009,27 @@ ImpEncoder::~ImpEncoder() {
 
 }
 
-int ImpEncoder::snap_jpeg() {
+int save_stream(void *buffer, IMPEncoderStream *stream) {
+    int i, nr_pack = stream->packCount;
+    // IMP_LOG_ERR(TAG,  "Pack count: %d\n", nr_pack);
+
+    void *memoryAddress = buffer;
+    int bytesRead = 0;
+    for (i = 0; i < nr_pack; i++) {
+        int packLen = stream->pack[i].length;
+        memcpy(memoryAddress, (void *) stream->pack[i].virAddr, packLen);
+        memoryAddress = (void *) ((int) memoryAddress + packLen);
+        bytesRead = bytesRead + packLen;
+        // IMP_LOG_ERR(TAG,  "Pack Len: %d\n", packLen);
+    }
+
+    return bytesRead;
+}
+
+int snap_jpeg(int width, int height) {
     int ret;
     int bytesRead = 0;
-
-
+    unsigned char _buffer[width * height];
 
     /* Polling JPEG Snap, set timeout as 1000msec */
     ret = IMP_Encoder_PollingStream(1, 1000);
@@ -1043,21 +1046,18 @@ int ImpEncoder::snap_jpeg() {
         return -1;
     }
 
-    ret = save_stream(buffer, &stream);
+    ret = save_stream(_buffer, &stream);
     bytesRead = ret;
-    // IMP_LOG_ERR(TAG,  "Read %d bytes \n", ret);
-    //extractHeader(buffer,ret);
-    // IMP_LOG_ERR(TAG,  "JPEG saved!\n");
-    if (ret < 0) {
 
-        return -1;
-    }
+//    int nr_pack = stream.packCount;
+    SharedMem &mem = SharedMem::instance();
+    mem.copyImage(_buffer, sizeof(_buffer));
 
     IMP_Encoder_ReleaseStream(1, &stream);
 
-
     return bytesRead;
 }
+
 
 
 int ImpEncoder::save_stream(void *buffer, IMPEncoderStream *stream) {
@@ -1078,13 +1078,13 @@ int ImpEncoder::save_stream(void *buffer, IMPEncoderStream *stream) {
 }
 
 
-int ImpEncoder::snap_h264() {
+int ImpEncoder::snap_h264(char *buffer) {
     int nr_frames = 1;
     int ret;
     int bytesRead = 0;
     /* H264 Channel start receive picture */
 
-    if (framesCount == currentParams.framerate * 2) {
+/*    if (framesCount == currentParams.framerate * 2) {
         framesCount = 0;
         //
         //IMP_Encoder_FlushStream(0);
@@ -1093,7 +1093,7 @@ int ImpEncoder::snap_h264() {
         framesCount++;
     }
 
-
+*/
     int i;
     for (i = 0; i < nr_frames; i++) {
         /* Polling H264 Stream, set timeout as 1000msec */
@@ -1110,6 +1110,7 @@ int ImpEncoder::snap_h264() {
             LOG_S(ERROR) << "IMP_Encoder_GetStream() failed";
             return -1;
         }
+        LOG_S(9) << "i" << i << ", stream.packCount"<<stream.packCount <<" stream.h264RefType="<<stream.refType << "seq="<< stream.seq;
 
         ret = save_stream(buffer, &stream);
         bytesRead = ret;
@@ -1123,7 +1124,7 @@ int ImpEncoder::snap_h264() {
 
     return bytesRead;
 }
-
+/*
 bool ImpEncoder::listEmpty() {
     pthread_mutex_lock(&m_mutex);
     bool listEmpty = frameList.empty();
@@ -1138,7 +1139,7 @@ IMPEncoderPack ImpEncoder::getFrame() {
     pthread_mutex_unlock(&m_mutex);
     return frame;
 }
-
+*/
 
 void ImpEncoder::requestIDR() {
     IMP_Encoder_RequestIDR(0);
@@ -1414,13 +1415,17 @@ int ImpEncoder::sample_encoder_init() {
     enc_attr->picHeight = imp_chn_attr_tmp->picHeight;
     rc_attr = &channel_attr.rcAttr;
 
-    rc_attr->attrRcMode.rcMode = ENC_RC_MODE_CBR;
-    //rc_attr->attrRcMode.attrH264Cbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
-    //rc_attr->attrRcMode.attrH264Cbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
-    //rc_attr->attrRcMode.attrH264Cbr.maxGop = 2 * rc_attr->attrH264Cbr.outFrmRate.frmRateNum / rc_attr->attrH264Cbr.outFrmRate.frmRateDen;
+/*    rc_attr->attrRcMode.rcMode = ENC_RC_MODE_CBR;
     rc_attr->attrRcMode.attrH264Cbr.outBitRate = currentParams.bitrate;
     rc_attr->attrRcMode.attrH264Cbr.maxQp = 38;
     rc_attr->attrRcMode.attrH264Cbr.minQp = 15;
+
+    rc_attr->attrRcMode.attrH264Cbr.iBiasLvl=0;	//< Adjust the I-frame QP to adjust the I-frame image quality and its code stream size, range: [-3, 3]
+    rc_attr->attrRcMode.attrH264Cbr.frmQPStep=3;		//< Inter-frame QP change step
+    rc_attr->attrRcMode.attrH264Cbr.gopQPStep = 15;		//< QP step change between GOPs
+    rc_attr->attrRcMode.attrH264Cbr.adaptiveMode = false;	//< Adaptive mode
+    rc_attr->attrRcMode.attrH264Cbr.gopRelation = false;	//< Is GOP associated
+
     rc_attr->attrHSkip.hSkipAttr.skipType = IMP_Encoder_STYPE_N1X;
     rc_attr->attrHSkip.hSkipAttr.m = 0;
     rc_attr->attrHSkip.hSkipAttr.n = 0;
@@ -1428,73 +1433,26 @@ int ImpEncoder::sample_encoder_init() {
     rc_attr->attrHSkip.hSkipAttr.bEnableScenecut = 0;
     rc_attr->attrHSkip.hSkipAttr.bBlackEnhance = 0;
     rc_attr->attrHSkip.maxHSkipType = IMP_Encoder_STYPE_N1X;
-
-    /*rc_attr->attrRcMode.attrH264Cbr.maxFPS = imp_chn_attr_tmp->outFrmRateNum;
-    rc_attr->attrRcMode.attrH264Cbr.minFPS = 1;
-    rc_attr->attrRcMode.attrH264Cbr.IBiasLvl = 2;
-    rc_attr->attrRcMode.attrH264Cbr.FrmQPStep = 3;
-    rc_attr->attrRcMode.attrH264Cbr.GOPQPStep = 15;
-    rc_attr->attrRcMode.attrH264Cbr.AdaptiveMode = false;
-    rc_attr->attrRcMode.attrH264Cbr.GOPRelation = false;
-
-    rc_attr->attrRcMode.attrH264Denoise.enable = false;
-    rc_attr->attrRcMode.attrH264Denoise.dnType = 2;
-    rc_attr->attrRcMode.attrH264Denoise.dnIQp = 1;
-    rc_attr->attrRcMode.attrH264Denoise.dnPQp = 1;
-
-
-    rc_attr->attrRcMode.attrH264FrmUsed.enable = false;
-    rc_attr->attrRcMode.attrH264FrmUsed.frmUsedMode = ENC_FRM_SKIP;
-    rc_attr->attrRcMode.attrH264FrmUsed.frmUsedTimes = 2000;
 */
-    /*
-       rc_attr->attrH264FrmUsed.enable = true;
-       rc_attr->attrH264FrmUsed.dnIQp = ENC_FRM_REUSED ;
-       rc_attr->attrH264FrmUsed.frmUsedTimes = 50;
-     */
+   rc_attr->attrRcMode.rcMode = ENC_RC_MODE_VBR;
+      rc_attr->attrRcMode.attrH264Vbr.maxQp = 45;
+      rc_attr->attrRcMode.attrH264Vbr.minQp = 15;
+      rc_attr->attrRcMode.attrH264Vbr.staticTime = 2;
+      rc_attr->attrRcMode.attrH264Vbr.maxBitRate = currentParams.bitrate; //(double)2000.0 * (imp_chn_attr_tmp->picWidth * imp_chn_attr_tmp->picHeight) / (1280 * 720);
+      rc_attr->attrRcMode.attrH264Vbr.iBiasLvl = 0;
+      rc_attr->attrRcMode.attrH264Vbr.changePos = 80;
+      rc_attr->attrRcMode.attrH264Vbr.qualityLvl = 2;
+      rc_attr->attrRcMode.attrH264Vbr.frmQPStep = 3;
+      rc_attr->attrRcMode.attrH264Vbr.gopQPStep = 15;
+      rc_attr->attrRcMode.attrH264Vbr.gopRelation = false;
 
-
-
-
-    /*
-       rc_attr->attrH264FrmUsed.enable = true;
-       rc_attr->attrH264FrmUsed.frmUsedMode = ENC_FRM_REUSED ;
-       rc_attr->attrH264FrmUsed.frmUsedTimes = 50;
-     */
-
-
-    /*
-       rc_attr->rcMode = ENC_RC_MODE_H264VBR;
-       rc_attr->attrH264Vbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
-       rc_attr->attrH264Vbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
-       rc_attr->attrH264Vbr.maxGop =
-       1 * rc_attr->attrH264Vbr.outFrmRate.frmRateNum / rc_attr->attrH264Vbr.outFrmRate.frmRateDen;
-       rc_attr->attrH264Vbr.maxQp = 38;
-       rc_attr->attrH264Vbr.minQp = 15;
-       rc_attr->attrH264Vbr.staticTime = 1;
-       rc_attr->attrH264Vbr.maxBitRate =
-       100 ;
-       rc_attr->attrH264Vbr.changePos = 50;
-       rc_attr->attrH264Vbr.FrmQPStep = 3;
-       rc_attr->attrH264Vbr.GOPQPStep = 15;
-       rc_attr->attrH264FrmUsed.enable = 1;
-     */
-
-    /*
-       rc_attr->rcMode = ENC_RC_MODE_H264VBR;
-       rc_attr->attrH264Vbr.outFrmRate.frmRateNum = imp_chn_attr_tmp->outFrmRateNum;
-       rc_attr->attrH264Vbr.outFrmRate.frmRateDen = imp_chn_attr_tmp->outFrmRateDen;
-       rc_attr->attrH264Vbr.maxGop =
-       1 * rc_attr->attrH264Vbr.outFrmRate.frmRateNum / rc_attr->attrH264Vbr.outFrmRate.frmRateDen;
-       rc_attr->attrH264Vbr.maxQp = 38;
-       rc_attr->attrH264Vbr.minQp = 15;
-       rc_attr->attrH264Vbr.staticTime = 1;
-       rc_attr->attrH264Vbr.maxBitRate =
-       100 ;
-       rc_attr->attrH264Vbr.changePos = 50;
-       rc_attr->attrH264Vbr.FrmQPStep = 3;
-       rc_attr->attrH264Vbr.GOPQPStep = 15;
-     */
+      rc_attr->attrHSkip.hSkipAttr.skipType = IMP_Encoder_STYPE_N1X;
+      rc_attr->attrHSkip.hSkipAttr.m = 0;
+      rc_attr->attrHSkip.hSkipAttr.n = 0;
+      rc_attr->attrHSkip.hSkipAttr.maxSameSceneCnt = 0;
+      rc_attr->attrHSkip.hSkipAttr.bEnableScenecut = 0;
+      rc_attr->attrHSkip.hSkipAttr.bBlackEnhance = 0;
+      rc_attr->attrHSkip.maxHSkipType = IMP_Encoder_STYPE_N1X;
 
 
     ret = IMP_Encoder_CreateChn(0, &channel_attr);
@@ -1562,70 +1520,6 @@ int ImpEncoder::sample_encoder_exit(void) {
 }
 
 
-void ImpEncoder::geth264frames() {
-
-
-
-
-    // Request it every 2 Seconds:
-
-
-
-    if (framesCount == currentParams.framerate * 8) {
-        framesCount = 0;
-        //requestIDR();
-        //IMP_Encoder_FlushStream(0);
-    } else {
-        framesCount++;
-    }
-
-
-
-
-    //requestIDR();
-
-
-    int ret;
-    /* H264 Channel start receive picture */
-
-
-    unsigned int i;
-    /* Polling H264 Stream, set timeout as 1000msec */
-    ret = IMP_Encoder_PollingStream(0, 1000);
-    if (ret < 0) {
-       LOG_S(ERROR) << "IMP_Encoder_PollingStream(0, 1000) error:"<<  ret;
-    }
-
-    IMPEncoderStream stream;
-    /* Get H264 Stream */
-    ret = IMP_Encoder_GetStream(0, &stream, 1);
-    if (ret < 0) {
-       LOG_S(ERROR) << "IMP_Encoder_GetStream(0, ,1) error:"<<  ret;
-
-    }
-
-    for (i = 0; i < stream.packCount; i++) {
-        //printf("1. Got Frame with size %d\n",stream.pack[i].length);
-        //if(stream.pack[i].dataType.h264Type == 5){
-        IMPEncoderPack frame = stream.pack[i];
-        if (i == 0) {
-            void *frameAdr = (void *) (frame.virAddr);
-            int frameSize = frame.length;
-            frameAdr = (void *) ((int) (frameAdr) + 4);
-            frameSize = frameSize - 4;
-            frame.virAddr = (uint32_t) frameAdr;
-            frame.length = frameSize;
-        }
-        pthread_mutex_lock(&m_mutex);
-        frameList.push_back(frame);
-        pthread_mutex_unlock(&m_mutex);
-        //}
-
-    }
-
-    IMP_Encoder_ReleaseStream(0, &stream);
-
-}
 
 void ImpEncoder::setNightVision(bool state) {
     IMPISPRunningMode isprunningmode;

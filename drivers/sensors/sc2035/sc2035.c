@@ -934,10 +934,11 @@ static int sc2035_g_chip_ident(struct v4l2_subdev *sd,
 		ret = gpio_request(reset_gpio,"sc2035_reset");
 		if(!ret){
 			gpio_direction_output(reset_gpio, 1);
-			mdelay(10);
+			msleep(10);
 			gpio_direction_output(reset_gpio, 0);
-			mdelay(10);
+			msleep(10);
 			gpio_direction_output(reset_gpio, 1);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",reset_gpio);
 		}
@@ -946,8 +947,9 @@ static int sc2035_g_chip_ident(struct v4l2_subdev *sd,
 		ret = gpio_request(pwdn_gpio, "sc2035_pwdn");
 		if (!ret) {
 			gpio_direction_output(pwdn_gpio, 1);
-			mdelay(50);
+			msleep(50);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		} else {
 			printk("gpio requrest fail %d\n", pwdn_gpio);
 		}

@@ -1,7 +1,7 @@
 /*
  * sample_sinfo.c
  *
- * twe ways to get sensor info
+ * two ways to get sensor info
  *
  * 1. open /dev/sinfo; ioctl TOCTL_SINFO_GET
  *
@@ -41,15 +41,39 @@ enum SENSOR_TYPE
 	SENSOR_TYPE_BF3115,
 	SENSOR_TYPE_IMX225,
 	SENSOR_TYPE_OV2710,
-	SENSOR_TYPE_IMX322,
+	SENSOR_TYPE_IMX323,
 	SENSOR_TYPE_SC2135,
 	SENSOR_TYPE_SP1409,
 	SENSOR_TYPE_JXH62,
 	SENSOR_TYPE_BG0806,
 	SENSOR_TYPE_OV4689,
 	SENSOR_TYPE_JXF22,
-	SENSOR_TYPE_IMX323,
-	SENSOR_TYPE_IMX291
+	SENSOR_TYPE_IMX322,
+	SENSOR_TYPE_IMX291,
+	SENSOR_TYPE_OV2735,
+	SENSOR_TYPE_SC3035,
+	SENSOR_TYPE_AR0237,
+	SENSOR_TYPE_SC2145,
+	SENSOR_TYPE_JXH65,
+	SENSOR_TYPE_SC2300,
+	SENSOR_TYPE_OV2735B,
+	SENSOR_TYPE_JXV01,
+	SENSOR_TYPE_PS5230,
+	SENSOR_TYPE_PS5250,
+	SENSOR_TYPE_OV2718,
+	SENSOR_TYPE_OV2732,
+	SENSOR_TYPE_SC2235,
+	SENSOR_TYPE_JXK02,
+	SENSOR_TYPE_OV7740,
+	SENSOR_TYPE_HM2140,
+	SENSOR_TYPE_GC2033,
+	SENSOR_TYPE_JXF28,
+	SENSOR_TYPE_OS02B10,
+	SENSOR_TYPE_OS05A10,
+	SENSOR_TYPE_SC2232,
+	SENSOR_TYPE_SC4236,
+	SENSOR_TYPE_SC1245,
+	SENSOR_TYPE_GC1034,
 };
 
 typedef struct SENSOR_INFO_S
@@ -75,13 +99,39 @@ SENSOR_INFO_T g_sinfo[] =
 	{"bf3115"},
 	{"imx225"},
 	{"ov2710"},
-	{"imx322"},
+	{"imx323"},
 	{"sc2135"},
 	{"sp1409"},
 	{"jxh62"},
 	{"bg0806"},
 	{"ov4689"},
 	{"jxf22"},
+	{"imx322"},
+	{"imx291"},
+	{"ov2735"},
+	{"sc3035"},
+	{"ar0237"},
+	{"sc2145"},
+	{"jxh65"},
+	{"sc2300"},
+	{"ov2735b"},
+	{"jxv01"},
+	{"ps5230"},
+	{"ps5250"},
+	{"ov2718"},
+	{"ov2732"},
+	{"sc2235"},
+	{"jxk02"},
+	{"ov7740"},
+	{"hm2140"},
+	{"gc2033"},
+	{"jxf28"},
+	{"os02b10"},
+	{"os05a10"},
+	{"sc2232"},
+	{"sc4236"},
+	{"sc1245"},
+	{"gc1034"},
 };
 int main(int argc,char **argv)
 {

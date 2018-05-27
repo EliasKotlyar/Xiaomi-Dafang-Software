@@ -24,7 +24,8 @@ struct shared_conf {
     int motionTimeout;
     int hardVolume;
     int softVolume;
-    int filter;
+    char filter;
+    bool highfilter;
 };
 
 

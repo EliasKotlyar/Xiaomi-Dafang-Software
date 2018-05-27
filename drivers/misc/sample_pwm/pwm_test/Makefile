@@ -8,7 +8,7 @@
 #================================================================
 
 CC=mips-linux-gnu-gcc
-CCFLAGS += -pthread -Wall -g -static
+CCFLAGS += -pthread -Wall -muclibc -g -static
 target = pwm_test
 sources = $(wildcard *.c)
 objects = $(patsubst %.c, %.o, $(sources))
@@ -19,8 +19,8 @@ $(target):$(objects)
 	echo "generate $@"
 
 %.o:%.c
-	$(CC) -Wall -c -g -o $@ $<
+	$(CC) -Wall -muclibc -c -g -o $@ $<
 
 .PHONY : clean
 clean:
-	-rm $(target)
+	rm -f $(target) *.o

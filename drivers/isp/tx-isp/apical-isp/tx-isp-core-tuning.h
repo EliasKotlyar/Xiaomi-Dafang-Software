@@ -7,6 +7,8 @@
 #include "tx-isp-core.h"
 
 #define	WEIGHT_ZONE_NUM (15*15)
+#define	ZONE_H_NUM (15)
+#define	ZONE_V_NUM (15)
 
 typedef enum isp_core_module_ops_mode {
 	ISPCORE_MODULE_DISABLE,
@@ -381,6 +383,77 @@ struct isp_core_gamma_attr{
 	unsigned short gamma[129];
 };
 
+struct isp_core_weight_attr{
+	unsigned char weight[15][15];
+};
+
+struct isp_core_ae_sta_info{
+	unsigned char ae_histhresh[4];
+	unsigned short ae_hist[5];
+	unsigned char ae_stat_nodeh;
+	unsigned char ae_stat_nodev;
+};
+
+struct awb_sta_info{
+	unsigned short r_gain;
+	unsigned short b_gain;
+	unsigned int awb_sum;
+};
+
+enum awb_stats_mode{
+	ISPCORE_AWB_STATS_LEGACY_MODE = 0,    /**< 延迟模式 */
+	ISPCORE_AWB_STATS_CURRENT_MODE = 1,    /**< 当前模式 */
+	ISPCORE_AWB_STATS_MODE_BUTT,
+};
+
+struct isp_core_awb_sta_info{
+	struct awb_sta_info awb_stat;
+	enum awb_stats_mode awb_stats_mode;
+	unsigned short awb_whitelevel;
+	unsigned short awb_blacklevel;
+	unsigned short cr_ref_max;
+	unsigned short cr_ref_min;
+	unsigned short cb_ref_max;
+	unsigned short cb_ref_min;
+	unsigned char awb_stat_nodeh;
+	unsigned char awb_stat_nodev;
+};
+
+struct isp_wb_zone{
+	struct isp_core_wb_zone_info awb_sta_zone[ZONE_H_NUM][ZONE_V_NUM];
+};
+
+struct isp_ae_zone{
+	unsigned short ae_sta_zone[ZONE_H_NUM * ZONE_V_NUM];
+};
+
+struct af_sta_info{
+	unsigned short af_metrics;
+	unsigned short af_metrics_alt;
+	unsigned short af_thresh_read;
+	unsigned short af_intensity_read;
+	unsigned short af_intensity_zone;
+	unsigned int   af_total_pixels;
+	unsigned int   af_counted_pixels;
+};
+
+struct isp_core_af_sta_info{
+	struct af_sta_info af_stat;
+	unsigned char af_metrics_shift;
+	unsigned short af_thresh;
+	unsigned short af_thresh_alt;
+	unsigned char  af_stat_nodeh;
+	unsigned char  af_stat_nodev;
+	unsigned char  af_np_offset;
+	unsigned char  af_intensity_mode;
+	unsigned char  af_skipx;
+	unsigned char  af_offsetx;
+	unsigned char  af_skipy;
+	unsigned char  af_offsety;
+	unsigned char  af_scale_top;
+	unsigned char  af_scale_bottom;
+};
+
 typedef struct _system_tab_ctrl{
 	bool ctrl_global_freeze_firmware ;
 	bool ctrl_global_manual_exposure ;
@@ -486,6 +559,12 @@ struct isp_core_wb_attr {
 		unsigned short bgain;
 };
 
+struct isp_core_rgb_coefft_wb_attr {
+		unsigned short rgb_coefft_wb_r;
+		unsigned short rgb_coefft_wb_g;
+		unsigned short rgb_coefft_wb_b;
+};
+
 /* ev */
 struct isp_core_ev_attr {
 	unsigned int ev;
@@ -553,6 +632,10 @@ enum isp_image_tuning_private_cmd_id {
 	IMAGE_TUNING_CID_WB_STAINFO,
 	IMAGE_TUNING_CID_WB_ATTR,
 	IMAGE_TUNING_CID_WB_STATIS_ATTR,
+	IMAGE_TUNING_CID_AWB_WEIGHT,
+	IMAGE_TUNING_CID_AWB_HIST,
+	IMAGE_TUNING_CID_AWB_RGB_COEFFT_WB_ATTR,
+	IMAGE_TUNING_CID_AWB_ZONE,
 	IMAGE_TUNING_CID_AE_ATTR = V4L2_CID_PRIVATE_BASE + 0x20,
 	IMAGE_TUNING_CID_AE_STAINFO,
 	IMAGE_TUNING_CID_AE_STRATEGY,
@@ -566,8 +649,13 @@ enum isp_image_tuning_private_cmd_id {
 	IMAGE_TUNING_CID_HILIGHT_DEPRESS_STRENGTH,
 	IMAGE_TUNING_CID_GAMMA_ATTR,
 	IMAGE_TUNING_CID_SYSTEM_TAB,
+	IMAGE_TUNING_CID_AE_WEIGHT,
+	IMAGE_TUNING_CID_AE_HIST,
+	IMAGE_TUNING_CID_AE_ZONE,
 	IMAGE_TUNING_CID_AF_ATTR = V4L2_CID_PRIVATE_BASE + 0x20 * 2,
 	IMAGE_TUNING_CID_AF_STAINFO,
+	IMAGE_TUNING_CID_AF_HIST,
+	IMAGE_TUNING_CID_AF_ZONE,
 	IMAGE_TUNING_CID_DYNAMIC_DP_ATTR = V4L2_CID_PRIVATE_BASE + 0x20 * 3,
 	IMAGE_TUNING_CID_STATIC_DP_ATTR,
 	IMAGE_TUNING_CID_NOISE_PROFILE_ATTR = V4L2_CID_PRIVATE_BASE + 0x20 * 4,
@@ -581,11 +669,13 @@ enum isp_image_tuning_private_cmd_id {
 	IMAGE_TUNING_CID_FC_ATTR,
 	IMAGE_TUNING_CID_CONTROL_FPS= V4L2_CID_PRIVATE_BASE + 0x20 * 7,
 	IMAGE_TUNING_CID_DAY_OR_NIGHT,
+	IMAGE_TUNING_CID_HVFLIP,
 	IMAGE_TUNING_CID_CCM_ATTR = V4L2_CID_PRIVATE_BASE + 0x20 * 8,
 	IMAGE_TUNING_CID_SHAD_ATTR = V4L2_CID_PRIVATE_BASE + 0x20 * 9,
 	IMAGE_TUNING_CID_GE_ATTR = V4L2_CID_PRIVATE_BASE + 0x20 * 10,
 	IMAGE_TUNING_CID_DIS_STAINFO = V4L2_CID_PRIVATE_BASE + 0x20 * 11,
 	IMAGE_TUNING_CID_ISP_TABLE_ATTR,
+	IMAGE_TUNING_CID_ISP_WAIT_FRAME_ATTR,
 };
 
 struct image_tuning_ctrls {

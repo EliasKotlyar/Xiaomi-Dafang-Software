@@ -189,7 +189,7 @@ struct tx_isp_sensor_attribute jxf22_attr={
 			.hblanking = 0,
 		},
 	},
-	.max_again = 262144,
+	.max_again = 324678,
 	.max_dgain = 0,
 	.min_integration_time = 2,
 	.min_integration_time_native = 2,
@@ -199,7 +199,7 @@ struct tx_isp_sensor_attribute jxf22_attr={
 	.total_height = 1350,
 	.max_integration_time = 1350 - 4,
 	.integration_time_apply_delay = 2,
-	.again_apply_delay = 1,
+	.again_apply_delay = 2,
 	.dgain_apply_delay = 0,
 	.sensor_ctrl.alloc_again = jxf22_alloc_again,
 	.sensor_ctrl.alloc_dgain = jxf22_alloc_dgain,
@@ -207,12 +207,12 @@ struct tx_isp_sensor_attribute jxf22_attr={
 };
 
 
-static struct regval_list jxf22_init_regs_1920_1080_30fps_mipi[] = {
+static struct regval_list jxf22_init_regs_1920_1080_25fps_mipi[] = {
 
 {JXF22_REG_END, 0x00},	/* END MARKER */
 };
 
-static struct regval_list jxf22_init_regs_1920_1080_30fps_dvp[] = {
+static struct regval_list jxf22_init_regs_1920_1080_25fps_dvp[] = {
 	{0x12, 0x40},
 	{0x0E, 0x11},
 	{0x0F, 0x00},
@@ -224,12 +224,14 @@ static struct regval_list jxf22_init_regs_1920_1080_30fps_dvp[] = {
 	{0x48, 0x05},
 	{0x20, 0xB0},//HTS L
 	{0x21, 0x04},//HTS H
-	{0x22, 0x46},//VTS L
-	{0x23, 0x05},//VTS H
+	{0x22, 0x46},
+	{0x23, 0x05},
+	/*{0x22, 0x56},*/
+	/*{0x23, 0x04},*/
 	{0x24, 0xC0},
 	{0x25, 0x38},
 	{0x26, 0x43},
-	{0x27, 0xD0},
+	{0x27, 0xcc},
 	{0x28, 0x18},
 	{0x29, 0x01},
 	{0x2A, 0xC0},
@@ -268,7 +270,7 @@ static struct regval_list jxf22_init_regs_1920_1080_30fps_dvp[] = {
 	{0x5C, 0xF7},
 	{0x5D, 0xF0},
 	{0x62, 0x80},
-	{0x63, 0x82},
+	{0x63, 0x80},
 	{0x64, 0x00},
 	{0x67, 0x75},
 	{0x68, 0x04},
@@ -282,8 +284,11 @@ static struct regval_list jxf22_init_regs_1920_1080_30fps_dvp[] = {
 	{0x50, 0x02},
 	{0x47, 0x22},
 	{0x7E, 0xCD},
+	{0x7F, 0x52},
+	{0x7B, 0x57},
+	{0x7C, 0x28},
+	{0x80, 0x00},
 	{0x13, 0x81},
-	{0x12, 0x00},
 	{0x93, 0x5C},
 	{0x45, 0x89},
 	/* sleep 500 */
@@ -305,7 +310,7 @@ static struct tx_isp_sensor_win_setting jxf22_win_sizes[] = {
 		.fps		= 25 << 16 | 1,
 		.mbus_code	= V4L2_MBUS_FMT_SBGGR10_1X10,
 		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.regs 		= jxf22_init_regs_1920_1080_30fps_dvp,
+		.regs 		= jxf22_init_regs_1920_1080_25fps_dvp,
 	}
 };
 
@@ -318,11 +323,12 @@ static enum v4l2_mbus_pixelcode jxf22_mbus_code[] = {
  */
 
 static struct regval_list jxf22_stream_on_dvp[] = {
-
+	{0x12, 0x00},
 	{JXF22_REG_END, 0x00},	/* END MARKER */
 };
 
 static struct regval_list jxf22_stream_off_dvp[] = {
+	{0x12, 0x40},
 	{JXF22_REG_END, 0x00},	/* END MARKER */
 };
 
@@ -568,8 +574,17 @@ static int jxf22_set_fps(struct tx_isp_sensor *sensor, int fps)
 
 	vts = sclk * (fps & 0xffff) / hts / ((fps & 0xffff0000) >> 16);
 
-	ret += jxf22_write(sd, 0x22, vts & 0xff);
-	ret += jxf22_write(sd, 0x23, (vts >> 8) & 0xff);
+	jxf22_write(sd, 0xc0, 0x22);
+	jxf22_write(sd, 0xc1, (unsigned char)(vts & 0xff));
+	jxf22_write(sd, 0xc2, 0x23);
+	jxf22_write(sd, 0xc3, (unsigned char)(vts >> 8));
+	ret = jxf22_read(sd, 0x1f, &val);
+	pr_debug("before register 0x1f value : 0x%02x\n", val);
+	if(ret < 0)
+		return -1;
+	val |= (1 << 7); //set bit[7],  register group write function,  auto clean
+	jxf22_write(sd, 0x1f, val);
+	pr_debug("after register 0x1f value : 0x%02x\n", val);
 
 	if (0 != ret) {
 		printk("err: jxf22_write err\n");
@@ -635,6 +650,7 @@ static int jxf22_g_chip_ident(struct v4l2_subdev *sd,
 			gpio_direction_output(pwdn_gpio, 1);
 			msleep(150);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",pwdn_gpio);
 		}
@@ -803,9 +819,9 @@ static int jxf22_probe(struct i2c_client *client,
 
 	jxf22_attr.dbus_type = data_interface;
 	if (data_interface == TX_SENSOR_DATA_INTERFACE_DVP){
-		wsize->regs = jxf22_init_regs_1920_1080_30fps_dvp;
+		wsize->regs = jxf22_init_regs_1920_1080_25fps_dvp;
 	} else if (data_interface == TX_SENSOR_DATA_INTERFACE_MIPI){
-		wsize->regs = jxf22_init_regs_1920_1080_30fps_mipi;
+		wsize->regs = jxf22_init_regs_1920_1080_25fps_mipi;
 	} else{
 		printk("Don't support this Sensor Data Output Interface.\n");
 		goto err_set_sensor_data_interface;
@@ -832,7 +848,7 @@ static int jxf22_probe(struct i2c_client *client,
 	 /*
 		convert sensor-gain into isp-gain,
 	 */
-	jxf22_attr.max_again = 262144;
+	jxf22_attr.max_again = 324678;
 	jxf22_attr.max_dgain = 0;
 	sd = &sensor->sd;
 	video = &sensor->video;

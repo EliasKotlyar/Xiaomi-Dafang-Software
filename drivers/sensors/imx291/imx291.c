@@ -29,9 +29,9 @@
 #define IMX291_REG_END		0xffff
 #define IMX291_REG_DELAY	0xfffe
 
-#define IMX291_SUPPORT_PCLK (74125*1000)
+#define IMX291_SUPPORT_PCLK (74250*1000)
 #define SENSOR_OUTPUT_MAX_FPS 30
-#define SENSOR_OUTPUT_MIN_FPS 5
+#define SENSOR_OUTPUT_MIN_FPS 15
 #define AGAIN_MAX_DB 0x50
 #define DGAIN_MAX_DB 0x3c
 static int reset_gpio = GPIO_PA(18);
@@ -89,17 +89,17 @@ struct tx_isp_sensor_attribute imx291_attr = {
 			.hblanking = 11,
 		},
 	},
-	.max_again = 786420,
+	.max_again = 458752,
 	.max_dgain = 0,
 	.min_integration_time = 1,
 	.min_integration_time_native = 1,
 	.max_integration_time_native = 1125-2,
 	.integration_time_limit = 1125-2,
-	.total_width = 1984,
+	.total_width = 2640,
 	.total_height = 1125,
 	.max_integration_time = 1125-2,
-	.integration_time_apply_delay = 2,
-	.again_apply_delay = 2,
+	.integration_time_apply_delay = 0,
+	.again_apply_delay = 0,
 	.dgain_apply_delay = 0,
 	.sensor_ctrl.alloc_again = imx291_alloc_again,
 	.sensor_ctrl.alloc_dgain = imx291_alloc_dgain,
@@ -108,7 +108,7 @@ struct tx_isp_sensor_attribute imx291_attr = {
 
 
 static struct regval_list imx291_init_regs_1920_1080_25fps[] = {
-/* inclk 37.135M clk*/
+/* inclk 37.125M clk*/
 	{0x3000,0x01},
 	{0x3002,0x00},//MODE
 	{0x3005,0x01},
@@ -185,7 +185,7 @@ static struct regval_list imx291_init_regs_1920_1080_25fps[] = {
  * the order of the imx291_win_sizes is [full_resolution, preview_resolution].
  */
 static struct tx_isp_sensor_win_setting imx291_win_sizes[] = {
-	/* 1280*960 */
+	/* 1920*1080 */
 	{
 		.width		= 1920,
 		.height		= 1080,
@@ -328,24 +328,15 @@ static int imx291_set_integration_time(struct v4l2_subdev *sd, int int_time)
 	unsigned short shs = 0;
 	unsigned short vmax = 0;
 
-	ret = imx291_read(sd, 0x3018, &value);
-	vmax = value;
-	ret = imx291_read(sd, 0x3019, &value);
-	vmax |= value << 8;
-	ret = imx291_read(sd, 0x301a, &value);
-	vmax |= (value|0x3) << 16;
+	vmax = imx291_attr.total_height;
 	shs = vmax - int_time - 2;
-
 	ret = imx291_write(sd, 0x3020, (unsigned char)(shs & 0xff));
-	if (ret < 0)
+	ret += imx291_write(sd, 0x3021, (unsigned char)((shs >> 8) & 0xff));
+	ret += imx291_write(sd, 0x3022, (unsigned char)((shs >> 16) & 0x3));
+	if (0 != ret) {
+		printk("err: imx291_write err\n");
 		return ret;
-	ret = imx291_write(sd, 0x3021, (unsigned char)((shs >> 8) & 0xff));
-	if (ret < 0)
-		return ret;
-	ret = imx291_write(sd, 0x3022, (unsigned char)((shs >> 16) & 0x3));
-	if (ret < 0)
-		return ret;
-
+	}
 	return 0;
 
 }
@@ -399,13 +390,11 @@ static int imx291_s_stream(struct v4l2_subdev *sd, int enable)
 	if (enable) {
 		ret = imx291_write_array(sd, imx291_stream_on);
 		pr_debug("imx291 stream on\n");
-		/* imx291_read_array(sd,imx291_init_regs_1920_1080_30fps); */
 	}
 	else {
 		ret = imx291_write_array(sd, imx291_stream_off);
 		pr_debug("imx291 stream off\n");
 	}
-//	imx291_read_array(sd, imx291_init_regs_1280_960_25fps);
 	return ret;
 }
 
@@ -421,15 +410,13 @@ static int imx291_s_parm(struct v4l2_subdev *sd, struct v4l2_streamparm *parms)
 
 static int imx291_set_fps(struct tx_isp_sensor *sensor, int fps)
 {
-	return 0;
-#if 0
 	struct v4l2_subdev *sd = &sensor->sd;
 	struct tx_isp_notify_argument arg;
 	int ret = 0;
 	unsigned int pclk = 0;
-	unsigned int hts = 0;
-	unsigned int vts = 0;
-	unsigned char val = 0;
+	unsigned short hmax = 0;
+	unsigned short vmax = 0;
+	unsigned char value = 0;
 	unsigned int newformat = 0; //the format is 24.8
 
 	newformat = (((fps >> 16) / (fps & 0xffff)) << 8) + ((((fps >> 16) % (fps & 0xffff)) << 8) / (fps & 0xffff));
@@ -439,32 +426,25 @@ static int imx291_set_fps(struct tx_isp_sensor *sensor, int fps)
 	}
 	pclk = IMX291_SUPPORT_PCLK;
 
-	val = 0;
-	ret += imx291_read(sd, 0x380c, &val);
-	hts = val<<8;
-	val = 0;
-	ret += imx291_read(sd, 0x380d, &val);
-	hts |= val;
-	if (0 != ret) {
-		printk("err: imx291 read err\n");
-		return ret;
-	}
-	vts = (pclk << 4) / (hts * (newformat >> 4));
-	ret += imx291_write(sd, 0x380f, vts&0xff);
-	ret += imx291_write(sd, 0x380e, (vts>>8)&0xff);
+	ret = imx291_read(sd, 0x3018, &value);
+	vmax = value;
+	ret += imx291_read(sd, 0x3019, &value);
+	vmax |= value << 8;
+	ret += imx291_read(sd, 0x301a, &value);
+	vmax |= (value|0x3) << 16;
+
+	hmax = ((pclk << 4) / (vmax * (newformat >> 4))) << 1;
+	ret += imx291_write(sd, 0x301c, hmax&0xff);
+	ret += imx291_write(sd, 0x301d, (hmax>>8)&0xff);
 	if (0 != ret) {
 		printk("err: imx291_write err\n");
 		return ret;
 	}
 	sensor->video.fps = fps;
-	sensor->video.attr->max_integration_time_native = vts - 4;
-	sensor->video.attr->integration_time_limit = vts - 4;
-	sensor->video.attr->total_height = vts;
-	sensor->video.attr->max_integration_time = vts - 4;
+	sensor->video.attr->total_width = hmax >> 1;
 	arg.value = (int)&sensor->video;
 	sd->v4l2_dev->notify(sd, TX_ISP_NOTIFY_SYNC_VIDEO_IN, &arg);
 	return ret;
-#endif
 }
 
 static int imx291_set_mode(struct tx_isp_sensor *sensor, int value)
@@ -514,6 +494,7 @@ static int imx291_g_chip_ident(struct v4l2_subdev *sd,
 			gpio_direction_output(pwdn_gpio, 1);
 			msleep(150);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",pwdn_gpio);
 		}
@@ -669,6 +650,8 @@ static int imx291_probe(struct i2c_client *client,
 		if (IS_ERR(vpll)) {
 			pr_warning("get vpll failed\n");
 		} else {
+			/*vpll default 1200M*/
+			clk_set_rate(vpll,891000000);
 			rate = clk_get_rate(vpll);
 			if (((rate / 1000) % 37125) == 0) {
 				ret = clk_set_parent(sensor->mclk, vpll);
@@ -766,5 +749,5 @@ static __exit void exit_imx291(void)
 module_init(init_imx291);
 module_exit(exit_imx291);
 
-MODULE_DESCRIPTION("A low-level driver for OmniVision imx291 sensors");
+MODULE_DESCRIPTION("A low-level driver for Sony imx291 sensors");
 MODULE_LICENSE("GPL");

@@ -3,6 +3,9 @@
 #include "apical_command_api.h"
 #include <apical-isp/apical_isp_config.h>
 #include <apical-isp/apical_math.h>
+#include <apical-isp/apical_metering_mem_config.h>
+#include <apical-isp/apical_isp_core_nomem_settings.h>
+#include <apical-isp/apical_histogram_mem_config.h>
 #include "tx-isp-core-tuning.h"
 #include "../tx-isp-debug.h"
 
@@ -48,7 +51,7 @@ static inline int wb_value_v4l2_to_apical(int val)
 	}
 	return ret;
 }
-
+#if 0
 static int apical_isp_wb_s_control(struct tx_isp_core_device *core, struct v4l2_control *control)
 {
 	struct video_device *video = core->tun;
@@ -109,7 +112,7 @@ static int apical_isp_wb_s_control(struct tx_isp_core_device *core, struct v4l2_
 	}
 	return ret;
 }
-
+#endif
 static inline int ae_value_v4l2_to_apical(int val)
 {
 	int ret = 0;
@@ -126,6 +129,7 @@ static inline int ae_value_v4l2_to_apical(int val)
 	}
 	return ret;
 }
+#if 0
 static int apical_isp_ae_s_control(struct tx_isp_core_device *core, struct v4l2_control *control)
 {
 	struct video_device *video = core->tun;
@@ -187,6 +191,7 @@ static int apical_isp_ae_s_control(struct tx_isp_core_device *core, struct v4l2_
 	}
 	return 0;
 }
+#endif
 static int apical_isp_ae_g_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
 {
 	struct video_device *video = core->tun;
@@ -239,6 +244,7 @@ static inline int af_value_v4l2_to_apical(int val)
 {
 	return val + AF_AUTO_SINGLE;
 }
+#if 0
 static int apical_isp_af_s_control(struct tx_isp_core_device *core, struct v4l2_control *control)
 {
 	struct video_device *video = core->tun;
@@ -283,6 +289,7 @@ static int apical_isp_af_s_control(struct tx_isp_core_device *core, struct v4l2_
 	}
 	return ret;
 }
+#endif
 
 static inline int apical_isp_3alock_s_control(struct tx_isp_core_device *core, struct v4l2_control *control)
 {
@@ -1764,6 +1771,22 @@ static inline int apical_isp_day_or_night_s_ctrl(struct tx_isp_core_device *core
 	return ret;
 }
 
+static inline int apical_isp_hvflip_s_ctrl(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	uint32_t value = control->value;
+	core->vflip_state = value&0xffff;
+	//msleep(20);
+	core->hflip_state = (value>>16)&0xffff;
+	return ISP_SUCCESS;
+}
+
+static inline int apical_isp_hvflip_g_ctrl(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	uint32_t value = 0;
+	value = (core->hflip_state)<<16|core->vflip_state;
+	control->value = value;
+	return ISP_SUCCESS;
+}
 
 static inline int apical_isp_ae_strategy_g_ctrl(struct tx_isp_core_device *core, struct v4l2_control *control)
 {
@@ -1771,11 +1794,11 @@ static inline int apical_isp_ae_strategy_g_ctrl(struct tx_isp_core_device *core,
 	unsigned int reason = 0;
 	unsigned int status = 0;
 
-        api.type = TALGORITHMS;
-        api.dir = COMMAND_GET;
-        api.id = AE_SPLIT_PRESET_ID;
-        api.value = -1;
-        status = apical_command(api.type, api.id, api.value, api.dir, &reason);
+	api.type = TALGORITHMS;
+	api.dir = COMMAND_GET;
+	api.id = AE_SPLIT_PRESET_ID;
+	api.value = -1;
+	status = apical_command(api.type, api.id, api.value, api.dir, &reason);
 
 	switch(reason){
 	case AE_SPLIT_BALANCED:
@@ -1788,7 +1811,7 @@ static inline int apical_isp_ae_strategy_g_ctrl(struct tx_isp_core_device *core,
 		control->value = IMPISP_AE_STRATEGY_BUTT;
 		break;
 	}
-        if(status != ISP_SUCCESS) {
+	if(status != ISP_SUCCESS) {
 		ISP_PRINT(ISP_WARNING_LEVEL,"Custom Get AE strategy failure!reture value is %d,reason is %d\n", status, reason);
 	}
 	return ISP_SUCCESS;
@@ -1801,13 +1824,13 @@ static inline int apical_isp_ae_strategy_s_ctrl(struct tx_isp_core_device *core,
 	unsigned int status = 0;
 	int ret = ISP_SUCCESS;
 
-        api.type = TALGORITHMS;
-        api.id = AE_SPLIT_PRESET_ID;
-        api.dir = COMMAND_SET;
+	api.type = TALGORITHMS;
+	api.id = AE_SPLIT_PRESET_ID;
+	api.dir = COMMAND_SET;
 	api.value = control->value ? AE_SPLIT_INTEGRATION_PRIORITY : AE_SPLIT_BALANCED;
-        status = apical_command(api.type, api.id, api.value, api.dir, &reason);
+	status = apical_command(api.type, api.id, api.value, api.dir, &reason);
 
-        if(status != ISP_SUCCESS) {
+	if(status != ISP_SUCCESS) {
 		ISP_PRINT(ISP_WARNING_LEVEL,"Custom Set AE strategy failure!reture value is %d,reason is %d\n",status, reason);
 	}
 	return ret;
@@ -2315,6 +2338,282 @@ err_get_def_gamma:
 	return ret;
 }
 
+static int apical_isp_ae_weight_s_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_core_weight_attr attr;
+	unsigned int row,col;
+
+	copy_from_user(&attr, (const void __user*)control->value, sizeof(attr));
+
+	for (row = 0; row < 15; row++){
+		for (col = 0; col < 15; col++){
+			apical_isp_zones_aexp_weight_write(row, col, (attr.weight[row][col]));
+		}
+	}
+
+	return 0;
+}
+
+static int apical_isp_ae_weight_g_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_core_weight_attr attr;
+	unsigned int row,col;
+
+	for (row = 0; row < 15; row++){
+		for (col = 0; col < 15; col++){
+			attr.weight[row][col] = apical_isp_zones_aexp_weight_read(row,col);
+		}
+	}
+
+	copy_to_user((void __user*)control->value, &attr, sizeof(attr));
+
+	return 0;
+}
+
+static int apical_isp_ae_hist_g_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_core_ae_sta_info info;
+
+	info.ae_histhresh[0] = apical_isp_metering_hist_thresh_0_1_read();
+	info.ae_histhresh[1] = apical_isp_metering_hist_thresh_1_2_read();
+	info.ae_histhresh[2] = apical_isp_metering_hist_thresh_3_4_read();
+	info.ae_histhresh[3] = apical_isp_metering_hist_thresh_4_5_read();
+
+	info.ae_hist[0] = apical_isp_metering_hist_0_read();
+	info.ae_hist[1] = apical_isp_metering_hist_1_read();
+	info.ae_hist[3] = apical_isp_metering_hist_3_read();
+	info.ae_hist[4] = apical_isp_metering_hist_4_read();
+	info.ae_hist[2] = 0xffff - info.ae_hist[0] - info.ae_hist[1] - info.ae_hist[3] - info.ae_hist[4];
+
+	info.ae_stat_nodeh = apical_isp_metering_aexp_nodes_used_horiz_read();
+	info.ae_stat_nodev = apical_isp_metering_aexp_nodes_used_vert_read();
+
+	copy_to_user((void __user*)control->value, &info, sizeof(info));
+	return 0;
+}
+
+static int apical_isp_ae_hist_s_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_core_ae_sta_info info;
+
+	copy_from_user(&info, (const void __user*)control->value, sizeof(info));
+
+	apical_isp_metering_hist_thresh_0_1_write(info.ae_histhresh[0]);
+	apical_isp_metering_hist_thresh_1_2_write(info.ae_histhresh[1]);
+	apical_isp_metering_hist_thresh_3_4_write(info.ae_histhresh[2]);
+	apical_isp_metering_hist_thresh_4_5_write(info.ae_histhresh[3]);
+
+	apical_isp_metering_aexp_nodes_used_horiz_write(info.ae_stat_nodeh);
+	apical_isp_metering_aexp_nodes_used_vert_write(info.ae_stat_nodev);
+
+	return 0;
+}
+
+static int apical_isp_ae_zone_g_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_ae_zone ae_zone;
+	int i = 0;
+	unsigned int ae_meter;
+	unsigned int exp;
+	unsigned int val;
+
+	for (i = 0; i < ZONE_H_NUM * ZONE_V_NUM; i++){
+			ae_meter = apical_histogram_mem_array_data_read(i);
+			exp = (ae_meter >> 12) & 0xf;
+			val = ae_meter & 0xfff;
+			if(exp){
+				val = (val | 0x1000) << (exp - 1);
+			}
+			ae_zone.ae_sta_zone[i] = (unsigned short)val;
+	}
+
+	copy_to_user((void __user*)control->value, &ae_zone, sizeof(ae_zone));
+
+	return 0;
+
+}
+
+static int apical_isp_af_zone_g_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_ae_zone ae_zone;
+	int i = 0;
+	unsigned int ae_meter;
+	unsigned int exp;
+	unsigned int val;
+
+	for (i = 0; i < ZONE_H_NUM * ZONE_V_NUM; i++){
+		ae_meter = apical_histogram_mem_array_data_read(i);
+		exp = (ae_meter >> 12) & 0xf;
+		val = ae_meter & 0xfff;
+		if(exp){
+			val = (val | 0x1000) << (exp - 1);
+		}
+		ae_zone.ae_sta_zone[i] = (unsigned short)val;
+	}
+
+	copy_to_user((void __user*)control->value, &ae_zone, sizeof(ae_zone));
+
+	return 0;
+}
+
+static int apical_isp_awb_hist_g_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_core_awb_sta_info info;
+
+	info.awb_stat.r_gain = apical_isp_metering_awb_rg_read();
+	info.awb_stat.b_gain = apical_isp_metering_awb_bg_read();
+	info.awb_stat.awb_sum = apical_isp_metering_awb_sum_read();
+
+	info.awb_stats_mode = apical_isp_metering_awb_stats_mode_read()?ISPCORE_AWB_STATS_CURRENT_MODE:ISPCORE_AWB_STATS_LEGACY_MODE;
+	info.awb_whitelevel = apical_isp_metering_white_level_awb_read();
+	info.awb_blacklevel = apical_isp_metering_black_level_awb_read();
+	info.cr_ref_max = apical_isp_metering_cr_ref_max_awb_read();
+	info.cr_ref_min = apical_isp_metering_cr_ref_min_awb_read();
+	info.cb_ref_max = apical_isp_metering_cb_ref_max_awb_read();
+	info.cb_ref_min = apical_isp_metering_cb_ref_min_awb_read();
+	info.awb_stat_nodeh = apical_isp_metering_awb_nodes_used_horiz_read();
+	info.awb_stat_nodev = apical_isp_metering_awb_nodes_used_vert_read();
+	/* info.cr_ref_high = apical_isp_metering_cr_ref_high_awb_read(); */
+	/* info.cr_ref_low = apical_isp_metering_cr_ref_low_awb_read(); */
+	/* info.cb_ref_high = apical_isp_metering_cb_ref_high_awb_read(); */
+	/* info.cb_ref_low = apical_isp_metering_cb_ref_low_awb_read(); */
+
+	copy_to_user((void __user*)control->value, &info, sizeof(info));
+
+	return 0;
+}
+
+static int apical_isp_awb_zone_g_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	int i = 0;
+	int j = 0;
+	unsigned int awb_meter;
+	struct isp_wb_zone *wb_zone = kmalloc(sizeof(*wb_zone),GFP_KERNEL);
+	if(!wb_zone)
+		return -1;
+	memset(wb_zone, 0, sizeof(*wb_zone));
+	for (i = 0; i < ZONE_H_NUM; i++){
+		for (j = 0; j < ZONE_V_NUM; j++){
+			awb_meter = apical_metering_mem_array_data_read((ISP_METERING_OFFSET_AWB >> 2) + (i * ZONE_V_NUM + j) * 2);
+			wb_zone->awb_sta_zone[i][j].red_green = awb_meter & 0xfff;
+			wb_zone->awb_sta_zone[i][j].blue_green = awb_meter >> 16 & 0xfff;
+			awb_meter = apical_metering_mem_array_data_read((ISP_METERING_OFFSET_AWB >> 2) + ((i * ZONE_V_NUM + j) * 2 + 1));
+			wb_zone->awb_sta_zone[i][j].sum = awb_meter;
+		}
+
+	}
+	copy_to_user((void __user*)control->value, wb_zone, sizeof(*wb_zone));
+	kfree(wb_zone);
+
+	return 0;
+}
+
+static int apical_isp_awb_hist_s_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_core_awb_sta_info info;
+	copy_from_user(&info, (const void __user*)control->value, sizeof(info));
+
+	apical_isp_metering_awb_stats_mode_write(info.awb_stats_mode?1:0);
+	apical_isp_metering_white_level_awb_write(info.awb_whitelevel);
+	apical_isp_metering_black_level_awb_write(info.awb_blacklevel);
+	apical_isp_metering_cr_ref_max_awb_write(info.cr_ref_max);
+	apical_isp_metering_cr_ref_min_awb_write(info.cr_ref_min);
+	apical_isp_metering_cb_ref_max_awb_write(info.cb_ref_max);
+	apical_isp_metering_cb_ref_min_awb_write(info.cb_ref_min);
+	apical_isp_metering_awb_nodes_used_horiz_write(info.awb_stat_nodeh);
+	apical_isp_metering_awb_nodes_used_vert_write(info.awb_stat_nodev);
+	/* apical_isp_metering_cr_ref_high_awb_write(info.cr_ref_high); */
+	/* apical_isp_metering_cr_ref_low_awb_write(info.cr_ref_low); */
+	/* apical_isp_metering_cb_ref_high_awb_write(info.cb_ref_high); */
+	/* apical_isp_metering_cb_ref_low_awb_write(info.cb_ref_low); */
+
+	return 0;
+}
+
+static int apical_isp_af_hist_g_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_core_af_sta_info info;
+
+	info.af_stat.af_metrics = apical_isp_metering_af_metrics_read();
+	info.af_stat.af_metrics_alt = apical_isp_metering_af_metrics_alt_read();
+	info.af_stat.af_thresh_read = apical_isp_metering_af_threshold_read_read();
+	info.af_stat.af_intensity_read = apical_isp_metering_af_intensity_read_read();
+	info.af_stat.af_intensity_zone = apical_isp_metering_af_intensity_zone_read_read();
+	info.af_stat.af_total_pixels = apical_isp_metering_total_pixels_read();
+	info.af_stat.af_counted_pixels = apical_isp_metering_counted_pixels_read();
+
+	info.af_metrics_shift = apical_isp_metering_af_metrics_shift_read();
+	info.af_thresh = apical_isp_metering_af_threshold_write_read();
+	info.af_thresh_alt = apical_isp_metering_af_threshold_alt_write_read();
+	info.af_stat_nodeh = apical_isp_metering_af_nodes_used_horiz_read();
+	info.af_stat_nodev = apical_isp_metering_af_nodes_used_vert_read();
+	info.af_np_offset = apical_isp_metering_af_np_offset_read();
+	info.af_intensity_mode = apical_isp_metering_af_intensity_norm_mode_read();
+	info.af_skipx = apical_isp_metering_skip_x_read();
+	info.af_offsetx = apical_isp_metering_offset_x_read();
+	info.af_skipy = apical_isp_metering_skip_y_read();
+	info.af_offsety = apical_isp_metering_offset_y_read();
+	info.af_scale_top = apical_isp_metering_scale_top_read();
+	info.af_scale_bottom = apical_isp_metering_scale_bottom_read();
+
+	copy_to_user((void __user*)control->value, &info, sizeof(info));
+
+	return 0;
+}
+
+static int apical_isp_af_hist_s_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_core_af_sta_info info;
+	copy_from_user(&info, (const void __user*)control->value, sizeof(info));
+
+	 apical_isp_metering_af_metrics_shift_write(info.af_metrics_shift);
+	 apical_isp_metering_af_threshold_write_write(info.af_thresh);
+	 apical_isp_metering_af_threshold_alt_write_write(info.af_thresh_alt);
+	 apical_isp_metering_af_nodes_used_horiz_write(info.af_stat_nodeh);
+	 apical_isp_metering_af_nodes_used_vert_write(info.af_stat_nodev);
+	 apical_isp_metering_af_np_offset_write(info.af_np_offset);
+	 apical_isp_metering_af_intensity_norm_mode_write(info.af_intensity_mode);
+	 apical_isp_metering_skip_x_write(info.af_skipx);
+	 apical_isp_metering_offset_x_write(info.af_offsetx);
+	 apical_isp_metering_skip_y_write(info.af_skipy);
+	 apical_isp_metering_offset_y_write(info.af_offsety);
+	 apical_isp_metering_scale_top_write(info.af_scale_top);
+	 apical_isp_metering_scale_bottom_write(info.af_scale_bottom);
+
+	return 0;
+}
+
+static int apical_isp_awb_weight_s_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_core_weight_attr attr;
+	unsigned int row,col;
+
+	copy_from_user(&attr, (const void __user*)control->value, sizeof(attr));
+
+	for (row = 0; row < 15; row++){
+		for (col = 0; col < 15; col++){
+			apical_isp_zones_awb_weight_write(row, col, (attr.weight[row][col]));
+		}
+	}
+
+	return 0;
+}
+
+static int apical_isp_awb_weight_g_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_core_weight_attr attr;
+	unsigned int row,col;
+
+	for (row = 0; row < 15; row++){
+		for (col = 0; col < 15; col++){
+			attr.weight[row][col] = apical_isp_zones_awb_weight_read(row,col);
+		}
+	}
+
+	copy_to_user((void __user*)control->value, &attr, sizeof(attr));
+
+	return 0;
+}
 
 static int apical_isp_ae_comp_s_ctrl(struct tx_isp_core_device *core, struct v4l2_control *control)
 {
@@ -2641,6 +2940,30 @@ static int apical_isp_wb_statis_g_ctrl(struct tx_isp_core_device *core, struct v
 	control->value = (wb_attr.rgain << 16) + wb_attr.bgain;
 	return 0;
 }
+
+static int apical_isp_rgb_coefft_wb_s_ctrl(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_core_rgb_coefft_wb_attr rgb_coefft_wb_attr;
+
+	copy_from_user(&rgb_coefft_wb_attr, (const void __user*)control->value, sizeof(rgb_coefft_wb_attr));
+	apical_isp_matrix_rgb_coefft_wb_r_write(rgb_coefft_wb_attr.rgb_coefft_wb_r);
+	apical_isp_matrix_rgb_coefft_wb_g_write(rgb_coefft_wb_attr.rgb_coefft_wb_g);
+	apical_isp_matrix_rgb_coefft_wb_b_write(rgb_coefft_wb_attr.rgb_coefft_wb_b);
+	return 0;
+}
+
+
+static int apical_isp_rgb_coefft_wb_g_ctrl(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	struct isp_core_rgb_coefft_wb_attr rgb_coefft_wb_attr;
+
+	rgb_coefft_wb_attr.rgb_coefft_wb_r = apical_isp_matrix_rgb_coefft_wb_r_read();
+	rgb_coefft_wb_attr.rgb_coefft_wb_g = apical_isp_matrix_rgb_coefft_wb_g_read();
+	rgb_coefft_wb_attr.rgb_coefft_wb_b = apical_isp_matrix_rgb_coefft_wb_b_read();
+	copy_to_user((void __user*)control->value, &rgb_coefft_wb_attr, sizeof(rgb_coefft_wb_attr));
+	return 0;
+}
+
 
 static int apical_isp_wb_g_ctrl(struct tx_isp_core_device *core, struct v4l2_control *control)
 {
@@ -3063,6 +3386,54 @@ err_isp_param:
 	return -1;
 }
 
+struct isp_frame_done_info {
+	unsigned int timeout;
+	uint64_t cnt;
+	int reserved;
+};
+
+
+uint64_t frame_done_cnt = 0;
+DECLARE_WAIT_QUEUE_HEAD(frame_done_wq);
+atomic_t frame_done_cond = ATOMIC_INIT(0);
+
+int isp_frame_done_wait(int timeout, uint64_t *cnt)
+{
+	int ret = -1;
+	atomic_set(&frame_done_cond, 0);
+	ret = wait_event_interruptible_timeout(frame_done_wq, (1 == atomic_read(&frame_done_cond)), timeout);
+	*cnt = frame_done_cnt;
+	if (-ERESTARTSYS == ret)
+		return ret;
+	if (!ret)
+		return -ETIMEDOUT;
+	return 0;
+}
+
+void isp_frame_done_wakeup(void)
+{
+	frame_done_cnt++;
+	atomic_set(&frame_done_cond, 1);
+	wake_up(&frame_done_wq);
+}
+
+static int apical_isp_wait_frame_done(struct tx_isp_core_device *core, struct v4l2_control *control)
+{
+	int ret = ISP_SUCCESS;
+	int timeout = 0;
+	uint64_t cnt = 0;
+	struct isp_frame_done_info info;
+
+	copy_from_user(&info, (const void __user*)control->value, sizeof(info));
+	timeout = info.timeout;
+
+	ret = isp_frame_done_wait(timeout, &cnt);
+	info.cnt = cnt;
+
+	copy_to_user((void __user*)control->value, &info, sizeof(info));
+	return ret;
+
+}
 
 static int apical_isp_ev_g_attr(struct tx_isp_core_device *core, struct v4l2_control *control)
 {
@@ -3170,7 +3541,7 @@ static int apical_isp_core_ops_g_ctrl(struct tx_isp_core_device *core, struct v4
 			break;
 		case IMAGE_TUNING_CID_AF_STAINFO:
 			break;
-        case IMAGE_TUNING_CID_TEMPER_STRENGTH:
+		case IMAGE_TUNING_CID_TEMPER_STRENGTH:
 			ret = apical_isp_temper_dns_g_strength(core, ctrl);
 			break;
 		case IMAGE_TUNING_CID_TEMPER_ATTR:
@@ -3200,7 +3571,10 @@ static int apical_isp_core_ops_g_ctrl(struct tx_isp_core_device *core, struct v4
 		case IMAGE_TUNING_CID_DAY_OR_NIGHT:
 			ret = apical_isp_day_or_night_g_ctrl(core, ctrl);
 			break;
-	        case IMAGE_TUNING_CID_AE_STRATEGY:
+		case IMAGE_TUNING_CID_HVFLIP:
+			ret = apical_isp_hvflip_g_ctrl(core, ctrl);
+			break;
+		case IMAGE_TUNING_CID_AE_STRATEGY:
 			ret = apical_isp_ae_strategy_g_ctrl(core, ctrl);
 			break;
 		case IMAGE_TUNING_CID_GAMMA_ATTR:
@@ -3221,6 +3595,9 @@ static int apical_isp_core_ops_g_ctrl(struct tx_isp_core_device *core, struct v4
 		case IMAGE_TUNING_CID_WB_STATIS_ATTR:
 			ret = apical_isp_wb_statis_g_ctrl(core, ctrl);
 			break;
+		case IMAGE_TUNING_CID_AWB_RGB_COEFFT_WB_ATTR:
+			ret = apical_isp_rgb_coefft_wb_g_ctrl(core, ctrl);
+			break;
 		case IMAGE_TUNING_CID_MAX_AGAIN_ATTR:
 			ret = apical_isp_max_again_g_ctrl(core, ctrl);
 			break;
@@ -3236,15 +3613,42 @@ static int apical_isp_core_ops_g_ctrl(struct tx_isp_core_device *core, struct v4
 		case IMAGE_TUNING_CID_ISP_TABLE_ATTR:
 			ret = apical_isp_table_g_attr(core, ctrl);
 			break;
+		case IMAGE_TUNING_CID_ISP_WAIT_FRAME_ATTR:
+			ret = apical_isp_wait_frame_done(core, ctrl);
+			break;
 		case IMAGE_TUNING_CID_ISP_EV_ATTR:
 			ret = apical_isp_ev_g_attr(core, ctrl);
 			break;
-	    case IMAGE_TUNING_CID_AWB_CWF_SHIFT:
-		    ret = apical_isp_awb_cwf_g_shift(core, ctrl);
-		    break;
-		default:
-			ret = -EPERM;
+		case IMAGE_TUNING_CID_AWB_CWF_SHIFT:
+		 	ret = apical_isp_awb_cwf_g_shift(core, ctrl);
+		 	break;
+		case IMAGE_TUNING_CID_AE_WEIGHT:
+		 	ret = apical_isp_ae_weight_g_attr(core, ctrl);
+		 	break;
+		case IMAGE_TUNING_CID_AWB_WEIGHT:
+		 	ret = apical_isp_awb_weight_g_attr(core, ctrl);
+		 	break;
+		case IMAGE_TUNING_CID_AE_HIST:
+		 	ret = apical_isp_ae_hist_g_attr(core, ctrl);
+		 	break;
+		case IMAGE_TUNING_CID_AWB_HIST:
+		 	ret = apical_isp_awb_hist_g_attr(core, ctrl);
+		 	break;
+		case IMAGE_TUNING_CID_AWB_ZONE:
+			ret = apical_isp_awb_zone_g_attr(core, ctrl);
 			break;
+		case IMAGE_TUNING_CID_AE_ZONE:
+			ret = apical_isp_ae_zone_g_attr(core, ctrl);
+			break;
+		case IMAGE_TUNING_CID_AF_ZONE:
+			ret = apical_isp_af_zone_g_attr(core, ctrl);
+			break;
+		case IMAGE_TUNING_CID_AF_HIST:
+			ret = apical_isp_af_hist_g_attr(core, ctrl);
+			break;
+		default:
+		 	ret = -EPERM;
+		 	break;
 	}
 	return ret;
 }
@@ -3283,9 +3687,9 @@ static int apical_isp_core_ops_s_ctrl(struct tx_isp_core_device *core, struct v4
 		case IMAGE_TUNING_CID_CUSTOM_TEMPER_DNS:
 			ret = apical_isp_temper_dns_s_control(core, ctrl);
 			break;
-        case IMAGE_TUNING_CID_TEMPER_STRENGTH:
+		case IMAGE_TUNING_CID_TEMPER_STRENGTH:
 			ret = apical_isp_temper_dns_s_strength(core, ctrl);
-		    break;
+			break;
 		case IMAGE_TUNING_CID_TEMPER_ATTR:
 			ret = apical_isp_temper_dns_s_attr(core, ctrl);
 			break;
@@ -3386,7 +3790,10 @@ static int apical_isp_core_ops_s_ctrl(struct tx_isp_core_device *core, struct v4
 		case IMAGE_TUNING_CID_DAY_OR_NIGHT:
 			ret = apical_isp_day_or_night_s_ctrl(core, ctrl);
 			break;
-	        case IMAGE_TUNING_CID_AE_STRATEGY:
+		case IMAGE_TUNING_CID_HVFLIP:
+			ret = apical_isp_hvflip_s_ctrl(core, ctrl);
+			break;
+		case IMAGE_TUNING_CID_AE_STRATEGY:
 			ret = apical_isp_ae_strategy_s_ctrl(core, ctrl);
 			break;
 		case IMAGE_TUNING_CID_GAMMA_ATTR:
@@ -3403,6 +3810,9 @@ static int apical_isp_core_ops_s_ctrl(struct tx_isp_core_device *core, struct v4
 			break;
 		case IMAGE_TUNING_CID_WB_ATTR:
 			ret = apical_isp_wb_s_ctrl(core, ctrl);
+			break;
+		case IMAGE_TUNING_CID_AWB_RGB_COEFFT_WB_ATTR:
+			ret = apical_isp_rgb_coefft_wb_s_ctrl(core, ctrl);
 			break;
 		case IMAGE_TUNING_CID_MAX_AGAIN_ATTR:
 			ret = apical_isp_max_again_s_ctrl(core, ctrl);
@@ -3421,6 +3831,21 @@ static int apical_isp_core_ops_s_ctrl(struct tx_isp_core_device *core, struct v4
 			break;
 		case IMAGE_TUNING_CID_AWB_CWF_SHIFT:
 			ret = apical_isp_awb_cwf_s_shift(core, ctrl);
+			break;
+		case IMAGE_TUNING_CID_AE_WEIGHT:
+			ret = apical_isp_ae_weight_s_attr(core, ctrl);
+			break;
+		case IMAGE_TUNING_CID_AWB_WEIGHT:
+			ret = apical_isp_awb_weight_s_attr(core, ctrl);
+			break;
+		case IMAGE_TUNING_CID_AE_HIST:
+			ret = apical_isp_ae_hist_s_attr(core, ctrl);
+			break;
+		case IMAGE_TUNING_CID_AWB_HIST:
+			ret = apical_isp_awb_hist_s_attr(core, ctrl);
+			break;
+		case IMAGE_TUNING_CID_AF_HIST:
+			ret = apical_isp_af_hist_s_attr(core, ctrl);
 			break;
 		default:
 			ret = -EPERM;
@@ -3901,10 +4326,10 @@ static int image_tuning_v4l2_open(struct file *file)
 	struct tx_isp_core_device *core = sd_to_tx_isp_core_device(tuning->parent);
 	struct tx_isp_video_in *vin = &core->vin;
 	int ret = ISP_SUCCESS;
-	unsigned int tmp = 0;
 	printk("###### %s %d #######\n",__func__,__LINE__);
 	/* ISP must be runing */
 	if(atomic_read(&core->state) < TX_ISP_STATE_START){
+		printk("atomic_read failed!\n");
 		return -EPERM;
 	}
 
@@ -3949,61 +4374,12 @@ static int image_tuning_v4l2_open(struct file *file)
 	v4l2_ctrl_handler_setup(&tuning->ctrls.handler);
 	{
 		TXispPrivParamManage *param = core->param;
-		TXispPrivCustomerParamer *customer = NULL;
 		if (NULL != param) {
-			customer = &param->customer[TX_ISP_PRIV_PARAM_DAY_MODE];
-			if (NULL != customer) {
-				tmp = APICAL_READ_32(0x40);
-				tmp = (tmp | 0x0c02da6c) & (~(customer->top));
-				if(TX_ISP_EXIST_FR_CHANNEL == 0)
-					tmp |= 0x00fc0000;
-				APICAL_WRITE_32(0x40, tmp);
-				if (customer->top & (1 << 19)){
-#if TX_ISP_EXIST_FR_CHANNEL
-					apical_isp_top_bypass_fr_gamma_rgb_write(0);
-					apical_isp_fr_gamma_rgb_enable_write(1);
-#endif
-#if TX_ISP_EXIST_DS2_CHANNEL
-					apical_isp_top_bypass_ds2_gamma_rgb_write(0);
-					apical_isp_ds2_gamma_rgb_enable_write(1);
-#endif
-				} else {
-#if TX_ISP_EXIST_FR_CHANNEL
-					apical_isp_top_bypass_fr_gamma_rgb_write(1);
-					apical_isp_fr_gamma_rgb_enable_write(0);
-#endif
-#if TX_ISP_EXIST_DS2_CHANNEL
-					apical_isp_top_bypass_ds2_gamma_rgb_write(1);
-					apical_isp_ds2_gamma_rgb_enable_write(0);
-#endif
-				}
-
-				if ((customer->top) & (1 << 20)){
-#if TX_ISP_EXIST_FR_CHANNEL
-					apical_isp_top_bypass_fr_sharpen_write(0);
-					apical_isp_fr_sharpen_enable_write(1);
-#endif
-#if TX_ISP_EXIST_DS2_CHANNEL
-					apical_isp_top_bypass_ds2_sharpen_write(0);
-					apical_isp_ds2_sharpen_enable_write(1);
-#endif
-				} else {
-#if TX_ISP_EXIST_FR_CHANNEL
-					apical_isp_fr_sharpen_enable_write(1);
-					apical_isp_top_bypass_fr_sharpen_write(0);
-#endif
-#ifdef TX_ISP_EXIST_DS2_CHANNEL
-					apical_isp_top_bypass_ds2_sharpen_write(1);
-					apical_isp_ds2_sharpen_enable_write(0);
-#endif
-				}
-				if ((customer->top) & (1 << 27))
-					apical_isp_ds1_sharpen_enable_write(1);
-				else
-					apical_isp_ds1_sharpen_enable_write(0);
-			}
+			tuning->ctrls.daynight = ISP_CORE_RUNING_MODE_DAY_MODE;
+			core->isp_daynight_switch = 1;
 		}
 	}
+	frame_done_cnt = 0;
 	return ret;
 }
 
