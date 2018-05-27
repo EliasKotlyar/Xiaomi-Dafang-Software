@@ -15,6 +15,13 @@
 #include <soc/gpio.h>
 #include <linux/slab.h>
 
+#if defined(CONFIG_SOC_T30)
+#define PWM_NUM		NR_TCU_CHNS
+#else /* other soc type */
+#define PWM_NUM		4
+#endif
+
+#define PWM_DRIVER_VERSION "H20180309a"
 struct jz_pwm_device{
 	short id;
 	const char *label;
@@ -38,7 +45,7 @@ static int jz_pwm_request(struct pwm_chip *chip, struct pwm_device *pwm)
 {
 	struct jz_pwm_chip *jz = to_jz(chip);
 	int id = jz->pwm_chrs->tcu_cha->index;
-	if (id < 0 || id > 3)
+	if (id < 0 || id > PWM_NUM)
 		return -ENODEV;
 
 	printk("request pwm channel %d successfully\n", id);
@@ -61,6 +68,8 @@ static int jz_pwm_enable(struct pwm_chip *chip, struct pwm_device *pwm)
 
 	jz_tcu_start_counter(tcu_pwm);
 
+	jz_tcu_enable_counter(tcu_pwm);
+
 	jzgpio_set_func(tcu_pwm->gpio / 32,GPIO_FUNC_0,BIT(tcu_pwm->gpio & 0x1f));
 
 	return 0;
@@ -74,6 +83,8 @@ static void jz_pwm_disable(struct pwm_chip *chip, struct pwm_device *pwm)
 	jz_tcu_disable_counter(tcu_pwm);
 
 	jz_tcu_stop_counter(tcu_pwm);
+	if(tcu_pwm->index == 1 || tcu_pwm->index == 2)
+		jzgpio_set_func(tcu_pwm->gpio / 32,tcu_pwm->init_level > 0 ? GPIO_OUTPUT1 : GPIO_OUTPUT0,BIT(tcu_pwm->gpio & 0x1f));
 }
 
 static int jz_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
@@ -118,7 +129,7 @@ static int jz_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
 	if (duty >= period)
 		duty = period - 1;
 	tcu_pwm->full_num = period;
-	tcu_pwm->half_num = (period - duty);
+	tcu_pwm->half_num = duty;
 	tcu_pwm->prescale = prescaler;
 #ifdef CONFIG_SLCD_SUSPEND_ALARM_WAKEUP_REFRESH
 	tcu_pwm->clk_src = TCU_CLKSRC_RTC;
@@ -132,8 +143,7 @@ static int jz_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
 	jz_tcu_set_period(tcu_pwm,tcu_pwm->full_num);
 
 	jz_tcu_set_duty(tcu_pwm,tcu_pwm->half_num);
-
-	jz_tcu_enable_counter(tcu_pwm);
+//	printk("hwpwm = %d index = %d\n", pwm->hwpwm, tcu_pwm->index);
 
 	return 0;
 }
@@ -144,10 +154,10 @@ int jz_pwm_set_polarity(struct pwm_chip *chip,struct pwm_device *pwm, enum pwm_p
 	struct jz_tcu_chn *tcu_pwm = jz->pwm_chrs->tcu_cha;
 
 	if(polarity == PWM_POLARITY_INVERSED)
-		tcu_pwm->init_level = 1;
+		tcu_pwm->init_level = 0;
 
 	if(polarity == PWM_POLARITY_NORMAL)
-		tcu_pwm->init_level = 0;
+		tcu_pwm->init_level = 1;
 
 	return 0;
 }
@@ -182,16 +192,19 @@ static int jz_pwm_probe(struct platform_device *pdev)
 
 	jz->chip.dev = &pdev->dev;
 	jz->chip.ops = &jz_pwm_ops;
-	jz->chip.npwm = 4;
+	jz->chip.npwm = PWM_NUM;
 	jz->chip.base = -1;
 
 	jz->pwm_chrs->tcu_cha = (struct jz_tcu_chn *)jz->cell->platform_data;
 
 	ret = pwmchip_add(&jz->chip);
 	if (ret < 0) {
+		printk("%s[%d] ret = %d\n", __func__,__LINE__, ret);
 		goto err_free;
 	}
 
+	if(pdev->dev.driver)
+		printk("%s[%d] d_name = %s\n", __func__,__LINE__,pdev->dev.driver->name);
 	platform_set_drvdata(pdev, jz);
 
 	return 0;
@@ -258,6 +271,64 @@ static struct platform_driver jz_pwm3_driver = {
 };
 #endif
 
+#if defined(CONFIG_SOC_T30)
+#if (PWM_NUM > 4)
+#ifdef CONFIG_PWM4
+static struct platform_driver jz_pwm4_driver = {
+	.driver = {
+		.name = "tcu_chn4",
+		.owner = THIS_MODULE,
+	},
+	.probe = jz_pwm_probe,
+	.remove = jz_pwm_remove,
+};
+#endif
+#endif
+
+#if (PWM_NUM > 5)
+#ifdef CONFIG_PWM5
+static struct platform_driver jz_pwm5_driver = {
+	.driver = {
+		.name = "tcu_chn5",
+		.owner = THIS_MODULE,
+	},
+	.probe = jz_pwm_probe,
+	.remove = jz_pwm_remove,
+};
+#endif
+#endif
+
+#if (PWM_NUM > 6)
+#ifdef CONFIG_PWM6
+static struct platform_driver jz_pwm6_driver = {
+	.driver = {
+		.name = "tcu_chn6",
+		.owner = THIS_MODULE,
+	},
+	.probe = jz_pwm_probe,
+	.remove = jz_pwm_remove,
+};
+#endif
+#endif
+
+#if (PWM_NUM > 7)
+#ifdef CONFIG_PWM7
+static struct platform_driver jz_pwm7_driver = {
+	.driver = {
+		.name = "tcu_chn7",
+		.owner = THIS_MODULE,
+	},
+	.probe = jz_pwm_probe,
+	.remove = jz_pwm_remove,
+};
+#endif
+#endif
+#else /* T20 */
+#if (defined(CONFIG_PWM4) || defined(CONFIG_PWM5) || defined(CONFIG_PWM6) || defined(CONFIG_PWM7))
+#error "Can't support the pwm in t10/t20 chip!"
+#endif
+#endif
+
 static int __init pwm_init(void)
 {
 #ifdef CONFIG_PWM0
@@ -272,7 +343,19 @@ static int __init pwm_init(void)
 #ifdef CONFIG_PWM3
 	platform_driver_register(&jz_pwm3_driver);
 #endif
-
+#ifdef CONFIG_PWM4
+	platform_driver_register(&jz_pwm4_driver);
+#endif
+#ifdef CONFIG_PWM5
+	platform_driver_register(&jz_pwm5_driver);
+#endif
+#ifdef CONFIG_PWM6
+	platform_driver_register(&jz_pwm6_driver);
+#endif
+#ifdef CONFIG_PWM7
+	platform_driver_register(&jz_pwm7_driver);
+#endif
+	printk("The version of PWM driver is %s\n", PWM_DRIVER_VERSION);
 	return 0;
 }
 
@@ -290,8 +373,20 @@ static void __exit pwm_exit(void)
 #ifdef CONFIG_PWM3
 	platform_driver_unregister(&jz_pwm3_driver);
 #endif
+#ifdef CONFIG_PWM4
+	platform_driver_unregister(&jz_pwm4_driver);
+#endif
+#ifdef CONFIG_PWM5
+	platform_driver_unregister(&jz_pwm5_driver);
+#endif
+#ifdef CONFIG_PWM6
+	platform_driver_unregister(&jz_pwm6_driver);
+#endif
+#ifdef CONFIG_PWM7
+	platform_driver_unregister(&jz_pwm7_driver);
+#endif
 }
-
+#undef PWM_NUM
 module_init(pwm_init);
 module_exit(pwm_exit);
 

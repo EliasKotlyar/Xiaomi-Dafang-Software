@@ -18,10 +18,11 @@
 #define PATH_PWM "/dev/pwm"
 
 #define PWM_CONFIG	0x001
+#define PWM_CONFIG_DUTY	0x002
 #define PWM_ENABLE	0x010
 #define PWM_DISABLE 0x100
 
-#define NR_MAX_PWM_NUM 4
+#define NR_MAX_PWM_NUM 8
 
 struct pwm_ioctl_t {
 	int index;
@@ -234,6 +235,44 @@ int SU_PWM_SetChnAttr(uint32_t chn_num, SUPWMChnAttr *chn_attr)
 	return 0;
 }
 
+int SU_PWM_ModifyChnDuty(uint32_t chn_num, int duty)
+{
+	int ret = 0;
+	SUPWM *pwm = getpwm();
+	if(pwm == NULL) {
+		printf("pwm is NULL !\n");
+		return -1;
+	}
+
+	if((chn_num >= NR_MAX_PWM_NUM) || (chn_num < 0)) {
+		printf("chn_num error !\n");
+		return -1;
+	}
+
+	if(pwm->create[chn_num] == 0) {
+		printf("not SU_PWM_CreateChn !\n");
+		return -1;
+	}
+
+	if(pwm->enable[chn_num] == 0){
+		printf("Please  SU_PWM_Enable firstly!\n");
+		return -1;
+	}
+
+	if((duty < 0) || (duty > pwm->attr[chn_num]->period)) {
+		printf("chn_attr->duty error !\n");
+		return -1;
+	}
+	pwm->attr[chn_num]->duty = duty;
+
+	ret = ioctl(pwm->fd, PWM_CONFIG_DUTY, (unsigned long)pwm->attr[chn_num]);
+	if(ret != 0) {
+		printf("ioctl : %d error !\n", __LINE__);
+		return -1;
+	}
+	return 0;
+}
+
 int SU_PWM_EnableChn(uint32_t chn_num)
 {
 	int ret;
@@ -259,9 +298,10 @@ int SU_PWM_EnableChn(uint32_t chn_num)
 		return -1;
 	}
 
-	pwm->enable[chn_num] = 1;
+	if(pwm->enable[chn_num])
+		return 0;
 
-	ret = ioctl(pwm->fd, PWM_CONFIG, pwm->attr[chn_num]);
+	ret = ioctl(pwm->fd, PWM_CONFIG, (unsigned long)pwm->attr[chn_num]);
 	if(ret != 0) {
 		printf("ioctl : %d error !\n", __LINE__);
 		return -1;
@@ -272,6 +312,8 @@ int SU_PWM_EnableChn(uint32_t chn_num)
 		printf("ioctl : %d error !\n", __LINE__);
 		return -1;
 	}
+
+	pwm->enable[chn_num] = 1;
 
 	return 0;
 }
@@ -298,7 +340,7 @@ int SU_PWM_DisableChn(uint32_t chn_num)
 
 	if(pwm->enable[chn_num] == 0) {
 		printf("not SU_PWM_Enable !\n");
-		return -1;
+		return 0;
 	}
 
 	if(pwm->fd < 0) {
@@ -306,13 +348,12 @@ int SU_PWM_DisableChn(uint32_t chn_num)
 		return -1;
 	}
 
-	pwm->enable[chn_num] = 0;
-
 	ret = ioctl(pwm->fd, PWM_DISABLE, chn_num);
 	if(ret != 0) {
 		printf("ioctl : %d error !\n", __LINE__);
 		return -1;
 	}
+	pwm->enable[chn_num] = 0;
 
 	return 0;
 }

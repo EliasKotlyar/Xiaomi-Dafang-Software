@@ -564,9 +564,9 @@ static int imx225_g_chip_ident(struct v4l2_subdev *sd,
 		ret = gpio_request(reset_gpio,"imx225_reset");
 		if(!ret){
 			gpio_direction_output(reset_gpio, 0);
-			mdelay(5);
+			msleep(5);
 			gpio_direction_output(reset_gpio, 1);
-			mdelay(5);
+			msleep(5);
 		}else{
 			printk("gpio requrest fail %d\n",reset_gpio);
 		}
@@ -575,8 +575,9 @@ static int imx225_g_chip_ident(struct v4l2_subdev *sd,
 		ret = gpio_request(pwdn_gpio,"imx225_pwdn");
 		if(!ret){
 			gpio_direction_output(pwdn_gpio, 1);
-			mdelay(150);
+			msleep(150);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",pwdn_gpio);
 		}
@@ -711,6 +712,7 @@ static int imx225_probe(struct i2c_client *client,
 	enum v4l2_mbus_pixelcode mbus;
 	int i = 0;
 	int ret;
+	unsigned long rate = 0;
 
 	sensor = (struct tx_isp_sensor *)kzalloc(sizeof(*sensor), GFP_KERNEL);
 	if(!sensor){
@@ -724,6 +726,25 @@ static int imx225_probe(struct i2c_client *client,
 		printk("Cannot get sensor input clock cgu_cim\n");
 		goto err_get_mclk;
 	}
+
+	rate = clk_get_rate(clk_get_parent(sensor->mclk));
+	if (((rate / 1000) % 37125) != 0) {
+		struct clk *vpll;
+		vpll = clk_get(NULL,"vpll");
+		if (IS_ERR(vpll)) {
+			pr_warning("get vpll failed\n");
+		} else {
+			/*vpll default 1200M*/
+			clk_set_rate(vpll,891000000);
+			rate = clk_get_rate(vpll);
+			if (((rate / 1000) % 37125) == 0) {
+				ret = clk_set_parent(sensor->mclk, vpll);
+				if (ret < 0)
+					pr_err("set mclk parent as vpll err\n");
+			}
+		}
+	}
+
 	clk_set_rate(sensor->mclk, 37125000);
 	clk_enable(sensor->mclk);
 

@@ -45,9 +45,7 @@
 #include "SegmentServerMediaSubsession.h"
 #include "HTTPServer.h"
 
-#ifdef HAVE_ALSA
 #include "ALSACapture.h"
-#endif
 
 #define LOGURU_IMPLEMENTATION 1
 #include "loguru.hpp"
@@ -204,31 +202,6 @@ int decodeVideoFormat(const char *fmt) {
     return v4l2_fourcc(fourcc[0], fourcc[1], fourcc[2], fourcc[3]);
 }
 
-// -----------------------------------------
-//    convert string audio format to pcm
-// -----------------------------------------
-#ifdef HAVE_ALSA
-/*
-snd_pcm_format_t decodeAudioFormat(const std::string& fmt)
-{
-    snd_pcm_format_t audioFmt = SND_PCM_FORMAT_UNKNOWN;
-    if (fmt == "S16_BE") {
-        audioFmt = SND_PCM_FORMAT_S16_BE;
-    } else if (fmt == "S16_LE") {
-        audioFmt = SND_PCM_FORMAT_S16_LE;
-    } else if (fmt == "S32_BE") {
-        audioFmt = SND_PCM_FORMAT_S32_BE;
-    } else if (fmt == "S32_LE") {
-        audioFmt = SND_PCM_FORMAT_S32_LE;
-    } else if (fmt == "U8") {
-        audioFmt = SND_PCM_FORMAT_U8;
-    } else if (fmt == "S8") {
-        audioFmt = SND_PCM_FORMAT_S8;
-    }
-    return audioFmt;
-}
-*/
-#endif
 
 //"EncodeFormat:InSampleRate:OutSampleRate"
 void decodeEncodeFormat(const std::string &in, audioencoding &format,int &inAudioFreq, int &outAudioFreq )
@@ -305,97 +278,6 @@ std::string getDeviceName(const std::string &devicePath) {
 }
 
 
-/* ---------------------------------------------------------------------------
-**  get a "deviceid" from uevent sys file
-** -------------------------------------------------------------------------*/
-#ifdef HAVE_ALSA
-/*
-std::string getDeviceId(const std::string& evt) {
-    std::string deviceid;
-    std::istringstream f(evt);
-    std::string key;
-    while (getline(f, key, '=')) {
-            std::string value;
-        if (getline(f, value)) {
-            if ( (key =="PRODUCT") || (key == "PCI_SUBSYS_ID") ) {
-                deviceid = value;
-                break;
-            }
-        }
-    }
-    return deviceid;
-}
-
-std::string  getV4l2Alsa(const std::string& v4l2device) {
-    std::string audioDevice(v4l2device);
-
-    std::map<std::string,std::string> videodevices;
-    std::string video4linuxPath("/sys/class/video4linux");
-    DIR *dp = opendir(video4linuxPath.c_str());
-    if (dp != NULL) {
-        struct dirent *entry = NULL;
-        while((entry = readdir(dp))) {
-            std::string devicename;
-            std::string deviceid;
-            if (strstr(entry->d_name,"video") == entry->d_name) {
-                std::string ueventPath(video4linuxPath);
-                ueventPath.append("/").append(entry->d_name).append("/device/uevent");
-                std::ifstream ifsd(ueventPath.c_str());
-                deviceid = std::string(std::istreambuf_iterator<char>{ifsd}, {});
-                deviceid.erase(deviceid.find_last_not_of("\n")+1);
-            }
-
-            if (!deviceid.empty()) {
-                videodevices[entry->d_name] = getDeviceId(deviceid);
-            }
-        }
-        closedir(dp);
-    }
-
-    std::map<std::string,std::string> audiodevices;
-    int rcard = -1;
-    while ( (snd_card_next(&rcard) == 0) && (rcard>=0) ) {
-        void **hints = NULL;
-        if (snd_device_name_hint(rcard, "pcm", &hints) >= 0) {
-            void **str = hints;
-            while (*str) {
-                std::ostringstream os;
-                os << "/sys/class/sound/card" << rcard << "/device/uevent";
-
-                std::ifstream ifs(os.str().c_str());
-                std::string deviceid = std::string(std::istreambuf_iterator<char>{ifs}, {});
-                deviceid.erase(deviceid.find_last_not_of("\n")+1);
-                deviceid = getDeviceId(deviceid);
-
-                if (!deviceid.empty()) {
-                    if (audiodevices.find(deviceid) == audiodevices.end()) {
-                        std::string audioname = snd_device_name_get_hint(*str, "NAME");
-                        audiodevices[deviceid] = audioname;
-                    }
-                }
-
-                str++;
-            }
-
-            snd_device_name_free_hint(hints);
-        }
-    }
-
-    auto deviceId  = videodevices.find(getDeviceName(v4l2device));
-    if (deviceId != videodevices.end()) {
-        auto audioDeviceIt = audiodevices.find(deviceId->second);
-
-        if (audioDeviceIt != audiodevices.end()) {
-            audioDevice = audioDeviceIt->second;
-            std::cout <<  v4l2device << "=>" << audioDevice << std::endl;
-        }
-    }
-
-
-    return audioDevice;
-}
-*/
-#endif
 
 // -----------------------------------------
 //    entry point
@@ -425,13 +307,11 @@ int main(int argc, char **argv) {
     unsigned int hlsSegment = 0;
     const char *realm = NULL;
     std::list <std::string> userPasswordList;
-    int inAudioFreq = 44100;
-    int outAudioFreq = 44100;
+    int inAudioFreq = 8000; //44100;
+    int outAudioFreq = 44100; //44100;
     audioencoding encode = ENCODE_MP3;
 
-#ifdef HAVE_ALSA
-    //snd_pcm_format_t audioFmt = SND_PCM_FORMAT_S16_BE;
-#endif
+
     const char *defaultPort = getenv("PORT");
     if (defaultPort != NULL) {
         rtspPort = atoi(defaultPort);
@@ -510,16 +390,10 @@ int main(int argc, char **argv) {
                 height = atoi(optarg);
                 break;
 
-                // ALSA
-#ifdef HAVE_ALSA
             case 'A':	disableAudio = true; break;
             case 'E':   decodeEncodeFormat(optarg,encode,inAudioFreq,outAudioFreq); break;
-                decodeEncodeFormat(optarg,encode,inAudioFreq,outAudioFreq);
-            break;
-            //case 'a':	audioFmt = decodeAudioFormat(optarg); break;
-#endif
 
-                // help
+            // help
             case 'h':
             default: {
                 std::cout << argv[0] << " [-v[v]] [-Q queueSize] [-O file]" << std::endl;
@@ -632,7 +506,7 @@ int main(int argc, char **argv) {
             exit(0);
         }
         if(width == 1920 && height == 1080){
-            OutPacketBuffer::maxSize = 500000;
+            OutPacketBuffer::maxSize = 600000;
         }
 
 
@@ -674,7 +548,6 @@ int main(int argc, char **argv) {
         // Init Audio Capture
         StreamReplicator *audioReplicator = NULL;
         std::string rtpAudioFormat;
-#ifdef HAVE_ALSA
         std::string audioDev="/dev/dsp";
         //audioDev = "";
         if (disableAudio == false)
@@ -732,7 +605,6 @@ int main(int argc, char **argv) {
                 }
             }
         }
-#endif
 
 
         // Create Multicast Session

@@ -27,6 +27,12 @@ typedef enum
     ENCODE_ULAW,
 } audioencoding;
 
+typedef enum
+{
+    SOURCE_IMP,
+    SOURCE_DSP,
+} audioSource;
+
 
 struct ALSACaptureParameters 
 {
@@ -58,9 +64,23 @@ class ALSACapture
 		size_t readOpus(char* buffer, size_t bufferSize, int volume);
 		size_t readPCM(char* buffer, size_t bufferSize, int volume);
 		size_t readULAW(char* buffer, size_t bufferSize, int volume);
+
+		// This is non object progamming, sorry ...
+		size_t readMP3IMP(char* buffer, size_t bufferSize, int volume);
+        size_t readOpusIMP(char* buffer, size_t bufferSize, int volume);
+        size_t readPCMIMP(char* buffer, size_t bufferSize, int volume);
+        size_t readULAWIMP(char* buffer, size_t bufferSize, int volume);
+
+        void udpateHWVolume(unsigned int newVol);
+        void UpdateIMPFilter();
         short filter(short val,bool swap, int num_sample =0);
         void setSwVolume(short &val, int vol);
         unsigned char ulaw_encode(short sample);
+
+        ssize_t readAudio(int fd, void *buf, size_t count);
+
+        void initAudioIMP();
+        void initAudio(const ALSACaptureParameters & params);
 
 	public:
 		virtual size_t read(char* buffer, size_t bufferSize);		
@@ -85,6 +105,9 @@ class ALSACapture
 		struct shared_conf m_currentConfig;
 		shared_conf *m_newConfig;
 		int m_Filtermethod;
+		bool m_HighFiltermethod;
+		audioSource m_audioSource;
+
 };
 
 #endif

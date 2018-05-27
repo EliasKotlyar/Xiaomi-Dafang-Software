@@ -10,6 +10,7 @@ ImpCapture::ImpCapture(impParams params) {
     height = params.height;
     width = params.width;
     mode = params.mode;
+    //m_buffer = malloc(height*width);
 }
 
 
@@ -25,24 +26,11 @@ int ImpCapture::getHeight() {
 size_t ImpCapture::read(char *buffer, size_t bufferSize) {
     int frameSize;
 
-    // Save to JPG
-    frameSize = impEncoder->snap_jpeg();
-
-
-    SharedMem &mem = SharedMem::instance();
-    mem.copyImage(impEncoder->getBuffer(), impEncoder->getBufferSize());
-
-
-
-
-
-
-
 
     if (mode != IMP_MODE_JPEG) {
-        frameSize = impEncoder->snap_h264();
+        frameSize = impEncoder->snap_h264(buffer);
     }
-    memcpy(buffer, impEncoder->getBuffer(), frameSize);
+    //memcpy(buffer, m_buffer, frameSize);
     return frameSize;
 }
 
@@ -51,7 +39,7 @@ int ImpCapture::getFd() {
 }
 
 unsigned long ImpCapture::getBufferSize() {
-    return impEncoder->getBufferSize();
+    return width*height; //impEncoder->getBufferSize();
 }
 
 

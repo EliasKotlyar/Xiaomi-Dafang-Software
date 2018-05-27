@@ -192,6 +192,19 @@ static int tx_isp_vic_start(struct tx_isp_vic_driver *vsd)
 #if VIC_SUPPORT_MIPI
 		tx_isp_vic_writel(vsd,VIC_INTF_TYPE, INTF_TYPE_DVP);//DVP
 #endif
+
+#if defined(CONFIG_SOC_T30)
+		volatile unsigned int value = *(volatile unsigned int *)(0xb0000020);
+		value &= ~(1<<25);
+		*(volatile unsigned int *)(0xb0000020) = value;
+		*(volatile unsigned int*)(0xb004000c) = 0x0;
+		//msleep(1000);
+		*(volatile unsigned int*)(0xb004000c) = 0x1;
+		*(volatile unsigned int*)(0xb0022000) = 0x7d;
+		*(volatile unsigned int*)(0xb0022080) = 0x3e;//0x3f
+		*(volatile unsigned int*)(0xb0022300) = 0x1e;//disable
+		*(volatile unsigned int*)(0xb00222cc) = 0x1;
+#endif
 		switch(vin->mbus.code){
 			case V4L2_MBUS_FMT_SBGGR8_1X8:
 			case V4L2_MBUS_FMT_SGBRG8_1X8:
@@ -210,20 +223,30 @@ static int tx_isp_vic_start(struct tx_isp_vic_driver *vsd)
 			case V4L2_MBUS_FMT_SGBRG10_1X10:
 			case V4L2_MBUS_FMT_SGRBG10_1X10:
 			case V4L2_MBUS_FMT_SRGGB10_1X10:
-				if (vin->attr->dvp.gpio == DVP_PA_LOW_10BIT) {
-					input_cfg = DVP_RAW10; //RAW10 low_align
-				} else if (vin->attr->dvp.gpio == DVP_PA_HIGH_10BIT) {
-					input_cfg = DVP_RAW10|DVP_RAW_ALIG;//RAW10 high_align
+				if(vin->attr->dvp.mode == SENSOR_DVP_SONY_MODE){
+					input_cfg = DVP_RAW12|DVP_SONY_MODE;
+					tx_isp_vic_writel(vsd,0x60, 0xffc);
+					tx_isp_vic_writel(vsd,0x68, 0xffc);
 				}else{
-					printk("%s[%d] VIC failed to config DVP mode!(10bits-sensor)\n",__func__,__LINE__);
-					ret = -1;
+					if (vin->attr->dvp.gpio == DVP_PA_LOW_10BIT) {
+						input_cfg = DVP_RAW10; //RAW10 low_align
+					} else if (vin->attr->dvp.gpio == DVP_PA_HIGH_10BIT) {
+						input_cfg = DVP_RAW10|DVP_RAW_ALIG;//RAW10 high_align
+					}else{
+						printk("%s[%d] VIC failed to config DVP mode!(10bits-sensor)\n",__func__,__LINE__);
+						ret = -1;
+					}
 				}
 				break;
 			case V4L2_MBUS_FMT_SBGGR12_1X12:
 			case V4L2_MBUS_FMT_SGBRG12_1X12:
 			case V4L2_MBUS_FMT_SGRBG12_1X12:
 			case V4L2_MBUS_FMT_SRGGB12_1X12:
-				input_cfg = DVP_RAW12;
+				if(vin->attr->dvp.mode == SENSOR_DVP_SONY_MODE){
+					input_cfg = DVP_RAW12|DVP_SONY_MODE;
+				}else{
+					input_cfg = DVP_RAW12;
+				}
 				break;
 			case V4L2_MBUS_FMT_RGB565_2X8_LE:
 				input_cfg = DVP_RGB565_16BIT;
@@ -240,14 +263,25 @@ static int tx_isp_vic_start(struct tx_isp_vic_driver *vsd)
 				break;
 
 		}
-		if(vin->attr->dvp.mode == SENSOR_DVP_SONY_MODE)
-			input_cfg |= DVP_SONY_MODE;
-		tx_isp_vic_writel(vsd,VIC_DB_CFG, input_cfg);
 
-		if(vin->attr->dvp.blanking.hblanking)
+		if(vin->attr->dvp.polar.hsync_polar == DVP_POLARITY_LOW){
+			input_cfg |= HSYN_POLAR;
+		}
+
+		if(vin->attr->dvp.polar.vsync_polar == DVP_POLARITY_LOW){
+			input_cfg |= VSYN_POLAR;
+		}
+		tx_isp_vic_writel(vsd,VIC_DB_CFG, input_cfg);
+		if(vin->attr->dvp.blanking.hblanking) {
 			tx_isp_vic_writel(vsd, VIC_INPUT_HSYNC_BLANKING, vin->mbus.width + (vin->attr->dvp.blanking.hblanking << 16));
+		}
+#if defined(CONFIG_SOC_T30)
+		tx_isp_vic_writel(vsd, VIC_INPUT_HSYNC_BLANKING, vin->mbus.width + (vin->attr->dvp.blanking.hblanking << 16));
+		tx_isp_vic_writel(vsd, 0x150, 0x2);
+#endif
 		if(vin->attr->dvp.blanking.vblanking)
 			tx_isp_vic_writel(vsd, VIC_INPUT_VSYNC_BLANKING, vin->attr->dvp.blanking.vblanking);
+
 
 		ret = (vin->mbus.width<< 16) | (vin->mbus.height);
 		tx_isp_vic_writel(vsd,VIC_RESOLUTION, ret);
@@ -321,7 +355,7 @@ static void vic_interrupts_enable(struct v4l2_subdev *sd)
 {
 	struct tx_isp_notify_argument arg;
 	/* vic frd interrupt */
-	arg.value = 0x10000;
+	arg.value = 0x10000 | (0x3 << 19);
 	sd->v4l2_dev->notify(sd, TX_ISP_NOTIFY_ENABLE_IRQ, &arg);
 }
 
@@ -343,10 +377,36 @@ static int vic_core_s_stream(struct v4l2_subdev *sd, int enable)
 static int isp_vic_interrupt_service_routine(struct v4l2_subdev *sd, u32 status, bool *handled)
 {
 	struct tx_isp_vic_driver *vd = sd_to_tx_isp_vic_driver(sd);
+	unsigned int tmp = 0;
+
+#ifdef CONFIG_SOC_T10
+	if((0x3 << 19) & status){
+		tmp = tx_isp_vic_readl(vd, VIC_CONTROL);
+		tmp |= VIC_RESET;
+		tx_isp_vic_writel(vd, VIC_CONTROL, tmp);
+		printk("## VIC ERROR status = 0x%08x\n", status);
+		tx_isp_vic_writel(vd, VIC_CONTROL, VIC_SRART);
+	}
+#else
+	if((vd->vic_frd_c < 30) && ((vd->vic_frd_c % 10) == 0)){
+		tmp = tx_isp_vic_readl(vd, VIC_CONTROL);
+		tmp |= VIC_RESET;
+		tx_isp_vic_writel(vd, VIC_CONTROL, tmp);
+	}
+
+	if((0x3 << 19) & status){
+		tmp = tx_isp_vic_readl(vd, VIC_CONTROL);
+		tmp |= VIC_RESET;
+		tx_isp_vic_writel(vd, VIC_CONTROL, tmp);
+		printk("## VIC ERROR status = 0x%08x\n", status);
+	}
+#endif
+
 	/*vic frd interrupt */
 	if (0x10000&status) {
 		vd->vic_frd_c++;
 	}
+
 	return ISP_SUCCESS;
 }
 

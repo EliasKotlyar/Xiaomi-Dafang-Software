@@ -39,10 +39,6 @@ static int pwdn_gpio = -1;
 module_param(pwdn_gpio, int, S_IRUGO);
 MODULE_PARM_DESC(pwdn_gpio, "Power down GPIO NUM");
 
-static int sensor_gpio_func = DVP_PA_LOW_10BIT;
-module_param(sensor_gpio_func, int, S_IRUGO);
-MODULE_PARM_DESC(sensor_gpio_func, "Sensor GPIO function");
-
 struct regval_list {
 	uint16_t reg_num;
 	unsigned char value;
@@ -1990,6 +1986,7 @@ static int ov4689_g_chip_ident(struct v4l2_subdev *sd,
 			gpio_direction_output(pwdn_gpio, 1);
 			msleep(10);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",pwdn_gpio);
 		}
@@ -2138,10 +2135,6 @@ static int ov4689_probe(struct i2c_client *client,
 	clk_set_rate(sensor->mclk, 24000000);
 	clk_enable(sensor->mclk);
 
-	ret = set_sensor_gpio_function(sensor_gpio_func);
-	if (ret < 0)
-		goto err_set_sensor_gpio;
-
 	 /*
 		convert sensor-gain into isp-gain,
 	 */
@@ -2157,9 +2150,6 @@ static int ov4689_probe(struct i2c_client *client,
 
 	pr_debug("probe ok ------->ov4689\n");
 	return 0;
-err_set_sensor_gpio:
-	clk_disable(sensor->mclk);
-	clk_put(sensor->mclk);
 err_get_mclk:
 	kfree(sensor);
 

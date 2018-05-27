@@ -22,8 +22,8 @@
 #include <linux/proc_fs.h>
 #include <soc/gpio.h>
 
-#define IMX322_CHIP_ID_H	(0x55)
-#define IMX322_CHIP_ID_L	(0xec)
+#define IMX322_CHIP_ID_H	(0x50)
+#define IMX322_CHIP_ID_L	(0x0)
 
 #define IMX322_REG_END		0xffff
 #define IMX322_REG_DELAY	0xfffe
@@ -267,7 +267,7 @@ static int imx322_detect(struct v4l2_subdev *sd, unsigned int *ident)
 	unsigned char v;
 	int ret;
 
-	ret = imx322_read(sd, 0x31f3, &v);
+	ret = imx322_read(sd, 0x301c, &v);
 	pr_debug("-----%s: %d ret = %d, v = 0x%02x\n", __func__, __LINE__, ret,v);
 	if (ret < 0)
 		return ret;
@@ -275,7 +275,7 @@ static int imx322_detect(struct v4l2_subdev *sd, unsigned int *ident)
 		return -ENODEV;
 	*ident = v;
 
-	ret = imx322_read(sd, 0x31f2, &v);
+	ret = imx322_read(sd, 0x301d, &v);
 	pr_debug("-----%s: %d ret = %d, v = 0x%02x\n", __func__, __LINE__, ret,v);
 	if (ret < 0)
 		return ret;
@@ -507,6 +507,7 @@ static int imx322_g_chip_ident(struct v4l2_subdev *sd,
 			gpio_direction_output(pwdn_gpio, 1);
 			msleep(150);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",pwdn_gpio);
 		}
@@ -662,6 +663,8 @@ static int imx322_probe(struct i2c_client *client,
 		if (IS_ERR(vpll)) {
 			pr_warning("get vpll failed\n");
 		} else {
+			/*vpll default 1200M*/
+			clk_set_rate(vpll,891000000);
 			rate = clk_get_rate(vpll);
 			if (((rate / 1000) % 37125) == 0) {
 				ret = clk_set_parent(sensor->mclk, vpll);

@@ -145,26 +145,26 @@ int init_codec(void)
 
 	/* codec precharge */
 	codec_reg_set(TS_CODEC_CHCR_27, 6, 7, 1);
-	msleep(20);
+	msleep(10);
 #ifdef CONFIG_SOC_T20
 	codec_reg_set(TS_CODEC_CCR_28, 7, 7, 1);
-	msleep(20);
+	msleep(10);
 	for (i = 0; i < 6; i++) {
 		codec_reg_set(TS_CODEC_CCR_28, 0, 6, 0x3f >> (6 - i));
 		msleep(30);
 	}
-	msleep(20);
+	/*msleep(10);*/
 	codec_reg_set(TS_CODEC_CCR_28, 0, 6, 0x3f);
 #else	/* CONFIG_SOC_T10 */
 	codec_reg_set(TS_CODEC_CCR_28, 7, 7, 0);
-	msleep(20);
+	msleep(10);
 	codec_reg_set(TS_CODEC_CCR_28, 0, 6, 0x3f);
-	msleep(20);
+	msleep(10);
 	for (i = 0; i < 6; i++) {
 		codec_reg_set(TS_CODEC_CCR_28, 0, 6, 0x3f >> i);
 		msleep(30);
 	}
-	msleep(20);
+	/*msleep(20);*/
 	codec_reg_set(TS_CODEC_CCR_28, 0, 6, 0x0);
 #endif
 	msleep(20);
@@ -195,11 +195,10 @@ static int codec_set_buildin_mic(void)
 
 	/* set record volume */
 	codec_reg_set(TS_CODEC_CACR2_23, 0, 4, 0xc);
-//	codec_reg_set(TS_CODEC_CACR2_23, 0, 4, 31);
 	msleep(10);
 
 	/* MIC mode: 1: Signal-ended input , 0: Full Diff input */
-	codec_reg_set(TS_CODEC_CACR2_23, 5, 5, 1);
+	codec_reg_set(TS_CODEC_CACR2_23, 5, 5, 0);
 	msleep(10);
 	/* enable current source of ADC module, enable mic bias */
 	codec_reg_set(TS_CODEC_CAACR_21, 7, 7, 1);
@@ -306,8 +305,8 @@ static int codec_set_device(enum snd_device_t device)
 		break;
 
 	case SND_DEVICE_BUILDIN_MIC:
-		printk("%s: set device: MIC...\n", __func__);
 		ret = codec_set_buildin_mic();
+		printk("%s: set device: MIC...\n", __func__);
 		break;
 	default:
 		iserror = 1;
@@ -377,7 +376,12 @@ void codec_set_record_volume(int * vol)
 	if (*vol > 31) *vol = 31;
 	volume = *vol;
 
+#if 1
 	codec_reg_set(TS_CODEC_CACR2_23, 0, 4, volume);
+#else
+	codec_reg_set(TS_CODEC_CAFG_49, 6, 6, 1);
+	codec_reg_set(TS_CODEC_CGAINR_0a, 5, 5, 1);
+#endif
 }
 
 int dump_codec_regs(void)

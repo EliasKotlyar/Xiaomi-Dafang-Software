@@ -23,11 +23,12 @@
 #include <linux/proc_fs.h>
 #include <soc/gpio.h>
 
-#define SC2135_CHIP_ID_H		(0x21)
-#define SC2135_CHIP_ID_L		(0x35)
-#define SC2135_REG_END		    0xff
-#define SC2135_REG_DELAY		0xfe
-#define SC2135_SUPPORT_PCLK (67500*1000)
+#define SC2135_CHIP_ID_H	(0x21)
+#define SC2135_CHIP_ID_L	(0x35)
+#define SC2135_REG_END		0xffff
+#define SC2135_REG_DELAY	0xfffe
+#define SC2135_SUPPORT_PCLK_FPS_30 (81000*1000)
+#define SC2135_SUPPORT_PCLK_FPS_15 (33750*1000)
 #define SENSOR_OUTPUT_MAX_FPS 30
 #define SENSOR_OUTPUT_MIN_FPS 5
 #define DRIVE_CAPABILITY_1
@@ -39,9 +40,14 @@ MODULE_PARM_DESC(reset_gpio, "Reset GPIO NUM");
 static int pwdn_gpio = -1;
 module_param(pwdn_gpio, int, S_IRUGO);
 MODULE_PARM_DESC(pwdn_gpio, "Power down GPIO NUM");
+
 static int sensor_gpio_func = DVP_PA_HIGH_10BIT;
 module_param(sensor_gpio_func, int, S_IRUGO);
 MODULE_PARM_DESC(sensor_gpio_func, "Sensor GPIO function");
+
+static int sensor_max_fps = TX_SENSOR_MAX_FPS_25;
+module_param(sensor_max_fps, int, S_IRUGO);
+MODULE_PARM_DESC(sensor_max_fps, "Sensor Max Fps set interface");
 
 struct regval_list {
 	uint16_t reg_num;
@@ -417,36 +423,35 @@ struct tx_isp_sensor_attribute sc2135_attr={
 	.max_dgain = 0,
 	.min_integration_time = 4,
 	.min_integration_time_native = 4,
-	.max_integration_time_native = 1121,
-	.integration_time_limit = 1121,
-	.total_width = 2400,
-	.total_height = 1125,
-	.max_integration_time = 1121,
-	.one_line_expr_in_us = 35,
+	.max_integration_time_native = 1436,
+	.integration_time_limit = 1436,
+	.total_width = 2250,
+	.total_height = 1440,
+	.max_integration_time = 1436,
+	.one_line_expr_in_us = 28,
 	.integration_time_apply_delay = 2,
 	.again_apply_delay = 2,
 	.dgain_apply_delay = 2,
 	.sensor_ctrl.alloc_again = sc2135_alloc_again,
 	.sensor_ctrl.alloc_dgain = sc2135_alloc_dgain,
-	//void priv; /* point to struct tx_isp_sensor_board_info */
 };
 
 
 static struct regval_list sc2135_init_regs_1920_1080_25fps[] = {
 
-	{0x0103,0x01},  // reset all registers
-	{0x0100,0x00},  // stream output hold
+	{0x0103,0x01},
+	{0x0100,0x00},
 
-	{0x3e03,0x03},  //AE AG setting
+	{0x3e03,0x03},
 	{0x3e01,0x46},
-	{0x3e08,0x00},//03
+	{0x3e08,0x00},
 	{0x3e09,0x10},
 	{0x3416,0x11},
 
-	{0x3300,0x20},  //sampling timing
+	{0x3300,0x20},
 	{0x3301,0x08},
 	{0x3303,0x30},
-	{0x3306,0x78}, //0524
+	{0x3306,0x78},
 	{0x330b,0xd0},
 	{0x3309,0x30},
 	{0x3308,0x0a},
@@ -457,95 +462,237 @@ static struct regval_list sc2135_init_regs_1920_1080_25fps[] = {
 	{0x3322,0x2c},
 	{0x3323,0x2c},
 	{0x330e,0x20},
-	{0x3f05,0xdf},  // mem write
-	{0x3f01,0x04},  //sram write inv
+	{0x3f05,0xdf},
+	{0x3f01,0x04},
 	{0x3626,0x04},
 
-	{0x3312,0x06},  //sa1 timing
-	{0x3340,0x04},
-	{0x3341,0x30},//25fps //0x0438 - 0x80
+	{0x3312,0x06},
+	{0x3340,0x03},
+	{0x3341,0xe5},
 	{0x3342,0x02},
 	{0x3343,0x20},
 
 	{0x3333,0x10},
 	{0x3334,0x20},
 
-	{0x3621,0x18}, //mem timing setting
-	{0x3626,0x04}, //reduce non-overlap timing to improve margin
+	{0x3621,0x18},
+	{0x3626,0x04},
 
-	{0x3635,0x34}, //analog config
+	{0x3635,0x34},
 	{0x3038,0xa4},
-	{0x3630,0x84}, //blksun  0xcc
+	{0x3630,0x84},
 	{0x3622,0x0e},
 	{0x3620,0x62},
 	{0x3627,0x08},
 
-	{0x3637,0x87}, //ramp config
+	{0x3637,0x87},
 	{0x3638,0x86},
-	{0x3034,0xd2}, //decrease counter clock
-
-	{0x5780,0xff}, //DPC manual mode
+	{0x3034,0xd2},
+	{0x5780,0xff},
 	{0x5781,0x0c},
 	{0x5785,0x10},
-
-	{0x3d08,0x01}, //PCLK inversion
+	{0x3d08,0x00},/*PCLK inversion*/
 
 #ifdef  DRIVE_CAPABILITY_1
-	{0x3640,0x00}, //pad driving ability
+	{0x3640,0x00},
 #elif defined(DRIVE_CAPABILITY_2)
 	{0x3640,0x02},
 #endif
-	{0x320c,0x04}, //25fps config
-	{0x320d,0xb0}, //4b0
+	{0x320c,0x04},
+	{0x320d,0x65},
 
-	{0x3662,0x82}, //close temperature sensor
-	{0x335d,0x00}, //close precharge auto control
-	/*{0x3d0d,0x00}, //close random code */
-	{0x4501,0xa4}, //close bitwidth auto control
+	{0x3662,0x82},
+	{0x335d,0x00},
+	/*{0x3d0d,0x00},//close random code */
+	{0x4501,0xa4},
 
 	{0x3333,0x00},
 	{0x3627,0x02},
 	{0x3620,0x62},
-	{0x5781,0x04},	//0601
+	{0x5781,0x04},
 
 	{0x3333,0x10},
 	{0x3306,0x69},
 	{0x3635,0x52},
 	{0x3636,0x7c},
 	{0x3631,0x84},
-	{0x330b,0xe0},	//0612
-
 	{0x3637,0x88},
 	{0x3306,0x6b},
-	{0x330b,0xb0},//d0 930
-	{0x3630,0x84}, //0xe4,	//0613
+	{0x330b,0xd0},
+	{0x3630,0x84},
 
-	{0x335d,0x20}, // precharge auto control
-	{0x3368,0x02},  //EXP1
-	{0x3369,0x00},//=3e0e,3e0f - 0x265
-	{0x336A,0x04},  //EXP2
-	{0x336b,0x65},//= 3e0e,3e0f
-	/*{0x320f,0xe2},*/
-	{0x330E,0x20},  // start value
-	{0x3367,0x05},  // end value	//0812
+	{0x303a,0x07},/*CVI 81M 30fps*/
+	{0x3039,0x76},
+	{0x3343,0x40},
+	{0x3f04,0x02},
+	{0x3f05,0x04},
+	{0x3340,0x03},
+	{0x3341,0xe5},
+	{0x3207,0x4e},
 
-	{0x3620,0x92}, //0x62
+	{0x335d,0x20},
+	{0x3368,0x03},
+	{0x3369,0x3b},
+	{0x336a,0x05},
+	{0x336b,0xa0},
+	{0x330e,0x20},
+	{0x3367,0x05},
+
+	{0x3620,0x92},
 	{0x3634,0xd2},
 	{0x3633,0x17},
-	{0x3315,0x02}, //0x00
+	{0x3315,0x02},
+	{0x3334,0xa0},
+	{0x3312,0x00},
+	{0x335e,0x02},
+	{0x335f,0x0a},
+	{0x3306,0x60},
+	{0x3f04,0x01},
+	{0x3f05,0xf7},
 
-	{0x303a,0x18},
-	{0x3039,0x9e},	//0910
-
-	/*Count clock 162M 20160810 */
+	/*PLL 24mclk 81 pclk*/
+	{0x303a,0x15},
+	{0x3039,0x2e},
 	{0x3035,0x25},
-	{0x3034,0x2e},//16
+	{0x3034,0x2e},
 	{0x3036,0x00},
-	{0x0100,0x01}, //stream output on
+	{0x320c,0x04},
+	{0x320d,0x65},
+	{0x320e,0x05},
+	{0x320f,0xa0},
+	{0x3368,0x03},
+	{0x3369,0x3b},
+	{0x336a,0x05},
+	{0x336b,0xa0},
+
+	{0x3306,0x70},
+	{0x3640,0x01},
+	{0x3034,0x2e},
+	{0x330b,0xf0},
+	{0x3633,0x16},
+	{0x0100,0x01},
 
 	{SC2135_REG_END, 0x00},	/* END MARKER */
 };
 
+static struct regval_list sc2135_init_regs_1920_1080_15fps[] = {
+
+	{0x0103,0x01},
+	{0x0100,0x00},
+
+	{0x3e03,0x03},
+	{0x3e01,0x46},
+	{0x3e08,0x00},
+	{0x3e09,0x10},
+	{0x3416,0x11},
+
+	{0x3300,0x20},
+	{0x3301,0x08},
+	{0x3303,0x30},
+	{0x3306,0x78},
+	{0x330b,0xd0},
+	{0x3309,0x30},
+	{0x3308,0x0a},
+	{0x331e,0x26},
+	{0x331f,0x26},
+	{0x3320,0x2c},
+	{0x3321,0x2c},
+	{0x3322,0x2c},
+	{0x3323,0x2c},
+	{0x330e,0x20},
+	{0x3f05,0xdf},
+	{0x3f01,0x04},
+	{0x3626,0x04},
+
+	{0x3312,0x06},
+	{0x3340,0x03},
+	{0x3341,0x68},
+	{0x3342,0x02},
+	{0x3343,0x20},
+
+	{0x3333,0x10},
+	{0x3334,0x20},
+
+	{0x3621,0x18},
+	{0x3626,0x04},
+
+	{0x3635,0x34},
+	{0x3038,0xa4},
+	{0x3630,0x84},
+	{0x3622,0x0e},
+	{0x3620,0x62},
+	{0x3627,0x08},
+
+	{0x3637,0x87},
+	{0x3638,0x86},
+	{0x3034,0xd2},
+	{0x5780,0xff},
+	{0x5781,0x0c},
+	{0x5785,0x10},
+	{0x3d08,0x01},
+
+#ifdef  DRIVE_CAPABILITY_1
+	{0x3640,0x00},
+#elif defined(DRIVE_CAPABILITY_2)
+	{0x3640,0x02},
+#endif
+	{0x320c,0x03},
+	{0x320d,0xe8},
+
+	{0x3662,0x82},
+	{0x335d,0x00},
+	/*{0x3d0d,0x00},//close random code */
+	{0x4501,0xa4},
+
+	{0x3333,0x00},
+	{0x3627,0x02},
+	{0x3620,0x62},
+	{0x5781,0x04},
+
+	{0x3333,0x10},
+	{0x3306,0x69},
+	{0x3635,0x52},
+	{0x3636,0x7c},
+	{0x3631,0x84},
+	{0x330b,0xe0},
+	{0x3637,0x88},
+	{0x3306,0x6b},
+	{0x330b,0xd0},
+	{0x3630,0x84},
+
+	{0x335d,0x20},
+	{0x3368,0x02},
+	{0x3369,0x00},
+	{0x336a,0x04},
+	{0x336b,0x65},
+	{0x330e,0x20},
+	{0x3367,0x05},
+
+	{0x3620,0x92},
+	{0x3634,0xd2},
+	{0x3633,0x17},
+	{0x3315,0x02},
+	{0x3334,0xa0},
+	{0x3312,0x00},
+	{0x335e,0x02},
+	{0x335f,0x0a},
+	{0x3306,0x60},
+	{0x3f05,0xd2},
+
+	{0x3633,0x16},
+	{0x303a,0x17},
+	{0x330b,0x58},
+	{0x3306,0x30},
+	{0x303a,0x18},
+	{0x3039,0x9e},
+
+	/*Count clock 162M 20160810 */
+	{0x3035,0x05},
+	{0x3034,0x2a},
+	{0x0100,0x01},
+
+	{SC2135_REG_END, 0x00},	/* END MARKER */
+};
 /*
  * the order of the sc2135_win_sizes is [full_resolution, preview_resolution].
  */
@@ -571,13 +718,11 @@ static enum v4l2_mbus_pixelcode sc2135_mbus_code[] = {
  */
 
 static struct regval_list sc2135_stream_on[] = {
-
 	{0x0100, 0x01},
 	{SC2135_REG_END, 0x00},	/* END MARKER */
 };
 
 static struct regval_list sc2135_stream_off[] = {
-
 	{0x0100, 0x00},
 	{SC2135_REG_END, 0x00},	/* END MARKER */
 };
@@ -640,7 +785,6 @@ static int sc2135_read_array(struct v4l2_subdev *sd, struct regval_list *vals)
 			if (ret < 0)
 				return ret;
 		}
-		printk("read vals->reg_num:0x%02x, vals->value:0x%02x\n",vals->reg_num, val);
 		vals++;
 	}
 	return 0;
@@ -704,14 +848,6 @@ static int sc2135_set_integration_time(struct v4l2_subdev *sd, int value)
 static int sc2135_set_analog_gain(struct v4l2_subdev *sd, int value)
 {
 	int ret = 0;
-
-#if 0
-	ret += sc2135_write(sd, 0x3e09, (unsigned char)(value & 0xff));
-	ret += sc2135_write(sd, 0x3e08, (unsigned char)((value & 0x1f00) >> 8));
-	if (ret < 0)
-		return ret;
-#endif
-
 	ret += sc2135_write(sd, 0x3e09, (unsigned char)(value & 0xff));
 	ret += sc2135_write(sd, 0x3e08, (unsigned char)((value & 0xff00) >> 8));
 	if (ret < 0)
@@ -719,15 +855,17 @@ static int sc2135_set_analog_gain(struct v4l2_subdev *sd, int value)
 
 	/* denoise logic */
 	if (value < 0x20) {
-		ret += sc2135_write(sd, 0x3630, 0xe4);
+		ret += sc2135_write(sd, 0x3630, 0xc4);
+		ret += sc2135_write(sd, 0x3632, 0x20);
 		ret += sc2135_write(sd, 0x3635, 0x56);
 		ret += sc2135_write(sd, 0x3620, 0x92);
 		ret += sc2135_write(sd, 0x3315, 0x02);
 		if (ret < 0)
 			return ret;
-	} 
+	}
 	else if (value <= 0x100){
 		ret += sc2135_write(sd, 0x3630, 0x84);
+		ret += sc2135_write(sd, 0x3632, 0x40);
 		ret += sc2135_write(sd, 0x3635, 0x54);
 		ret += sc2135_write(sd, 0x3620, 0x92);
 		ret += sc2135_write(sd, 0x3315, 0x02);
@@ -765,6 +903,20 @@ static int sc2135_init(struct v4l2_subdev *sd, u32 enable)
 
 	if(!enable)
 		return ISP_SUCCESS;
+
+	switch (sensor_max_fps) {
+	case TX_SENSOR_MAX_FPS_25:
+		wsize->fps = 25 << 16 | 1;
+		wsize->regs = sc2135_init_regs_1920_1080_25fps;
+		break;
+	case TX_SENSOR_MAX_FPS_15:
+		wsize->fps = 15 << 16 | 1;
+		wsize->regs = sc2135_init_regs_1920_1080_15fps;
+		break;
+	default:
+		printk("Now we do not support this framerate!!!\n");
+	}
+
 	sensor->video.mbus.width = wsize->width;
 	sensor->video.mbus.height = wsize->height;
 	sensor->video.mbus.code = wsize->mbus_code;
@@ -810,17 +962,31 @@ static int sc2135_set_fps(struct tx_isp_sensor *sensor, int fps)
 {
 	struct v4l2_subdev *sd = &sensor->sd;
 	struct tx_isp_notify_argument arg;
-	unsigned int pclk = SC2135_SUPPORT_PCLK;
+	unsigned int pclk = 0;
 	unsigned short hts;
 	unsigned short vts = 0;
 	unsigned short drop_frame_reg = 0;
 	unsigned char tmp;
 	unsigned int newformat = 0; //the format is 24.8
+	unsigned int max_fps = 0; //the format is 24.8
 	int ret = 0;
+
+	switch (sensor_max_fps) {
+	case TX_SENSOR_MAX_FPS_25:
+		pclk = SC2135_SUPPORT_PCLK_FPS_30;
+		max_fps = SENSOR_OUTPUT_MAX_FPS;
+		break;
+	case TX_SENSOR_MAX_FPS_15:
+		pclk = SC2135_SUPPORT_PCLK_FPS_15;
+		max_fps = TX_SENSOR_MAX_FPS_15;
+		break;
+	default:
+		printk("Now we do not support this framerate!!!\n");
+	}
 
 	/* the format of fps is 16/16. for example 25 << 16 | 2, the value is 25/2 fps. */
 	newformat = (((fps >> 16) / (fps & 0xffff)) << 8) + ((((fps >> 16) % (fps & 0xffff)) << 8) / (fps & 0xffff));
-	if(newformat > (SENSOR_OUTPUT_MAX_FPS << 8) || newformat < (SENSOR_OUTPUT_MIN_FPS << 8)){
+	if(newformat > (max_fps << 8) || newformat < (SENSOR_OUTPUT_MIN_FPS << 8)){
 		printk("warn: fps(%d) no in range\n", fps);
 		return -1;
 	}
@@ -912,6 +1078,7 @@ static int sc2135_g_chip_ident(struct v4l2_subdev *sd,
 			gpio_direction_output(pwdn_gpio, 1);
 			msleep(50);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		} else {
 			printk("gpio requrest fail %d\n", pwdn_gpio);
 		}
@@ -919,12 +1086,12 @@ static int sc2135_g_chip_ident(struct v4l2_subdev *sd,
 	ret = sc2135_detect(sd, &ident);
 	if (ret) {
 		v4l_err(client,
-				"chip found @ 0x%x (%s) is not an sc2135 chip.\n",
-				client->addr, client->adapter->name);
+			"chip found @ 0x%x (%s) is not an sc2135 chip.\n",
+			client->addr, client->adapter->name);
 		return ret;
 	}
 	v4l_info(client, "sc2135 chip found @ 0x%02x (%s)\n",
-			client->addr, client->adapter->name);
+		client->addr, client->adapter->name);
 	return v4l2_chip_ident_i2c_client(client, chip, ident, 0);
 }
 
@@ -1060,7 +1227,17 @@ static int sc2135_probe(struct i2c_client *client,
 		printk("Cannot get sensor input clock cgu_cim\n");
 		goto err_get_mclk;
 	}
-	clk_set_rate(sensor->mclk, 24000000);
+
+	switch (sensor_max_fps) {
+	case TX_SENSOR_MAX_FPS_25:
+		clk_set_rate(sensor->mclk, 24000000);
+		break;
+	case TX_SENSOR_MAX_FPS_15:
+		clk_set_rate(sensor->mclk, 12000000);
+		break;
+	default:
+		printk("Now we do not support this framerate!!!\n");
+	}
 	clk_enable(sensor->mclk);
 
 	ret = set_sensor_gpio_function(sensor_gpio_func);
@@ -1087,6 +1264,19 @@ static int sc2135_probe(struct i2c_client *client,
 	 /*
 		convert sensor-gain into isp-gain,
 	 */
+	switch (sensor_max_fps) {
+	case TX_SENSOR_MAX_FPS_25:
+		break;
+	case TX_SENSOR_MAX_FPS_15:
+		sc2135_attr.max_integration_time_native = 1121;
+		sc2135_attr.integration_time_limit = 1121;
+		sc2135_attr.total_width = 2000;
+		sc2135_attr.total_height = 1125;
+		sc2135_attr.max_integration_time = 1121;
+		break;
+	default:
+		printk("Now we do not support this framerate!!!\n");
+	}
 	sc2135_attr.max_again = 262144;
 	sc2135_attr.max_dgain = 0; //sc2135_attr.max_dgain;
 	sd = &sensor->sd;

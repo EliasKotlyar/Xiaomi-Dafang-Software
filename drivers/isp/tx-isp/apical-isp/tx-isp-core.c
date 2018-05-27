@@ -29,12 +29,14 @@
 #endif
 
 system_tab stab ;
-#define SOFT_VERSION "H201611150900"
+#define SOFT_VERSION "H201712121018"
 #define FIRMWARE_VERSION "H01-380"
 
 #if defined(CONFIG_SOC_T10)
 static int isp_clk = ISP_CLK_960P_MODE;
 #elif defined(CONFIG_SOC_T20)
+static int isp_clk = ISP_CLK_1080P_MODE;
+#elif defined(CONFIG_SOC_T30)
 static int isp_clk = ISP_CLK_1080P_MODE;
 #endif
 module_param(isp_clk, int, S_IRUGO);
@@ -369,12 +371,14 @@ static inline void isp_core_update_addr(struct tx_isp_frame_channel *chan)
 	unsigned char bank_id = 0;
 	unsigned int current_active = 0;
 	unsigned int value = 0;
+	unsigned int isnv = 0;
 
 	switch(output->fmt.pix.pixelformat){
 		case V4L2_PIX_FMT_NV12:
 		case V4L2_PIX_FMT_NV21:
 			uv_hw_dma = APICAL_READ_32(0xba4 + 0x100 * video->index);
 			current_active |= uv_hw_dma;
+			isnv = 1;
 		default:
 			y_hw_dma = APICAL_READ_32(0xb24 + 0x100 * video->index);
 			current_active |= y_hw_dma;
@@ -384,7 +388,7 @@ static inline void isp_core_update_addr(struct tx_isp_frame_channel *chan)
 	current_bank = (y_hw_dma >> 8) & 0x7;
 	uv_bank = (uv_hw_dma >> 8) & 0x7;
 
-	if(uv_bank != current_bank){
+	if(isnv && (uv_bank != current_bank)){
 		/*printk("##### y_bank = %d, nv_bank = %d\n",current_bank,uv_bank);*/
 		value = (0x1<<3) | (chan->usingbanks - 1);
 		switch(output->fmt.pix.pixelformat){
@@ -431,6 +435,8 @@ static inline void isp_core_update_addr(struct tx_isp_frame_channel *chan)
 }
 
 extern int apical_isp_day_or_night_s_ctrl_internal(struct tx_isp_core_device *core);
+
+extern void isp_frame_done_wakeup(void);
 
 static int isp_core_interrupt_service_routine(struct v4l2_subdev *sd, u32 status, bool *handled)
 {
@@ -501,6 +507,8 @@ static int isp_core_interrupt_service_routine(struct v4l2_subdev *sd, u32 status
 						if(chan->dma_state != 1){
 							isp_enable_channel(chan);
 						}
+
+						isp_frame_done_wakeup();
 
 						if (1 == core->isp_daynight_switch) {
 							int ret = 0;
@@ -921,13 +929,19 @@ static int isp_core_config_dma_channel_write(struct tx_isp_core_device *core,
 							ISP_MODULE_BYPASS_DISABLE);
 					break;
 				case ISP_DS1_VIDEO_CHANNEL:
-					csc = 0x0f;
+					if(mbus->code == V4L2_MBUS_FMT_YUYV8_1X16)
+						csc = 0x08;
+					else
+						csc = 0x0f;
 					isp_core_config_top_ctl_register(DS1_CSC_BIT,
 							ISP_MODULE_BYPASS_DISABLE);
 					break;
 				#if TX_ISP_EXIST_DS2_CHANNEL
 				case ISP_DS2_VIDEO_CHANNEL:
-					csc = 0x0f;
+					if(mbus->code == V4L2_MBUS_FMT_YUYV8_1X16)
+						csc = 0x08;
+					else
+						csc = 0x0f;
 					isp_core_config_top_ctl_register(DS2_CSC_BIT,
 							ISP_MODULE_BYPASS_DISABLE);
 					break;
@@ -943,7 +957,8 @@ static int isp_core_config_dma_channel_write(struct tx_isp_core_device *core,
 			APICAL_WRITE_32(base + 0x20, vdev->attr.lineoffset);//lineoffset
 			break;
 		case V4L2_PIX_FMT_RGB565:
-		case V4L2_PIX_FMT_RGB24:
+		case V4L2_PIX_FMT_BGR24:
+		case V4L2_PIX_FMT_BGR32:
 		case V4L2_PIX_FMT_RGB310:
 			switch(vdev->index){
 				case ISP_FR_VIDEO_CHANNEL:
@@ -1011,7 +1026,8 @@ static int isp_core_config_dma_channel_write(struct tx_isp_core_device *core,
 			api.value = YUV444;
 			break;
 		case V4L2_PIX_FMT_RGB565:
-		case V4L2_PIX_FMT_RGB24:
+		case V4L2_PIX_FMT_BGR24:
+		case V4L2_PIX_FMT_BGR32:
 		case V4L2_PIX_FMT_RGB310:
 			api.value = RGB;
 			break;
@@ -1080,16 +1096,22 @@ static struct frame_channel_format isp_output_fmt[APICAL_ISP_FMT_MAX_INDEX] = {
 		.priv     = DMA_FORMAT_RGB565,
 	},
 	{
-		.name     = "RGB24, RGB-8-8-8",
-		.fourcc   = V4L2_PIX_FMT_RGB24,
+		.name     = "BGR24, RGB-8-8-8-3",
+		.fourcc   = V4L2_PIX_FMT_BGR24,
 		.depth    = 24,
 		.priv     = DMA_FORMAT_RGB24,
+	},
+	{
+		.name     = "BGR32, RGB-8-8-8-4",
+		.fourcc   = V4L2_PIX_FMT_BGR32,
+		.depth    = 32,
+		.priv     = DMA_FORMAT_RGB32,
 	},
 	{
 		.name     = "RGB101010, RGB-10-10-10",
 		.fourcc   = V4L2_PIX_FMT_RGB310,
 		.depth    = 32,
-		.priv     = DMA_FORMAT_RGB32,
+		.priv     = DMA_FORMAT_A2R10G10B10,
 	},
 	/* the last member will be determined when isp input confirm.*/
 	{
@@ -1351,48 +1373,69 @@ static int isp_core_frame_channel_set_scaler(struct tx_isp_core_device *core, in
 	}
 
 	switch(vdev->index){
-		case ISP_DS1_VIDEO_CHANNEL:
-			apical_isp_top_bypass_ds1_scaler_write(attr->scaler_enable?0:1);
-			chan = SCALER;
-			break;
+	case ISP_DS1_VIDEO_CHANNEL:
+		apical_isp_top_bypass_ds1_scaler_write(attr->scaler_enable?0:1);
+		apical_isp_ds1_scaler_imgrst_write(1);
+		chan = SCALER;
+		break;
 #if TX_ISP_EXIST_DS2_CHANNEL
-		case ISP_DS2_VIDEO_CHANNEL:
-			apical_isp_top_bypass_ds2_scaler_write(attr->scaler_enable?0:1);
-			chan = SCALER2;
-			break;
+	case ISP_DS2_VIDEO_CHANNEL:
+		apical_isp_top_bypass_ds2_scaler_write(attr->scaler_enable?0:1);
+		apical_isp_ds2_scaler_imgrst_write(1);
+		chan = SCALER2;
+		break;
 #endif
-		case ISP_FR_VIDEO_CHANNEL:
-		default:
-			ret = -EINVAL;
-			break;
+	case ISP_FR_VIDEO_CHANNEL:
+	default:
+		ret = -EINVAL;
+		break;
 	}
 	if(ret < 0)
 		return ret;
 	api.type = TIMAGE;
 	api.dir = COMMAND_SET;
 	if(attr->scaler_enable){
-	api.value = (chan << 16) + attr->scaler.out_width;
-	api.id = IMAGE_RESIZE_WIDTH_ID;
-	status = apical_command(api.type, api.id, api.value, api.dir, &ret);
-	//	printk("[%d]apical command: status = %d, ret = 0x%08x\n",__LINE__, status, ret);
+		api.value = (chan << 16) + DISABLE;
+		api.id = IMAGE_RESIZE_ENABLE_ID;
+		status = apical_command(api.type, api.id, api.value, api.dir, &ret);
 
-	api.value = (chan << 16) + attr->scaler.out_height;
-	api.id = IMAGE_RESIZE_HEIGHT_ID;
-	status = apical_command(api.type, api.id, api.value, api.dir, &ret);
-	//	printk("[%d]apical command: status = %d, ret = 0x%08x\n",__LINE__, status, ret);
+		api.value = (chan << 16) + attr->scaler.out_width;
+		api.id = IMAGE_RESIZE_WIDTH_ID;
+		status = apical_command(api.type, api.id, api.value, api.dir, &ret);
+		//	printk("[%d]apical command: status = %d, ret = 0x%08x\n",__LINE__, status, ret);
 
-	api.value = (chan << 16) + ENABLE;
-	api.id = IMAGE_RESIZE_ENABLE_ID;
-	status = apical_command(api.type, api.id, api.value, api.dir, &ret);
-	//	printk("[%d]apical command: status = %d, ret = 0x%08x\n",__LINE__, status, ret);	return ret;
+		api.value = (chan << 16) + attr->scaler.out_height;
+		api.id = IMAGE_RESIZE_HEIGHT_ID;
+		status = apical_command(api.type, api.id, api.value, api.dir, &ret);
+		//	printk("[%d]apical command: status = %d, ret = 0x%08x\n",__LINE__, status, ret);
+		switch(vdev->index){
+		case ISP_DS1_VIDEO_CHANNEL:
+			apical_isp_ds1_scaler_imgrst_write(0);
+			break;
+#if TX_ISP_EXIST_DS2_CHANNEL
+		case ISP_DS2_VIDEO_CHANNEL:
+			apical_isp_ds2_scaler_imgrst_write(0);
+			break;
+#endif
+		case ISP_FR_VIDEO_CHANNEL:
+		default:
+			ret = -EINVAL;
+			break;
+		}
 
-	attr->output.fmt.pix.width = attr->scaler.out_width;
-	attr->output.fmt.pix.height = attr->scaler.out_height;
+		api.value = (chan << 16) + ENABLE;
+		api.id = IMAGE_RESIZE_ENABLE_ID;
+		status = apical_command(api.type, api.id, api.value, api.dir, &ret);
+		//	printk("[%d]apical command: status = %d, ret = 0x%08x\n",__LINE__, status, ret);	return ret;
+
+		attr->output.fmt.pix.width = attr->scaler.out_width;
+		attr->output.fmt.pix.height = attr->scaler.out_height;
 	}else{
-	api.value = (chan << 16) + DISABLE;
-	api.id = IMAGE_RESIZE_ENABLE_ID;
-	status = apical_command(api.type, api.id, api.value, api.dir, &ret);
+		api.value = (chan << 16) + DISABLE;
+		api.id = IMAGE_RESIZE_ENABLE_ID;
+		status = apical_command(api.type, api.id, api.value, api.dir, &ret);
 	}
+
 	return ret;
 }
 
@@ -1430,7 +1473,8 @@ static int isp_core_frame_channel_streamon(struct tx_isp_core_device *core, int 
 		case V4L2_PIX_FMT_UYVY:
 		case V4L2_PIX_FMT_YUV444:
 		case V4L2_PIX_FMT_RGB565:
-		case V4L2_PIX_FMT_RGB24:
+		case V4L2_PIX_FMT_BGR24:
+		case V4L2_PIX_FMT_BGR32:
 		case V4L2_PIX_FMT_RGB310:
 		case V4L2_PIX_FMT_SBGGR12:
 		case V4L2_PIX_FMT_SGBRG12:
@@ -1510,7 +1554,8 @@ static int isp_core_frame_channel_streamoff(struct tx_isp_core_device *core, int
 		case V4L2_PIX_FMT_UYVY:
 		case V4L2_PIX_FMT_YUV444:
 		case V4L2_PIX_FMT_RGB565:
-		case V4L2_PIX_FMT_RGB24:
+		case V4L2_PIX_FMT_BGR24:
+		case V4L2_PIX_FMT_BGR32:
 		case V4L2_PIX_FMT_RGB310:
 			/* dma channel y write */
 			while(APICAL_READ_32(base + 0x24) & (1<<16));
@@ -1732,7 +1777,7 @@ static int isp_config_input_port(struct tx_isp_core_device *core)
 			break;
 		case V4L2_MBUS_FMT_RGB888_3X8_LE:
 			contrl->fmt_start = APICAL_ISP_INPUT_RGB888_FMT_INDEX_START;
-			contrl->fmt_end = APICAL_ISP_INPUT_RGB888_FMT_INDEX_START;
+			contrl->fmt_end = APICAL_ISP_INPUT_RGB888_FMT_INDEX_END;
 			apical_isp_top_isp_raw_bypass_write(1);
 			break;
 		case V4L2_MBUS_FMT_YUYV8_1X16:
@@ -1996,12 +2041,18 @@ static int isp_core_frame_channel_deinit(struct tx_isp_core_device *core)
 {
 	struct tx_isp_frame_channel *chans = core->chans;
 	frame_chan_vdev_t *video;
-	int index = 0;
 
-	for(index = 0; index < ISP_MAX_OUTPUT_VIDEOS; index++){
-		video = &(chans[index].video);
-		tx_isp_frame_channel_device_unregister(video);
-	}
+#if TX_ISP_EXIST_FR_CHANNEL
+	video = &(chans[ISP_FR_VIDEO_CHANNEL].video);
+	tx_isp_frame_channel_device_unregister(video);
+#endif
+	video = &(chans[ISP_DS1_VIDEO_CHANNEL].video);
+	tx_isp_frame_channel_device_unregister(video);
+#if TX_ISP_EXIST_DS2_CHANNEL
+	video = &(chans[ISP_DS2_VIDEO_CHANNEL].video);
+	tx_isp_frame_channel_device_unregister(video);
+#endif
+
 	kfree(chans);
 	atomic_set(&core->chan_state, TX_ISP_STATE_STOP);
 	return ISP_SUCCESS;
@@ -2159,7 +2210,7 @@ static int isp_info_show(struct seq_file *m, void *v)
 	len += seq_printf(m ,"SENSOR OUTPUT RAW PATTERN : %s\n", colorspace);
 	len += seq_printf(m ,"SENSOR Integration Time : %d lines\n", stab.global_integration_time);
 	len += seq_printf(m ,"ISP Top Value : 0x%x\n", APICAL_READ_32(0x40));
-	len += seq_printf(m ,"ISP Runing Mode : %s\n", ((apical_isp_fr_cs_conv_clip_min_uv_read() == 512) ? "Night" : "Day"));
+	len += seq_printf(m ,"ISP Runing Mode : %s\n", ((apical_isp_ds1_cs_conv_clip_min_uv_read() == 512) ? "Night" : "Day"));
 	len += seq_printf(m ,"ISP OUTPUT FPS : %d / %d\n", vin->fps >> 16, vin->fps & 0xffff);
 	len += seq_printf(m ,"SENSOR analog gain : %d\n", sensor_again);
 	len += seq_printf(m ,"MAX SENSOR analog gain : %d\n", max_sensor_again);
