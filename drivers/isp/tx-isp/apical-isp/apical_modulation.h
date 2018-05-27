@@ -20,6 +20,7 @@
 uint16_t calc_modulation_u16(uint16_t x,const modulation_entry_t *p_table,int table_len);
 uint32_t calc_modulation_u32(uint32_t x,const modulation_entry_32_t *p_table,int table_len);
 
+uint16_t calc_adjust_modulation_u16(uint16_t x,uint16_t target_min_y,uint16_t target_max_y,const modulation_entry_t *p_table,int table_len);
 uint16_t calc_scaled_modulation_u16(uint16_t x,uint16_t target_min_y,uint16_t target_max_y,const modulation_entry_t *p_table,int table_len);
 
 uint16_t calc_equidistant_modulation_u16(uint16_t x, const uint16_t *p_table, uint16_t table_len);

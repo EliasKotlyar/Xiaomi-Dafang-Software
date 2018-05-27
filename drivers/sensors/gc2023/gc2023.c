@@ -26,11 +26,12 @@
 #define GC2023_CHIP_ID_H	(0x20)
 #define GC2023_CHIP_ID_L	(0x23)
 
-#define GC2023_FLAG_END		 0xff
+#define GC2023_FLAG_END		0xff
 #define GC2023_FLAG_DELAY	0x00
-#define GC2023_PAGE_REG	     0xfe
+#define GC2023_PAGE_REG	    0xfe
 
-#define GC2023_SUPPORT_PCLK (96*1000*1000)
+#define GC2023_SUPPORT_PCLK_FPS_30 (96*1000*1000)
+#define GC2023_SUPPORT_PCLK_FPS_15 (42*1000*1000)
 #define SENSOR_OUTPUT_MAX_FPS 30
 #define SENSOR_OUTPUT_MIN_FPS 5
 
@@ -50,6 +51,10 @@ static int sensor_gpio_func = DVP_PA_LOW_10BIT;
 module_param(sensor_gpio_func, int, S_IRUGO);
 MODULE_PARM_DESC(sensor_gpio_func, "Sensor GPIO function");
 
+static int sensor_max_fps = TX_SENSOR_MAX_FPS_25;
+module_param(sensor_max_fps, int, S_IRUGO);
+MODULE_PARM_DESC(sensor_max_fps, "Sensor Max Fps set interface");
+
 const unsigned int  ANALOG_GAIN_1 =		(1<<TX_ISP_GAIN_FIXED_POINT)|(unsigned int)((0.0*(1<<TX_ISP_GAIN_FIXED_POINT)));
 const unsigned int  ANALOG_GAIN_2 =		(1<<TX_ISP_GAIN_FIXED_POINT)|(unsigned int)((0.42*(1<<TX_ISP_GAIN_FIXED_POINT)));
 const unsigned int  ANALOG_GAIN_3 =		(1<<TX_ISP_GAIN_FIXED_POINT)|(unsigned int)((0.99*(1<<TX_ISP_GAIN_FIXED_POINT)));
@@ -59,6 +64,7 @@ const unsigned int  ANALOG_GAIN_6 =		(5<<TX_ISP_GAIN_FIXED_POINT)|(unsigned int)
 const unsigned int  ANALOG_GAIN_7 =		(8<<TX_ISP_GAIN_FIXED_POINT)|(unsigned int)((0.23*(1<<TX_ISP_GAIN_FIXED_POINT)));
 const unsigned int  ANALOG_GAIN_8 =		(11<<TX_ISP_GAIN_FIXED_POINT)|(unsigned int)((0.72*(1<<TX_ISP_GAIN_FIXED_POINT)));
 const unsigned int  ANALOG_GAIN_9 =		(16<<TX_ISP_GAIN_FIXED_POINT)|(unsigned int)((0.55*(1<<TX_ISP_GAIN_FIXED_POINT)));
+const unsigned int  ANALOG_GAIN_10 =		(22<<TX_ISP_GAIN_FIXED_POINT)|(unsigned int)((0.68*(1<<TX_ISP_GAIN_FIXED_POINT)));
 
 struct tx_isp_sensor_attribute gc2023_attr;
 
@@ -89,7 +95,7 @@ unsigned int fix_point_mult3(unsigned int a, unsigned int b, unsigned int c)
 	return x;
 }
 
-#define  ANALOG_GAIN_MAX (fix_point_mult2(ANALOG_GAIN_9, (0xf<<TX_ISP_GAIN_FIXED_POINT) + (0x3f<<(TX_ISP_GAIN_FIXED_POINT-6))))
+#define  ANALOG_GAIN_MAX (fix_point_mult2(ANALOG_GAIN_10, (0xf<<TX_ISP_GAIN_FIXED_POINT) + (0x3f<<(TX_ISP_GAIN_FIXED_POINT-6))))
 unsigned int gc2023_gainone_to_reg(unsigned int gain_one, unsigned int *regs)
 {
 	unsigned int gain_one1 = 0;
@@ -98,7 +104,7 @@ unsigned int gc2023_gainone_to_reg(unsigned int gain_one, unsigned int *regs)
 	unsigned char regb1 =0x1;
 	unsigned char regb2 = 0;
 	int i,j;
-	unsigned int gain_one_max = fix_point_mult2(ANALOG_GAIN_9, (0xf<<TX_ISP_GAIN_FIXED_POINT) + (0x3f<<(TX_ISP_GAIN_FIXED_POINT-6)));
+	unsigned int gain_one_max = fix_point_mult2(ANALOG_GAIN_10, (0xf<<TX_ISP_GAIN_FIXED_POINT) + (0x3f<<(TX_ISP_GAIN_FIXED_POINT-6)));
 	if (gain_one < ANALOG_GAIN_1) {
 		gain_one1 = ANALOG_GAIN_1;
 		regb6 = 0x00;
@@ -225,7 +231,7 @@ unsigned int gc2023_gainone_to_reg(unsigned int gain_one, unsigned int *regs)
 				regb1 = i;
 				regb2 = j;
 			}
-	} else if (gain_one < gain_one_max) {
+	} else if (gain_one < ANALOG_GAIN_10) {
 		gain_one1 = gain_tmp = ANALOG_GAIN_9;
 		regb1 = 0;
 		regb2 = 0;
@@ -240,9 +246,24 @@ unsigned int gc2023_gainone_to_reg(unsigned int gain_one, unsigned int *regs)
 				regb1 = i;
 				regb2 = j;
 			}
+	} else if (gain_one < gain_one_max) {
+		gain_one1 = gain_tmp = ANALOG_GAIN_10;
+		regb1 = 0;
+		regb2 = 0;
+		for (i = 1; i <= 0xf; i++ )
+			for (j = 0; j <= 0x3f; j++) {
+				gain_tmp = fix_point_mult2(ANALOG_GAIN_10, (i<<TX_ISP_GAIN_FIXED_POINT)+(j<<(TX_ISP_GAIN_FIXED_POINT-6)));
+				if (gain_one < gain_tmp) {
+					goto done;
+				}
+				gain_one1 = gain_tmp;
+				regb6 = 0x09;
+				regb1 = i;
+				regb2 = j;
+			}
 	} else {
 		gain_one1 = gain_one_max;
-		regb6 = 0x08;
+		regb6 = 0x09;
 		regb1 = 0xf;
 		regb2 = 0x3f;
 		goto done;
@@ -288,7 +309,7 @@ struct tx_isp_sensor_attribute gc2023_attr={
 			.hblanking = 0,
 		},
 	},
-	.max_again = 0x40000,
+	.max_again = 321573,
 	.max_dgain = 0,
 	.min_integration_time = 4,
 	.min_integration_time_native = 4,
@@ -305,10 +326,8 @@ struct tx_isp_sensor_attribute gc2023_attr={
 	.sensor_ctrl.alloc_dgain = gc2023_alloc_dgain,
 };
 
-static struct regval_list gc2023_init_regs_1920_1080_30fps_dvp[] = {
-	/////////////////////////////////////////////////
-	////////////////////   SYS   //////////////////////
-	///////////////////////////////////////////////////
+static struct regval_list gc2023_init_regs_1920_1080_25fps_dvp[] = {
+	/*SYS*/
 	{0xf2, 0x00},
 	{0xf6, 0x00},
 	{0xfc, 0x06},
@@ -317,26 +336,24 @@ static struct regval_list gc2023_init_regs_1920_1080_30fps_dvp[] = {
 	{0xf9, 0x06},
 	{0xfa, 0x00},
 	{0xfc, 0x0e},
-	/////////////////////////////////////////////////
-	//////////////   ANALOG & CISCTL   ////////////////
-	///////////////////////////////////////////////////
+	/*ANALOG & CISCTL*/
 	{0xfe, 0x00},
 	{0x03, 0x03},
 	{0x04, 0xf6},
-	{0x05, 0x02}, //HB
+	{0x05, 0x02},
 	{0x06, 0xc6},
-	{0x86, 0x52},
-	{0x8e, 0x0c}, //drop frame while change VB
-	{0x07, 0x00}, //VB
-	{0x08, 0xf8}, //f8 for 25fps
+	{0x86, 0x51},
+	{0x8e, 0x0c},/*drop frame while change VB*/
+	{0x07, 0x00},
+	{0x08, 0xf8},
 	{0x09, 0x00},
-	{0x0a, 0x00}, //row start
+	{0x0a, 0x00},
 	{0x0b, 0x00},
-	{0x0c, 0x00}, //col start
+	{0x0c, 0x00},
 	{0x0d, 0x04},
-	{0x0e, 0x40}, //height 1088
+	{0x0e, 0x40},
 	{0x0f, 0x07},
-	{0x10, 0x88}, //width 1928
+	{0x10, 0x88},
 	{0x17, 0x54},
 	{0x18, 0x02},
 	{0x19, 0x0d},
@@ -373,23 +390,19 @@ static struct regval_list gc2023_init_regs_1920_1080_30fps_dvp[] = {
 	{0xe9, 0x02},
 	{0xea, 0x03},
 	{0xeb, 0x03},
-	/////////////////////////////////////////////////
-	////////////////////   ISP   //////////////////////
-	///////////////////////////////////////////////////
+	/*ISP*/
 	{0xfe, 0x00},
-	{0x80, 0x5c},
+	{0x80, 0x4c},/*disable sensor DD*/
 	{0x88, 0x23},
 	{0x89, 0x03},
 	{0x90, 0x01},
-	{0x92, 0x02}, //crop win y
-	{0x94, 0x02}, //crop win x
-	{0x95, 0x04}, //crop win height
+	{0x92, 0x02},
+	{0x94, 0x02},
+	{0x95, 0x04},
 	{0x96, 0x38},
-	{0x97, 0x07}, //crop win width
+	{0x97, 0x07},
 	{0x98, 0x80},
-	/////////////////////////////////////////////////
-	////////////////////   BLK   //////////////////////
-	///////////////////////////////////////////////////
+	/*BLK*/
 	{0xfe, 0x00},
 	{0x40, 0x22},
 	{0x43, 0x07},
@@ -397,9 +410,7 @@ static struct regval_list gc2023_init_regs_1920_1080_30fps_dvp[] = {
 	{0x4f, 0x00},
 	{0x60, 0x00},
 	{0x61, 0x80},
-	/////////////////////////////////////////////////
-	////////////////////   GAIN   /////////////////////
-	///////////////////////////////////////////////////
+	/*GAIN*/
 	{0xfe, 0x00},
 	{0xb0, 0x58},
 	{0xb1, 0x01},
@@ -420,21 +431,17 @@ static struct regval_list gc2023_init_regs_1920_1080_30fps_dvp[] = {
 	{0x0c, 0x3e},
 	{0x0d, 0x56},
 	{0x0e, 0x5e},
-	/////////////////////////////////////////////////
-	////////////////////   DNDD   /////////////////////
-	///////////////////////////////////////////////////
+	/*DNDD*/
 	{0xfe, 0x02},
 	{0x81, 0x05},
-	/////////////////////////////////////////////////
-	////////////////////   dark sun   /////////////////
-	///////////////////////////////////////////////////
+	/*{0x85, 0x21},*/
+	/*{0x87, 0x8a},//bit 7 ,change mode*/
+	/*dark sun*/
 	{0xfe, 0x01},
 	{0x54, 0x77},
 	{0x58, 0x00},
 	{0x5a, 0x05},
-	/////////////////////////////////////////////////
-	////////////////////	 MIPI	/////////////////////
-	///////////////////////////////////////////////////
+	/*MIPI*/
 	{0xfe, 0x03},
 	{0x01, 0x00},
 	{0x02, 0x00},
@@ -442,15 +449,148 @@ static struct regval_list gc2023_init_regs_1920_1080_30fps_dvp[] = {
 	{0x06, 0x00},
 	{0x10, 0x00},
 	{0x15, 0x00},
-
-	/////////////////////////////////////////////////
-	////////////////////   pad enable   ///////////////
-	///////////////////////////////////////////////////
+	/*pad enable*/
 	{0xfe, 0x00},
 	{0xf2, 0x0f},
+
   	{GC2023_FLAG_END, 0x00},	/* END MARKER */
 
 };
+
+static struct regval_list gc2023_init_regs_1920_1080_15fps_dvp[] = {
+	/*SYS*/
+	{0xf2, 0x00},
+	{0xf3, 0x00},
+	{0xf6, 0x00},
+	{0xfc, 0x06},
+	{0xf7, 0x03},
+	{0xf8, 0x06},
+	{0xf9, 0x06},
+	{0xfa, 0x03},
+	{0xfc, 0x0e},
+	/*ANALOG & CISCTL*/
+	{0xfe, 0x00},
+	{0x03, 0x03},
+	{0x04, 0xf6},
+	{0x05, 0x02},
+	{0x06, 0xc6},
+	{0x86, 0x51},
+	{0x8e, 0x0c},/*drop frame while change VB*/
+	{0x07, 0x00},
+	{0x08, 0x15},
+	{0x09, 0x00},
+	{0x0a, 0x00},
+	{0x0b, 0x00},
+	{0x0c, 0x00},
+	{0x0d, 0x04},
+	{0x0e, 0x40},
+	{0x0f, 0x07},
+	{0x10, 0x88},
+	{0x17, 0x54},
+	{0x18, 0x02},
+	{0x19, 0x0d},
+	{0x1a, 0x18},
+
+	{0x20, 0x54},
+	{0x23, 0xf0},
+	{0x24, 0xc1},
+	{0x25, 0x18},
+	{0x26, 0x64},
+	{0x28, 0xe8},
+	{0x29, 0x08},
+	{0x2a, 0x08},
+	{0x2b, 0x48},
+	{0x2f, 0x40},
+	{0x30, 0x99},
+	{0x34, 0x00},
+	{0x38, 0x80},
+	{0x3b, 0x12},
+	{0x3d, 0xb0},
+	{0xcc, 0x8a},
+	{0xcd, 0x99},
+	{0xcf, 0x70},
+	{0xd0, 0x9c},
+	{0xd2, 0xc1},
+	{0xd8, 0x80},
+	{0xda, 0x28},
+	{0xdc, 0x24},
+	{0xe1, 0x14},
+	{0xe3, 0xf0},
+	{0xe4, 0xfa},
+	{0xe6, 0x1f},
+	{0xe8, 0x02},
+	{0xe9, 0x02},
+	{0xea, 0x03},
+	{0xeb, 0x03},
+	/*ISP*/
+	{0xfe, 0x00},
+	{0x80, 0x5c},
+	{0x88, 0x23},
+	{0x89, 0x03},
+	{0x90, 0x01},
+	{0x92, 0x04},
+	{0x94, 0x04},
+	{0x95, 0x04},
+	{0x96, 0x38},
+	{0x97, 0x07},
+	{0x98, 0x80},
+	/*BLK*/
+	{0xfe, 0x00},
+	{0x40, 0x22},
+	{0x43, 0x07},
+	{0x4e, 0x3c},
+	{0x4f, 0x00},
+	{0x60, 0x00},
+	{0x61, 0x80},
+	/*GAIN*/
+	{0xfe, 0x00},
+	{0xb0, 0x58},
+	{0xb1, 0x01},
+	{0xb2, 0x00},
+	{0xb6, 0x00},
+	{0xfe, 0x01},
+	{0x01, 0x00},
+	{0x02, 0x01},
+	{0x03, 0x02},
+	{0x04, 0x03},
+	{0x05, 0x04},
+	{0x06, 0x05},
+	{0x07, 0x06},
+	{0x08, 0x0e},
+	{0x09, 0x16},
+	{0x0a, 0x1e},
+	{0x0b, 0x36},
+	{0x0c, 0x3e},
+	{0x0d, 0x56},
+	{0x0e, 0x5e},
+	/*DNDD*/
+	{0xfe, 0x02},
+	{0x81, 0x05},
+	{0x80, 0x4c},/*disable sensor DD*/
+	/*dark sun*/
+	{0xfe, 0x01},
+	{0x54, 0x77},
+	{0x58, 0x00},
+	{0x5a, 0x05},
+	/*MIPI*/
+	{0xfe, 0x03},
+	{0x01, 0x00},
+	{0x02, 0x00},
+	{0x03, 0x00},
+	{0x06, 0x00},
+	{0x10, 0x00},
+	{0x15, 0x00},
+	{0x36, 0x83},
+	{0x8f, 0x64},
+	/*pad enable*/
+	{0xfe, 0x00},
+	{0xf3, 0x01},
+	{0xfa, 0x83},
+	{0xf2, 0x0f},
+
+	{GC2023_FLAG_END, 0x00},	/* END MARKER */
+};
+
 
 /*
  * the order of the gc2023_win_sizes is [full_resolution, preview_resolution].
@@ -463,7 +603,7 @@ static struct tx_isp_sensor_win_setting gc2023_win_sizes[] = {
 		.fps		= 25<<16|1,
 		.mbus_code	= V4L2_MBUS_FMT_SRGGB10_1X10,
 		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.regs 		= gc2023_init_regs_1920_1080_30fps_dvp,
+		.regs 		= gc2023_init_regs_1920_1080_25fps_dvp,
 	}
 };
 
@@ -486,8 +626,7 @@ static struct regval_list gc2023_stream_off[] = {
 	{GC2023_FLAG_END, 0x00},	/* END MARKER */
 };
 
-int gc2023_read(struct v4l2_subdev *sd, unsigned char reg,
-		unsigned char *value)
+int gc2023_read(struct v4l2_subdev *sd, unsigned char reg, unsigned char *value)
 {
 	struct i2c_client *client = v4l2_get_subdevdata(sd);
 	struct i2c_msg msg[2] = {
@@ -513,12 +652,10 @@ int gc2023_read(struct v4l2_subdev *sd, unsigned char reg,
 	return ret;
 }
 
-static int gc2023_write(struct v4l2_subdev *sd, unsigned char reg,
-			unsigned char value)
+static int gc2023_write(struct v4l2_subdev *sd, unsigned char reg, unsigned char value)
 {
 	struct i2c_client *client = v4l2_get_subdevdata(sd);
 	unsigned char buf[2] = {reg, value};
-	//printk("into write@@@@@@@@@@@@@@@");
 	struct i2c_msg msg = {
 		.addr	= client->addr,
 		.flags	= 0,
@@ -539,10 +676,7 @@ static int gc2023_read_array(struct v4l2_subdev *sd, struct regval_list *vals)
 	int ret;
 	unsigned char val;
 	while (vals->reg_num != GC2023_FLAG_END) {
-		if(vals->reg_num == GC2023_FLAG_DELAY) {
-			if (vals->value >= (1000 / HZ))
-				msleep(vals->value);
-			else
+		if (vals->reg_num == GC2023_FLAG_DELAY) {
 				msleep(vals->value);
 		} else {
 			ret = gc2023_read(sd, vals->reg_num, &val);
@@ -554,8 +688,6 @@ static int gc2023_read_array(struct v4l2_subdev *sd, struct regval_list *vals)
 				ret = gc2023_write(sd, vals->reg_num, val);
 				ret = gc2023_read(sd, vals->reg_num, &val);
 			}
-			/*printk("vals->reg_num:0x%02x, vals->value:0x%02x\n",vals->reg_num, val);*/
-
 		}
 		vals++;
 	}
@@ -566,16 +698,12 @@ static int gc2023_write_array(struct v4l2_subdev *sd, struct regval_list *vals)
 	int ret;
 	while (vals->reg_num != GC2023_FLAG_END) {
 		if (vals->reg_num == GC2023_FLAG_DELAY) {
-			if (vals->value >= (1000 / HZ))
-				msleep(vals->value);
-			else
 				msleep(vals->value);
 		} else {
 			ret = gc2023_write(sd, vals->reg_num, vals->value);
 			if (ret < 0)
 				return ret;
 		}
-		/*printk("vals->reg_num:%x, vals->value:%x\n",vals->reg_num, vals->value);*/
 		vals++;
 	}
 	return 0;
@@ -591,24 +719,24 @@ static int gc2023_detect(struct v4l2_subdev *sd, unsigned int *ident)
 	unsigned char v;
 	int ret;
 	ret = gc2023_read(sd, 0xf0, &v);
-	/*printk("%s,value sensor id high is 0x%02x ret===%d\n \n",__func__,v,ret);*/
+	pr_debug("-----%s: %d ret = %d, v = 0x%02x\n", __func__, __LINE__, ret,v);
 	if (ret < 0)
 		return ret;
 	if (v != GC2023_CHIP_ID_H)
 		return -ENODEV;
 	ret = gc2023_read(sd, 0xf1, &v);
-	/*printk("%s,value sensor id low is 0x%02x\n",__func__,v);*/
+	pr_debug("-----%s: %d ret = %d, v = 0x%02x\n", __func__, __LINE__, ret,v);
 	if (ret < 0)
 		return ret;
 	if (v != GC2023_CHIP_ID_L)
 		return -ENODEV;
+	*ident = (*ident << 8) | v;
 	return 0;
 }
 
 static int gc2023_set_integration_time(struct v4l2_subdev *sd, int value)
 {
 	int ret = 0;
-	/*printk("set_integration_time = %d \n",value);*/
 	ret = gc2023_write(sd, 0x4, value&0xff);
 	if (ret < 0) {
 		printk("gc2023_write error  %d\n" ,__LINE__);
@@ -624,18 +752,17 @@ static int gc2023_set_integration_time(struct v4l2_subdev *sd, int value)
 static int gc2023_set_analog_gain(struct v4l2_subdev *sd, int value)
 {
 	int ret = 0;
-	/*printk("set_analog_gain = %d = 0x%x \n",value,value);*/
-	ret = gc2023_write(sd, 0xb6, (value>>12)&0xf);
+	ret = gc2023_write(sd, 0xb6, (value >> 12) & 0xf);
 	if (ret < 0) {
 		printk("gc2023_write error  %d" ,__LINE__ );
 		return ret;
 	}
-	ret = gc2023_write(sd, 0xb1, (value>>8)&0xf);
+	ret = gc2023_write(sd, 0xb1, (value >> 8) & 0xf);
 	if (ret < 0) {
 		printk("gc2023_write error  %d" ,__LINE__ );
 		return ret;
 	}
-	ret = gc2023_write(sd, 0xb2, (value<<2)&0xff);
+	ret = gc2023_write(sd, 0xb2, (value << 2) & 0xff);
 	if (ret < 0) {
 		printk("gc2023_write error  %d" ,__LINE__ );
 		return ret;
@@ -661,6 +788,20 @@ static int gc2023_init(struct v4l2_subdev *sd, u32 enable)
 
 	if(!enable)
 		return ISP_SUCCESS;
+
+	switch (sensor_max_fps) {
+	case TX_SENSOR_MAX_FPS_25:
+		wsize->fps = 25 << 16 | 1;
+		wsize->regs = gc2023_init_regs_1920_1080_25fps_dvp;
+		break;
+	case TX_SENSOR_MAX_FPS_15:
+		wsize->fps = 15 << 16 | 1;
+		wsize->regs = gc2023_init_regs_1920_1080_15fps_dvp;
+		break;
+	default:
+		printk("Now we do not support this framerate!!!\n");
+	}
+
 	sensor->video.mbus.width = wsize->width;
 	sensor->video.mbus.height = wsize->height;
 	sensor->video.mbus.code = wsize->mbus_code;
@@ -683,11 +824,11 @@ static int gc2023_s_stream(struct v4l2_subdev *sd, int enable)
 
 	if (enable) {
 		ret = gc2023_write_array(sd, gc2023_stream_on);
-		printk("gc2023 stream on\n");
+		pr_debug("gc2023 stream on\n");
 	}
 	else {
 		ret = gc2023_write_array(sd, gc2023_stream_off);
-		printk("gc2023 stream off\n");
+		pr_debug("gc2023 stream off\n");
 	}
 	return ret;
 }
@@ -706,8 +847,7 @@ static int gc2023_set_fps(struct tx_isp_sensor *sensor, int fps)
 {
 	struct tx_isp_notify_argument arg;
 	struct v4l2_subdev *sd = &sensor->sd;
-	unsigned int pclk = GC2023_SUPPORT_PCLK;
-	unsigned short win_width=0;
+	unsigned int pclk = 0;
 	unsigned short win_high=0;
 	unsigned short vts = 0;
 	unsigned short hb=0;
@@ -715,37 +855,55 @@ static int gc2023_set_fps(struct tx_isp_sensor *sensor, int fps)
 	unsigned short hts=0;
 	unsigned char tmp;
 	unsigned int newformat = 0; //the format is 24.8
+	unsigned int max_fps = 0; //the format is 24.8
 	int ret = 0;
+
+	switch (sensor_max_fps) {
+	case TX_SENSOR_MAX_FPS_25:
+		pclk = GC2023_SUPPORT_PCLK_FPS_30;
+		max_fps = SENSOR_OUTPUT_MAX_FPS;
+		break;
+	case TX_SENSOR_MAX_FPS_15:
+		pclk = GC2023_SUPPORT_PCLK_FPS_15;
+		max_fps = TX_SENSOR_MAX_FPS_15;
+		break;
+	default:
+		printk("Now we do not support this framerate!!!\n");
+	}
 
 	/* the format of fps is 16/16. for example 25 << 16 | 2, the value is 25/2 fps. */
 	newformat = (((fps >> 16) / (fps & 0xffff)) << 8) + ((((fps >> 16) % (fps & 0xffff)) << 8) / (fps & 0xffff));
-	if(newformat > (SENSOR_OUTPUT_MAX_FPS << 8) || newformat < (SENSOR_OUTPUT_MIN_FPS << 8)){
-		/*printk("set_fps error ,should be %d  ~ %d \n",SENSOR_OUTPUT_MIN_FPS, SENSOR_OUTPUT_MAX_FPS);*/
+	if(newformat > (max_fps << 8) || newformat < (SENSOR_OUTPUT_MIN_FPS << 8)){
+		printk("warn: fps(%d) no in range\n", fps);
 		return -1;
 	}
-	ret = gc2023_read(sd, 0x5, &tmp);
-	hb = tmp;
-	ret = gc2023_read(sd, 0x6, &tmp);
-	if(ret < 0)
-		return -1;
-	hb = (hb << 8) + tmp;
-	ret = gc2023_read(sd, 0xf, &tmp);
-	win_width = tmp;
-	ret = gc2023_read(sd, 0x10, &tmp);
-	if(ret < 0)
-		return -1;
-	win_width = (win_width << 8) + tmp;
-	hts = hb*4;
-	ret = gc2023_read(sd, 0xd, &tmp);
+	switch (sensor_max_fps) {
+	case TX_SENSOR_MAX_FPS_25:
+		ret = gc2023_read(sd, 0x05, &tmp);
+		hb = tmp;
+		ret += gc2023_read(sd, 0x06, &tmp);
+		if(ret < 0)
+			return -1;
+		hb = (hb << 8) + tmp;
+		hts = hb*4;
+		break;
+	case TX_SENSOR_MAX_FPS_15:
+		hts = gc2023_attr.total_width;
+		break;
+	default:
+		printk("Now we do not support this framerate!!!\n");
+	}
+
+	ret = gc2023_read(sd, 0x0d, &tmp);
 	win_high = tmp;
-	ret = gc2023_read(sd, 0xe, &tmp);
+	ret += gc2023_read(sd, 0x0e, &tmp);
 	if(ret < 0)
 		return -1;
 	win_high = (win_high << 8) + tmp;
 	vts = pclk * (fps & 0xffff) / hts / ((fps & 0xffff0000) >> 16);
-	vb=vts-win_high-16;
-	ret = gc2023_write(sd, 0x8, (unsigned char)(vb & 0xff));
-	ret += gc2023_write(sd, 0x7, (unsigned char)(vb >> 8));
+	vb = vts - win_high - 16;
+	ret = gc2023_write(sd, 0x08, (unsigned char)(vb & 0xff));
+	ret += gc2023_write(sd, 0x07, (unsigned char)(vb >> 8));
 	if(ret < 0)
 		return -1;
 	sensor->video.fps = fps;
@@ -764,6 +922,7 @@ static int gc2023_set_mode(struct tx_isp_sensor *sensor, int value)
 	struct v4l2_subdev *sd = &sensor->sd;
 	struct tx_isp_sensor_win_setting *wsize = NULL;
 	int ret = ISP_SUCCESS;
+
 	if(value == TX_ISP_SENSOR_FULL_RES_MAX_FPS){
 		wsize = &gc2023_win_sizes[0];
 	}else if(value == TX_ISP_SENSOR_PREVIEW_RES_MAX_FPS){
@@ -803,6 +962,7 @@ static int gc2023_g_chip_ident(struct v4l2_subdev *sd,
 			gpio_direction_output(reset_gpio, 0);
 			msleep(20);
 			gpio_direction_output(reset_gpio, 1);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",reset_gpio);
 		}
@@ -813,6 +973,7 @@ static int gc2023_g_chip_ident(struct v4l2_subdev *sd,
 			gpio_direction_output(pwdn_gpio, 1);
 			msleep(150);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",pwdn_gpio);
 		}
@@ -863,7 +1024,7 @@ static long gc2023_ops_private_ioctl(struct tx_isp_sensor *sensor, struct isp_pr
 		ret = gc2023_set_fps(sensor, ctrl->value);
 		break;
 	default:
-		break;;
+		break;
 	}
 	return 0;
 }
@@ -985,7 +1146,20 @@ static int gc2023_probe(struct i2c_client *client,
 	 /*
 		convert sensor-gain into isp-gain,
 	 */
-	gc2023_attr.max_again = log2_fixed_to_fixed(gc2023_attr.max_again, TX_ISP_GAIN_FIXED_POINT, LOG2_GAIN_SHIFT);
+	switch (sensor_max_fps) {
+	case TX_SENSOR_MAX_FPS_25:
+		break;
+	case TX_SENSOR_MAX_FPS_15:
+		gc2023_attr.max_integration_time_native = 1121;
+		gc2023_attr.integration_time_limit = 1121;
+		gc2023_attr.total_width = 2485;
+		gc2023_attr.total_height = 1125;
+		gc2023_attr.max_integration_time = 1121;
+		break;
+	default:
+		printk("Now we do not support this framerate!!!\n");
+	}
+	gc2023_attr.max_again = 321573;/*log2_fixed_to_fixed(gc2023_attr.max_again, TX_ISP_GAIN_FIXED_POINT, LOG2_GAIN_SHIFT);*/
 	gc2023_attr.max_dgain = gc2023_attr.max_dgain;
 	sd = &sensor->sd;
 	video = &sensor->video;
@@ -995,7 +1169,7 @@ static int gc2023_probe(struct i2c_client *client,
 	v4l2_i2c_subdev_init(sd, client, &gc2023_ops);
 	v4l2_set_subdev_hostdata(sd, sensor);
 
-	/*printk("@@@@@@@sssssssssssssssssprobe ok ------->gc2023\n");*/
+	pr_debug("@@@@@@@probe ok ------->gc2023\n");
 	return 0;
 err_set_sensor_gpio:
 	clk_disable(sensor->mclk);
@@ -1053,5 +1227,5 @@ static __exit void exit_gc2023(void)
 module_init(init_gc2023);
 module_exit(exit_gc2023);
 
-MODULE_DESCRIPTION("A low-level driver for OmniVision gc2023 sensors");
+MODULE_DESCRIPTION("A low-level driver for Gcoreinc gc2023 sensors");
 MODULE_LICENSE("GPL");

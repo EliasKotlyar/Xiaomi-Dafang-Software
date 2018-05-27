@@ -49,76 +49,127 @@ MODULE_PARM_DESC(pwdn_gpio, "Power down GPIO NUM");
 static int sensor_gpio_func = DVP_PA_LOW_10BIT;
 module_param(sensor_gpio_func, int, S_IRUGO);
 MODULE_PARM_DESC(sensor_gpio_func, "Sensor GPIO function");
+/*
+ * the part of driver maybe modify about different sensor and different board.
+ */
+struct again_lut {
+	unsigned int value;
+	unsigned int gain;
+};
+
+struct again_lut jxh62_again_lut[] = {
+	{0x0, 0},
+	{0x1, 5731},
+	{0x2, 11136},
+	{0x3, 16248},
+	{0x4, 21097},
+	{0x5, 25710},
+	{0x6, 30109},
+	{0x7, 34312},
+	{0x8, 38336},
+	{0x9, 42195},
+	{0xa, 45904},
+	{0xb, 49472},
+	{0xc, 52910},
+	{0xd, 56228},
+	{0xe, 59433},
+	{0xf, 62534},
+	{0x10, 65536},
+	{0x11, 71267},
+	{0x12, 76672},
+	{0x13, 81784},
+	{0x14, 86633},
+	{0x15, 91246},
+	{0x16, 95645},
+	{0x17, 99848},
+	{0x18, 103872},
+	{0x19, 107731},
+	{0x1a, 111440},
+	{0x1b, 115008},
+	{0x1c, 118446},
+	{0x1d, 121764},
+	{0x1e, 124969},
+	{0x1f, 128070},
+	{0x20, 131072},
+	{0x21, 136803},
+	{0x22, 142208},
+	{0x23, 147320},
+	{0x24, 152169},
+	{0x25, 156782},
+	{0x26, 161181},
+	{0x27, 165384},
+	{0x28, 169408},
+	{0x29, 173267},
+	{0x2a, 176976},
+	{0x2b, 180544},
+	{0x2c, 183982},
+	{0x2d, 187300},
+	{0x2e, 190505},
+	{0x2f, 193606},
+	{0x30, 196608},
+	{0x31, 202339},
+	{0x32, 207744},
+	{0x33, 212856},
+	{0x34, 217705},
+	{0x35, 222318},
+	{0x36, 226717},
+	{0x37, 230920},
+	{0x38, 234944},
+	{0x39, 238803},
+	{0x3a, 242512},
+	{0x3b, 246080},
+	{0x3c, 249518},
+	{0x3d, 252836},
+	{0x3e, 256041},
+	{0x3f, 259142},
+	{0x40, 262144},
+	{0x41, 267875},
+	{0x42, 273280},
+	{0x43, 278392},
+	{0x44, 283241},
+	{0x45, 287854},
+	{0x46, 292253},
+	{0x47, 296456},
+	{0x48, 300480},
+	{0x49, 304339},
+	{0x4a, 308048},
+	{0x4b, 311616},
+	{0x4c, 315054},
+	{0x4d, 318372},
+	{0x4e, 321577},
+	{0x4f, 324678},
+};
 
 struct tx_isp_sensor_attribute jxh62_attr;
-#if 0
-static inline unsigned char cale_again_register(unsigned int gain)
-{
-	int index = 0;
-	int i = 0, p = 0;
-	for(index = 3; index >= 0; index--)
-		if(gain & (1 << (index + TX_ISP_GAIN_FIXED_POINT)))
-			break;
-	i = index;
-	p = (gain >> (TX_ISP_GAIN_FIXED_POINT - 4)) & ((1 << (4 + i)) - 1);
-	return (i << 4) | p;
-}
 
 unsigned int jxh62_alloc_again(unsigned int isp_gain, unsigned char shift, unsigned int *sensor_again)
 {
-	unsigned int again = 0;
-	unsigned int gain_one = math_exp2(isp_gain, shift, TX_ISP_GAIN_FIXED_POINT);
-
-	if(gain_one < jxh62_attr.max_again){
-		again = (gain_one  >> (TX_ISP_GAIN_FIXED_POINT - 4) << (TX_ISP_GAIN_FIXED_POINT - 4));
-	}else{
-		again = jxh62_attr.max_again;
+	struct again_lut *lut = jxh62_again_lut;
+	while(lut->gain <= jxh62_attr.max_again) {
+		if(isp_gain == 0) {
+			*sensor_again = lut->value;
+			return 0;
+		}
+		else if(isp_gain < lut->gain) {
+			*sensor_again = (lut - 1)->value;
+			return (lut - 1)->gain;
+		}
+		else{
+			if((lut->gain == jxh62_attr.max_again) && (isp_gain >= lut->gain)) {
+				*sensor_again = lut->value;
+				return lut->gain;
+			}
+		}
+		lut++;
 	}
-	isp_gain = log2_fixed_to_fixed(again, TX_ISP_GAIN_FIXED_POINT, shift);
-	*sensor_again = cale_again_register(again);
 	return isp_gain;
 }
-#else
-static inline unsigned char cale_again_register(unsigned int gain)
-{
-	int index = 0;
-	int i = 0, p = 0;
-	for(index = 3; index >= 0; index--)
-		if(gain & (1 << (index + TX_ISP_GAIN_FIXED_POINT)))
-			break;
-	i = index;
-	p = (gain >> (TX_ISP_GAIN_FIXED_POINT + index - 4)) & 0xf;
-	return (i << 4) | p;
-}
-static inline unsigned int cale_sensor_again_to_isp(unsigned char reg)
-{
-	unsigned int h,l;
-	h = reg >> 4;
-	l = reg & 0xf;
-	return (1 << (h + TX_ISP_GAIN_FIXED_POINT)) | (l << ((TX_ISP_GAIN_FIXED_POINT + h - 4)));
-}
-unsigned int jxh62_alloc_again(unsigned int isp_gain, unsigned char shift, unsigned int *sensor_again)
-{
-	unsigned int again = 0;
-	unsigned int gain_one = 0;
-	unsigned int gain_one1 = 0;
 
-	if(isp_gain > jxh62_attr.max_again){
-		isp_gain = jxh62_attr.max_again;
-	}
-	again = isp_gain;
-	gain_one = math_exp2(isp_gain, shift, TX_ISP_GAIN_FIXED_POINT);
-	*sensor_again = cale_again_register(gain_one);
-	gain_one1 = cale_sensor_again_to_isp(*sensor_again);
-	isp_gain = log2_fixed_to_fixed(gain_one1, TX_ISP_GAIN_FIXED_POINT, shift);
-//	printk("again = %d gain_one = 0x%0x sensor_gain = 0x%0x gain_one1 = 0x%0x isp_gain = %d\n", again, gain_one, *sensor_again, gain_one1, isp_gain);
-	return isp_gain;
-}
-#endif
 unsigned int jxh62_alloc_dgain(unsigned int isp_gain, unsigned char shift, unsigned int *sensor_dgain)
 {
 	return isp_gain;
 }
+
 struct tx_isp_sensor_attribute jxh62_attr={
 	.name = "jxh62",
 	.chip_id = 0xa062,
@@ -133,18 +184,18 @@ struct tx_isp_sensor_attribute jxh62_attr={
 			.hblanking = 0,
 		},
 	},
-	.max_again = 0xff << (TX_ISP_GAIN_FIXED_POINT - 4),
+	.max_again = 324678,
 	.max_dgain = 0,
 	.min_integration_time = 1,
 	.min_integration_time_native = 1,
-	.max_integration_time_native = 896,
-	.integration_time_limit = 896,
+	.max_integration_time_native = 899,
+	.integration_time_limit = 899,
 	.total_width = 1600,
 	.total_height = 900,
-	.max_integration_time = 896,
-	.integration_time_apply_delay = 1,
-	.again_apply_delay = 1,
-	.dgain_apply_delay = 1,
+	.max_integration_time = 899,
+	.integration_time_apply_delay = 2,
+	.again_apply_delay = 2,
+	.dgain_apply_delay = 0,
 	.sensor_ctrl.alloc_again = jxh62_alloc_again,
 	.sensor_ctrl.alloc_dgain = jxh62_alloc_dgain,
 	.one_line_expr_in_us = 44,
@@ -152,43 +203,6 @@ struct tx_isp_sensor_attribute jxh62_attr={
 };
 
 static struct regval_list jxh62_init_regs_1280_720_25fps[] = {
-//[SensorType]
-//0=INI_Header
-//
-//[INI_Header]
-//InitREGdef=INI_Register
-//IniVersion=20160621
-//Project=4	;H62
-//Width=1280
-//Height=720
-//disWidth=1280
-//disHeight=720
-//FrameWidth=1920
-//FrameHeight=750
-//H_pad=0
-//V_pad=0
-//SrOutputFormat=1
-//Interface=0
-//HDR_Mode=0
-//MclkRate=24
-//DVPClkRate=36
-//MipiClkRate=144
-//
-//[INI_Category]
-//FPS=25.00
-//Start=H62_Start_2016070700.soi
-//PLL=H62_PLL_2016071501.soi
-//Timing=H62_Timing_2016081204.soi
-//Interface=H62_Interface_2016071500.soi
-//Sampling=H62_Sampling_2016090501.soi
-//Power=H62_Power_2016080900.soi
-//AE=H62_AE_2016081200.soi
-//End=H62_End_2016070700.soi
-//AutoRamp=H62_AutoRamp_2016080900.soi
-//
-//;PC:1191871452
-//
-//[INI_Register]
 	{0x12,0x40},
 	{0x0E,0x11},
 	{0x0F,0x00},
@@ -219,12 +233,12 @@ static struct regval_list jxh62_init_regs_1280_720_25fps[] = {
 	{0x7A,0x80},
 	{0x1F,0x20},
 	{0x30,0x90},
-	{0x31,0x0C},//{0x31,0x08},changed by jack 20160923
+	{0x31,0x0C},
 	{0x32,0xFF},
-	{0x33,0x0C},//{0x33,0x08},changed by jack 20160923
+	{0x33,0x0C},
 	{0x34,0x4B},
-	{0x35,0xA3},
-	{0x36,0x06},//changed by jack 20160923
+	{0x35,0xE3},
+	{0x36,0x0A},
 	{0x38,0x40},
 	{0x3A,0x08},
 	{0x56,0x02},
@@ -264,28 +278,12 @@ static struct regval_list jxh62_init_regs_1280_720_25fps[] = {
 	{0x59,0x97},
 	{0x12,0x00},
 	{0x47,0x47},
-	{JXH62_REG_DELAY,500},//sleep 500
+	{JXH62_REG_DELAY,250},
+	{JXH62_REG_DELAY,250},
 	{0x47,0x44},
 	{0x1F,0x21},
-//;PC:2942318289
 	{JXH62_REG_END, 0x00},	/* END MARKER */
 };
-
-/* static struct regval_list jxh62_init_version_80[] = { */
-
-/* 	{0x27,0x46}, */
-/* 	{0x2C,0x00}, */
-/* 	{0x63,0x19}, */
-/* 	{JXH62_REG_END, 0x00},	/\* END MARKER *\/ */
-/* }; */
-
-/* static struct regval_list jxh62_init_version_81[] = { */
-
-/* 	{0x27,0x3c}, */
-/* 	{0x2C,0x04}, */
-/* 	{0x63,0x51}, */
-/* 	{JXH62_REG_END, 0x00},	/\* END MARKER *\/ */
-/* }; */
 
 /*
  * the order of the jxh62_win_sizes is [full_resolution, preview_resolution].
@@ -295,14 +293,14 @@ static struct tx_isp_sensor_win_setting jxh62_win_sizes[] = {
 	{
 		.width		= 1280,
 		.height		= 720,
-		.fps		= 25 << 16 | 1, /* 12.5 fps */
+		.fps		= 25 << 16 | 1,
 		.mbus_code	= V4L2_MBUS_FMT_SBGGR10_1X10,
 		.colorspace	= V4L2_COLORSPACE_SRGB,
 		.regs 		= jxh62_init_regs_1280_720_25fps,
 	}
 };
 static enum v4l2_mbus_pixelcode jxh62_mbus_code[] = {
-	V4L2_MBUS_FMT_SGBRG8_1X8,
+	V4L2_MBUS_FMT_SBGGR8_1X8,
 	V4L2_MBUS_FMT_SBGGR10_1X10,
 };
 /*
@@ -311,14 +309,11 @@ static enum v4l2_mbus_pixelcode jxh62_mbus_code[] = {
 
 static struct regval_list jxh62_stream_on[] = {
 	{0x12, 0x00},
-
 	{JXH62_REG_END, 0x00},	/* END MARKER */
 };
 
 static struct regval_list jxh62_stream_off[] = {
-	/* Sensor enter LP11*/
 	{0x12, 0x40},
-
 	{JXH62_REG_END, 0x00},	/* END MARKER */
 };
 
@@ -376,13 +371,13 @@ static int jxh62_read_array(struct v4l2_subdev *sd, struct regval_list *vals)
 			if (vals->value >= (1000 / HZ))
 				msleep(vals->value);
 			else
-				mdelay(vals->value);
+				msleep(vals->value);
 		} else {
 			ret = jxh62_read(sd, vals->reg_num, &val);
 			if (ret < 0)
 				return ret;
 		}
-		/*printk("vals->reg_num:0x%02x, vals->value:0x%02x\n",vals->reg_num, val);*/
+		printk("vals->reg_num:0x%02x, vals->value:0x%02x\n",vals->reg_num, val);
 		vals++;
 	}
 	return 0;
@@ -395,7 +390,7 @@ static int jxh62_write_array(struct v4l2_subdev *sd, struct regval_list *vals)
 			if (vals->value >= (1000 / HZ))
 				msleep(vals->value);
 			else
-				mdelay(vals->value);
+				msleep(vals->value);
 		} else {
 			ret = jxh62_write(sd, vals->reg_num, vals->value);
 			if (ret < 0)
@@ -456,46 +451,11 @@ static int jxh62_set_analog_gain(struct v4l2_subdev *sd, int value)
 }
 static int jxh62_set_digital_gain(struct v4l2_subdev *sd, int value)
 {
-	/* 0x00 bit[7] if gain > 2X set 0; if gain > 4X set 1 */
 	return 0;
 }
 
 static int jxh62_get_black_pedestal(struct v4l2_subdev *sd, int value)
 {
-#if 0
-	int ret = 0;
-	int black = 0;
-	unsigned char h,l;
-	unsigned char reg = 0xff;
-	unsigned int * v = (unsigned int *)(value);
-	ret = jxh62_read(sd, 0x48, &h);
-	if (ret < 0)
-		return ret;
-	switch(*v){
-	case SENSOR_R_BLACK_LEVEL:
-		black = (h & 0x3) << 8;
-		reg = 0x44;
-		break;
-	case SENSOR_GR_BLACK_LEVEL:
-		black = (h & (0x3 << 2)) << 8;
-		reg = 0x45;
-		break;
-	case SENSOR_GB_BLACK_LEVEL:
-		black = (h & (0x3 << 4)) << 8;
-		reg = 0x46;
-		break;
-	case SENSOR_B_BLACK_LEVEL:
-		black = (h & (0x3 << 6)) << 8;
-		reg = 0x47;
-		break;
-	default:
-		return -1;
-	}
-	ret = jxh62_read(sd, reg, &l);
-	if (ret < 0)
-		return ret;
-	*v = (black | l);
-#endif
 	return 0;
 }
 
@@ -517,13 +477,8 @@ static int jxh62_init(struct v4l2_subdev *sd, u32 enable)
 	sensor->video.mbus.colorspace = wsize->colorspace;
 	sensor->video.fps = wsize->fps;
 	ret = jxh62_write_array(sd, wsize->regs);
-	ret = jxh62_read(sd, 0x09, &val);
-	/* if (val == 0x00 || val == 0x80) */
-	/* 	jxh62_write_array(sd, jxh62_init_version_80); */
-	/* else if(val == 0x81) */
-	/* 	jxh62_write_array(sd, jxh62_init_version_81); */
-	/* if (ret) */
-	/* 	return ret; */
+	if (ret)
+		return ret;
 	arg.value = (int)&sensor->video;
 	sd->v4l2_dev->notify(sd, TX_ISP_NOTIFY_SYNC_VIDEO_IN, &arg);
 	sensor->priv = wsize;
@@ -547,13 +502,11 @@ static int jxh62_s_stream(struct v4l2_subdev *sd, int enable)
 
 static int jxh62_g_parm(struct v4l2_subdev *sd, struct v4l2_streamparm *parms)
 {
-	/*printk("functiong:%s, line:%d\n", __func__, __LINE__); */
 	return 0;
 }
 
 static int jxh62_s_parm(struct v4l2_subdev *sd, struct v4l2_streamparm *parms)
 {
-	/*printk("functiong:%s, line:%d\n", __func__, __LINE__); */
 	return 0;
 }
 
@@ -568,7 +521,6 @@ static int jxh62_set_fps(struct tx_isp_sensor *sensor, int fps)
 	unsigned char tmp;
 	unsigned int newformat = 0; //the format is 24.8
 	int ret = 0;
-	unsigned int vts_tmp = 0;
 
 	/* the format of fps is 16/16. for example 25 << 16 | 2, the value is 25/2 fps. */
 	newformat = (((fps >> 16) / (fps & 0xffff)) << 8) + ((((fps >> 16) % (fps & 0xffff)) << 8) / (fps & 0xffff));
@@ -580,33 +532,22 @@ static int jxh62_set_fps(struct tx_isp_sensor *sensor, int fps)
 	if(ret < 0)
 		return -1;
 	hts = (hts << 8) + tmp;
-	/*vts = (pclk << 4) / (hts * (newformat >> 4));*/
 	vts = pclk * (fps & 0xffff) / hts / ((fps & 0xffff0000) >> 16);
-#if 0
-	ret = jxh62_write(sd, 0x22, (unsigned char)(vts & 0xff));
-	ret += jxh62_write(sd, 0x23, (unsigned char)(vts >> 8));
-	if(ret < 0)
-		return -1;
-#else
 	jxh62_write(sd, 0xc0, 0x22);
 	jxh62_write(sd, 0xc1, (unsigned char)(vts & 0xff));
 	jxh62_write(sd, 0xc2, 0x23);
 	jxh62_write(sd, 0xc3, (unsigned char)(vts >> 8));
 	ret = jxh62_read(sd, 0x1f, &tmp);
-	pr_debug("before register 0x1f value : 0x%02x\n", tmp);
 	if(ret < 0)
 		return -1;
 	tmp |= (1 << 7); //set bit[7],  register group write function,  auto clean
 	jxh62_write(sd, 0x1f, tmp);
-	pr_debug("after register 0x1f value : 0x%02x\n", tmp);
-#endif
-
 
 	sensor->video.fps = fps;
-	sensor->video.attr->max_integration_time_native = vts - 4;
-	sensor->video.attr->integration_time_limit = vts - 4;
+	sensor->video.attr->max_integration_time_native = vts-1;
+	sensor->video.attr->integration_time_limit = vts-1;
 	sensor->video.attr->total_height = vts;
-	sensor->video.attr->max_integration_time = vts - 4;
+	sensor->video.attr->max_integration_time = vts-1;
 	arg.value = (int)&sensor->video;
 	sd->v4l2_dev->notify(sd, TX_ISP_NOTIFY_SYNC_VIDEO_IN, &arg);
 	return 0;
@@ -666,6 +607,7 @@ static int jxh62_g_chip_ident(struct v4l2_subdev *sd,
 			gpio_direction_output(pwdn_gpio, 1);
 			msleep(50);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		} else {
 			printk("gpio requrest fail %d\n", pwdn_gpio);
 		}
@@ -707,17 +649,16 @@ static long jxh62_ops_private_ioctl(struct tx_isp_sensor *sensor, struct isp_pri
 		ret = jxh62_set_mode(sensor,ctrl->value);
 		break;
 	case TX_ISP_PRIVATE_IOCTL_SUBDEV_PREPARE_CHANGE:
-		//	ret = jxh62_write_array(sd, jxh62_stream_off);
+		ret = jxh62_write_array(sd, jxh62_stream_off);
 		break;
 	case TX_ISP_PRIVATE_IOCTL_SUBDEV_FINISH_CHANGE:
-		//	ret = jxh62_write_array(sd, jxh62_stream_on);
+		ret = jxh62_write_array(sd, jxh62_stream_on);
 		break;
 	case TX_ISP_PRIVATE_IOCTL_SENSOR_FPS:
 		ret = jxh62_set_fps(sensor, ctrl->value);
 		break;
 	default:
-		pr_debug("do not support ctrl->cmd ====%d\n",ctrl->cmd);
-		break;;
+		break;
 	}
 	return 0;
 }
@@ -812,7 +753,7 @@ static int jxh62_probe(struct i2c_client *client,
 		printk("Cannot get sensor input clock cgu_cim\n");
 		goto err_get_mclk;
 	}
-	clk_set_rate(sensor->mclk, 24000000);//MCLK=24MHz
+	clk_set_rate(sensor->mclk, 24000000);
 	clk_enable(sensor->mclk);
 
 	ret = set_sensor_gpio_function(sensor_gpio_func);
@@ -838,7 +779,7 @@ static int jxh62_probe(struct i2c_client *client,
 	/*
 	  convert sensor-gain into isp-gain,
 	*/
-	jxh62_attr.max_again = 	log2_fixed_to_fixed(jxh62_attr.max_again, TX_ISP_GAIN_FIXED_POINT, LOG2_GAIN_SHIFT);
+	jxh62_attr.max_again = 324678;
 	jxh62_attr.max_dgain = jxh62_attr.max_dgain;
 	sd = &sensor->sd;
 	video = &sensor->video;

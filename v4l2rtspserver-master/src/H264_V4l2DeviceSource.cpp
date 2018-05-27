@@ -36,9 +36,9 @@ std::list< std::pair<unsigned char*,size_t> > H264_V4L2DeviceSource::splitFrames
 	{	
 		switch (m_frameType&0x1F)					
 		{
-			case 7: /*LOG_S(INFO) << "SPS size:" << size << " bufSize:" << bufSize;*/ m_sps.assign((char*)buffer,size); break;
-			case 8: /*LOG_S(INFO) << "PPS size:" << size << " bufSize:" << bufSize;*/ m_pps.assign((char*)buffer,size); break;
-			case 5: /*LOG_S(INFO) << "IDR size:" << size << " bufSize:" << bufSize;*/
+			case 7: LOG_S(9) << "SPS size:" << size << " bufSize:" << bufSize; m_sps.assign((char*)buffer,size); break;
+			case 8: LOG_S(9) << "PPS size:" << size << " bufSize:" << bufSize; m_pps.assign((char*)buffer,size); break;
+			case 5: LOG_S(9) << "IDR size:" << size << " bufSize:" << bufSize;
 				if (m_repeatConfig && !m_sps.empty() && !m_pps.empty())
 				{
 					frameList.push_back(std::pair<unsigned char*,size_t>((unsigned char*)m_sps.c_str(), m_sps.size()));
@@ -84,11 +84,11 @@ std::list< std::pair<unsigned char*,size_t> > H265_V4L2DeviceSource::splitFrames
 	{
 		switch ((m_frameType&0x7E)>>1)					
 		{
-			case 32: /*LOG_S(INFO) << "VPS size:" << size << " bufSize:" << bufSize;*/ m_vps.assign((char*)buffer,size); break;
-			case 33: /*LOG_S(INFO) << "SPS size:" << size << " bufSize:" << bufSize;*/ m_sps.assign((char*)buffer,size); break;
-			case 34: /*LOG_S(INFO) << "PPS size:" << size << " bufSize:" << bufSize;*/ m_pps.assign((char*)buffer,size); break;
+			case 32: LOG_S(9) << "VPS size:" << size << " bufSize:" << bufSize; m_vps.assign((char*)buffer,size); break;
+			case 33: LOG_S(9) << "SPS size:" << size << " bufSize:" << bufSize; m_sps.assign((char*)buffer,size); break;
+			case 34: LOG_S(9) << "PPS size:" << size << " bufSize:" << bufSize; m_pps.assign((char*)buffer,size); break;
 			case 19: 
-			case 20: /*LOG_S(INFO) << "IDR size:" << size << " bufSize:" << bufSize;*/
+			case 20: LOG_S(INFO) << "IDR size:" << size << " bufSize:" << bufSize;
 				if (m_repeatConfig && !m_vps.empty() && !m_sps.empty() && !m_pps.empty())
 				{
 					frameList.push_back(std::pair<unsigned char*,size_t>((unsigned char*)m_vps.c_str(), m_vps.size()));

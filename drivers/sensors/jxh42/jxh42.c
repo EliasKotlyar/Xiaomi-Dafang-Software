@@ -49,70 +49,116 @@ module_param(sensor_gpio_func, int, S_IRUGO);
 MODULE_PARM_DESC(sensor_gpio_func, "Sensor GPIO function");
 
 struct tx_isp_sensor_attribute jxh42_attr;
-#if 0
-static inline unsigned char cale_again_register(unsigned int gain)
-{
-	int index = 0;
-	int i = 0, p = 0;
-	for(index = 3; index >= 0; index--)
-		if(gain & (1 << (index + TX_ISP_GAIN_FIXED_POINT)))
-			break;
-	i = index;
-	p = (gain >> (TX_ISP_GAIN_FIXED_POINT - 4)) & ((1 << (4 + i)) - 1);
-	return (i << 4) | p;
-}
+struct again_lut {
+	unsigned int value;
+	unsigned int gain;
+};
 
+struct again_lut jxh42_again_lut[] = {
+	{0x0, 0},
+	{0x1, 5731},
+	{0x2, 11136},
+	{0x3, 16248},
+	{0x4, 21097},
+	{0x5, 25710},
+	{0x6, 30109},
+	{0x7, 34312},
+	{0x8, 38336},
+	{0x9, 42195},
+	{0xa, 45904},
+	{0xb, 49472},
+	{0xc, 52910},
+	{0xd, 56228},
+	{0xe, 59433},
+	{0xf, 62534},
+	{0x10, 65536},
+	{0x11, 71267},
+	{0x12, 76672},
+	{0x13, 81784},
+	{0x14, 86633},
+	{0x15, 91246},
+	{0x16, 95645},
+	{0x17, 99848},
+	{0x18, 103872},
+	{0x19, 107731},
+	{0x1a, 111440},
+	{0x1b, 115008},
+	{0x1c, 118446},
+	{0x1d, 121764},
+	{0x1e, 124969},
+	{0x1f, 128070},
+	{0x20, 131072},
+	{0x21, 136803},
+	{0x22, 142208},
+	{0x23, 147320},
+	{0x24, 152169},
+	{0x25, 156782},
+	{0x26, 161181},
+	{0x27, 165384},
+	{0x28, 169408},
+	{0x29, 173267},
+	{0x2a, 176976},
+	{0x2b, 180544},
+	{0x2c, 183982},
+	{0x2d, 187300},
+	{0x2e, 190505},
+	{0x2f, 193606},
+	{0x30, 196608},
+	{0x31, 202339},
+	{0x32, 207744},
+	{0x33, 212856},
+	{0x34, 217705},
+	{0x35, 222318},
+	{0x36, 226717},
+	{0x37, 230920},
+	{0x38, 234944},
+	{0x39, 238803},
+	{0x3a, 242512},
+	{0x3b, 246080},
+	{0x3c, 249518},
+	{0x3d, 252836},
+	{0x3e, 256041},
+	{0x3f, 259142},
+	{0x40, 262144},
+	{0x41, 267875},
+	{0x42, 273280},
+	{0x43, 278392},
+	{0x44, 283241},
+	{0x45, 287854},
+	{0x46, 292253},
+	{0x47, 296456},
+	{0x48, 300480},
+	{0x49, 304339},
+	{0x4a, 308048},
+	{0x4b, 311616},
+	{0x4c, 315054},
+	{0x4d, 318372},
+	{0x4e, 321577},
+	{0x4f, 324678},
+};
 unsigned int jxh42_alloc_again(unsigned int isp_gain, unsigned char shift, unsigned int *sensor_again)
 {
-	unsigned int again = 0;
-	unsigned int gain_one = math_exp2(isp_gain, shift, TX_ISP_GAIN_FIXED_POINT);
-
-	if(gain_one < jxh42_attr.max_again){
-		again = (gain_one  >> (TX_ISP_GAIN_FIXED_POINT - 4) << (TX_ISP_GAIN_FIXED_POINT - 4));
-	}else{
-		again = jxh42_attr.max_again;
+	struct again_lut *lut = jxh42_again_lut;
+	while(lut->gain <= jxh42_attr.max_again) {
+		if(isp_gain == 0) {
+			*sensor_again = lut->value;
+			return 0;
+		}
+		else if(isp_gain < lut->gain) {
+			*sensor_again = (lut - 1)->value;
+			return (lut - 1)->gain;
+		}
+		else{
+			if((lut->gain == jxh42_attr.max_again) && (isp_gain >= lut->gain)) {
+				*sensor_again = lut->value;
+				return lut->gain;
+			}
+		}
+		lut++;
 	}
-	isp_gain = log2_fixed_to_fixed(again, TX_ISP_GAIN_FIXED_POINT, shift);
-	*sensor_again = cale_again_register(again);
 	return isp_gain;
 }
-#else
-static inline unsigned char cale_again_register(unsigned int gain)
-{
-	int index = 0;
-	int i = 0, p = 0;
-	for(index = 3; index >= 0; index--)
-		if(gain & (1 << (index + TX_ISP_GAIN_FIXED_POINT)))
-			break;
-	i = index;
-	p = (gain >> (TX_ISP_GAIN_FIXED_POINT + index - 4)) & 0xf;
-	return (i << 4) | p;
-}
-static inline unsigned int cale_sensor_again_to_isp(unsigned char reg)
-{
-	unsigned int h,l;
-	h = reg >> 4;
-	l = reg & 0xf;
-	return (1 << (h + TX_ISP_GAIN_FIXED_POINT)) | (l << ((TX_ISP_GAIN_FIXED_POINT + h - 4)));
-}
-unsigned int jxh42_alloc_again(unsigned int isp_gain, unsigned char shift, unsigned int *sensor_again)
-{
-	unsigned int again = 0;
-	unsigned int gain_one = 0;
-	unsigned int gain_one1 = 0;
 
-	if(isp_gain > jxh42_attr.max_again){
-		isp_gain = jxh42_attr.max_again;
-	}
-	again = isp_gain;
-	gain_one = math_exp2(isp_gain, shift, TX_ISP_GAIN_FIXED_POINT);
-	*sensor_again = cale_again_register(gain_one);
-	gain_one1 = cale_sensor_again_to_isp(*sensor_again);
-	isp_gain = log2_fixed_to_fixed(gain_one1, TX_ISP_GAIN_FIXED_POINT, shift);
-//	printk("again = %d gain_one = 0x%0x sensor_gain = 0x%0x gain_one1 = 0x%0x isp_gain = %d\n", again, gain_one, *sensor_again, gain_one1, isp_gain);
-	return isp_gain;
-}
-#endif
 unsigned int jxh42_alloc_dgain(unsigned int isp_gain, unsigned char shift, unsigned int *sensor_dgain)
 {
 	return isp_gain;
@@ -131,7 +177,7 @@ struct tx_isp_sensor_attribute jxh42_attr={
 			.hblanking = 0,
 		},
 	},
-	.max_again = 0xff << (TX_ISP_GAIN_FIXED_POINT - 4),
+	.max_again = 324678,
 	.max_dgain = 0,
 	.min_integration_time = 1,
 	.min_integration_time_native = 1,
@@ -604,6 +650,7 @@ static int jxh42_g_chip_ident(struct v4l2_subdev *sd,
 			gpio_direction_output(pwdn_gpio, 1);
 			msleep(50);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		} else {
 			printk("gpio requrest fail %d\n", pwdn_gpio);
 		}
@@ -777,7 +824,7 @@ static int jxh42_probe(struct i2c_client *client,
 	 /*
 		convert sensor-gain into isp-gain,
 	 */
-	jxh42_attr.max_again = 	log2_fixed_to_fixed(jxh42_attr.max_again, TX_ISP_GAIN_FIXED_POINT, LOG2_GAIN_SHIFT);
+	jxh42_attr.max_again = 324678;
 	jxh42_attr.max_dgain = jxh42_attr.max_dgain;
 	sd = &sensor->sd;
 	video = &sensor->video;

@@ -92,7 +92,7 @@
 #define CB_MODE1			0x6c
 #define BK_NUM_CB1			0x70
 
-#elif defined(CONFIG_SOC_T20)
+#elif (defined(CONFIG_SOC_T20) || defined(CONFIG_SOC_T30))
 #define VIC_SUPPORT_MIPI                1
 #define VIC_DB_CFG		        0x10
 #define DVP_DATA_POS			(1<<24)

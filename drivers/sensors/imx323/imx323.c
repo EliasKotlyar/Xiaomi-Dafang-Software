@@ -22,17 +22,18 @@
 #include <linux/proc_fs.h>
 #include <soc/gpio.h>
 
-#define IMX323_CHIP_ID_H	(0x14)
-#define IMX323_CHIP_ID_L	(0x6c)
+#define IMX323_CHIP_ID_H	(0x50)
+#define IMX323_CHIP_ID_L	(0x0)
 
 #define IMX323_REG_END		0xffff
 #define IMX323_REG_DELAY	0xfffe
 
-#define IMX323_SUPPORT_PCLK (74125*1000)
+#define IMX323_SUPPORT_SCLK (37125*1000)
 #define SENSOR_OUTPUT_MAX_FPS 30
 #define SENSOR_OUTPUT_MIN_FPS 5
 #define AGAIN_MAX_DB 0x50
 #define DGAIN_MAX_DB 0x3c
+#define DRIVER_VERSION "IMX32320170309"
 static int reset_gpio = GPIO_PA(18);
 module_param(reset_gpio, int, S_IRUGO);
 MODULE_PARM_DESC(reset_gpio, "Reset GPIO NUM");
@@ -89,11 +90,11 @@ struct tx_isp_sensor_attribute imx323_attr = {
 	.max_dgain = 0,
 	.min_integration_time = 1,
 	.min_integration_time_native = 1,
-	.max_integration_time_native = 1125-2,
-	.integration_time_limit = 1125-1,
-	.total_width = 1984,
-	.total_height = 1125,
-	.max_integration_time = 1125-1,
+	.max_integration_time_native = 1350,
+	.integration_time_limit = 1350,
+	.total_width = 2200,
+	.total_height = 1350,
+	.max_integration_time = 1350,
 	.integration_time_apply_delay = 2,
 	.again_apply_delay = 2,
 	.dgain_apply_delay = 0,
@@ -110,10 +111,10 @@ static struct regval_list imx323_init_regs_1920_1080_30fps[] = {
 	{0x0009,0xf0},
 	{0x0112,0x0c},
 	{0x0113,0x0c},
-	{0x0340,0x04},
-	{0x0341,0x65},
-	{0x0342,0x05},        //LINE_LENGTH 30fps 0x44c
-	{0x0343,0x28},        //LINE_LENGTH
+	{0x0340,0x05},
+	{0x0341,0x46},
+	{0x0342,0x04},        //LINE_LENGTH 30fps 0x44c
+	{0x0343,0x4c},        //LINE_LENGTH
 	{0x3002,0x0F},        //MODE
 	{0x3005,0x65},
 	{0x3027,0x20},
@@ -130,7 +131,7 @@ static struct regval_list imx323_init_regs_1920_1080_30fps[] = {
 	{0x303f,0x0a},
 	{0x307a,0x00},
 	{0x307b,0x00},
-	{0x309a,0x94}, //30fps 26
+	{0x309a,0x26}, //30fps 26
 	{0x309b,0x02},
 	{0x30CE,0x16},        //PRES
 	{0x30CF,0x82},        //DRES
@@ -269,7 +270,7 @@ static int imx323_detect(struct v4l2_subdev *sd, unsigned int *ident)
 	unsigned char v;
 	int ret;
 
-	ret = imx323_read(sd, 0x31f3, &v);
+	ret = imx323_read(sd, 0x301c, &v);
 	pr_debug("-----%s: %d ret = %d, v = 0x%02x\n", __func__, __LINE__, ret,v);
 	if (ret < 0)
 		return ret;
@@ -277,7 +278,7 @@ static int imx323_detect(struct v4l2_subdev *sd, unsigned int *ident)
 		return -ENODEV;
 	*ident = v;
 
-	ret = imx323_read(sd, 0x31f2, &v);
+	ret = imx323_read(sd, 0x301d, &v);
 	pr_debug("-----%s: %d ret = %d, v = 0x%02x\n", __func__, __LINE__, ret,v);
 	if (ret < 0)
 		return ret;
@@ -290,15 +291,11 @@ static int imx323_detect(struct v4l2_subdev *sd, unsigned int *ident)
 static int imx323_set_integration_time(struct v4l2_subdev *sd, int int_time)
 {
 	int ret = 0;
-	char value = 0;
 	unsigned short shs = 0;
 	unsigned short vmax = 0;
-	ret = imx323_read(sd, 0x0341, &value);
-	vmax = value;
-	ret = imx323_read(sd, 0x0340, &value);
-	vmax |= value << 8;
-	shs = vmax - int_time - 1;
 
+	vmax = imx323_attr.total_height;
+	shs = vmax-int_time;
 	ret = imx323_write(sd, 0x0203, (unsigned char)(shs & 0xff));
 	if (ret < 0)
 		return ret;
@@ -379,50 +376,63 @@ static int imx323_s_parm(struct v4l2_subdev *sd, struct v4l2_streamparm *parms)
 
 static int imx323_set_fps(struct tx_isp_sensor *sensor, int fps)
 {
-	return 0;
-#if 0
 	struct v4l2_subdev *sd = &sensor->sd;
 	struct tx_isp_notify_argument arg;
 	int ret = 0;
 	unsigned int pclk = 0;
 	unsigned int hts = 0;
 	unsigned int vts = 0;
+	unsigned int vts_old = 0;
 	unsigned char val = 0;
 	unsigned int newformat = 0; //the format is 24.8
-
+	unsigned int shs = 0;
 	newformat = (((fps >> 16) / (fps & 0xffff)) << 8) + ((((fps >> 16) % (fps & 0xffff)) << 8) / (fps & 0xffff));
 	if(newformat > (SENSOR_OUTPUT_MAX_FPS << 8) || newformat < (SENSOR_OUTPUT_MIN_FPS << 8)) {
 		printk("warn: fps(%d) no in range\n", fps);
 		return -1;
 	}
-	pclk = IMX323_SUPPORT_PCLK;
+	pclk = IMX323_SUPPORT_SCLK;
 
 	val = 0;
-	ret += imx323_read(sd, 0x380c, &val);
+	ret += imx323_read(sd, 0x0342, &val);
 	hts = val<<8;
 	val = 0;
-	ret += imx323_read(sd, 0x380d, &val);
+	ret += imx323_read(sd, 0x0343, &val);
 	hts |= val;
 	if (0 != ret) {
 		printk("err: imx323 read err\n");
 		return ret;
 	}
+	val = 0;
+	ret += imx323_read(sd, 0x0340, &val);
+	vts_old = val<<8;
+	val = 0;
+	ret += imx323_read(sd, 0x0341, &val);
+	vts_old |= val;
+
 	vts = (pclk << 4) / (hts * (newformat >> 4));
-	ret += imx323_write(sd, 0x380f, vts&0xff);
-	ret += imx323_write(sd, 0x380e, (vts>>8)&0xff);
+	ret += imx323_write(sd, 0x0341, vts&0xff);
+	ret += imx323_write(sd, 0x0340, (vts>>8)&0xff);
 	if (0 != ret) {
 		printk("err: imx323_write err\n");
 		return ret;
 	}
 	sensor->video.fps = fps;
-	sensor->video.attr->max_integration_time_native = vts - 4;
-	sensor->video.attr->integration_time_limit = vts - 4;
+	sensor->video.attr->max_integration_time_native = vts - 1;
+	sensor->video.attr->integration_time_limit = vts - 1;
 	sensor->video.attr->total_height = vts;
-	sensor->video.attr->max_integration_time = vts - 4;
+	sensor->video.attr->max_integration_time = vts - 1;
 	arg.value = (int)&sensor->video;
 	sd->v4l2_dev->notify(sd, TX_ISP_NOTIFY_SYNC_VIDEO_IN, &arg);
+
+	val = 0;
+	ret += imx323_read(sd, 0x0202, &val);
+	shs = val<<8;
+	val = 0;
+	ret += imx323_read(sd, 0x0203, &val);
+	shs |= val;
+	imx323_set_integration_time(sd,vts_old-shs);
 	return ret;
-#endif
 }
 
 static int imx323_set_mode(struct tx_isp_sensor *sensor, int value)
@@ -472,6 +482,7 @@ static int imx323_g_chip_ident(struct v4l2_subdev *sd,
 			gpio_direction_output(pwdn_gpio, 1);
 			msleep(150);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",pwdn_gpio);
 		}
@@ -627,6 +638,8 @@ static int imx323_probe(struct i2c_client *client,
 		if (IS_ERR(vpll)) {
 			pr_warning("get vpll failed\n");
 		} else {
+			/*vpll default 1200M*/
+			clk_set_rate(vpll,891000000);
 			rate = clk_get_rate(vpll);
 			if (((rate / 1000) % 37125) == 0) {
 				ret = clk_set_parent(sensor->mclk, vpll);
@@ -638,7 +651,8 @@ static int imx323_probe(struct i2c_client *client,
 
 	clk_set_rate(sensor->mclk, 37125000);
 	clk_enable(sensor->mclk);
-	printk("mclk=%lu\n", clk_get_rate(sensor->mclk));
+	pr_debug("mclk=%lu\n", clk_get_rate(sensor->mclk));
+	pr_debug("Sensor Driver Version : %s\n", DRIVER_VERSION);
 
 	ret = set_sensor_gpio_function(sensor_gpio_func);
 	if (ret < 0)

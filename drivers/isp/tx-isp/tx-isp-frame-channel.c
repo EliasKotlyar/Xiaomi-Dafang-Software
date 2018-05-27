@@ -594,14 +594,14 @@ static int frame_channel_vidioc_streamoff(struct file *file, void *priv,
 	struct frame_channel_attribute *attr = &vdev->attr;
 	int ret = 0;
 	ISP_PRINT(ISP_INFO_LEVEL,"%s==========%d\n", __func__, __LINE__);
+	attr->crop_enable = 0;
+	attr->scaler_enable = 0;
+	attr->frame_rate = 0;
 	ret = vb2_streamoff(&vdev->vbq, i);
 	/* reset some public parameters */
 	memset(&attr->crop, 0, sizeof(attr->crop));
 	memset(&attr->scaler, 0, sizeof(attr->scaler));
 //	memset(&attr->output, 0, sizeof(attr->output));
-	attr->crop_enable = 0;
-	attr->scaler_enable = 0;
-	attr->frame_rate = 0;
 	return ret;
 }
 
@@ -687,6 +687,16 @@ static inline long frame_channel_set_scaler_info(frame_chan_vdev_t *vdev, void *
 	return ret;
 }
 
+static inline long frame_channel_set_channel_banks(frame_chan_vdev_t *vdev, void *arg)
+{
+	int count = *(int*)arg;
+	if(count <= 0)
+		return -EINVAL;
+
+	vdev->reqbufs = count;
+	return ISP_SUCCESS;
+}
+
 static inline long frame_channel_listen_buffer(frame_chan_vdev_t *vdev, void *arg)
 {
 //	unsigned int timeout = 0;
@@ -697,9 +707,10 @@ static inline long frame_channel_listen_buffer(frame_chan_vdev_t *vdev, void *ar
 		return -EPERM;
 	}
 #endif
+	/* -ERESTARTSYS value return to sdk */
 	ret = wait_for_completion_interruptible(&vdev->comp);
 	if (ret < 0)
-		*(int *)arg = -1;
+		*(int *)arg = ret;
 	else
 		*(int *)arg = vdev->comp.done + 1;
 	return ret;
@@ -716,6 +727,9 @@ static long frame_channel_vidioc_default(struct file *file, void *fh, bool valid
 			break;
 		case VIDIOC_DEFAULT_CMD_SET_SCALER:
 			ret = frame_channel_set_scaler_info(vdev, arg);
+			break;
+		case VIDIOC_DEFAULT_CMD_SET_BANKS:
+			ret = frame_channel_set_channel_banks(vdev, arg);
 			break;
 		case VIDIOC_DEFAULT_CMD_LISTEN_BUF:
 			ret = frame_channel_listen_buffer(vdev, arg);
@@ -811,7 +825,7 @@ fh_alloc_fail:
 static int frame_channel_v4l2_close(struct file *file)
 {
 	frame_chan_vdev_t *vdev = video_drvdata(file);
-//	struct frame_channel_fh *fh = file->private_data;
+	struct frame_channel_fh *fh = file->private_data;
 	unsigned long flags;
 	if(atomic_read(&vdev->state) == TX_ISP_STATE_RUN){
 		frame_channel_vidioc_streamoff(file, NULL, V4L2_BUF_TYPE_VIDEO_CAPTURE);
@@ -824,7 +838,10 @@ static int frame_channel_v4l2_close(struct file *file)
 	}
 	/* Close the priority */
 //	v4l2_prio_close(&camdev->prio, fh->prio);
-//	printk("~~~ %s[%d]  ~~~~\n",__func__,__LINE__);
+	if(fh){
+		kfree(fh);
+		file->private_data = NULL;
+	}
 	return ISP_SUCCESS;
 }
 

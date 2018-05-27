@@ -8,6 +8,8 @@
  * published by the Free Software Foundation.
  */
 
+#define DEBUG
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -15,9 +17,10 @@
 #include <linux/delay.h>
 #include <linux/gpio.h>
 #include <linux/clk.h>
+#include <linux/delay.h>
 #include <sensor-common.h>
 #include <apical-isp/apical_math.h>
-
+#include <linux/proc_fs.h>
 #include <soc/gpio.h>
 
 #define GC1064_CHIP_ID_H	(0x10)
@@ -338,30 +341,8 @@ struct tx_isp_sensor_attribute gc1064_attr={
 	.dgain_apply_delay = 0,
 	.sensor_ctrl.alloc_again = gc1064_alloc_again,
 	.sensor_ctrl.alloc_dgain = gc1064_alloc_dgain,
-//	void priv; /* point to struct tx_isp_sensor_board_info */
 };
 
-/*
- * the configure of gpio should be in accord with product-board.
- * if one is redundant, please config -1.
- */
-/*struct tx_isp_sensor_board_info gc1064_board = {
-#ifdef CONFIG_BOARD_BOX
-	.reset_gpio = GPIO_PF(30),
-	.pwdn_gpio = GPIO_PF(31),
-#elif defined(CONFIG_BOARD_BOOTES)
-	.reset_gpio = GPIO_PF(28),
-	.pwdn_gpio = GPIO_PF(29),
-#elif defined(CONFIG_BOARD_MANGO)
-	.reset_gpio = GPIO_PA(18),
-	.pwdn_gpio = -1,
-#else
-	.reset_gpio = GPIO_PF(0),
-	.pwdn_gpio = GPIO_PF(1),
-#endif
-	.mclk_name = "cgu_cim",
-};
-*/
 static struct regval_list gc1064_init_regs_1280_720[] = {
 
 	{0xfe,0x80},
@@ -374,20 +355,18 @@ static struct regval_list gc1064_init_regs_1280_720[] = {
 	{0xf8,0x03},
 	{0xf9,0x0e},
 	{0xfa,0x00},
+	/*ANALOG & CISCTL*/
 	{0xfe,0x00},
-  /////////////////////////////////////////////////////
-  ////////////////   ANALOG & CISCTL   ////////////////
-  /////////////////////////////////////////////////////
-  	{0x03,0x02},
-	{0x04,0xb5}, //exposure
+	{0x03,0x02},
+	{0x04,0xb5},
 	{0x05,0x01},
-	{0x06,0x6f}, //H blanking
+	{0x06,0x6f},
 	{0x07,0x00},
-	{0x08,0xb4}, // v blanking
+	{0x08,0xb4},
 	{0x0d,0x02},
-	{0x0e,0xd8}, //728 windows heigh
+	{0x0e,0xd8},
 	{0x0f,0x05},
-	{0x10,0x08}, //1288 window width
+	{0x10,0x08},
 	{0x11,0x00},
 	{0x12,0x18},
 	{0x16,0xc0},
@@ -395,13 +374,13 @@ static struct regval_list gc1064_init_regs_1280_720[] = {
 	{0x19,0x06},
 	{0x1b,0x4f},
 	{0x1c,0x11},
-	{0x1d,0x10}, //exp<1frame 图像闪烁
-	{0x1e,0xf8}, //fc 左侧发紫
+	{0x1d,0x10},
+	{0x1e,0xf8},
 	{0x1f,0x38},
 	{0x20,0x81},
-	{0x21,0x1f}, //6f//2f
-	{0x22,0xc0}, //c2 左侧发紫
-	{0x23,0x82}, //f2 左侧发紫
+	{0x21,0x1f},
+	{0x22,0xc0},
+	{0x23,0x82},
 #ifdef DRIVE_CAPABILITY_1
 	{0x24,0xe3},
 #elif defined(DRIVE_CAPABILITY_2)
@@ -409,13 +388,13 @@ static struct regval_list gc1064_init_regs_1280_720[] = {
 #endif
 	{0x25,0xd4},
 	{0x26,0xa8},
-	{0x29,0x3f}, //54//3f
+	{0x29,0x3f},
 	{0x2a,0x00},
-	{0x2b,0x00}, //00--powernoise	 03---强光拖尾
-	{0x2c,0xe0}, //左右range不一致
+	{0x2b,0x00},
+	{0x2c,0xe0},
 	{0x2d,0x0a},
 	{0x2e,0x00},
-	{0x2f,0x16}, //1f--横闪线
+	{0x2f,0x16},
 	{0x30,0x00},
 	{0x31,0x01},
 	{0x32,0x02},
@@ -427,10 +406,8 @@ static struct regval_list gc1064_init_regs_1280_720[] = {
 	{0x38,0x0f},
 	{0x39,0x17},
 	{0x3a,0x1f},
-	{0x3f,0x18}, //关掉Vclamp 电压
-	////////////////////////////////////////////////
-	/////////////////	  ISP	//////////////////////
-	////////////////////////////////////////////////
+	{0x3f,0x18},
+	/*ISP*/
 	{0xfe,0x00},
 	{0x8a,0x00},
 	{0x8c,0x02},
@@ -442,9 +419,7 @@ static struct regval_list gc1064_init_regs_1280_720[] = {
 	{0x96,0xd0},
 	{0x97,0x05},
 	{0x98,0x00},
-	////////////////////////////////////////////////
-	/////////////////	 MIPI	/////////////////////
-	////////////////////////////////////////////////
+	/*MIPI*/
 	{0xfe,0x03},
 	{0x01,0x00},
 	{0x02,0x00},
@@ -452,35 +427,26 @@ static struct regval_list gc1064_init_regs_1280_720[] = {
 	{0x06,0x00},
 	{0x10,0x00},
 	{0x15,0x00},
-	///////////////////////////////////////////////
-	////////////////	 BLK	/////////////////////
-	///////////////////////////////////////////////
+	/*BLK*/
 	{0xfe,0x00},
 	{0x18,0x02},
 	{0x1a,0x11},
-	{0x40,0x23}, //2b
+	{0x40,0x23},
 	{0x5e,0x00},
 	{0x66,0x80},
-	////////////////////////////////////////////////
-	///////////////// Dark SUN /////////////////////
-	////////////////////////////////////////////////
+	/*dark sun*/
 	{0xfe,0x00},
 	{0xcc,0x25},
 	{0xce,0xf3},
-	///////////////////////////////////////////////
-	////////////////	 Gain	/////////////////////
-	///////////////////////////////////////////////
+	/*GAIN*/
 	{0xfe,0x00},
 	{0xb0,0x50},
 	{0xb3,0x40},
 	{0xb4,0x40},
 	{0xb5,0x40},
 	{0xb6,0x00},
-	//disable sensor dpc
-//	{0x8b,0x22},
-	///////////////////////////////////////////////
-	////////////////	  pad enable   ///////////////
-	///////////////////////////////////////////////
+	{0x8b,0x22},/*disable sensor dpc*/
+	/*pad enable*/
 	{0xf2,0x0f},
 	{0xfe,0x00},
   	{GC1064_FLAG_END, 0x00},	/* END MARKER */
@@ -509,15 +475,13 @@ static struct tx_isp_sensor_win_setting gc1064_win_sizes[] = {
 static struct regval_list gc1064_stream_on[] = {
 	{ 0xfe, 0x03},
 	{ 0x10, 0x91},
-	/* {GC1064_FLAG_DELAY, 0x00, 1000},  */
 	{ 0xfe, 0x00},
 	{GC1064_FLAG_END, 0x00},	/* END MARKER */
 };
 
 static struct regval_list gc1064_stream_off[] = {
 	{ 0xfe, 0x03},
-	{ 0x10 ,0x81},//add
-	/* {GC1064_FLAG_DELAY, 0x00, 1000},  */
+	{ 0x10 ,0x81},
 	{ 0xfe ,0x00},
 	{GC1064_FLAG_END, 0x00},	/* END MARKER */
 };
@@ -576,10 +540,7 @@ static int gc1064_read_array(struct v4l2_subdev *sd, struct regval_list *vals)
 	unsigned char val;
 	while (vals->reg_num != GC1064_FLAG_END) {
 		if(vals->reg_num == GC1064_FLAG_DELAY) {
-			if (vals->value >= (1000 / HZ))
 				msleep(vals->value);
-			else
-				mdelay(vals->value);
 		} else {
 			ret = gc1064_read(sd, vals->reg_num, &val);
 			if (ret < 0)
@@ -600,10 +561,7 @@ static int gc1064_write_array(struct v4l2_subdev *sd, struct regval_list *vals)
 	int ret;
 	while (vals->reg_num != GC1064_FLAG_END) {
 		if (vals->reg_num == GC1064_FLAG_DELAY) {
-			if (vals->value >= (1000 / HZ))
 				msleep(vals->value);
-			else
-				mdelay(vals->value);
 		} else {
 			ret = gc1064_write(sd, vals->reg_num, vals->value);
 			if (ret < 0)
@@ -624,14 +582,18 @@ static int gc1064_detect(struct v4l2_subdev *sd, unsigned int *ident)
 	unsigned char v;
 	int ret;
 	ret = gc1064_read(sd, 0xf0, &v);
+	pr_debug("-----%s: %d ret = %d, v = 0x%02x\n", __func__, __LINE__, ret,v);
 	if (ret < 0)
 		return ret;
+	if (v != GC1064_CHIP_ID_H)
+		return -ENODEV;
 	ret = gc1064_read(sd, 0xf1, &v);
+	pr_debug("-----%s: %d ret = %d, v = 0x%02x\n", __func__, __LINE__, ret,v);
 	if (ret < 0)
 		return ret;
 	if (v != GC1064_CHIP_ID_L)
 		return -ENODEV;
-
+	*ident = (*ident << 8) | v;
 	return 0;
 }
 
@@ -641,38 +603,34 @@ static int gc1064_set_integration_time(struct v4l2_subdev *sd, int value)
 	ret = gc1064_write(sd, 0x4, value&0xff);
 	if (ret < 0) {
 		printk("gc1064_write error\n");
-		goto err_gc1064_wr;
+		return ret;
 	}
 	ret = gc1064_write(sd, 0x3, (value&0x1f00)>>8);
 	if (ret < 0) {
 		printk("gc1064_write error\n");
-		goto err_gc1064_wr;
+		return ret;
 	}
 	return 0;
-err_gc1064_wr:
-	return ret;
 }
 static int gc1064_set_analog_gain(struct v4l2_subdev *sd, int value)
 {
 	int ret = 0;
-	ret = gc1064_write(sd, 0xb6, (value>>12)&0xf);
+	ret = gc1064_write(sd, 0xb6, (value >> 12) & 0xf);
 	if (ret < 0) {
 		printk("gc1064_write error\n");
-		goto err_gc1064_wr;
+		return ret;
 	}
-	ret = gc1064_write(sd, 0xb1, (value>>8)&0xf);
+	ret = gc1064_write(sd, 0xb1, (value >> 8) & 0xf);
 	if (ret < 0) {
 		printk("gc1064_write error\n");
-		goto err_gc1064_wr;
+		return ret;
 	}
-	ret = gc1064_write(sd, 0xb2, (value<<2)&0xff);
+	ret = gc1064_write(sd, 0xb2, (value << 2) & 0xff);
 	if (ret < 0) {
 		printk("gc1064_write error\n");
-		goto err_gc1064_wr;
+		return ret;
 	}
 	return 0;
-err_gc1064_wr:
-	return ret;
 }
 static int gc1064_set_digital_gain(struct v4l2_subdev *sd, int value)
 {
@@ -681,40 +639,6 @@ static int gc1064_set_digital_gain(struct v4l2_subdev *sd, int value)
 
 static int gc1064_get_black_pedestal(struct v4l2_subdev *sd, int value)
 {
-#if 0
-	int ret = 0;
-	int black = 0;
-	unsigned char h,l;
-	unsigned char reg = 0xff;
-	unsigned int * v = (unsigned int *)(value);
-	ret = gc1064_read(sd, 0x48, &h);
-	if (ret < 0)
-		return ret;
-	switch(*v){
-	case SENSOR_R_BLACK_LEVEL:
-		black = (h & 0x3) << 8;
-		reg = 0x44;
-		break;
-	case SENSOR_GR_BLACK_LEVEL:
-		black = (h & (0x3 << 2)) << 8;
-		reg = 0x45;
-		break;
-	case SENSOR_GB_BLACK_LEVEL:
-		black = (h & (0x3 << 4)) << 8;
-		reg = 0x46;
-		break;
-	case SENSOR_B_BLACK_LEVEL:
-		black = (h & (0x3 << 6)) << 8;
-		reg = 0x47;
-		break;
-	default:
-		return -1;
-	}
-	ret = gc1064_read(sd, reg, &l);
-	if (ret < 0)
-		return ret;
-	*v = (black | l);
-#endif
 	return 0;
 }
 
@@ -746,11 +670,11 @@ static int gc1064_s_stream(struct v4l2_subdev *sd, int enable)
 	int ret = 0;
 	if (enable) {
 		ret = gc1064_write_array(sd, gc1064_stream_on);
-		printk("gc1064 stream on\n");
+		pr_debug("gc1064 stream on\n");
 	}
 	else {
 		ret = gc1064_write_array(sd, gc1064_stream_off);
-		printk("gc1064 stream off\n");
+		pr_debug("gc1064 stream off\n");
 	}
 	return ret;
 }
@@ -782,34 +706,35 @@ static int gc1064_set_fps(struct tx_isp_sensor *sensor, int fps)
 	int ret = 0;
 	/* the format of fps is 16/16. for example 25 << 16 | 2, the value is 25/2 fps. */
 	newformat = (((fps >> 16) / (fps & 0xffff)) << 8) + ((((fps >> 16) % (fps & 0xffff)) << 8) / (fps & 0xffff));
-	if(newformat > (SENSOR_OUTPUT_MAX_FPS << 8) || newformat < (SENSOR_OUTPUT_MIN_FPS << 8))
+	if(newformat > (SENSOR_OUTPUT_MAX_FPS << 8) || newformat < (SENSOR_OUTPUT_MIN_FPS << 8)){
+		printk("set_fps error ,should be %d  ~ %d \n",SENSOR_OUTPUT_MIN_FPS, SENSOR_OUTPUT_MAX_FPS);
 		return -1;
+	}
 	ret = gc1064_read(sd, 0x5, &tmp);
 	hb = tmp;
-	ret = gc1064_read(sd, 0x6, &tmp);
+	ret += gc1064_read(sd, 0x6, &tmp);
 	if(ret < 0)
 		return -1;
 	hb = (hb << 8) + tmp;
+
 	ret = gc1064_read(sd, 0xf, &tmp);
 	win_width = tmp;
-	ret = gc1064_read(sd, 0x10, &tmp);
+	ret += gc1064_read(sd, 0x10, &tmp);
+	win_width = (win_width << 8) + tmp;
+	ret += gc1064_read(sd, 0x12, &tmp);
 	if(ret < 0)
 		return -1;
-	win_width = (win_width << 8) + tmp;
-
-	ret = gc1064_read(sd, 0x12, &tmp);
 	sh_delay = tmp;
-
 	hts=win_width+2*(hb+sh_delay+4);
 
 	ret = gc1064_read(sd, 0xd, &tmp);
 	win_high = tmp;
-	ret = gc1064_read(sd, 0xe, &tmp);
+	ret += gc1064_read(sd, 0xe, &tmp);
 	if(ret < 0)
 		return -1;
 	win_high = (win_high << 8) + tmp;
 	vts = pclk * (fps & 0xffff) / hts / ((fps & 0xffff0000) >> 16);
-	vb=vts-win_high-16;
+	vb = vts - win_high - 16;
 	ret = gc1064_write(sd, 0x8, (unsigned char)(vb & 0xff));
 	ret += gc1064_write(sd, 0x7, (unsigned char)(vb >> 8));
 	if(ret < 0)
@@ -855,7 +780,7 @@ static int gc1064_set_mode(struct tx_isp_sensor *sensor, int value)
 	return ret;
 }
 static int gc1064_g_chip_ident(struct v4l2_subdev *sd,
-			       struct v4l2_dbg_chip_ident *chip)
+		struct v4l2_dbg_chip_ident *chip)
 {
 	struct i2c_client *client = v4l2_get_subdevdata(sd);
 	unsigned int ident = 0;
@@ -865,10 +790,11 @@ static int gc1064_g_chip_ident(struct v4l2_subdev *sd,
 		ret = gpio_request(reset_gpio,"gc1064_reset");
 		if(!ret){
 			gpio_direction_output(reset_gpio, 1);
-			mdelay(20);
+			msleep(20);
 			gpio_direction_output(reset_gpio, 0);
-			mdelay(20);
+			msleep(20);
 			gpio_direction_output(reset_gpio, 1);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",reset_gpio);
 		}
@@ -877,8 +803,9 @@ static int gc1064_g_chip_ident(struct v4l2_subdev *sd,
 		ret = gpio_request(pwdn_gpio,"gc1064_pwdn");
 		if(!ret){
 			gpio_direction_output(pwdn_gpio, 1);
-			mdelay(150);
+			msleep(150);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",pwdn_gpio);
 		}
@@ -891,7 +818,7 @@ static int gc1064_g_chip_ident(struct v4l2_subdev *sd,
 		return ret;
 	}
 	v4l_info(client, "gc1064 chip found @ 0x%02x (%s)\n",
-		 client->addr, client->adapter->name);
+		client->addr, client->adapter->name);
 	return v4l2_chip_ident_i2c_client(client, chip, ident, 0);
 }
 
@@ -929,7 +856,7 @@ static long gc1064_ops_private_ioctl(struct tx_isp_sensor *sensor, struct isp_pr
 		ret = gc1064_set_fps(sensor, ctrl->value);
 		break;
 	default:
-		break;;
+		break;
 	}
 	return 0;
 }
@@ -1019,7 +946,7 @@ static int gc1064_probe(struct i2c_client *client,
 	sensor->mclk = clk_get(NULL, "cgu_cim");
 	if (IS_ERR(sensor->mclk)) {
 		printk("Cannot get sensor input clock cgu_cim\n");
-		return PTR_ERR(sensor->mclk);
+		goto err_get_mclk;
 	}
 	clk_set_rate(sensor->mclk, 24000000);
 	clk_enable(sensor->mclk);
@@ -1028,6 +955,7 @@ static int gc1064_probe(struct i2c_client *client,
 	if (ret < 0)
 		goto err_set_sensor_gpio;
 
+	gc1064_attr.dvp.gpio = sensor_gpio_func;
 	 /*
 		convert sensor-gain into isp-gain,
 	 */
@@ -1041,10 +969,12 @@ static int gc1064_probe(struct i2c_client *client,
 	v4l2_i2c_subdev_init(sd, client, &gc1064_ops);
 	v4l2_set_subdev_hostdata(sd, sensor);
 
+	pr_debug("@@@@@@@ probe ok ------->gc1024\n");
 	return 0;
 err_set_sensor_gpio:
 	clk_disable(sensor->mclk);
 	clk_put(sensor->mclk);
+err_get_mclk:
 	kfree(sensor);
 
 	return -1;
@@ -1097,5 +1027,5 @@ static __exit void exit_gc1064(void)
 module_init(init_gc1064);
 module_exit(exit_gc1064);
 
-MODULE_DESCRIPTION("A low-level driver for OmniVision gc1064 sensors");
+MODULE_DESCRIPTION("A low-level driver for Gcoreinc gc1064 sensors");
 MODULE_LICENSE("GPL");

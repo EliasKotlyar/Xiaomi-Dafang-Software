@@ -8,6 +8,8 @@
  * published by the Free Software Foundation.
  */
 
+#define DEBUG
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -189,40 +191,18 @@ struct tx_isp_sensor_attribute bf3115_attr={
 	.max_dgain = 0,
 	.min_integration_time = 1,
 	.min_integration_time_native = 1,
-	.max_integration_time_native = 749,
-	.integration_time_limit = 749,
+	.max_integration_time_native = 748,
+	.integration_time_limit = 748,
 	.total_width = 1980,
 	.total_height = 750,
-	.max_integration_time = 749,
+	.max_integration_time = 748,
 	.integration_time_apply_delay = 2,
 	.again_apply_delay = 2,
 	.dgain_apply_delay = 2,
 	.sensor_ctrl.alloc_again = bf3115_alloc_again,
 	.sensor_ctrl.alloc_dgain = bf3115_alloc_dgain,
-//	void priv; /* point to struct tx_isp_sensor_board_info */
 };
 
-/*
- * the configure of gpio should be in accord with product-board.
- * if one is redundant, please config -1.
- */
-/*struct tx_isp_sensor_board_info bf3115_board = {
-#ifdef CONFIG_BOARD_BOX
-	.reset_gpio = GPIO_PF(30),
-	.pwdn_gpio = GPIO_PF(31),
-#elif defined(CONFIG_BOARD_BOOTES)
-	.reset_gpio = GPIO_PF(28),
-	.pwdn_gpio = GPIO_PF(29),
-#elif defined(CONFIG_BOARD_MANGO)
-	.reset_gpio = GPIO_PA(18),
-	.pwdn_gpio = -1,
-#else
-	.reset_gpio = GPIO_PF(0),
-	.pwdn_gpio = GPIO_PF(1),
-#endif
-	.mclk_name = "cgu_cim",
-};
-*/
 static struct regval_list bf3115_init_regs_1280_720_25fps[] = {
 	{0xfe,0x00},
 	{0x3d,0xff},
@@ -244,21 +224,21 @@ static struct regval_list bf3115_init_regs_1280_720_25fps[] = {
 	{0x46,0x08},
 	{0x47,0xd8},
 	{0xfe,0x00},
-	{0xe1,0xf7}, //input 24MHz.
+	{0xe1,0xf7},
 	{0xe2,0x2b},
 	{0xe3,0x15},
 	{0xe4,0x58},
 	{0xe5,0x41},
 	{0xe7,0x00},
-	{0xe9,0x20},	// clk,vsync,hsync,data current drive
+	{0xe9,0x20},
 	{0xec,0x12},
 	{0xb2,0x91},
 	{0xb0,0x00},
 	{0xb1,0x00},
 	{0xb2,0x90},
 	{0xb3,0x00},
-	{0xf1,0x01}, //
-	{0xf1,0x01}, //
+	{0xf1,0x01},
+	{0xf1,0x01},
 	{0x6f,0xd2},
 	{0x72,0x00},
 	{0x73,0x00},
@@ -270,16 +250,16 @@ static struct regval_list bf3115_init_regs_1280_720_25fps[] = {
 	{0x85,0x06},
 
 	{0xfe,0x00},
-	{0x09,0x01},//0x40-default
+	{0x09,0x01},
 	{0x0a,0xd0},
 	{0x0b,0x04},
 	{0x0c,0x00},
 	{0x0d,0x04},
 	{0x0e,0x00},
 
-	{0xfe,0x01},		//page 1 selection
-	{0xf1,0x80},		//disable all the isp function inside the sensor
- {BF3115_FLAG_END, 0x00},	/* END MARKER */
+	{0xfe,0x01},
+	{0xf1,0x80},/*disable all the isp function inside the sensor*/
+	{BF3115_FLAG_END, 0x00},	/* END MARKER */
 };
 
 /*
@@ -303,20 +283,17 @@ static struct tx_isp_sensor_win_setting bf3115_win_sizes[] = {
 
 static struct regval_list bf3115_stream_on[] = {
 	{ 0xfe, 0x00},
-        { 0xe8, 0x00},
-	/* {BF3115_FLAG_DELAY, 0x00, 1000},  */
+	{ 0xe8, 0x00},
 	{BF3115_FLAG_END, 0x00},	/* END MARKER */
 };
 
 static struct regval_list bf3115_stream_off[] = {
 	{ 0xfe, 0x00},
-        { 0xe8, 0x01},
-	/* {BF3115_FLAG_DELAY, 0x00, 1000},  */
+	{ 0xe8, 0x01},
 	{BF3115_FLAG_END, 0x00},	/* END MARKER */
 };
 
-int bf3115_read(struct v4l2_subdev *sd, unsigned char reg,
-		unsigned char *value)
+int bf3115_read(struct v4l2_subdev *sd, unsigned char reg, unsigned char *value)
 {
 	struct i2c_client *client = v4l2_get_subdevdata(sd);
 	struct i2c_msg msg[2] = {
@@ -343,8 +320,7 @@ int bf3115_read(struct v4l2_subdev *sd, unsigned char reg,
 }
 
 
-static int bf3115_write(struct v4l2_subdev *sd, unsigned char reg,
-			unsigned char value)
+static int bf3115_write(struct v4l2_subdev *sd, unsigned char reg, unsigned char value)
 {
 	struct i2c_client *client = v4l2_get_subdevdata(sd);
 	unsigned char buf[2] = {reg, value};
@@ -365,15 +341,11 @@ static int bf3115_write(struct v4l2_subdev *sd, unsigned char reg,
 
 static int bf3115_read_array(struct v4l2_subdev *sd, struct regval_list *vals)
 {
-
 	int ret;
 	unsigned char val;
 	while (vals->reg_num != BF3115_FLAG_END) {
 		if(vals->reg_num == BF3115_FLAG_DELAY) {
-			if (vals->value >= (1000 / HZ))
 				msleep(vals->value);
-			else
-				mdelay(vals->value);
 		} else {
 			ret = bf3115_read(sd, vals->reg_num, &val);
 			if (ret < 0)
@@ -382,7 +354,6 @@ static int bf3115_read_array(struct v4l2_subdev *sd, struct regval_list *vals)
 			  ret = bf3115_write(sd, vals->reg_num, val);
 			  ret = bf3115_read(sd, vals->reg_num, &val);
 			}
-		/*	printk("vals->reg_num:0x%02x, vals->value:0x%02x\n",vals->reg_num, val); */
 		}
 		vals++;
 	}
@@ -393,10 +364,7 @@ static int bf3115_write_array(struct v4l2_subdev *sd, struct regval_list *vals)
 	int ret;
 	while (vals->reg_num != BF3115_FLAG_END) {
 		if (vals->reg_num == BF3115_FLAG_DELAY) {
-			if (vals->value >= (1000 / HZ))
 				msleep(vals->value);
-			else
-				mdelay(vals->value);
 		} else {
 			ret = bf3115_write(sd, vals->reg_num, vals->value);
 			if (ret < 0)
@@ -417,22 +385,26 @@ static int bf3115_detect(struct v4l2_subdev *sd, unsigned int *ident)
 	unsigned char v;
 	int ret;
 	ret = bf3115_read(sd, 0xfc, &v);
-	/*printk("%s,value sensor id high is 0x%02x ret===%d\n \n",__func__,v,ret);*/
+	pr_debug("-----%s: %d ret = %d, v = 0x%02x\n", __func__, __LINE__, ret,v);
 	if (ret < 0)
 		return ret;
+	if (v != BF3115_CHIP_ID_H)
+		return -ENODEV;
+	*ident = v;
 	ret = bf3115_read(sd, 0xfd, &v);
-	/*printk("%s,value sensor id low is 0x%02x\n",__func__,v);*/
+	pr_debug("-----%s: %d ret = %d, v = 0x%02x\n", __func__, __LINE__, ret,v);
 	if (ret < 0)
 		return ret;
 	if (v != BF3115_CHIP_ID_L)
 		return -ENODEV;
-
+	*ident = (*ident << 8) | v;
 	return 0;
 }
 
 static int bf3115_set_integration_time(struct v4l2_subdev *sd, int value)
 {
 	int ret = 0;
+
 	ret = bf3115_write(sd, 0xfe, 0x01);
 	if (ret < 0) {
 		printk("bf3115_write error\n");
@@ -449,7 +421,6 @@ static int bf3115_set_integration_time(struct v4l2_subdev *sd, int value)
 		return ret;
 	}
 	return 0;
-	return ret;
 }
 static int bf3115_set_analog_gain(struct v4l2_subdev *sd, int value)
 {
@@ -459,7 +430,6 @@ static int bf3115_set_analog_gain(struct v4l2_subdev *sd, int value)
 		printk("bf3115_write analog gain error\n");
 		return ret;
 	}
-
 	return 0;
 }
 static int bf3115_set_digital_gain(struct v4l2_subdev *sd, int value)
@@ -470,40 +440,6 @@ static int bf3115_set_digital_gain(struct v4l2_subdev *sd, int value)
 
 static int bf3115_get_black_pedestal(struct v4l2_subdev *sd, int value)
 {
-#if 0
-	int ret = 0;
-	int black = 0;
-	unsigned char h,l;
-	unsigned char reg = 0xff;
-	unsigned int * v = (unsigned int *)(value);
-	ret = ov9712_read(sd, 0x48, &h);
-	if (ret < 0)
-		return ret;
-	switch(*v){
-		case SENSOR_R_BLACK_LEVEL:
-			black = (h & 0x3) << 8;
-			reg = 0x44;
-			break;
-		case SENSOR_GR_BLACK_LEVEL:
-			black = (h & (0x3 << 2)) << 8;
-			reg = 0x45;
-			break;
-		case SENSOR_GB_BLACK_LEVEL:
-			black = (h & (0x3 << 4)) << 8;
-			reg = 0x46;
-			break;
-		case SENSOR_B_BLACK_LEVEL:
-			black = (h & (0x3 << 6)) << 8;
-			reg = 0x47;
-			break;
-		default:
-			return -1;
-	}
-	ret = ov9712_read(sd, reg, &l);
-	if (ret < 0)
-		return ret;
-	*v = (black | l);
-#endif
 	return 0;
 }
 
@@ -535,11 +471,11 @@ static int bf3115_s_stream(struct v4l2_subdev *sd, int enable)
 	int ret = 0;
 	if (enable) {
 		ret = bf3115_write_array(sd, bf3115_stream_on);
-		printk("bf3115 stream on\n");
+		pr_debug("bf3115 stream on\n");
 	}
 	else {
 		ret = bf3115_write_array(sd, bf3115_stream_off);
-		printk("bf3115 stream off\n");
+		pr_debug("bf3115 stream off\n");
 	}
 	return ret;
 }
@@ -570,10 +506,13 @@ static int bf3115_set_fps(struct tx_isp_sensor *sensor, int fps)
 	unsigned char tmp;
 	unsigned int newformat = 0; //the format is 24.8
 	int ret = 0;
+
 	/* the format of fps is 16/16. for example 25 << 16 | 2, the value is 25/2 fps. */
 	newformat = (((fps >> 16) / (fps & 0xffff)) << 8) + ((((fps >> 16) % (fps & 0xffff)) << 8) / (fps & 0xffff));
-	if(newformat > (SENSOR_OUTPUT_MAX_FPS << 8) || newformat < (SENSOR_OUTPUT_MIN_FPS << 8))
+	if(newformat > (SENSOR_OUTPUT_MAX_FPS << 8) || newformat < (SENSOR_OUTPUT_MIN_FPS << 8)){
+		printk("warn: fps(%d) no in range\n", fps);
 		return -1;
+	}
 	ret = bf3115_write(sd, 0xfe, 0x00);
 	if (ret < 0) {
 		printk("bf3115_write error\n");
@@ -581,26 +520,27 @@ static int bf3115_set_fps(struct tx_isp_sensor *sensor, int fps)
 	}
 	ret = bf3115_read(sd, 0x09, &tmp);
 	hb = tmp;
-	ret = bf3115_read(sd, 0x0a, &tmp);
+	ret += bf3115_read(sd, 0x0a, &tmp);
 	if(ret < 0)
-		return -1;
+		return ret;
 	hb = ((hb & 0x0f) << 8) + tmp;
 
 	hts = line_length_df + hb;
-	/*vts = (pclk << 4) / (hts * (newformat >> 4));*/
 	vts = pclk * (fps & 0xffff) / hts / ((fps & 0xffff0000) >> 16);
 	vb = vts-frame_length_df;
 	vb_bf = vb - vb_af;
 
 	ret = bf3115_write(sd, 0x0b, (unsigned char)(vb_bf & 0xff));
 	ret += bf3115_write(sd, 0x0c, (unsigned char)(vb_bf >> 8));
-	if(ret < 0)
-		return -1;
+	if(ret < 0){
+		printk("err: bf3115_write err\n");
+		return ret;
+	}
 	sensor->video.fps = fps;
-	sensor->video.attr->max_integration_time_native = vts-1;
-	sensor->video.attr->integration_time_limit = vts-1;
+	sensor->video.attr->max_integration_time_native = vts-2;
+	sensor->video.attr->integration_time_limit = vts-2;
 	sensor->video.attr->total_height = vts;
-	sensor->video.attr->max_integration_time = vts-1;
+	sensor->video.attr->max_integration_time = vts-2;
 	arg.value = (int)&sensor->video;
 	sd->v4l2_dev->notify(sd, TX_ISP_NOTIFY_SYNC_VIDEO_IN, &arg);
 	return 0;
@@ -647,10 +587,11 @@ static int bf3115_g_chip_ident(struct v4l2_subdev *sd,
 		ret = gpio_request(reset_gpio,"bf3115_reset");
 		if(!ret){
 			gpio_direction_output(reset_gpio, 1);
-			mdelay(20);
+			msleep(20);
 			gpio_direction_output(reset_gpio, 0);
-			mdelay(20);
+			msleep(20);
 			gpio_direction_output(reset_gpio, 1);
+			msleep(20);
 		}else{
 			printk("gpio requrest fail %d\n",reset_gpio);
 		}
@@ -659,8 +600,9 @@ static int bf3115_g_chip_ident(struct v4l2_subdev *sd,
 		ret = gpio_request(pwdn_gpio,"bf3115_pwdn");
 		if(!ret){
 			gpio_direction_output(pwdn_gpio, 1);
-			mdelay(150);
+			msleep(150);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",pwdn_gpio);
 		}
@@ -673,7 +615,7 @@ static int bf3115_g_chip_ident(struct v4l2_subdev *sd,
 		return ret;
 	}
 	v4l_info(client, "bf3115 chip found @ 0x%02x (%s)\n",
-		 client->addr, client->adapter->name);
+		client->addr, client->adapter->name);
 	return v4l2_chip_ident_i2c_client(client, chip, ident, 0);
 }
 
@@ -824,6 +766,7 @@ static int bf3115_probe(struct i2c_client *client,
 	v4l2_i2c_subdev_init(sd, client, &bf3115_ops);
 	v4l2_set_subdev_hostdata(sd, sensor);
 
+	pr_debug("@@@@@@@probe ok ------->bf3115\n");
 	return 0;
 err_set_sensor_gpio:
 	clk_disable(sensor->mclk);

@@ -23,12 +23,14 @@
 #define SC1145_CHIP_ID_H		(0x11)
 #define SC1145_CHIP_ID_L		(0x45)
 
-#define SC1145_REG_END		        0xff
-#define SC1145_REG_DELAY		0xfe
+#define SC1145_REG_END			0xffff
+#define SC1145_REG_DELAY		0xfffe
 
 #define SC1145_SUPPORT_PCLK (43200*1000)
 #define SENSOR_OUTPUT_MAX_FPS 30
 #define SENSOR_OUTPUT_MIN_FPS 5
+#define DRIVE_CAPABILITY_1
+
 
 struct regval_list {
 	unsigned short reg_num;
@@ -58,81 +60,65 @@ struct again_lut sc1145_again_lut[] = {
 	{0x2, 10512},
 	{0x3, 15368},
 	{0x4, 19979},
-	{0x5, 24376},
-	{0x6, 28577},
+	{0x5, 24375},
+	{0x6, 28576},
 	{0x7, 32606},
-	{0x8, 36464},
-	{0x9, 40171},
-	{0xa, 43738},
-	{0xb, 47181},
-	{0xc, 50497},
-	{0xd, 53701},
-	{0xe, 56800},
-	{0xf, 59806},
-	{0x10, 65536},
-	{0x11, 70938},
-	{0x12, 76048},
-	{0x13, 80904},
-	{0x14, 85515},
-	{0x15, 89912},
-	{0x16, 94113},
-	{0x17, 98142},
-	{0x18, 102000},
-	{0x19, 105707},
-	{0x1a, 109274},
-	{0x1b, 112717},
-	{0x1c, 116033},
-	{0x1d, 119237},
-	{0x1e, 122336},
-	{0x1f, 125342},
-	{0x30, 131072},
-	{0x31, 136474},
-	{0x32, 141584},
-	{0x33, 146440},
-	{0x34, 151051},
-	{0x35, 155448},
-	{0x36, 159649},
-	{0x37, 163678},
-	{0x38, 167536},
-	{0x39, 171243},
-	{0x3a, 174810},
-	{0x3b, 178253},
-	{0x3c, 181569},
-	{0x3d, 184773},
-	{0x3e, 187872},
-	{0x3f, 190878},
-	{0x70, 196608},
-	{0x71, 202010},
-	{0x72, 207120},
-	{0x73, 211976},
-	{0x74, 216587},
-	{0x75, 220984},
-	{0x76, 225185},
-	{0x77, 229214},
-	{0x78, 233072},
-	{0x79, 236779},
-	{0x7a, 240346},
-	{0x7b, 243789},
-	{0x7c, 247105},
-	{0x7d, 250309},
-	{0x7e, 253408},
-	{0x7f, 256414},
-	{0xf0, 262144},
-	{0xf1, 267546},
-	{0xf2, 272656},
-	{0xf3, 277512},
-	{0xf4, 282123},
-	{0xf5, 286520},
-	{0xf6, 290721},
-	{0xf7, 294750},
-	{0xf8, 298608},
-	{0xf9, 302315},
-	{0xfa, 305882},
-	{0xfb, 309325},
-	{0xfc, 312641},
-	{0xfd, 315845},
-	{0xfe, 318944},
-	{0xff, 321950},
+	{0x8, 36463},
+	{0x9, 40170},
+	{0xa, 43737},
+	{0xb, 47180},
+	{0xc, 50496},
+	{0xd, 53700},
+	{0xe, 56799},
+	{0xf, 59805},
+	{0x10, 65535},
+	{0x11, 70937},
+	{0x12, 76047},
+	{0x13, 80903},
+	{0x14, 85514},
+	{0x15, 89910},
+	{0x16, 94111},
+	{0x17, 98141},
+	{0x18, 101998},
+	{0x19, 105705},
+	{0x1a, 109272},
+	{0x1b, 112715},
+	{0x1c, 116031},
+	{0x1d, 119235},
+	{0x1e, 122334},
+	{0x1f, 125340},
+	{0x30, 131070},
+	{0x31, 136472},
+	{0x32, 141582},
+	{0x33, 146438},
+	{0x34, 151049},
+	{0x35, 155445},
+	{0x36, 159646},
+	{0x37, 163676},
+	{0x38, 167533},
+	{0x39, 171240},
+	{0x3a, 174807},
+	{0x3b, 178250},
+	{0x3c, 181566},
+	{0x3d, 184770},
+	{0x3e, 187869},
+	{0x3f, 190875},
+	{0x70, 196605},
+	{0x71, 202007},
+	{0x72, 207117},
+	{0x73, 211973},
+	{0x74, 216584},
+	{0x75, 220980},
+	{0x76, 225181},
+	{0x77, 229211},
+	{0x78, 233068},
+	{0x79, 236775},
+	{0x7a, 240342},
+	{0x7b, 243785},
+	{0x7c, 247101},
+	{0x7d, 250305},
+	{0x7e, 253404},
+	{0x7f, 256410}
 };
 
 struct tx_isp_sensor_attribute sc1145_attr;
@@ -181,7 +167,7 @@ struct tx_isp_sensor_attribute sc1145_attr={
 			.hblanking = 0,
 		},
 	},
-	.max_again = 256414,
+	.max_again = 256410,
 	.max_dgain = 0,
 	.min_integration_time = 1,
 	.min_integration_time_native = 1,
@@ -192,7 +178,7 @@ struct tx_isp_sensor_attribute sc1145_attr={
 	.max_integration_time = 895,
 	.integration_time_apply_delay = 2,
 	.again_apply_delay = 2,
-	.dgain_apply_delay = 0,
+	.dgain_apply_delay = 2,
 	.sensor_ctrl.alloc_again = sc1145_alloc_again,
 	.sensor_ctrl.alloc_dgain = sc1145_alloc_dgain,
 	.one_line_expr_in_us = 44,
@@ -209,13 +195,15 @@ static struct regval_list sc1145_init_regs_1280_720_25fps[] = {
   {0x3610, 0x03},
   {0x3634, 0x00}, // reduce power
   {0x3620, 0x84},
-  {0x3631, 0x85}, // txvdd 0910
+  {0x3631, 0x80}, // txvdd 0910 #0x85, 20170629
   {0x3907, 0x03},
   {0x3622, 0x0e},
-  {0x3633, 0x2c}, //0825
+  {0x3633, 0x2d}, //0825 #0x2c, 20170629
   {0x3630, 0x88},
   {0x3635, 0x80},
   {0x3310, 0x83}, //prechg tx auto ctrl [5] 0825
+  {0x3005, 0x82}, //add  #0x22, 20170629
+  {0x3305, 0xf2}, //#0x72, 20170629
   //{0x3336, 0x00},
   //{0x3337, 0x00},
   //{0x3338, 0x02},
@@ -234,7 +222,7 @@ static struct regval_list sc1145_init_regs_1280_720_25fps[] = {
   {0x3d04, 0x04}, //0806    vsync gen mode
   {0x3d08, 0x03},
   {0x3415, 0x00},
-  {0x3416, 0x40},
+  {0x3416, 0x3e}, //#0x40, 20170629
   {0x320e, 0x03},
   {0x320f, 0x84},//1920X900 25fps
   {0x3336, 0x00},
@@ -245,8 +233,15 @@ static struct regval_list sc1145_init_regs_1280_720_25fps[] = {
   {0x3207, 0xe2},//160520
   {0x321d, 0x00},//mirror
   {0x3211, 0x60},//start rol
+
+#ifdef  DRIVE_CAPABILITY_1
+  {0x3640,0x00},//drv
+#elif defined(DRIVE_CAPABILITY_2)
+  {0x3640,0x01},
+#endif
+
   //* {0x3000, 0x01}, //recover   *//
-	{SC1145_REG_END, 0x00},	/* END MARKER */
+  {SC1145_REG_END, 0x00},	/* END MARKER */
 };
 
 /*
@@ -264,6 +259,10 @@ static struct tx_isp_sensor_win_setting sc1145_win_sizes[] = {
 	}
 };
 
+static enum v4l2_mbus_pixelcode sc1145_mbus_code[] = {
+	V4L2_MBUS_FMT_SBGGR8_1X8,
+	V4L2_MBUS_FMT_SBGGR10_1X10,
+};
 /*
  * the part of driver was fixed.
  */
@@ -405,6 +404,11 @@ static int sc1145_set_integration_time(struct v4l2_subdev *sd, int value)
 	unsigned int expo = value;
 	int ret = 0;
 
+	if(value<=50)
+		ret += sc1145_write(sd, 0x3307, 0x13);
+	else
+		ret += sc1145_write(sd, 0x3307, 0x3);
+
 	ret += sc1145_write(sd, 0x3e01, (unsigned char)((expo >> 4) & 0xff));
 	ret += sc1145_write(sd, 0x3e02, (unsigned char)((expo & 0x0f) << 4));
 	if (ret < 0)
@@ -518,6 +522,7 @@ static int sc1145_set_fps(struct tx_isp_sensor *sensor, int fps)
 	hts = (hts << 8) + tmp;
 	/*vts = (pclk << 4) / (hts * (newformat >> 4));*/
 	vts = pclk * (fps & 0xffff) / hts / ((fps & 0xffff0000) >> 16);
+
 	ret = sc1145_write(sd, 0x320f, (unsigned char)(vts & 0xff));
 	ret += sc1145_write(sd, 0x320e, (unsigned char)(vts >> 8));
 	ret = sc1145_write(sd, 0x3339, (unsigned char)(vts & 0xff));
@@ -576,10 +581,11 @@ static int sc1145_g_chip_ident(struct v4l2_subdev *sd,
 		ret = gpio_request(reset_gpio,"sc1145_reset");
 		if(!ret){
 			gpio_direction_output(reset_gpio, 1);
-			mdelay(10);
+			msleep(10);
 			gpio_direction_output(reset_gpio, 0);
-			mdelay(10);
+			msleep(10);
 			gpio_direction_output(reset_gpio, 1);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",reset_gpio);
 		}
@@ -588,8 +594,9 @@ static int sc1145_g_chip_ident(struct v4l2_subdev *sd,
 		ret = gpio_request(pwdn_gpio, "sc1145_pwdn");
 		if (!ret) {
 			gpio_direction_output(pwdn_gpio, 1);
-			mdelay(50);
+			msleep(50);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		} else {
 			printk("gpio requrest fail %d\n", pwdn_gpio);
 		}
@@ -721,6 +728,8 @@ static int sc1145_probe(struct i2c_client *client,
 	struct tx_isp_video_in *video;
 	struct tx_isp_sensor *sensor;
 	struct tx_isp_sensor_win_setting *wsize = &sc1145_win_sizes[0];
+	enum v4l2_mbus_pixelcode mbus;
+	int i = 0;
 	int ret;
 
 	sensor = (struct tx_isp_sensor *)kzalloc(sizeof(*sensor), GFP_KERNEL);
@@ -743,7 +752,21 @@ static int sc1145_probe(struct i2c_client *client,
 		goto err_set_sensor_gpio;
 
 	sc1145_attr.dvp.gpio = sensor_gpio_func;
-	 /*
+	switch(sensor_gpio_func){
+		case DVP_PA_LOW_8BIT:
+		case DVP_PA_HIGH_8BIT:
+			mbus = sc1145_mbus_code[0];
+			break;
+		case DVP_PA_LOW_10BIT:
+		case DVP_PA_HIGH_10BIT:
+			mbus = sc1145_mbus_code[1];
+			break;
+		default:
+			goto err_set_sensor_gpio;
+	}
+	for(i = 0; i < ARRAY_SIZE(sc1145_win_sizes); i++)
+		sc1145_win_sizes[i].mbus_code = mbus;
+	/*
 		convert sensor-gain into isp-gain,
 	 */
 	sc1145_attr.max_again = sc1145_attr.max_again;

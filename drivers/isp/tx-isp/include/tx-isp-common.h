@@ -19,6 +19,14 @@
 #if defined(CONFIG_SOC_T10)
 /* T10 */
 #define TX_ISP_EXIST_FR_CHANNEL 1
+#define TX_ISP_EXIST_DS2_CHANNEL 0
+
+#define TX_ISP_INPUT_PORT_MAX_WIDTH		1280
+#define TX_ISP_INPUT_PORT_MAX_HEIGHT	960
+#define TX_ISP_FR_CAHNNEL_MAX_WIDTH		1280
+#define TX_ISP_FR_CAHNNEL_MAX_HEIGHT	960
+#define TX_ISP_DS1_CAHNNEL_MAX_WIDTH	640
+#define TX_ISP_DS1_CAHNNEL_MAX_HEIGHT	640
 
 #elif defined(CONFIG_SOC_T20)
 /* T20 */
@@ -28,17 +36,24 @@
 
 #define TX_ISP_INPUT_PORT_MAX_WIDTH		2048
 #define TX_ISP_INPUT_PORT_MAX_HEIGHT	1536
-#if TX_ISP_EXIST_FR_CHANNEL
-#define TX_ISP_FR_CAHNNEL_MAX_WIDTH		2048
-#define TX_ISP_FR_CAHNNEL_MAX_HEIGHT	1536
-#endif
 #define TX_ISP_DS1_CAHNNEL_MAX_WIDTH	2048
 #define TX_ISP_DS1_CAHNNEL_MAX_HEIGHT	1536
-#if TX_ISP_EXIST_DS2_CHANNEL
 #define TX_ISP_DS2_CAHNNEL_MAX_WIDTH	800
-#define TX_ISP_DS2_CAHNNEL_MAX_HEIGHT	600
-#endif
-#else
+#define TX_ISP_DS2_CAHNNEL_MAX_HEIGHT	800
+
+#elif defined(CONFIG_SOC_T30)
+/* T30 */
+#define TX_ISP_EXIST_FR_CHANNEL 1
+#define TX_ISP_EXIST_DS2_CHANNEL 0
+
+#define TX_ISP_INPUT_PORT_MAX_WIDTH		2688
+#define TX_ISP_INPUT_PORT_MAX_HEIGHT	2048
+#define TX_ISP_FR_CAHNNEL_MAX_WIDTH		2688
+#define TX_ISP_FR_CAHNNEL_MAX_HEIGHT	2048
+#define TX_ISP_DS1_CAHNNEL_MAX_WIDTH	1920
+#define TX_ISP_DS1_CAHNNEL_MAX_HEIGHT	1080
+
+#else /* other soc */
 
 #endif
 
@@ -95,14 +110,35 @@ typedef enum {
 
 typedef enum {
 	ISP_CLK_960P_MODE = 60000000,
-	ISP_CLK_1080P_MODE = 80000000,
+	ISP_CLK_1080P_MODE = 90000000,
 	ISP_CLK_3M_MODE = 100000000,
 } isp_clk_mode;
+
+typedef enum {
+	TX_SENSOR_MAX_FPS_30 = 30,
+	TX_SENSOR_MAX_FPS_25 = 25,
+	TX_SENSOR_MAX_FPS_15 = 15,
+	TX_SENSOR_MAX_FPS_12 = 12,
+	TX_SENSOR_MAX_FPS_10 = 10,
+	TX_SENSOR_MAX_FPS_5 = 5,
+} sensor_max_fps_mode;
+
+enum tx_isp_dvp_polarity {
+	DVP_POLARITY_DEFAULT,
+	DVP_POLARITY_HIGH,
+	DVP_POLARITY_LOW,
+};
 
 typedef struct {
 	unsigned short vblanking;
 	unsigned short hblanking;
 } sensor_dvp_blanking;
+
+typedef struct {
+	unsigned char hsync_polar;
+	unsigned char vsync_polar;
+	unsigned char pclk_polar;
+} sensor_dvp_polar;
 
 struct tx_isp_mipi_bus{
 	unsigned int clk;
@@ -113,6 +149,7 @@ struct tx_isp_dvp_bus{
 	sensor_dvp_gpio_mode gpio;
 	sensor_dvp_timing_mode mode;
 	sensor_dvp_blanking blanking;
+	sensor_dvp_polar polar;
 };
 
 struct tx_isp_bt1120_bus{
@@ -163,6 +200,7 @@ struct tx_isp_sensor_attribute{
 		struct tx_isp_bt1120_bus 	bt1120;
 		struct tx_isp_bt656_bus		bt656bus;
 		struct tx_isp_bt601_bus		bt601bus;
+		char string[64];
 	};
 	unsigned int max_again;	//the format is .16
 	unsigned int max_dgain;	//the format is .16
@@ -245,6 +283,7 @@ struct isp_image_tuning_default_ctrl {
 //#define VIDIOC_DEFAULT_CMD_BYPASS_ISP	 _IOW('V', BASE_VIDIOC_PRIVATE + 3, int)
 #define VIDIOC_DEFAULT_CMD_SCALER_CAP	 _IOWR('V', BASE_VIDIOC_PRIVATE + 3, struct frame_image_scalercap)
 #define VIDIOC_DEFAULT_CMD_SET_SCALER	 _IOW('V', BASE_VIDIOC_PRIVATE + 4, struct frame_image_scaler)
+#define VIDIOC_DEFAULT_CMD_SET_BANKS	 _IOW('V', BASE_VIDIOC_PRIVATE + 5, int)
 
 #define VIDIOC_DEFAULT_CMD_ISP_TUNING	 _IOWR('V', BASE_VIDIOC_PRIVATE + 6, struct isp_image_tuning_default_ctrl)
 

@@ -23,8 +23,8 @@
 #define SC1135_CHIP_ID_H		(0x00)
 #define SC1135_CHIP_ID_L		(0x35)
 
-#define SC1135_REG_END		        0xff
-#define SC1135_REG_DELAY		0xfe
+#define SC1135_REG_END		        0xffff
+#define SC1135_REG_DELAY		0xfffe
 
 #define SC1135_SUPPORT_PCLK (54*1000*1000)
 #define SENSOR_OUTPUT_MAX_FPS 25
@@ -184,8 +184,8 @@ struct tx_isp_sensor_attribute sc1135_attr={
 
 
 static struct regval_list sc1135_init_regs_1280_960_25fps[] = {
-	{0x3000,0x01},//manualstreamenbale
-	{0x3003,0x01},//softreset
+	{0x3003,0x01},//manualstreamenbale
+	{0x3000,0x00},//softreset
 	{0x3400,0x53},
 	{0x3416,0xc0},
 	{0x3d08,0x03},
@@ -228,10 +228,10 @@ static struct regval_list sc1135_init_regs_1280_960_25fps[] = {
 	{0x3e0f,0x90},
 	{0x3631,0x80},
 	{0x3310,0x83},
-	{0x3336,0x01},
-	{0x3337,0xc8},
-	{0x3338,0x04},
-	{0x3339,0xb0},
+	{0x3336,0x01},//4
+	{0x3337,0xc8},//e8
+	{0x3338,0x04},//7
+	{0x3339,0xb0},//d0
 	{0x3335,0x06}, //20160418
 	{0x3880,0x00},
 
@@ -444,6 +444,10 @@ static int sc1135_set_integration_time(struct v4l2_subdev *sd, int value)
 {
 	unsigned int expo = value;
 	int ret = 0;
+	if(value<30)
+		ret += sc1135_write(sd, 0x3307, 0x13);
+	else
+		ret += sc1135_write(sd, 0x3307, 0x3);
 	ret += sc1135_write(sd, 0x3e01, (unsigned char)((expo >> 4) & 0xff));
 	ret += sc1135_write(sd, 0x3e02, (unsigned char)((expo & 0x0f) << 4));
 
@@ -617,10 +621,11 @@ static int sc1135_g_chip_ident(struct v4l2_subdev *sd,
 		ret = gpio_request(reset_gpio,"sc1135_reset");
 		if(!ret){
 			gpio_direction_output(reset_gpio, 1);
-			mdelay(10);
+			msleep(10);
 			gpio_direction_output(reset_gpio, 0);
-			mdelay(10);
+			msleep(10);
 			gpio_direction_output(reset_gpio, 1);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n",reset_gpio);
 		}
@@ -629,8 +634,9 @@ static int sc1135_g_chip_ident(struct v4l2_subdev *sd,
 		ret = gpio_request(pwdn_gpio, "sc1135_pwdn");
 		if (!ret) {
 			gpio_direction_output(pwdn_gpio, 1);
-			mdelay(50);
+			msleep(50);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		} else {
 			printk("gpio requrest fail %d\n", pwdn_gpio);
 		}

@@ -10,6 +10,7 @@ export LDFLAGS="-muclibc -O2"
 if [ ! -d libressl/.git ]
 then
   git clone https://github.com/libressl-portable/portable.git
+  mkdir libressl
   mv portable/* libressl 
   rmdir portable
 fi

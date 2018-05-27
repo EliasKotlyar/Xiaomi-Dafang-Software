@@ -805,6 +805,7 @@ static int ov9732_g_chip_ident(struct v4l2_subdev *sd,
 			gpio_direction_output(pwdn_gpio, 1);
 			msleep(150);
 			gpio_direction_output(pwdn_gpio, 0);
+			msleep(10);
 		}else{
 			printk("gpio requrest fail %d\n", pwdn_gpio);
 		}
@@ -935,7 +936,7 @@ static int ov9732_probe(struct i2c_client *client,
 	struct tx_isp_sensor *sensor;
 	struct tx_isp_sensor_win_setting *wsize = &ov9732_win_sizes[0];
 	int ret = -1;
-
+	printk("%s[%d] called\n",__func__, __LINE__);
 	sensor = (struct tx_isp_sensor *)kzalloc(sizeof(*sensor), GFP_KERNEL);
 	if(!sensor){
 		printk("Failed to allocate sensor subdev.\n");
