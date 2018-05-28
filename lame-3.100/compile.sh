@@ -8,6 +8,6 @@ export CPPFLAGS="-muclibc -O2"
 export LDFLAGS="-muclibc -O2"
 
 ./configure --host=mips-linux-gnu --disable-udev --prefix=${PWD}/_install
-make
+make libmp3lame.so
 make install
 
