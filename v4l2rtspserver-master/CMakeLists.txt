@@ -75,18 +75,19 @@ set(DEPENDLIBS ${CMAKE_CURRENT_SOURCE_DIR}/../live/liveMedia/libliveMedia.so ;
                ${CMAKE_CURRENT_SOURCE_DIR}/../live/BasicUsageEnvironment/libBasicUsageEnvironment.so ;
                ${CMAKE_CURRENT_SOURCE_DIR}/uclibc/libalog.so ;
                ${CMAKE_CURRENT_SOURCE_DIR}/uclibc/libimp.so ;
-               ${CMAKE_CURRENT_SOURCE_DIR}/uclibc/libsysutils.so )
+               ${CMAKE_CURRENT_SOURCE_DIR}/uclibc/libsysutils.so;
+				${CMAKE_CURRENT_SOURCE_DIR}/../lame-3.100/_install/lib/libmp3lame.so.0.0.0;
+		${CMAKE_CURRENT_SOURCE_DIR}/../opus/.libs/libopus.so.0.6.1
+		)
 
 foreach (LIB ${DEPENDLIBS})
     target_link_libraries(${PROJECT_NAME} PRIVATE ${LIB})
-    install(FILES ${LIB} DESTINATION libs)
+    install(FILES ${LIB} DESTINATION libs NAMELINK_SKIP)
 endforeach (LIB)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/libv4l2wrapper.a")
 target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/libfilter.a")
 
-target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../lame-3.100/_install/lib/libmp3lame.so")
-target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../opus/.libs/libopus.so")
 
 
 # Install
