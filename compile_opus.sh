@@ -14,5 +14,5 @@ fi
 
 cd opus/
 ./autogen.sh
-./configure --host=mips-linux
+./configure --host=mips-linux --prefix=${PWD}/_install
 make 
