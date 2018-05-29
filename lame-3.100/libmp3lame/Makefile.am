@@ -21,7 +21,7 @@ endif
 
 libmp3lame_la_LIBADD =	$(cpu_ldadd) $(vector_ldadd) $(decoder_ldadd) \
 			$(CONFIG_MATH_LIB)
-libmp3lame_la_LDFLAGS = -version-info @LIB_MAJOR_VERSION@:@LIB_MINOR_VERSION@ \
+libmp3lame_la_LDFLAGS = -avoid-version \
 			-export-symbols $(top_srcdir)/include/libmp3lame.sym \
 			-no-undefined
 
