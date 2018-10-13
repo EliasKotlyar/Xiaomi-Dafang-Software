@@ -31,6 +31,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <string.h>
+#include <math.h>
 
 const char *device = "/dev/jz_adc_aux_0";
 const char *nightModeCmd = "/system/sdcard/scripts/nightmode.sh";
@@ -43,6 +44,29 @@ int verbose = 0;
 bool nightModeEnabled = false;
 
 int software_method(void);
+// Configuration parameters for software method
+#if 1
+int jitter_percent = 3;
+int eq1_user_exposure = 1200000;
+int eq2_user_exposure = 930000;
+int eq2_user_iridix = 14;
+int eq3_user_wb = 3000;
+int eq3_user_iridix = 17;
+int eq2_count = 10;
+int eq3_count = 8;
+int sec_wait = 3;
+
+int mode_switch_wait_count=0;
+#else
+int max_night_ex_wait = 6;
+int max_faill_count = 25;
+int max_iridx_wait = 20;
+int exposure_tolerance = 1;
+int wait_iridix_diff = 2;
+int day_color_temp = 200;
+int day_exposure_drop = 5;
+#endif
+
 
 int jzAuxReadSample(const char *device, unsigned int *buffer) {
         int fd = open(device, O_RDONLY);
@@ -72,6 +96,7 @@ void updateNightMode() {
         snprintf(buf, sizeof(buf), "%s %s\n", nightModeCmd, nightModeEnabled ? "on" : "off");
         int ret = system(buf);
         if(ret) fprintf(stderr, "WARNING: %s returned %d\n", buf, ret);
+        mode_switch_wait_count = sec_wait;
         return;
 }
 
@@ -81,6 +106,7 @@ void usage() {
         printf("-v              Increase verbosity\n");
         printf("-S              uses software to determine day/night\n");
         printf("                    following options don't mean anything for software method\n");
+        printf("                    use sw_night_configure.html for more software mode options\n");
         printf("-D <str>        Sets jz_adc_aux device (default: %s)\n", device);
         printf("-c <str>        Sets the command to call to set night mode (default: %s)\n", nightModeCmd);
         printf("-a <int>        Sets the number of ADC reads to average into a single sample (default: %d)\n", readAverageCount);
@@ -99,7 +125,7 @@ int main(int argc, char *argv[]) {
         double *window = (double *)malloc(sizeof(double) * windowSize);
         bool use_software_method = false;
 
-        while((opt = getopt(argc, argv, "D:c:a:d:n:O:F:vSh")) != -1) {
+        while((opt = getopt(argc, argv, "D:c:a:d:n:O:F:vShj:w:1:2:3:")) != -1) {
                 switch (opt) {
                         case 'D': device = optarg;
                                   break;
@@ -129,7 +155,55 @@ int main(int argc, char *argv[]) {
                         case 'S':
                                   use_software_method = true;
                                   break;
+                        case 'j':
+                                  jitter_percent = atoi(optarg);
+                                  break;
+                        case 'w':
+                                  sec_wait = atoi(optarg);
+                                  break;
+                        case '1':
+                                  eq1_user_exposure = atoi(optarg);
+                                  break;
+                        case '2':
+                                  if(sscanf(optarg, "%d,%d,%d", &eq2_user_exposure, &eq2_user_iridix, &eq2_count) != 3){
+                                    fprintf(stderr, "invalid argument: %s\n", optarg);
+                                    usage();
+                                  }
+                                  break;
+                        case '3':
+                                  if(sscanf(optarg, "%d,%d,%d", &eq3_user_wb, &eq3_user_iridix, &eq3_count) != 3){
+                                    fprintf(stderr, "invalid argument: %s\n", optarg);
+                                    usage();
+                                  }
+                                  break;
+                        /*case 'N':
+                                  max_night_ex_wait = atoi(optarg);
+                                  break;
 
+                        case 'M':
+                                  max_faill_count = atoi(optarg);
+                                  break;
+
+                        case 'W':
+                                  max_iridx_wait = atoi(optarg);
+                                  break;
+
+                        case 'T':
+                                  exposure_tolerance = atoi(optarg);
+                                  break;
+
+                        case 'I':
+                                  wait_iridix_diff = atoi(optarg);
+                                  break;
+
+                        case 'B':
+                                  day_color_temp = atoi(optarg);
+                                  break;
+
+                        case 'X':
+                                  day_exposure_drop = atoi(optarg);
+                                  break;
+                        */
                         case 'h':
                                   usage();
                                   return 0;
@@ -240,18 +314,119 @@ typedef enum {
   NIGHT_MODE_WAIT,
 } States;
 
+
+/*
+int jitter_percent = 3;
+int eq1_user_exposure = 1200000;
+int eq2_user_exposure = 930000;
+int eq2_user_iridix = 14;
+int eq3_user_wb = 3000;
+int eq3_user_iridix = 17;
+int eq2_count = 10;
+int eq3_count = 8;
+int sec_wait = 3;
+*/
+#if 1
+int software_method(void)
+{
+  int last_exposure = 0;
+  int eq2_wait_count = 0;
+  int eq3_wait_count = 0; 
+  int exposure, iridix, colortemp;
+  
+  if(verbose){
+    printf("Starting software method using \n");
+    printf("jitter_percent = %d\n", jitter_percent);
+    printf("eq1_user_exposure = %d\n", eq1_user_exposure);
+    printf("eq2_user_exposure = %d\n", eq2_user_exposure);
+    printf("eq2_user_iridix = %d\n", eq2_user_iridix);
+    printf("eq2_count = %d\n", eq2_count);
+    printf("eq3_user_wb = %d\n", eq3_user_wb);
+    printf("eq3_user_iridix = %d\n", eq3_user_iridix);
+    printf("eq3_count = %d\n", eq3_count);
+    printf("sec_wait = %d\n", sec_wait);
+  }
+  // Start with day
+  nightModeEnabled = false;
+  updateNightMode();
+
+  while(1){
+    double exp_diff;
+    sleep(1);
+    if(readIspInfo(&exposure, &iridix, &colortemp) == 3){
+      if(verbose >= 2) printf("(%d, %d, %d)\n", exposure, iridix, colortemp);
+      // Jitter equation
+      if( (int)((fabs((double)exposure - (double)last_exposure)/(double)exposure)*100.0 - (double) jitter_percent) > 0  ){
+        eq2_wait_count = 0;
+        eq3_wait_count = 0;
+        last_exposure = exposure;
+        if(verbose >= 1) printf("jitter active\n");
+        continue;
+      }
+      last_exposure = exposure;
+
+      // Mode switch wait
+      if(mode_switch_wait_count){
+        mode_switch_wait_count--;
+        if(verbose >= 1) printf("mode switch wait active\n");
+        continue;
+      }
+
+      // Eq1
+      if(nightModeEnabled == false && exposure > eq1_user_exposure){
+        if(verbose >= 1) printf("Switching to night new exp=%d\n", exposure);
+        nightModeEnabled = true;
+        eq2_wait_count = 0;
+        eq3_wait_count = 0;
+        updateNightMode();
+        continue;
+      }
+
+      // Eq2
+      if(nightModeEnabled == true && exposure < eq2_user_exposure && iridix < eq2_user_iridix){
+        eq2_wait_count++;
+        if(eq2_wait_count > eq2_count){
+          if(verbose >= 1) printf("Eq2 switching to day mode exp=%d iridix=%d\n", exposure, iridix);
+          nightModeEnabled = false;
+          updateNightMode();
+          continue;
+        }else{
+          if(verbose >= 1) printf("Eq2 wait_count active exp=%d iridix=%d\n", exposure, iridix);
+        }
+      }else{
+        eq2_wait_count = 0;
+      }
+
+      // Eq3
+      if(nightModeEnabled == true && colortemp < eq3_user_wb && iridix > eq3_user_iridix){
+        eq3_wait_count++;
+        if(eq3_wait_count > eq3_count){
+          if(verbose >= 1) printf("Eq3 switching to day mode wb=%d iridix=%d\n", colortemp, iridix);
+          nightModeEnabled = false;
+          updateNightMode();
+          continue;
+        }else{
+          if(verbose >= 1) printf("Eq3 wait_count active wb=%d iridix=%d\n", colortemp, iridix);
+        }
+      }else{
+        eq3_wait_count = 0;
+      }
+    }else{
+      // Unable to read isp_info
+      fprintf(stderr, "Unable to read isp_info\n");
+    }
+  }
+}
+#else
 int software_method(void)
 {
   int exposure, iridix, colortemp;
   int last_exposure=-1;
-  int night_exposure, night_iridix;
+  int night_exposure, night_iridix, night_temp;
   int night_mode_wait_count, iridx_wait_count;
   int exp_fall_count;
+  double day_exposure_drop_f = 1.0 - (double)day_exposure_drop/100.0;
   States state;
-
-  int max_night_ex_wait = 6;
-  int max_faill_count = 25;
-  int max_iridx_wait = 20;
 
   // Start with day
   nightModeEnabled = false;
@@ -261,8 +436,8 @@ int software_method(void)
   while(1){
     if(readIspInfo(&exposure, &iridix, &colortemp) == 3){
       if(last_exposure == -1) last_exposure = exposure;
-      if( (exposure < last_exposure && ((last_exposure - exposure)*100)/last_exposure >= 1) ||
-          (exposure > last_exposure && ((exposure - last_exposure)*100)/exposure >= 1) ){
+      if( (exposure < last_exposure && ((last_exposure - exposure)*100)/last_exposure >= exposure_tolerance) ||
+          (exposure > last_exposure && ((exposure - last_exposure)*100)/exposure >= exposure_tolerance) ){
         //Exposure chaging rapidly. Wait for it to get stablized
         if(verbose >= 2) printf("Exposure falling by %d%% to %d count %d\n", ((last_exposure - exposure)*100)/last_exposure, exposure, exp_fall_count);
         last_exposure = exposure;
@@ -275,7 +450,7 @@ int software_method(void)
       }
       last_exposure = exposure;
       exp_fall_count = 0;
-      if(colortemp <= 3100){
+      /*if(colortemp+day_color_temp <= night_temp){
         if(state != DAY_MODE){
           // Check color temp for any state in night mode
           if(verbose >= 1) printf("Colortemp %d\n", colortemp);
@@ -283,7 +458,7 @@ int software_method(void)
             updateNightMode();
             state = DAY_MODE;
           }
-      }
+      }*/
       switch(state){
         case DAY_MODE:
           //Look for very high exposure setting (max is 1283554)
@@ -292,7 +467,7 @@ int software_method(void)
               nightModeEnabled = true;
               updateNightMode();
               state = NIGHT_MODE_START;
-              sleep(1); // Extra sleep
+              sleep(3); // Extra sleep
           }
           break;
         case NIGHT_MODE_START:
@@ -307,6 +482,8 @@ int software_method(void)
           // save readings as initial night values
           night_exposure = exposure;
           night_iridix = iridix;
+          night_temp = colortemp;
+          if(verbose >= 1) printf("night mode start %d, %d, %d\n", exposure, iridix, colortemp);
           state = NIGHT_MODE_WAIT;
           night_mode_wait_count = 0;
           iridx_wait_count = 0;
@@ -314,7 +491,7 @@ int software_method(void)
         case WAIT_IRIDX:
             // Wait for Iridx to drop to below 30
             if(verbose >= 2) printf("WAIT_IRIDX %d, %d %d\n", iridix, night_iridix, iridx_wait_count);
-            if(iridix <= (night_iridix-2)){
+            if(iridix <= (night_iridix-wait_iridix_diff)){
               if(verbose >= 1) printf("Iridx dropped %d, %d>\n", exposure, iridix);
               nightModeEnabled = false;
               updateNightMode();
@@ -331,8 +508,14 @@ int software_method(void)
             }
             break;
         case NIGHT_MODE_WAIT:
-          if(verbose >= 2) printf("Exposure changed by %d%% to %d,%d (%d) %d %d %6f\n", ((last_exposure - exposure)*100)/last_exposure, exposure, iridix, night_exposure, night_iridix, colortemp, (0.95*(double)night_exposure));
-          if( (double)exposure < (0.95*(double)night_exposure) ){
+          if(colortemp+day_color_temp <= night_temp){
+            if(verbose >= 1) printf("Colortemp %d\n", colortemp);
+              nightModeEnabled = false;
+              updateNightMode();
+              state = DAY_MODE;
+          }
+          if(verbose >= 2) printf("Exposure changed by %d%% to %d,%d (%d) %d %d %6f\n", ((last_exposure - exposure)*100)/last_exposure, exposure, iridix, night_exposure, night_iridix, colortemp, (day_exposure_drop_f*(double)night_exposure));
+          if( (double)exposure < (day_exposure_drop_f*(double)night_exposure) ){
             if( iridix < (night_iridix + 4) ){
               // Exposure droped by 5% without increasing iridix by much
               iridx_wait_count = 0;
@@ -384,3 +567,4 @@ int software_method(void)
   }
   return -1;
 }
+#endif
