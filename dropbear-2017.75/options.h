@@ -347,7 +347,7 @@ be overridden at runtime with -I. 0 disables idle timeouts */
 #define DEFAULT_IDLE_TIMEOUT 0
 
 /* The default path. This will often get replaced by the shell */
-#define DEFAULT_PATH "/usr/bin:/bin"
+#define DEFAULT_PATH "/usr/bin:/bin:/system/bin:/system/sdcard/bin"
 
 /* Some other defines (that mostly should be left alone) are defined
  * in sysoptions.h */
